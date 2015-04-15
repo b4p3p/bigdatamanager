@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <% include ../partials/bootstrap.ejs %>
+    <% include ../partials/jquery.ejs %>
+    <link href="/public/css/login.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<div class="container">
+
+    <h1 class="title">Open data manager</h1>
+    <img id="imglogin" src="/public/img/login.png" >
+
+    <form action="/login" method="post">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" name="username" id="username" placeholder="Enter username">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input name="password" type="password" class="form-control" id="password" placeholder="Password">
+        </div>
+
+        <% if (error) { %>
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            <%= message %>
+        </div>
+        <% } %>
+
+        <div id="container-header">
+            <button type="submit" class="btn btn-success" >Log In</button>
+            <a href="/register">Need an account? Sign up free.</a>
+        </div>
+
+    </form>
+
+
+
+</div>
+</body>
+</html>

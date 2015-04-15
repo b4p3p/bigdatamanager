@@ -1,0 +1,36 @@
+#container-header {
+    bottom: 10px;
+    margin-bottom: 10px;
+    /*position: absolute;*/
+    /*left: 10px; right: 0;*/
+}
+
+#imglogin {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.container {
+    background: whitesmoke;
+    max-width: 400px;
+    /*max-height: 620px;*/
+
+    padding-top: 10px;
+
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 20px;
+    /*top:0; bottom: 0;*/
+    margin: auto;
+    height: auto;
+    border-radius: 15px;
+}
+
+body {
+    background: cornflowerblue;
+}
+
+.title {
+    text-align: center;
+}

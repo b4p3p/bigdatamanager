@@ -1,0 +1,42 @@
+#container-header
+{
+  bottom: 10px;
+  position: absolute;
+}
+
+#imglogin
+{
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.container
+{
+  background: whitesmoke;
+  max-width: 400px;
+  max-height: 500px;
+
+  padding-top: 10px;
+
+  position: absolute;
+  left: 0; right: 0;
+  top:0; bottom: 0;
+  margin: auto;
+  height: auto;
+  border-radius: 15px;
+}
+
+button
+{
+  width: 100px;
+}
+
+body
+{
+  background: cornflowerblue;
+}
+
+.title
+{
+  text-align: center;
+}
