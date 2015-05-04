@@ -2,7 +2,10 @@ var User = function (data) {
     this.data = data;
 };
 
+var model_name = "users";
 var mongoose = require('mongoose');
+var connection = null;
+
 var userSchema = new mongoose.Schema({
     username: String ,
     password: String ,
@@ -10,65 +13,55 @@ var userSchema = new mongoose.Schema({
     lastname: String
 });
 
-User.prototype.data = {};   //json del dato
-
-//User.prototype.username = "";
-//User.prototype.password = "";
+User.prototype.data = {};               //json del dato
 
 User.prototype.getUsername = function()
 {
     return this.data.username;
 };
 
-//
-//User.prototype.getPassword = function()
-//{
-//    return this.data.password;
-//};
-
-User.prototype.save  = function()
+User.prototype.save  = function(callback)
 {
-    var testUser = getUser(this.getUsername());
+    connection = mongoose.createConnection('mongodb://localhost/oim');
 
-    mongoose.createConnection('mongodb://localhost/oim');
+    getUser( this.getUsername() ,  function (data)
+    {
+        if ( data != null)
+        {
+            callback(-1 , "User exists" );   //utente esistente
+            connection.close();
+        }
+        else
+        {
+            //var conn = mongoose.createConnection('mongodb://localhost/oim');
+            var Users = connection.model(model_name, userSchema);
+            var u = new Users( this.data );
+            u.save( function(err, thor) {
+                if (err)
+                    callback(-2, err ); //errore
+                callback(0, "" );            //OK
 
-    var Users = mongoose.model('Users', userSchema);
+                connection.close();
 
-    var u = new Users( this.data );
-
-    u.save(function(err, thor) {
-        if (err) return console.error(err);
-        console.dir(thor);
+            });
+        }
     });
-
-    mongoose.connection.close();
 
 };
 
 module.exports = User;
 
-function getUser(username)
+function getUser(username, callback)
 {
-    mongoose.createConnection('mongodb://localhost/oim');
+    connection = mongoose.createConnection('mongodb://localhost/oim');
+    var Users = connection.model(model_name, userSchema);
 
-    var Users = mongoose.model('Users', userSchema);
-    var user = null;
-
-    Users.findOne( {username: username } ,"username" , function (err, doc)
+    Users.findOne( {username: username } , function (err, doc)
     {
-        test();
+        console.log(doc);
+        console.log("CALL getUsers -> findOne");
+        callback(doc);
     });
-
-    mongoose.connection.close();
-
-    console.log("porco cane");
-
-    return user;
-}
-
-function test()
-{
-    console.log("porco cane");
 }
 
 /* static function */
