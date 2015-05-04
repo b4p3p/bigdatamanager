@@ -4,6 +4,8 @@
     <% include ../partials/header.ejs %>
     <% include ../partials/bootstrap.ejs %>
 
+
+
 </head>
 <body>
 
@@ -28,7 +30,7 @@
                         <img src="/public/img/uni-ba.png" style="height: 35px"/>
                     </div>
 
-                    <div class="Row" style="text-align: center">
+                    <div class="Row" style="text-align: left">
                         Big Data Manager
                     </div>
 
@@ -44,7 +46,7 @@
                          style="float: left">
                     <div style="float: right">
                         <p style="font-weight: bold;margin: 0;">Username:</p>
-                        <p style="margin: 0;"><%= username %></p>
+                        <p style="margin: 0;text-align: right;"><%= username %></p>
                     </div>
 
                 </ul>
@@ -79,10 +81,40 @@
 
         <!-- Tab panes -->
         <div class="tab-content">
-            <div class="tab-pane active"
-                 id="open">Open project</div>
-            <div class="tab-pane"
-                 id="new">New project</div>
+            <div class="tab-pane " id="open">Open project
+            </div>
+
+            <div class="tab-pane pane-newproject active" id="new">
+
+                <!-- FORM NUOVO PROGETTO -->
+                <form class="form-horizontal">
+
+                    <div class="form-group">
+                        <label for="nameproject" class="col-sm-2 control-label">Project Name:</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="nameproject" placeholder="Project Name"
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputPassword3" class="col-sm-2 control-label">Load data:</label>
+                        <div class="col-sm-10">
+                            <input id="input-data" type="file" class="file">
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-success" style="border-radius: 50px;float: right;margin-top: 30px;">
+                        <img src="/public/img/confirm.png" style="width: 100px;height: 100px;">
+                    </button>
+                    
+
+
+
+                </form>
+
+
+            </div>
         </div>
 
     </div>
