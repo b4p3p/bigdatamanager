@@ -1,1 +1,94 @@
-Index!!!
+<!DOCTYPE html>
+<html>
+<head>
+    <% include ../partials/header.ejs %>
+    <% include ../partials/bootstrap.ejs %>
+
+</head>
+<body>
+
+    <nav class="navbar navbar-default menu">
+
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+
+                <button type="button" class="navbar-toggle collapsed pull-left"
+                        data-toggle="collapse"
+                        data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+
+                <div class="Table" style="margin-right: 5px;">
+
+                    <div class="Row">
+                        <img src="/public/img/uni-ba.png" style="height: 35px"/>
+                    </div>
+
+                    <div class="Row" style="text-align: center">
+                        Big Data Manager
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+
+                <ul class="nav navbar-nav" style="margin-right: 10px;">
+                    <img src="/public/img/icon-user.png" class="imageheader"
+                         style="float: left">
+                    <div style="float: right">
+                        <p style="font-weight: bold;margin: 0;">Username:</p>
+                        <p style="margin: 0;"><%= username %></p>
+                    </div>
+
+                </ul>
+
+                <ul class="nav navbar-nav" style="margin-right: 10px;">
+                    <img src="/public/img/project.png" class="imageheader"
+                         style="float: left;"/>
+                    <div style="float: right;">
+                        <p style="font-weight: bold;margin: 0;">Project:</p>
+                        <p style="margin: 0;"><%= project %></p>
+                    </div>
+
+                </ul>
+
+                <!--<ul class="nav navbar-nav" style="margin-left: 5px">-->
+                    <!--<p style="font-weight: bold;margin: 0;">Project:</p>-->
+                    <!--<p style="margin: 0;"><%= project %></p>-->
+                <!--</ul>-->
+
+            </div>
+
+        </div>
+
+    </nav>
+
+    <div class="container-large">
+
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#open" data-toggle="tab">Open project</a></li>
+            <li><a href="#new" data-toggle="tab">New project</a></li>
+        </ul>
+
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <div class="tab-pane active"
+                 id="open">Open project</div>
+            <div class="tab-pane"
+                 id="new">New project</div>
+        </div>
+
+    </div>
+
+
+
+</body>
+
+</html>

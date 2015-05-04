@@ -1,3 +1,8 @@
+var arg_index = { username:'' , project:'' };
+
+var _USERNAME = "username";
+var _IS_AUTH = "isauth";
+
 module.exports = function (app) {
 
     app.get('/', function (req, res) {
@@ -9,11 +14,15 @@ module.exports = function (app) {
         res.render('../views/pages/login.ejs', message);
     });
 
+    var request;
+
     app.post('/login', function (req, res) {
 
         var username = req.body.username;
         var password = req.body.password;
         var message = { error:false , message: '' };
+
+        request = req;
 
         if ( username == "" || password == "" ) {
             message.error = true;
@@ -22,12 +31,25 @@ module.exports = function (app) {
             return;
         }
 
-        var db = require('../controller/db');
-        var user = db.getUser(username, password);
+        User = require('../model/User');
 
-        message.error = true;
-        message.message = "User not found";
-        res.render('../views/pages/login.ejs', message );
+        User.getUserPsw(username , password , function(data)
+        {
+            message.error = true;
+            message.message = "User not found";
+
+            if ( data == null )
+            {
+                res.render('../views/pages/login.ejs', message );
+            }
+            else
+            {
+                var sess = request.session;
+                sess.username = username;
+                res.redirect('/index');
+            }
+
+        });
 
     });
 
@@ -46,13 +68,13 @@ module.exports = function (app) {
         User = require("../model/User");
 
         var newUser = new User(req.body);
-        newUser.save(
+        User.save(newUser ,
             function(result, message)
             {
                 var arg = { error:false , message: '' };
 
                 if ( result >= 0 )
-                    res.render('../views/pages/index.ejs');
+                    res.redirect('/login');
                 else
                 {
                     arg.message = message;
@@ -67,7 +89,13 @@ module.exports = function (app) {
 
     app.get('/index', function (req, res) {
 
-        res.render('views/pages/index.ejs');
+        var sess = req.session;
+        var username = sess.username;
+        var arg = arg_index;
+
+        arg.username = username;
+
+        res.render('../views/pages/index.ejs', arg);
     });
 
 };

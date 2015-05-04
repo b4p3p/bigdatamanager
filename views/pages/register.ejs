@@ -4,29 +4,32 @@
     <% include ../partials/jquery.ejs %>
     <% include ../partials/bootstrap.ejs %>
     <link href="/public/css/signup.css" rel="stylesheet" type="text/css">
+    <script src="/public/lib/bootstrap-validator/validator.js"></script>
 </head>
 <body>
 <div class="container">
     <img id="imglogin" src="/public/img/register.png" >
-    <form action="/register" method="post" autocomplete="off">
+    <form action="/register" method="post" autocomplete="off"
+          data-toggle="validator" role="form">
         <div class="form-group">
             <label for="name">Name</label>
             <input autocomplete="off" type="text" class="form-control"
-                   name="name" id="name" placeholder="Enter name">
+                   name="name" id="name" placeholder="Enter name" required>
         </div>
         <div class="form-group">
             <label for="lastname">Last name</label>
             <input autocomplete="off" type="text" class="form-control"
-                   name="lastname" id="lastname" placeholder="Last name">
+                   name="lastname" id="lastname" placeholder="Last name" required>
         </div>
         <div class="form-group">
             <label for="username">Username</label>
             <input autocomplete="off" type="text" class="form-control"
-                   name="username" id="username" placeholder="Enter name">
+                   name="username" id="username" placeholder="Enter name" required>
         </div>
         <div class="form-group">
             <label for="password">Password</label>
-            <input name="password" type="password" class="form-control" id="password" placeholder="Password">
+            <input name="password" type="password" class="form-control"
+                   id="password" placeholder="Password" required>
         </div>
 
         <% if (error) { %>

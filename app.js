@@ -4,6 +4,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var session = require('express-session');
 
 var app = express();
 
@@ -20,10 +21,11 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 }));
 app.use(cookieParser());
 
-//app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({secret: 'kjhkjsdhjdljaslkjwi___4587'}));
 
 //DEBUG
 app.use(express.static(__dirname));
+//app.use(express.static(path.join(__dirname, 'public')));
 
 require('./routes/router')(app);   //chiamo il router
 

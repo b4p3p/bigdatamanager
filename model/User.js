@@ -4,7 +4,6 @@ var User = function (data) {
 
 var model_name = "users";
 var mongoose = require('mongoose');
-var connection = null;
 
 var userSchema = new mongoose.Schema({
     username: String ,
@@ -20,11 +19,13 @@ User.prototype.getUsername = function()
     return this.data.username;
 };
 
-User.prototype.save  = function(callback)
+User.save  = function( user , callback)
 {
-    connection = mongoose.createConnection('mongodb://localhost/oim');
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+    var username = user.getUsername();
+    var userdata = user.data;
 
-    getUser( this.getUsername() ,  function (data)
+    User.getUser( username ,  function (data)
     {
         if ( data != null)
         {
@@ -34,9 +35,10 @@ User.prototype.save  = function(callback)
         else
         {
             //var conn = mongoose.createConnection('mongodb://localhost/oim');
-            var Users = connection.model(model_name, userSchema);
-            var u = new Users( this.data );
-            u.save( function(err, thor) {
+            var Model = connection.model(model_name, userSchema);
+            var newuser = new Model( user.data );
+            newuser.save( function(err) {
+
                 if (err)
                     callback(-2, err ); //errore
                 callback(0, "" );            //OK
@@ -49,11 +51,10 @@ User.prototype.save  = function(callback)
 
 };
 
-module.exports = User;
-
-function getUser(username, callback)
+User.getUser = function (username, callback)
 {
-    connection = mongoose.createConnection('mongodb://localhost/oim');
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+
     var Users = connection.model(model_name, userSchema);
 
     Users.findOne( {username: username } , function (err, doc)
@@ -61,9 +62,24 @@ function getUser(username, callback)
         console.log(doc);
         console.log("CALL getUsers -> findOne");
         callback(doc);
+        connection.close();
     });
-}
+};
 
-/* static function */
-exports.getUser = getUser;
+User.getUserPsw = function (username, password , callback)
+{
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+
+    var Users = connection.model(model_name, userSchema);
+
+    Users.findOne( {username: username, password:password } , function (err, doc)
+    {
+        console.log(doc);
+        console.log("CALL getUsers -> findOne");
+        callback(doc);
+        connection.close();
+    });
+};
+
+module.exports = User;
 
