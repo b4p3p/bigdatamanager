@@ -4,121 +4,210 @@
     <% include ../partials/header.ejs %>
     <% include ../partials/bootstrap.ejs %>
 
-
-
 </head>
 <body>
 
-    <nav class="navbar navbar-default menu">
+<nav class="navbar navbar-default menu">
 
-        <div class="container-fluid">
-            <!-- Brand and toggle get grouped for better mobile display -->
-            <div class="navbar-header">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
 
-                <button type="button" class="navbar-toggle collapsed pull-left"
-                        data-toggle="collapse"
-                        data-target="#bs-example-navbar-collapse-1">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
+            <button type="button" class="navbar-toggle collapsed pull-left"
+                    data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
 
-                <div class="Table" style="margin-right: 5px;">
+            <div class="Table" style="margin-right: 5px;">
 
-                    <div class="Row">
-                        <img src="/public/img/uni-ba.png" style="height: 35px"/>
-                    </div>
+                <div class="Row">
+                    <img src="/public/img/uni-ba.png" style="height: 35px"/>
+                </div>
 
-                    <div class="Row" style="text-align: left">
-                        Big Data Manager
-                    </div>
-
+                <div class="Row" style="text-align: left">
+                    Big Data Manager
                 </div>
 
             </div>
 
-            <!-- Collect the nav links, forms, and other content for toggling -->
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-
-                <ul class="nav navbar-nav" style="margin-right: 10px;">
-                    <img src="/public/img/icon-user.png" class="imageheader"
-                         style="float: left">
-                    <div style="float: right">
-                        <p style="font-weight: bold;margin: 0;">Username:</p>
-                        <p style="margin: 0;text-align: right;"><%= username %></p>
-                    </div>
-
-                </ul>
-
-                <ul class="nav navbar-nav" style="margin-right: 10px;">
-                    <img src="/public/img/project.png" class="imageheader"
-                         style="float: left;"/>
-                    <div style="float: right;">
-                        <p style="font-weight: bold;margin: 0;">Project:</p>
-                        <p style="margin: 0;"><%= project %></p>
-                    </div>
-
-                </ul>
-
-                <!--<ul class="nav navbar-nav" style="margin-left: 5px">-->
-                    <!--<p style="font-weight: bold;margin: 0;">Project:</p>-->
-                    <!--<p style="margin: 0;"><%= project %></p>-->
-                <!--</ul>-->
-
-            </div>
-
         </div>
 
-    </nav>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 
-    <div class="container-large">
+            <ul class="nav navbar-nav" style="margin-right: 10px;">
+                <img src="/public/img/icon-user.png" class="imageheader"
+                     style="float: left">
 
-        <ul class="nav nav-tabs">
-            <li class="active"><a href="#open" data-toggle="tab">Open project</a></li>
-            <li><a href="#new" data-toggle="tab">New project</a></li>
-        </ul>
+                <div style="float: right">
+                    <p style="font-weight: bold;margin: 0;">Username:</p>
 
-        <!-- Tab panes -->
-        <div class="tab-content">
-            <div class="tab-pane active" id="open">Open project
-            </div>
+                    <p style="margin: 0;text-align: right;"><%= username %></p>
+                </div>
 
-            <div class="tab-pane pane-newproject" id="new">
+            </ul>
 
-                <!-- FORM NUOVO PROGETTO -->
-                <form class="form-horizontal">
+            <ul class="nav navbar-nav" style="margin-right: 10px;">
+                <img src="/public/img/project.png" class="imageheader"
+                     style="float: left;"/>
 
-                    <div class="form-group">
-                        <label for="nameproject" class="col-sm-2 control-label">Project Name:</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" id="nameproject" placeholder="Project Name"
-                                   required>
-                        </div>
-                    </div>
+                <div style="float: right;">
+                    <p style="font-weight: bold;margin: 0;">Project:</p>
 
-                    <div class="form-group">
-                        <label for="inputPassword3" class="col-sm-2 control-label">Load data:</label>
-                        <div class="col-sm-10">
-                            <input id="input-data" type="file" class="file">
-                        </div>
-                    </div>
-                    
-                    <button class="btn btn-success"
-                            style="border-radius: 50px;float: right;margin-top: 30px;width: 120px">
-                        Confirm
-                    </button>
+                    <p style="margin: 0;"><%= project %></p>
+                </div>
 
-                </form>
+            </ul>
 
+            <!--<ul class="nav navbar-nav" style="margin-left: 5px">-->
+            <!--<p style="font-weight: bold;margin: 0;">Project:</p>-->
+            <!--<p style="margin: 0;"><%= project %></p>-->
+            <!--</ul>-->
 
-            </div>
         </div>
 
     </div>
 
+</nav>
 
+<div class="container-large">
+
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#open" data-toggle="tab">Open project</a></li>
+        <li><a href="#new" data-toggle="tab">New project</a></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div class="tab-pane " id="open">Open project
+        </div>
+
+        <div class="tab-pane pane-newproject active" id="new">
+
+            <!-- FORM NUOVO PROGETTO -->
+            <form class="form-horizontal">
+
+                <div class="form-group">
+                    <label for="nameproject" class="col-sm-2 control-label">Project Name:</label>
+
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="nameproject" placeholder="Project Name"
+                               required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="typeimport" class="col-sm-2 control-label"
+                           style="margin-right: 15px">Type Data:</label>
+
+                    <div>
+                        <select class="selectpicker" id="cmbtype">
+                            <option>CSV</option>
+                            <option>Json</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"
+                           style="margin-right: 15px">Type Data:</label>
+
+                    <div id="examplecode" class="example-code">
+                        <pre>
+
+                        </pre>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="inputPassword3" class="col-sm-2 control-label">Load data:</label>
+
+                    <div class="col-sm-10">
+                        <input id="input-data" type="file" class="file">
+                    </div>
+                </div>
+
+                <button class="btn btn-success"
+                        style="border-radius: 50px;float: right;margin-top: 30px;width: 120px">
+                    Confirm
+                </button>
+
+            </form>
+
+
+        </div>
+    </div>
+
+</div>
 
 </body>
+
+<script>
+
+    $('.selectpicker').selectpicker();
+
+    var cmbType = $('#cmbtype');
+    var divCode = $('#examplecode');
+
+    cmbType.on('change', function () {
+        var selected = $(this).find("option:selected").val();
+        alert(selected);
+    });
+
+    var selected = cmbType.find("option:selected").val();
+    if ( selected == "CSV")
+        divCode.html(
+        "<pre>[\n"+
+        "  {\n" +
+        "    id: '&lt;unique_id&gt;',\n" +
+        "    data: '&lt;AAAA-MM-GG&gt;',\n"+
+        "    latitudine: &lt;float&gt;,\n"+
+        "    longitudine: &lt;float&gt;,\n"+
+        "    source: '&lt;source&gt;',\n"+
+        "    testo: '&lt;text&gt;',\n"+
+        "    utente: '&lt;user&gt;',\n"+
+        "    etichetta: '&lt;tag&gt;'\n"+
+        "  },{\n"+
+        "    id: '&lt;unique_id&gt;',;\n"+
+        "    data: '&lt;AAAA-MM-GG&gt;',\n"+
+        "    latitudine: &lt;float&gt;,\n"+
+        "    longitudine: &lt;float&gt;,\n"+
+        "    source: '&lt;source&gt;',\n"+
+        "    testo: '&lt;text&gt;',\n"+
+        "    utente: '&lt;user&gt;',\n"+
+        "    etichetta: '&lt;tag&gt;'\n"+
+        "  }\n"+
+        "]</pre>");
+    else
+        divCode.html(
+        "<pre>[\n"+
+        "  {\n" +
+        "    id: '&lt;unique_id&gt;',\n" +
+        "    data: '&lt;AAAA-MM-GG&gt;',\n"+
+        "    latitudine: &lt;float&gt;,\n"+
+        "    longitudine: &lt;float&gt;,\n"+
+        "    source: '&lt;source&gt;',\n"+
+        "    testo: '&lt;text&gt;',\n"+
+        "    utente: '&lt;user&gt;',\n"+
+        "    etichetta: '&lt;tag&gt;'\n"+
+        "  },{\n"+
+        "    id: '&lt;unique_id&gt;',;\n"+
+        "    data: '&lt;AAAA-MM-GG&gt;',\n"+
+        "    latitudine: &lt;float&gt;,\n"+
+        "    longitudine: &lt;float&gt;,\n"+
+        "    source: '&lt;source&gt;',\n"+
+        "    testo: '&lt;text&gt;',\n"+
+        "    utente: '&lt;user&gt;',\n"+
+        "    etichetta: '&lt;tag&gt;'\n"+
+        "  }\n"+
+        "]</pre>");
+
+
+
+</script>
 
 </html>

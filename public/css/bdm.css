@@ -19,3 +19,8 @@
     margin-top: 20px;
 
 }
+
+.example-code > pre
+{
+    margin-right: 15px
+}

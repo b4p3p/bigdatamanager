@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "bootstrap-validator" : "*" ,
+    "bootstrap-select" : "~1" ,
     "mongo" : "*" ,
     "mongoose" : "*" ,
     "ejs" : "~2",
