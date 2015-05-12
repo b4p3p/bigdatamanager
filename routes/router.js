@@ -98,4 +98,8 @@ module.exports = function (app) {
         res.render('../views/pages/index.ejs', arg);
     });
 
+    app.get('/test', function (req, res) {
+        res.render('../views/pages/test.ejs', {} );
+    });
+
 };

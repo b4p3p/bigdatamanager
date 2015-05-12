@@ -1,9 +1,7 @@
 <!DOCTYPE html>
-<html>
 <head>
     <% include ../partials/header.ejs %>
     <% include ../partials/bootstrap.ejs %>
-
 </head>
 <body>
 
@@ -89,7 +87,8 @@
         <div class="tab-pane pane-newproject active" id="new">
 
             <!-- FORM NUOVO PROGETTO -->
-            <form class="form-horizontal">
+            <!--suppress HtmlUnknownTarget -->
+            <form class="form-horizontal" action="/newproject" method="post">
 
                 <div class="form-group">
                     <label for="nameproject" class="col-sm-2 control-label">Project Name:</label>
@@ -105,10 +104,10 @@
                            style="margin-right: 15px">Type Data:</label>
 
                     <div>
-                        <select class="selectpicker" id="cmbtype">
+                        <select class="selectpicker" id="cmbtype" title="select_picker">
                             <option>CSV</option>
                             <option>Json</option>
-                        </select>
+                        </select>\
                     </div>
                 </div>
 
@@ -131,7 +130,7 @@
                     </div>
                 </div>
 
-                <button class="btn btn-success"
+                <button class="btn btn-success" type="submit"
                         style="border-radius: 50px;float: right;margin-top: 30px;width: 120px">
                     Confirm
                 </button>

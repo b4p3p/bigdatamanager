@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+
+    <% include ../partials/header.ejs %>
+    <% include ../partials/bootstrap.ejs %>
+
+    <link href="/public/css/navbar-static-top.css" rel="stylesheet">
+
+</head>
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+
+            <button type="button" class="navbar-toggle" data-toggle="offcanvas" data-target=".sidebar-nav">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            <!--<a class="icon back" href=""><i class="fa fa-chevron-left"></i></a>-->
+            <!--<a class="icon search" href=""><i class="fa fa-search"></i></a>-->
+
+            <!--<a class="navbar-brand " href="#">UX</a>-->
+
+            <!--<a class="icon tw" href=""><i class="fa fa-twitter"></i></a>-->
+            <!--<a class="icon fb" href=""><i class="fa fa-facebook"></i></a>-->
+
+            <img src="/public/img/uni-ba.png" class="img-responsive imageheader" alt="Uniba" height="20px">
+
+            <h2 class="title">Big Data Manager</h2>
+
+        </div>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="row">
+
+        <!-- sidebar -->
+        <div class="col-xs-6 col-sm-4 col-md-3 sidebar-offcanvas">
+            <ul data-spy="affix" data-offset-top="0" id="affix" class="nav nav-stacked">
+
+                <li><a class="btn btn-link"><i class="fa fa-th" style="float: left"></i>Home</a></li>
+                <li><a class="btn btn-link"><i class="fa fa-users" style="float: left"></i>Profile</a></li>
+                <li><a class="btn btn-link"><i class="fa fa-database" style="float: left"></i>Projects</a></li>
+                <li><a class="btn btn-link"><i class="fa fa-bar-chart" style="float: left"></i>Statistics</a></li>
+
+                <!--<li><a href="#"> <i class="fa fa-map-marker"></i> Map</a></li>-->
+                <!--<li><a href="#" data-toggle="collapse" data-target="#sub1"> <i class="fa fa-envelope"></i>Contacts (submenu)</a>-->
+                    <!--<ul class="nav collapse" id="sub1">-->
+                        <!--<li><a href="#">andrea@gmail.com</a></li>-->
+                        <!--<li><a href="#">lorenzo@gmail.com</a></li>-->
+                        <!--<li><a href="#">matteo@gmail.com</a></li>-->
+                    <!--</ul>-->
+                <!--</li>-->
+                <!--<li><a href="#"> <i class="fa fa-plus"></i> More..</a></li>-->
+            </ul>
+        </div>
+
+        <!-- content -->
+        <div class="col-xs-12  col-sm-8 col-md-9 content">
+
+
+            <p class="upper">Credits: &nbsp;<a href="http://www.brazandre.com/manifesto/" target="_blank">Andrè Braz</a></p>
+
+            <h2>Experiences can be based in real life or in fantasy, but reality and fantasy must empower one another in a way that the whole is better than the absolute sum of the separate experiences.</h2>
+            <p class="upper">Experiences that foster happiness should have the following qualities:</p>
+
+
+
+            <ul class="ux-mood">
+                <li>Make people feel confident of themselves.</li>
+                <li>Make people feel they can do something better. Empowers people to do something in a better way.</li>
+                <li>Improve people's lives helping to solve existing pragmatic problems.</li>
+                <li>Make people have an enjoyable and fun time during the experience, thus making life worth to be lived.</li>
+                <li>Surprises people in a magic way, bringing delight to the eyes and making the mind wonder.</li>
+                <li>Create an emotional connection between everyone involved, the experience itself and the one supporting the experience (a brand or a person).</li>
+                <li>Make the world a better place to live.</li>
+                <li>Strenghten relationships between people that live the same experience.</li>
+            </ul>
+
+
+            <p>
+            <blockquote>
+                Experiences must be immersive and sensorial. The more it talks to human senses, the better it will be. They can exist in physical or virtual states.
+            </p>
+            </blockquote>
+            <p>
+            <blockquote>
+                The success of an experience is measured by the amount of happiness it brings to life and the amount of people willing to live the experience, not by it's individual qualities.
+            </blockquote>
+            </p>
+
+
+
+            <p class="space">
+                <strong>The Experience Designer</strong> is therefore a new denomination for all of those that follow this movement and conjure art, science, technology and psychology to desire, conceive and create experiences that bring happiness to the life of many.
+            </p>
+
+
+            <p class="space">
+                <strong>An experience designer must love</strong> and care about people and the world in which we all live. It's his mission in the world to proudly spread love and happiness through his creations.
+            </p>
+
+            provaz<br>
+            provaz<br>
+            provaz<br>
+            provaz<br>
+            provaz<br>
+            provaz<br>
+
+
+
+        </div>
+    </div>
+
+</div>
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+
+
+<script>
+    $(document).ready(function() {
+        $('[data-toggle=offcanvas]').click(function() {
+            $('.sidebar-offcanvas').toggleClass('active', 1000);
+        });
+    });
+
+
+</script>
+
+</body>
+
+</html>
