@@ -5,6 +5,8 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
+var multer  = require('multer');
+
 
 var app = express();
 
@@ -26,6 +28,21 @@ app.use(session({secret: 'kjhkjsdhjdljaslkjwi___4587'}));
 //DEBUG
 app.use(express.static(__dirname));
 //app.use(express.static(path.join(__dirname, 'public')));
+
+app.uploaddone = false;
+
+app.use(multer({ dest: './uploads/',
+  rename: function (fieldname, filename) {
+    return filename+Date.now();
+  },
+  onFileUploadStart: function (file) {
+    console.log(file.originalname + ' is starting ...')
+  },
+  onFileUploadComplete: function (file) {
+    console.log(file.fieldname + ' uploaded to  ' + file.path);
+    app.uploaddone=true;
+  }
+}));
 
 require('./routes/router')(app);   //chiamo il router
 

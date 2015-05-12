@@ -88,7 +88,9 @@
 
             <!-- FORM NUOVO PROGETTO -->
             <!--suppress HtmlUnknownTarget -->
-            <form class="form-horizontal" action="/newproject" method="post">
+            <form class="form-horizontal" action="/newproject" method="post"
+                  id        =  "uploadForm"
+                  enctype   =  "multipart/form-data">
 
                 <div class="form-group">
                     <label for="nameproject" class="col-sm-2 control-label">Project Name:</label>
@@ -126,7 +128,10 @@
                     <label for="inputPassword3" class="col-sm-2 control-label">Load data:</label>
 
                     <div class="col-sm-10">
-                        <input id="input-data" type="file" class="file">
+                        <input id="input-5" type="file" multiple="true" class="file"
+                               name="files"
+                               data-show-upload="false" data-show-caption="true"
+                               data-show-preview="false">
                     </div>
                 </div>
 

@@ -1,4 +1,13 @@
-var arg_index = { username:'' , project:'' };
+const ARG_INDEX = {
+    username: '' ,
+    project: '',
+    page: ''
+};
+
+const PAGE = {
+  HOME : "home",
+  PROJECT : "project"
+};
 
 var _USERNAME = "username";
 var _IS_AUTH = "isauth";
@@ -91,7 +100,7 @@ module.exports = function (app) {
 
         var sess = req.session;
         var username = sess.username;
-        var arg = arg_index;
+        var arg = ARG_INDEX;
 
         arg.username = username;
 
@@ -99,7 +108,47 @@ module.exports = function (app) {
     });
 
     app.get('/test', function (req, res) {
-        res.render('../views/pages/test.ejs', {} );
+
+        var arg = ARG_INDEX;
+        arg.username = "pippo";
+        arg.project = "test";
+        arg.page = PAGE.PROJECT;
+
+        res.render('../views/pages/test.ejs', arg );
+
+    });
+
+
+    app.get('/home', function (req, res) {
+
+        var arg = ARG_INDEX;
+        arg.username = "pippo";
+        arg.project = "test";
+        arg.page = PAGE.HOME;
+
+        res.render('../views/pages/test.ejs', arg );
+
+    });
+
+
+    app.get('/project', function (req, res) {
+
+        var arg = ARG_INDEX;
+        arg.username = "pippo";
+        arg.project = "test";
+        arg.page = PAGE.PROJECT;
+
+        res.render('../views/pages/test.ejs', arg );
+
+    });
+
+    app.post('/newproject', function (req, res) {
+
+        if(app.uploaddone == true){
+            console.log(req.files);
+            res.end("File uploaded.");
+        }
+
     });
 
 };
