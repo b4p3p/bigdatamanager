@@ -4,9 +4,17 @@ const ARG_INDEX = {
     page: ''
 };
 
+const ARG_PROJECT = {
+    nameproject: '' ,
+    username: '',
+    error: '',
+    messageError: ''
+};
+
 const PAGE = {
   HOME : "home",
-  PROJECT : "project"
+  PROJECT : "project",
+    STAT : "stat"
 };
 
 var _USERNAME = "username";
@@ -129,10 +137,7 @@ module.exports = function (app) {
 
     app.get('/project', function (req, res) {
 
-        var arg = ARG_INDEX;
-        arg.username = "pippo";
-        arg.project = "test";
-        arg.page = PAGE.PROJECT;
+        var arg = ARG_PROJECT;
 
         res.render('../views/pages/test.ejs', arg );
 
@@ -167,86 +172,99 @@ module.exports = function (app) {
                 {
                     var arg = { error:false , message: '' };
 
-                    if ( result >= 0 )
-                        res.redirect('/index');
+                    //qui sai se il progetto è stato salvato o meno
+                    if ( result < 0 )
+                        res.redirect('/project', {}); //aggiungere qui il messaggio di errore mandare come tab -> create
                     else
                     {
-                        arg.message = message;
-                        arg.error = true;
-                        res.render('../views/pages/index.ejs', arg);
+                        error = saveDataInProject(saveDataInProject_end);
+                        //res.end();
                     }
+
                 }
             );
 
-            //res.end(projectName+"\n"+input+"\n"+cmbType+"\n"+userProject);
-
-
-            if(app.uploaddonedone == true){
-                console.log(req.files);
-                res.write("File uploaded.");
-            }
-
-            var fs = require('fs');
-            var path = req.files.input.path;
-
-            //fs.readFile(path, function (err, data) {
-            //    if (err) {
-            //         res.end(err);
-            //    }
-            //    res.end(data);
-            //
-            //});
-            //
-            //var csv = require('csv');
-            //csv.parse(csvData, function(err, data){
-            //    csv.transform(data, function(data){
-            //        return data.map(function(value){return value.toUpperCase()});
-            //    }, function(err, data){
-            //        csv.stringify(data, function(err, data){
-            //            //res.end(data);
-            //        });
-            //    });
-            //});
-
-            //Converter Class
-            var Converter = require("csvtojson").core.Converter;
-            var csvConverter = new Converter();
-            var jsonObject = null;
-
-            csvConverter.on("end_parsed", function(jsonObj){
-
-                jsonObject = jsonObj;
-                res.write(JSON.stringify(jsonObj));
-
-                Data = require("../model/Data");
-
-                req.body.data = jsonObject;
-                var newData = new Project(jsonObject);
-                Data.save( newData,
-                    function(result, message)
-                    {
-                        var arg = { error:false , message: '' };
-
-                        if ( result >= 0 )
-                            res.redirect('/index');
-                        else
-                        {
-                            arg.message = message;
-                            arg.error = true;
-                            res.render('../views/pages/index.ejs', arg);
-                        }
-                    }
-                );
-
-            });
-
-            fs.createReadStream(path).pipe(csvConverter);
-
-            res.end();
+            res.write(projectName+"\n"+input+"\n"+cmbType+"\n"+userProject);
 
         }
     );
 
+    function saveDataInProject_end()
+    {
+        if (!error)
+            res.redirect('/project', {}); //mandare come parametro il tab da aprire -> open
+        else
+            res.redirect('/project', {}); //mandare come parametro il tab da aprire -> create + error
+    }
+
+    function saveDataInProject(callback_saveDataInProject_end)
+    {
+        if(app.uploaddonedone == true){
+            console.log(req.files);
+            res.write("File uploaded.");
+        }
+
+        var fs = require('fs');
+        var path = req.files.input.path;
+
+        //fs.readFile(path, function (err, data) {
+        //    if (err) {
+        //         res.end(err);
+        //    }
+        //    res.end(data);
+        //
+        //});
+        //
+        //var csv = require('csv');
+        //csv.parse(csvData, function(err, data){
+        //    csv.transform(data, function(data){
+        //        return data.map(function(value){return value.toUpperCase()});
+        //    }, function(err, data){
+        //        csv.stringify(data, function(err, data){
+        //            //res.end(data);
+        //        });
+        //    });
+        //});
+
+        //Converter Class
+        var Converter = require("csvtojson").core.Converter;
+        var csvConverter = new Converter();
+        var jsonObject = null;
+
+        csvConverter.on("end_parsed", csvConverter_end_parsed );
+
+        fs.createReadStream(path).pipe(csvConverter);
+
+
+    }
+
+    function csvConverter_end_parsed(jsonObj)
+    {
+        jsonObject = jsonObj;
+        res.write(JSON.stringify(jsonObj));
+
+        Data = require("../model/Data");
+
+        req.body.data = jsonObject;
+        var newData = new Project(jsonObject);
+        Data.save( newData, saveCallback );
+
+    }
+
+    function saveCallback(result, message)
+    {
+        var arg = { error:false , message: '' };
+
+        if ( result >= 0 )
+            res.redirect('/index');
+        else
+        {
+            arg.message = message;
+            arg.error = true;
+            res.render('../views/pages/index.ejs', arg);
+
+        }
+    }
     //app.get('/newproject', function (req, res)
     //    {
     //        res.end("ciao get");
