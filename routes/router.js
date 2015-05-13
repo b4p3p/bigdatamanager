@@ -19,7 +19,7 @@ module.exports = function (app) {
     });
 
     app.get('/login', function (req, res) {
-        var message = { error:false , message: '' };
+        var message = { error:false, message: '' };
         res.render('../views/pages/login.ejs', message);
     });
 
@@ -29,7 +29,7 @@ module.exports = function (app) {
 
         var username = req.body.username;
         var password = req.body.password;
-        var message = { error:false , message: '' };
+        var message = { error:false, message: '' };
 
         request = req;
 
@@ -42,7 +42,7 @@ module.exports = function (app) {
 
         User = require('../model/User');
 
-        User.getUserPsw(username , password , function(data)
+        User.getUserPsw(username, password, function(data)
         {
             message.error = true;
             message.message = "User not found";
@@ -77,10 +77,10 @@ module.exports = function (app) {
         User = require("../model/User");
 
         var newUser = new User(req.body);
-        User.save(newUser ,
+        User.save( newUser,
             function(result, message)
             {
-                var arg = { error:false , message: '' };
+                var arg = { error:false, message: '' };
 
                 if ( result >= 0 )
                     res.redirect('/login');
@@ -92,8 +92,6 @@ module.exports = function (app) {
                 }
             }
         );
-
-
     });
 
     app.get('/index', function (req, res) {
@@ -118,7 +116,6 @@ module.exports = function (app) {
 
     });
 
-
     app.get('/home', function (req, res) {
 
         var arg = ARG_INDEX;
@@ -129,7 +126,6 @@ module.exports = function (app) {
         res.render('../views/pages/test.ejs', arg );
 
     });
-
 
     app.get('/project', function (req, res) {
 
@@ -142,13 +138,119 @@ module.exports = function (app) {
 
     });
 
-    app.post('/newproject', function (req, res) {
+    //app.post('/newproject', function (req, res) {
+    //
+    //    if(app.uploaddone == true){
+    //        console.log(req.files);
+    //        res.end("File uploaded.");
+    //    }
+    //
+    //});
 
-        if(app.uploaddone == true){
-            console.log(req.files);
-            res.end("File uploaded.");
+    app.post('/newproject', function (req, res)
+        {
+            var projectName = req.body.projectName;
+            var cmbType = req.body.cmbType;
+            var input = req.body.input;
+
+            var sess = req.session;
+            var userProject = sess.username;
+
+            req.body.userProject = userProject;
+
+            Project = require("../model/Project");
+
+            var newProject = new Project(req.body);
+
+            Project.save( newProject,
+                function(result, message)
+                {
+                    var arg = { error:false , message: '' };
+
+                    if ( result >= 0 )
+                        res.redirect('/index');
+                    else
+                    {
+                        arg.message = message;
+                        arg.error = true;
+                        res.render('../views/pages/index.ejs', arg);
+                    }
+                }
+            );
+
+            //res.end(projectName+"\n"+input+"\n"+cmbType+"\n"+userProject);
+
+
+            if(app.uploaddonedone == true){
+                console.log(req.files);
+                res.write("File uploaded.");
+            }
+
+            var fs = require('fs');
+            var path = req.files.input.path;
+
+            //fs.readFile(path, function (err, data) {
+            //    if (err) {
+            //         res.end(err);
+            //    }
+            //    res.end(data);
+            //
+            //});
+            //
+            //var csv = require('csv');
+            //csv.parse(csvData, function(err, data){
+            //    csv.transform(data, function(data){
+            //        return data.map(function(value){return value.toUpperCase()});
+            //    }, function(err, data){
+            //        csv.stringify(data, function(err, data){
+            //            //res.end(data);
+            //        });
+            //    });
+            //});
+
+            //Converter Class
+            var Converter = require("csvtojson").core.Converter;
+            var csvConverter = new Converter();
+            var jsonObject = null;
+
+            csvConverter.on("end_parsed", function(jsonObj){
+
+                jsonObject = jsonObj;
+                res.write(JSON.stringify(jsonObj));
+
+                Data = require("../model/Data");
+
+                req.body.data = jsonObject;
+                var newData = new Project(jsonObject);
+                Data.save( newData,
+                    function(result, message)
+                    {
+                        var arg = { error:false , message: '' };
+
+                        if ( result >= 0 )
+                            res.redirect('/index');
+                        else
+                        {
+                            arg.message = message;
+                            arg.error = true;
+                            res.render('../views/pages/index.ejs', arg);
+                        }
+                    }
+                );
+
+            });
+
+            fs.createReadStream(path).pipe(csvConverter);
+
+            res.end();
+
         }
+    );
 
-    });
+    //app.get('/newproject', function (req, res)
+    //    {
+    //        res.end("ciao get");
+    //    }
+    //);
 
 };

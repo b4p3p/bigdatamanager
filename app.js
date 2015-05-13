@@ -39,8 +39,8 @@ app.use(multer({ dest: './uploads/',
     console.log(file.originalname + ' is starting ...')
   },
   onFileUploadComplete: function (file) {
-    console.log(file.fieldname + ' uploaded to  ' + file.path);
-    app.uploaddone=true;
+    console.log(file.fieldname + ' uploaded to ' + file.path);
+    app.uploaddone = true;
   }
 }));
 
@@ -48,7 +48,8 @@ require('./routes/router')(app);   //chiamo il router
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  var err = new Error('Not Found');
+  var err =
+      new Error('Not Found');
   err.status = 404;
   next(err);
 });
