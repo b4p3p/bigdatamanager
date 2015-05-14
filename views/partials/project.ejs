@@ -1,14 +1,42 @@
 <ul class="nav nav-tabs">
-    <li class="active"><a href="#open" data-toggle="tab">Open project</a></li>
-    <li><a href="#new" data-toggle="tab">New project</a></li>
+
+    <% if( tab == "openproject" ) { %>
+        <li class="active">
+    <%} else {%>
+        <li>
+    <% } %>
+
+    <a href="#open" data-toggle="tab">Open project</a></li>
+
+    <% if( tab == "newproject" ) {%>
+        <li class="active">
+    <%} else {%>
+        <li>
+    <% } %>
+
+    <a href="#new" data-toggle="tab">New project</a></li>
 </ul>
 
 <!-- Tab panes -->
 <div class="tab-content">
-    <div class="tab-pane active" id="open">Open project
+
+    <div
+        <% if( tab == "openproject" ) {%>
+            class="tab-pane active"
+        <%} else {%>
+            class="tab-pane"
+        <% } %>
+
+        id="open" >
+
+        Open project annarita se bona
     </div>
 
-    <div class="tab-pane pane-newproject " id="new">
+    <div class="tab-pane pane-newproject
+
+        <% if( tab == "newproject" ) {%>
+            active
+        <% } %> " id="new" >
 
         <!-- FORM NUOVO PROGETTO -->
         <!--suppress HtmlUnknownTarget -->
@@ -21,19 +49,21 @@
 
                 <div class="col-sm-10">
                     <input type="text" class="form-control" id="nameproject" placeholder="Project Name"
+                           name="projectName"
                            required>
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="typeimport" class="col-sm-2 control-label"
+                <label for="inputType" class="col-sm-2 control-label"
                        style="margin-right: 15px">Type Data:</label>
 
                 <div>
-                    <select class="selectpicker" id="cmbtype" title="select_picker">
-                        <option>CSV</option>
-                        <option>Json</option>
-                    </select>\
+                    <select class="selectpicker" id="inputType"
+                            name="inputType" title="select_picker">
+                        <option value="csv">CSV</option>
+                        <option value="json">Json</option>
+                    </select>
                 </div>
             </div>
 
@@ -50,18 +80,27 @@
             </div>
 
             <div class="form-group">
-                <label for="inputPassword3" class="col-sm-2 control-label">Load data:</label>
+                <label for="files" class="col-sm-2 control-label">Load data:</label>
 
                 <!--multiple="true"-->
 
                 <div class="col-sm-10">
-                    <input type="file" multiple class="file"
-                           name="files"
+                    <input type="file" class="file" multiple
+                           name="files" id="files"
                            data-show-upload="false"
                            data-show-caption="true"
-                           data-show-preview="false">
+                           data-show-preview="false"
+                            required>
                 </div>
             </div>
+
+            <% if (error && error.status < 0) { %>
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                <%= error.message %>
+            </div>
+            <% } %>
 
             <button class="btn btn-success" type="submit"
                     style="border-radius: 50px;float: right;margin-top: 30px;width: 120px">

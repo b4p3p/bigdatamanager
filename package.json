@@ -22,7 +22,8 @@
     "morgan": "~1.5.1",
     "serve-favicon": "~2.2.0",
     "font-awesome": ">4.0.0",
-    "node-csv" : "~0.1.0"
+    "node-csv" : "~0.1.0",
+    "synchronize": "^0.9.10"
   }
 }
 
