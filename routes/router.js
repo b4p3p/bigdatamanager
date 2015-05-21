@@ -231,24 +231,30 @@ module.exports = function (app) {
 
                                 Data.importFromFile(type, fileNames, function(err) {
 
-                                    if (err)
+                                    if (err.status)
                                     {
-                                        sendProjectError(req, res, err.message, err.errno);
+                                        sendProjectError(req, res, err.message, err.status);
                                     }
                                     else
                                     {
-                                        var arg_index = getArgIndex();
+                                        var arg = getArgIndex();
+                                        arg.username = req.session.username;
+                                        arg.project = req.session.project;
+                                        arg.page = PAGE.PROJECT;
+                                        arg.tab = TAB.OPENPROJECT;
+                                        req.session.arg = arg;
+                                        res.redirect('/project');
                                     }
 
                                 });
                             } else {
                                 console.log("Internal error: " + err);
-                                sendProjectError(req, res, "Internal Error", -2);
+                                sendProjectError(req, res, err.message, err.status);
                             }
                         }
                     );
                 } else  {
-                    sendProjectError(req, res, "Project already exists", -1);
+                    sendProjectError(req, res, "Project already exists", 1);
                 }
             }
         );

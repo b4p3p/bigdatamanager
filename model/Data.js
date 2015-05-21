@@ -1,6 +1,10 @@
 /**
  * Created by annarita on 12/05/15.
  */
+const ERROR = {
+    status: 0,
+    message: ''
+};
 
 var Data = function (data) {
     this.data = data;
@@ -11,20 +15,28 @@ var model_name = "data";
 var mongoose = require('mongoose');
 
 const DATA_SCHEMA = new mongoose.Schema({
-    project_Name: String,
+    projectName: String,
     id: Number,
-    Date: Date,
-    Latitude: Number,
-    Longitude: Number,
-    Source: { type: String, lowercase: true },
-    Text: { type: String, lowercase: true },
-    User: { type: String, lowercase: true },
-    Tag: { type: String, lowercase: true }
+    date: Date,
+    latitude: Number,
+    longitude: Number,
+    source: String,
+    text: String,
+    user: String,
+    tag: String
 });
 
 Data.prototype.data = {};    //json
 
-Data.save = function(data, callback)
+/**
+ * Save an instance of Data.
+ *
+ * @constructor
+ * @this {Data}
+ * @param {IstanceOf Data} data The istance of Data to save.
+ * @param {callback} callback callback with err result.
+ */
+Data.addData = function(data, callback)
 {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var Model = connection.model(model_name, DATA_SCHEMA);
@@ -40,19 +52,50 @@ Data.save = function(data, callback)
 
 };
 
-Data.saveArray = function(data, callback) {
+/**
+ * Save an json array of data.
+ *
+ * @constructor
+ * @this {Data}
+ * @param {json array of data} data Json array.
+ * @param {callback} callback callback with err result.
+ *                   - null:  no error
+ *                   - !null: error
+ */
+Data.addDataArray = function(data, callback) {
+
+    console.log("CALL: Data.addDataArray");
+    //console.log(data);
+
+    var error = false;
+    var cont = 0;
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var Model = connection.model(model_name, DATA_SCHEMA);
-    var newData = new Model( data );
 
-    newData.save( function(err) {
-        if (err)
-            callback(-2, err ); //error
-        callback(0, "" );       //OK
+    for(var i in data)
+    {
+        var d = new Model( data[i] );
+        d.save( function(err) {
 
-        connection.close();
-    });
+            cont++;
+
+            if (err && !error)
+            {
+                connection.close();
+                error = true;
+                callback(err.code, err ); //error
+            }
+
+            if (cont == data.length && !error)
+            {
+                connection.close();
+                callback(0, "" );       //OK
+            }
+        });
+    }
+
+
 
 };
 
@@ -65,10 +108,21 @@ Data.importFromFile = function(type, fileNames, callback)
         function (err, data) {
             if (err)
                 callback(err);
-            else
-                convertData(callback, data);
+            else {
+                if(type == "csv")
+                    convertData(callback, data);
+                else
+                    writeJson(callback, data);
+            }
         }
     );
+};
+
+function writeJson(callback, jsonData) {
+
+    jsonData = jsonData.toString();
+    console.log(jsonData);
+
 };
 
 function convertData(callback, csvData) {
@@ -90,17 +144,6 @@ function convertData(callback, csvData) {
                     }
                 );
 
-                // senza questa funzione, function (err, data) mi restituisce un elemento per volta
-                //return data.map(
-                //    function (value)
-                //    {
-                //        cont++;
-                //        if (cont == 1)
-                //            return value.toLowerCase();
-                //        else
-                //            return value;
-                //    }
-                //);
             },
             function (err, data)
             {
@@ -128,10 +171,8 @@ function _convertCsvToJson(callback, data)
     });
 
     csvConverter.fromString(data, function(jsonObj){
-
         //if (jsonObj == null)
         //    return;
-
         //return csvConverter_end_parsed(callback, jsonObj);
     });
 }
@@ -144,7 +185,7 @@ function csvConverter_end_parsed(callback, jsonObj)
     console.log(JSON.stringify(newData));
     console.log(JSON.stringify(jsonObj));
 
-    Data.saveArray( jsonObj, function(result, message){
+    Data.addDataArray( jsonObj, function(result, message){
         saveCallback(callback, result, message)
     });
 
@@ -152,17 +193,19 @@ function csvConverter_end_parsed(callback, jsonObj)
 
 function saveCallback(callback, result, message)
 {
-    var arg = { error:false , message: '' };
+    var arg = ERROR;
 
-    if ( result >= 0 )
-        res.redirect('/index');
+    if ( result <= 0 )
+    {
+        arg.status = 0;
+        arg.message = "";
+    }
     else
     {
-        arg.message = message;
-        arg.error = true;
-        res.render('../views/pages/index.ejs', arg);
-
+        arg.status = message.code;
+        arg.message = message.message;
     }
+    callback(arg);
 }
 
 
