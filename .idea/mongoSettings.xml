@@ -13,6 +13,6 @@
         </ServerConfiguration>
       </list>
     </option>
-    <option name="shellPath" value="C:\Program Files\MongoDB\Server\3.0\bin\mongo.exe" />
+    <option name="shellPath" value="/usr/bin/mongo" />
   </component>
 </project>

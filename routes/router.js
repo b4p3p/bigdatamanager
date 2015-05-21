@@ -1,5 +1,4 @@
 var extend = require('util')._extend;
-var sync = require('synchronize')
 
 const PAGE = {
     HOME: "home",

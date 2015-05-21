@@ -75,19 +75,32 @@ function convertData(callback, csvData) {
     var csv = require('csv');
     var cont = 0;
     csv.parse(csvData, function (err, data) {
-        csv.transform(data, function (data)
-            {
-                // senza questa funzione, function (err, data) mi restituisce un elemento per volta
+        csv.transform(data,
+            function (data) {
+
+                cont++;
+
                 return data.map(
-                    function (value)
-                    {
-                        cont++;
+                    function (value) {
+
                         if (cont == 1)
                             return value.toLowerCase();
                         else
                             return value;
                     }
                 );
+
+                // senza questa funzione, function (err, data) mi restituisce un elemento per volta
+                //return data.map(
+                //    function (value)
+                //    {
+                //        cont++;
+                //        if (cont == 1)
+                //            return value.toLowerCase();
+                //        else
+                //            return value;
+                //    }
+                //);
             },
             function (err, data)
             {
@@ -131,7 +144,7 @@ function csvConverter_end_parsed(callback, jsonObj)
     console.log(JSON.stringify(newData));
     console.log(JSON.stringify(jsonObj));
 
-    Data.saveArray( newData, function(result, message){
+    Data.saveArray( jsonObj, function(result, message){
         saveCallback(callback, result, message)
     });
 

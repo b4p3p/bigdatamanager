@@ -3,7 +3,7 @@
     <envs>
       <env name="DEBUG" value="bigdatamanager:*" />
     </envs>
-    <browser start="true" with-js-debugger="true" url="http://localhost:8080" />
+    <browser name="a7bb68e0-33c0-4d6f-a81a-aac1fdb870c8" start="true" with-js-debugger="true" url="http://localhost:8080" />
     <method />
   </configuration>
 </component>
