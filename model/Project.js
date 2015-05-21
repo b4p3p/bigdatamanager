@@ -17,11 +17,11 @@ Project.prototype.data = {};    //json
 
 Project.getProject = function (projectName, callback)
 {
-    //TODO debug - cancellare questa porzione di codice
-    var connection = mongoose.createConnection('mongodb://localhost/oim');
-    var Model = connection.model(Project.MODEL_NAME, Project.PROJECT_SCHEMA);
-    Model.find({ userProject:'oim' }).remove().exec();
-    connection.close();
+    ////TO DO debug - cancellare questa porzione di codice
+    //var connection = mongoose.createConnection('mongodb://localhost/oim');
+    //var Model = connection.model(Project.MODEL_NAME, Project.PROJECT_SCHEMA);
+    //Model.find({ userProject:'oim' }).remove().exec();
+    //connection.close();
 
     connection = mongoose.createConnection('mongodb://localhost/oim');
     var Projects = connection.model(Project.MODEL_NAME, Project.PROJECT_SCHEMA);
