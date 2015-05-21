@@ -3,9 +3,9 @@
   <component name="JavaScriptLibraryMappings">
     <file url="file://$PROJECT_DIR$" libraries="{bigdatamanager node_modules}" />
     <file url="file://$PROJECT_DIR$/app.js" libraries="{Node.js v0.10.25 Core Modules}" />
-    <file url="file://$PROJECT_DIR$/controller/FileReader.js" libraries="{Node.js v0.10.25 Core Modules}" />
     <file url="file://$PROJECT_DIR$/model/Data.js" libraries="{Node.js v0.10.25 Core Modules}" />
     <file url="file://$PROJECT_DIR$/model/Project.js" libraries="{Node.js v0.10.25 Core Modules}" />
     <file url="file://$PROJECT_DIR$/routes/router.js" libraries="{Node.js v0.10.25 Core Modules}" />
+    <includedPredefinedLibrary name="ECMAScript 6" />
   </component>
 </project>

@@ -1,0 +1,8 @@
+{
+  "name": "bigdatamanager",
+  "version": "1.0.0",
+  "main": "app.js",
+  "dependencies": {
+    "bootstrap-table": ">=1.7.0"
+  }
+}

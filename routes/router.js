@@ -20,16 +20,14 @@ const ARG_INDEX = {
     username: '' ,
     project: '',
     page: '',
-    tab: TAB.OPENPROJECT,
-    error: ERROR
+    tab: '',
+    error: ERROR,
+    content: null
 };
 
-//const ARG_PROJECT = {
-//    nameproject: '' ,
-//    username: '',
-//    error: '',
-//    messageError: ''
-//};
+const ARG_PROJECT = {
+    projects: ''
+};
 
 //var _USERNAME = "username";
 //var _IS_AUTH = "isauth";
@@ -172,13 +170,14 @@ module.exports = function (app) {
 
         //controllo se ho un errore
         var arg = extend({}, ARG_INDEX);
+        var Project = require("../model/Project");
 
-        if (req.session.arg)
+        if (req.session.arg)                    // uso  i paramenti presenti nella variabile di sessione
         {
             arg = req.session.arg;
             req.session.arg = null;
         }
-        else
+        else                                    // mi costruisco la variabile usando le variabili di sessione
         {
             //var err = ERROR;
             //err.status = -1;
@@ -187,11 +186,20 @@ module.exports = function (app) {
             arg.username = req.session.username;
             arg.project = req.session.project;
             arg.page = PAGE.PROJECT;
-            arg.tab = TAB.NEWPROJECT;               //TODO mettere open project
+            arg.tab = TAB.OPENPROJECT;
             //arg.error = err;
         }
 
-        res.render('../views/pages/index.ejs', arg );
+        //TODO debug
+        if (!arg.username) arg.username = 'oim';
+
+        Project.getProjects(arg.username, function(data, err)
+        {
+            var projectArg = getArgProject();
+            projectArg.projects = JSON.stringify(data);
+            arg.content = projectArg;
+            res.render('../views/pages/index.ejs', arg );
+        });
 
     });
 
@@ -281,96 +289,9 @@ module.exports = function (app) {
         return extend({}, ARG_INDEX);
     }
 
-
-    //var newProject = null;
-    //
-    //function projectSaveEnd(err) {
-    //
-    //    var arg = extend({}, ARG_INDEX);
-    //    var resultError = extend({}, ERROR);
-    //
-    //    if (err)
-    //    {
-    //        resultError.message(err);
-    //        resultError.status = -2;
-    //
-    //        arg.page = PAGE.PROJECT;
-    //        arg.tab = TAB.NEWPROJECT;
-    //        arg.error = resultError;
-    //
-    //        request.session.arg = arg;
-    //
-    //        response.redirect("/project" );
-    //
-    //    }
-    //    else
-    //    {
-    //
-    //    }
-    //
-    //    connection.close();
-    //
-    //
-    //    //if (err)
-    //    //    callback(-1, err ); //error
-    //    //    callback(0, "" );       //OK
-    //    //
-    //    //    connection.close();
-    //
-    //}
-
-    //function saveDataInProject_end()
-    //{
-    //    if (!error)
-    //        res.redirect('/project', {}); //mandare come parametro il tab da aprire -> open
-    //    else
-    //        res.redirect('/project', {}); //mandare come parametro il tab da aprire -> create + error
-    //}
-    //
-    //function saveDataInProject(callback_saveDataInProject_end)
-    //{
-    //
-    //
-    //    var fs = require('fs');
-    //    var path = req.files.input.path;
-    //
-    //    //fs.readFile(path, function (err, data) {
-    //    //    if (err) {
-    //    //         res.end(err);
-    //    //    }
-    //    //    res.end(data);
-    //    //
-    //    //});
-    //    //
-    //    //var csv = require('csv');
-    //    //csv.parse(csvData, function(err, data){
-    //    //    csv.transform(data, function(data){
-    //    //        return data.map(function(value){return value.toUpperCase()});
-    //    //    }, function(err, data){
-    //    //        csv.stringify(data, function(err, data){
-    //    //            //res.end(data);
-    //    //        });
-    //    //    });
-    //    //});
-    //
-    //    //Converter Class
-    //    var Converter = require("csvtojson").core.Converter;
-    //    var csvConverter = new Converter();
-    //    var jsonObject = null;
-    //
-    //    csvConverter.on("end_parsed", csvConverter_end_parsed );
-    //
-    //    fs.createReadStream(path).pipe(csvConverter);
-    //
-    //
-    //}
-    //
-
-
-    //app.get('/newproject', function (req, res)
-    //    {
-    //        res.end("ciao get");
-    //    }
-    //);
+    function getArgProject()
+    {
+        return extend({}, ARG_PROJECT);
+    }
 
 };

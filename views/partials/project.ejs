@@ -1,3 +1,7 @@
+<!-- prendo le variabili -->
+
+<script src="/public/js/project.js"></script>
+
 <ul class="nav nav-tabs">
 
     <% if( tab == "openproject" ) { %>
@@ -29,7 +33,19 @@
 
         id="open" >
 
-        Open project annarita se bona
+        <div class="row" style="margin-top: 10px">
+            <table data-toggle="table" >
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Stars</th>
+                    <th>Forks</th>
+                    <th>Description</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+
     </div>
 
     <div class="tab-pane pane-newproject
@@ -171,5 +187,12 @@
                 "    etichetta: '&lt;tag&gt;'\n" +
                 "  }\n" +
                 "]</pre>");
+
+    $(document).ready(function()
+    {
+        alert("sono qui");
+        var content = '<%- content.projects %>';
+        addData(content);
+    });
 
 </script>

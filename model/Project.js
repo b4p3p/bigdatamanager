@@ -5,6 +5,7 @@ var Project = function (data) {
 Project.MODEL_NAME = "project";
 
 var mongoose = require('mongoose');
+var connection = mongoose.createConnection('mongodb://localhost/oim');
 
 Project.PROJECT_SCHEMA = new mongoose.Schema({
     projectName: String,
@@ -23,7 +24,7 @@ Project.getProject = function (projectName, callback)
     //Model.find({ userProject:'oim' }).remove().exec();
     //connection.close();
 
-    connection = mongoose.createConnection('mongodb://localhost/oim');
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
     var Projects = connection.model(Project.MODEL_NAME, Project.PROJECT_SCHEMA);
 
     Projects.findOne( {projectName: projectName },
@@ -34,6 +35,21 @@ Project.getProject = function (projectName, callback)
             callback(doc);
         }
     );
+};
+
+Project.getProjects = function(username, callback)
+{
+    var ProjectModel = connection.model(Project.MODEL_NAME, Project.PROJECT_SCHEMA);
+
+    ProjectModel.find()
+                .lean()
+                .exec( function(err, docs)
+    {
+        if (err) { callback(null); return; }
+        callback(docs);
+    });
+
+
 };
 
 Project.addProject = function(dataProject, callback)
