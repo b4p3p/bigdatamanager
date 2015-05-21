@@ -25,6 +25,16 @@ const ARG_INDEX = {
     error: ERROR
 };
 
+//const ARG_PROJECT = {
+//    nameproject: '' ,
+//    username: '',
+//    error: '',
+//    messageError: ''
+//};
+
+//var _USERNAME = "username";
+//var _IS_AUTH = "isauth";
+
 function setArgIndex(username, project, page, error)
 {
     var arg = extend({}, ARG_INDEX);
@@ -38,17 +48,6 @@ function setArgIndex(username, project, page, error)
 
     return arg;
 }
-
-
-//const ARG_PROJECT = {
-//    nameproject: '' ,
-//    username: '',
-//    error: '',
-//    messageError: ''
-//};
-
-//var _USERNAME = "username";
-//var _IS_AUTH = "isauth";
 
 module.exports = function (app) {
 
@@ -199,9 +198,13 @@ module.exports = function (app) {
 
     app.post('/newproject', function (req, res) {
 
+        /*** Creo un nuovo progetto ***/
+
         if(app.uploaddonedone == false) return;
 
         console.log("PAGE /newproject");
+
+        var Project = require("../model/Project");
 
         response = res;
         request = req;
@@ -213,125 +216,103 @@ module.exports = function (app) {
 
         dataProject.userProject = 'oim';   //TODO togliere questo
 
-        createProject(dataProject);
+        // Cerco prima se il progetto esiste
+        Project.getProject( dataProject.projectName,
+            function(doc)
+            {
+                // restituisco errore se esiste
+                if ( doc == null )  {
+                    //Creo un nuovo progetto
+                    Project.addProject(dataProject,
+                        function (err){
+                            if ( err == null) {
+                                var type = req.body.inputType;
+                                var fileNames = app.fileNames;
+                                var Data = require("../model/Data");
 
+                                Data.importFromFile(type, fileNames, function(err) {
 
-        ////var cmbType =   req.body.inputType;
-        //////var files =     req.body.files;
-        ////var sess =      req.session;
-        ////var userProject = sess.username;
-        ////
-        ////userProject = 'oim';                        //TODO DEBUG
-        ////req.body.userProject = userProject;
-        //
-        //
-        //Project = require("../model/Project");
-        //
-        //var newProject = new Project(req.body);
-        //
-        //Project.save( newProject,
-        //    function(result, message)
-        //    {
-        //        var arg = { error:false , message: '' };
-        //
-        //        //qui sai se il progetto è stato salvato o meno
-        //        if ( result < 0 )
-        //            res.redirect('/project', {}); //aggiungere qui il messaggio di errore mandare come tab -> create
-        //        else
-        //        {
-        //            error = saveDataInProject(saveDataInProject_end);
-        //            //res.end();
-        //        }
-        //    }
-        //);
-        //
-        //res.write(projectName+"\n"+files+"\n"+cmbType+"\n"+userProject);
+                                    if (err)
+                                    {
+                                        sendProjectError(req, res, err.message, err.errno);
+                                    }
+                                    else
+                                    {
+                                        var arg_index = getArgIndex();
+                                    }
 
+                                });
+                            } else {
+                                console.log("Internal error: " + err);
+                                sendProjectError(req, res, "Internal Error", -2);
+                            }
+                        }
+                    );
+                } else  {
+                    sendProjectError(req, res, "Project already exists", -1);
+                }
+            }
+        );
     });
 
-    var newProject = null;
-
-    function createProject(dataProject)
+    function sendProjectError(request, response, message, status)
     {
-        console.log("CALL createProject");
+        //restituisco errore
+        var err = extend({}, ERROR);
+        err.message = message;
+        err.status = status;
 
-        var Project = require("../model/Project");
-        newProject = new Project(dataProject);
+        var arg = extend({}, ARG_INDEX);
+        arg.error = err;
+        arg.tab = TAB.NEWPROJECT;
+        arg.page = PAGE.PROJECT;
 
-        Project.getProject( dataProject.projectName, getProjectEnd );
-
+        request.session.arg = arg;
+        response.redirect("/project");
     }
 
-    function getProjectEnd(doc) {
-
-        console.log("CALL getProjectEnd");
-
-        var Project = require("../model/Project");
-
-        if ( doc == null ) {
-
-            var connection = require('mongoose').createConnection('mongodb://localhost/oim');
-
-            var Model = connection.model(Project.MODEL_NAME, Project.PROJECT_SCHEMA);
-            var modelProject = new Model(newProject.data);
-
-            modelProject.save( function (err) {
-
-                var arg = extend({}, ARG_INDEX);
-                var resultError = extend({}, ERROR);
-
-                if (err)
-                {
-                    resultError.message(err);
-                    resultError.status = -2;
-
-                    arg.page = PAGE.PROJECT;
-                    arg.tab = TAB.NEWPROJECT;
-                    arg.error = resultError;
-
-                    request.session.arg = arg;
-
-                    response.redirect("/project" );
-
-                }
-                else
-                {
-
-                }
-
-                connection.close();
-            });
-
-        }
-        else
-        {
-            //restituisco errore
-            var err = extend({}, ERROR);
-            err.message = "Project already exists";
-            err.status = -1;
-
-            var arg = extend({}, ARG_INDEX);
-            arg.error = err;
-            arg.tab = TAB.NEWPROJECT;
-            arg.page = PAGE.PROJECT;
-
-            request.session.arg = arg;
-
-            response.redirect("/project");
-        }
-
-
+    function getArgIndex()
+    {
+        return extend({}, ARG_INDEX);
     }
 
-    function projectSaveEnd(err) {
 
-        if (err)
-            callback(-1, err ); //error
-            callback(0, "" );       //OK
-
-            connection.close();
-
-    }
+    //var newProject = null;
+    //
+    //function projectSaveEnd(err) {
+    //
+    //    var arg = extend({}, ARG_INDEX);
+    //    var resultError = extend({}, ERROR);
+    //
+    //    if (err)
+    //    {
+    //        resultError.message(err);
+    //        resultError.status = -2;
+    //
+    //        arg.page = PAGE.PROJECT;
+    //        arg.tab = TAB.NEWPROJECT;
+    //        arg.error = resultError;
+    //
+    //        request.session.arg = arg;
+    //
+    //        response.redirect("/project" );
+    //
+    //    }
+    //    else
+    //    {
+    //
+    //    }
+    //
+    //    connection.close();
+    //
+    //
+    //    //if (err)
+    //    //    callback(-1, err ); //error
+    //    //    callback(0, "" );       //OK
+    //    //
+    //    //    connection.close();
+    //
+    //}
 
     //function saveDataInProject_end()
     //{
@@ -379,33 +360,7 @@ module.exports = function (app) {
     //
     //}
     //
-    //function csvConverter_end_parsed(jsonObj)
-    //{
-    //    jsonObject = jsonObj;
-    //    res.write(JSON.stringify(jsonObj));
-    //
-    //    Data = require("../model/Data");
-    //
-    //    req.body.data = jsonObject;
-    //    var newData = new Project(jsonObject);
-    //    Data.save( newData, saveCallback );
-    //
-    //}
-    //
-    //function saveCallback(result, message)
-    //{
-    //    var arg = { error:false , message: '' };
-    //
-    //    if ( result >= 0 )
-    //        res.redirect('/index');
-    //    else
-    //    {
-    //        arg.message = message;
-    //        arg.error = true;
-    //        res.render('../views/pages/index.ejs', arg);
-    //
-    //    }
-    //}
+
 
     //app.get('/newproject', function (req, res)
     //    {

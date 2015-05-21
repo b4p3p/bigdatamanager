@@ -23,7 +23,10 @@
     "serve-favicon": "~2.2.0",
     "font-awesome": ">4.0.0",
     "node-csv" : "~0.1.0",
-    "synchronize": "^0.9.10"
+    "sync": "^0.2.5",
+    "synchronize": "^0.2.5",
+    "csvtojson" : "^0.3.21",
+    "csv" : "^0.4.2"
   }
 }
 

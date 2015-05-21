@@ -1,6 +1,6 @@
 var express = require('express');
 var path = require('path');
-var favicon = require('serve-favicon');
+//var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -19,7 +19,7 @@ app.set('view engine', 'ejs');
 app.use(logger('dev'));
 app.use(bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
-  extended: true
+    extended: true
 }));
 app.use(cookieParser());
 
@@ -30,30 +30,32 @@ app.use(express.static(__dirname));
 //app.use(express.static(path.join(__dirname, 'public')));
 
 app.uploaddone = false;
+app.fileNames = [];
 
 app.use(multer({ dest: './uploads/',
-  rename: function (fieldname, filename)
-  {
-    console.log('rename');
-    return filename+Date.now();
-  },
-  onFileUploadStart: function (file) {
-    console.log(file.originalname + ' is starting ...')
-  },
-  onFileUploadComplete: function (file) {
-    console.log(file.fieldname + ' uploaded to ' + file.path);
-    app.uploaddone = true;
-  }
+    rename: function (fieldname, filename)
+    {
+        console.log('CALL: app.rename');
+        return filename+Date.now();
+    },
+    onFileUploadStart: function (file) {
+        console.log('CALL: app.onFileUploadStart (' + file.originalname + ')');
+    },
+    onFileUploadComplete: function (file) {
+        console.log('CALL: app.onFileUploadComplete (' + file.path + ')');
+        app.fileNames.push(file.path);
+        app.uploaddone = true;
+    }
 }));
 
 require('./routes/router')(app);   //chiamo il router
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  var err =
-      new Error('Not Found');
-  err.status = 404;
-  next(err);
+    var err =
+        new Error('Not Found');
+    err.status = 404;
+    next(err);
 });
 
 // error handlers
