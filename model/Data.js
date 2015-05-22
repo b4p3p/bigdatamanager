@@ -6,7 +6,8 @@ const ERROR = {
     message: ''
 };
 
-var Data = function (data) {
+var Data = function (data)
+{
     this.data = data;
 };
 
@@ -34,7 +35,7 @@ Data.prototype.data = {};    //json
  * @constructor
  * @this {Data}
  * @param {IstanceOf Data} data The istance of Data to save.
- * @param {callback} callback callback with err result.
+ * @param {callback} callback Callback with err result.
  */
 Data.loadData = function(data, callback)
 {
@@ -49,7 +50,6 @@ Data.loadData = function(data, callback)
 
         connection.close();
     });
-
 };
 
 /**
@@ -58,12 +58,12 @@ Data.loadData = function(data, callback)
  * @constructor
  * @this {Data}
  * @param {json array of data} data Json array.
- * @param {callback} callback callback with err result.
+ * @param {callback} callback Callback with err result.
  *                   - null:  no error
  *                   - !null: error
  */
-Data.addDataArray = function(data, callback) {
-
+Data.addDataArray = function(data, callback)
+{
     console.log("CALL: Data.addDataArray");
     //console.log(data);
 
@@ -94,38 +94,73 @@ Data.addDataArray = function(data, callback) {
             }
         });
     }
-
-
-
 };
 
 Data.importFromFile = function(type, fileNames, callback)
 {
     var fs = require('fs');
-    var path = fileNames[0]; //TODO implementare il salvataggio di piu file
+    var util = require('util');
+    for(var i = 0; i < fileNames.length; i++) {
+        var path = fileNames[i];
 
-    fs.readFile(path,
-        function (err, data) {
-            if (err)
-                callback(err);
-            else {
-                if(type == "csv")
-                    convertData(callback, data);
-                else
-                    writeJson(callback, data);
+        console.log(path);
+
+        fs.readFile(path,
+            function (err, data) {
+                if (err){
+                    callback(err);
+                    return;
+                }
+                else {
+                    if (type == "csv")
+                        convertData(callback, data);
+                    else
+                        writeJson(callback, data);
+
+                }
             }
+        );
+    }
+};
+
+function writeJson(callback, jsonData)
+{
+    var jsonlint = require("jsonlint");
+
+    JSON._parse = JSON.parse;
+    JSON.parse = function (json) {
+        try {
+            return JSON._parse(json);
+        } catch(e) {
+            jsonlint.parse(json);
         }
-    );
-};
+    };
 
-function writeJson(callback, jsonData) {
+    var objJson;
+    try {
+        objJson = jsonlint.parse( jsonData.toString() );
+    }
+    catch (e) {
+        var test = e.toString();
+        var arg = ERROR;
+        arg.status = 200;
+        arg.message = e;
+        callback(arg);
+        return;
+    }
+    for(var i = 0; i < objJson.length; i ++) {
+        var obj = objJson[i];
+        var keys = Object.keys(obj);
+        for(var k = 0; k < keys.length; k ++) {
+            var key = keys[k];
+            obj[key.toLowerCase()] = obj[key];
+        }
+    }
+    saveJson(callback, objJson);
+}
 
-    jsonData = jsonData.toString();
-    console.log(jsonData);
-
-};
-
-function convertData(callback, csvData) {
+function convertData(callback, csvData)
+{
     var csv = require('csv');
     var cont = 0;
     csv.parse(csvData, function (err, data) {
@@ -164,26 +199,26 @@ function _convertCsvToJson(callback, data)
     //Converter Class
     var Converter = require("csvtojson").core.Converter;
     var csvConverter = new Converter();
-    var jsonObject = null;
+   //var jsonObject = null;
 
     csvConverter.on("end_parsed", function(jsonObj) {
-        csvConverter_end_parsed(callback, jsonObj);
+        saveJson(callback, jsonObj);
     });
 
     csvConverter.fromString(data, function(jsonObj){
         //if (jsonObj == null)
         //    return;
-        //return csvConverter_end_parsed(callback, jsonObj);
+        //return saveJson(callback, jsonObj);
     });
 }
 
-function csvConverter_end_parsed(callback, jsonObj)
+function saveJson(callback, jsonObj)
 {
     var Data = require("../model/Data");
     var newData = new Data(jsonObj);
 
-    console.log(JSON.stringify(newData));
-    console.log(JSON.stringify(jsonObj));
+    //console.log(JSON.stringify(newData));
+    //console.log(JSON.stringify(jsonObj));
 
     Data.addDataArray( jsonObj, function(result, message){
         saveCallback(callback, result, message)
@@ -207,6 +242,5 @@ function saveCallback(callback, result, message)
     }
     callback(arg);
 }
-
 
 module.exports = Data;

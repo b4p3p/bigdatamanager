@@ -49,8 +49,8 @@
                     <th data-field="creationDate">Creation Date</th>
                     <th data-field="lastEdit">Last Edit</th>
                     <th data-field="size">Size</th>
-                    <th data-field="Open project" data-width="55"
-                        data-formatter="projectCtrl.openColumnFormatter">Open</th>
+                    <th data-field="Open project"
+                        data-formatter="openFormatter">Open</th>
                 </tr>
                 </thead>
             </table>
@@ -85,10 +85,9 @@
                        style="margin-right: 15px">Type Data:</label>
 
                 <div>
-                    <select class="selectpicker" id="inputType"
-                            name="inputType" title="select_picker">
+                    <select class="selectpicker" name="cmbType" id="cmbType">
                         <option value="csv">CSV</option>
-                        <option value="json">Json</option>
+                        <option value="json">JSON</option>
                     </select>
                 </div>
             </div>
@@ -142,73 +141,65 @@
 <script>
 
     $('.selectpicker').selectpicker();
-    var cmbType = $('#cmbtype');
+    var cmbType = $('#cmbType');
     var divCode = $('#examplecode');
+    showExample();
+
+    function showExample(){
+        var selected = cmbType.find("option:selected").val();
+        if (selected == "csv")
+            divCode.html(
+                    "<pre>id,date,latitude,longitude,source,text,user,tag\n"+
+                    "'&lt;unique_id&gt;'," +
+                    "'&lt;AAAA-MM-GG&gt;'," +
+                    "&lt;float&gt;," +
+                    "&lt;float&gt;," +
+                    "'&lt;source&gt;'," +
+                    "'&lt;text&gt;'," +
+                    "'&lt;user&gt;'," +
+                    "'&lt;tag&gt;'\n" +
+                    "'&lt;unique_id&gt;'," +
+                    "'&lt;AAAA-MM-GG&gt;'," +
+                    "&lt;float&gt;," +
+                    "&lt;float&gt;," +
+                    "'&lt;source&gt;'," +
+                    "'&lt;text&gt;'," +
+                    "'&lt;user&gt;'," +
+                    "'&lt;tag&gt;'\n" +
+                    "...\n"+
+                    "</pre>");
+        else
+            divCode.html(
+                    "<pre>[\n"+
+                    "  {\n" +
+                    "    id: '&lt;unique_id&gt;',\n" +
+                    "    date: '&lt;AAAA-MM-GG&gt;',\n"+
+                    "    latitude: &lt;float&gt;,\n"+
+                    "    longitude: &lt;float&gt;,\n"+
+                    "    source: '&lt;source&gt;',\n"+
+                    "    text: '&lt;text&gt;',\n"+
+                    "    user: '&lt;user&gt;',\n"+
+                    "    tag: '&lt;tag&gt;'\n"+
+                    "  },{\n"+
+                    "    id: '&lt;unique_id&gt;',\n" +
+                    "    date: '&lt;AAAA-MM-GG&gt;',\n"+
+                    "    latitude: &lt;float&gt;,\n"+
+                    "    longitude: &lt;float&gt;,\n"+
+                    "    source: '&lt;source&gt;',\n"+
+                    "    text: '&lt;text&gt;',\n"+
+                    "    user: '&lt;user&gt;',\n"+
+                    "    tag: '&lt;tag&gt;'\n"+
+                    "  },\n"+
+                    "  ...\n"+
+                    "]</pre>");
+
+    }
 
     cmbType.on('change', function () {
         var selected = $(this).find("option:selected").val();
-        alert(selected);
+        showExample();
     });
 
-    var selected = cmbType.find("option:selected").val();
-    if (selected == "CSV")
-        divCode.html(
-                "<pre>[\n" +
-                "  {\n" +
-                "    id: '&lt;unique_id&gt;',\n" +
-                "    data: '&lt;AAAA-MM-GG&gt;',\n" +
-                "    latitudine: &lt;float&gt;,\n" +
-                "    longitudine: &lt;float&gt;,\n" +
-                "    source: '&lt;source&gt;',\n" +
-                "    testo: '&lt;text&gt;',\n" +
-                "    utente: '&lt;user&gt;',\n" +
-                "    etichetta: '&lt;tag&gt;'\n" +
-                "  },{\n" +
-                "    id: '&lt;unique_id&gt;',;\n" +
-                "    data: '&lt;AAAA-MM-GG&gt;',\n" +
-                "    latitudine: &lt;float&gt;,\n" +
-                "    longitudine: &lt;float&gt;,\n" +
-                "    source: '&lt;source&gt;',\n" +
-                "    testo: '&lt;text&gt;',\n" +
-                "    utente: '&lt;user&gt;',\n" +
-                "    etichetta: '&lt;tag&gt;'\n" +
-                "  }\n" +
-                "]</pre>");
-    else
-        divCode.html(
-                "<pre>[\n" +
-                "  {\n" +
-                "    id: '&lt;unique_id&gt;',\n" +
-                "    data: '&lt;AAAA-MM-GG&gt;',\n" +
-                "    latitudine: &lt;float&gt;,\n" +
-                "    longitudine: &lt;float&gt;,\n" +
-                "    source: '&lt;source&gt;',\n" +
-                "    testo: '&lt;text&gt;',\n" +
-                "    utente: '&lt;user&gt;',\n" +
-                "    etichetta: '&lt;tag&gt;'\n" +
-                "  },{\n" +
-                "    id: '&lt;unique_id&gt;',;\n" +
-                "    data: '&lt;AAAA-MM-GG&gt;',\n" +
-                "    latitudine: &lt;float&gt;,\n" +
-                "    longitudine: &lt;float&gt;,\n" +
-                "    source: '&lt;source&gt;',\n" +
-                "    testo: '&lt;text&gt;',\n" +
-                "    utente: '&lt;user&gt;',\n" +
-                "    etichetta: '&lt;tag&gt;'\n" +
-                "  }\n" +
-                "]</pre>");
 
-    $(document).ready(function()
-    {
-        var content = '<%- content.projects %>'; // string
-        projectCtrl.loadData(content);
-    });
-
-//    function openFormatter(value, row) {
-//
-//        return  '<button type="button" class="btn btn-success btn-open">' +
-//                  '<span class="glyphicon glyphicon-ok" aria-hidden="true" ></span>' +
-//                '</button>';
-//    }
 
 </script>

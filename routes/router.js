@@ -233,7 +233,7 @@ module.exports = function (app) {
                     Project.addProject(dataProject,
                         function (err){
                             if ( err == null) {
-                                var type = req.body.inputType;
+                                var type = req.body.cmbType;
                                 var fileNames = app.fileNames;
                                 var Data = require("../model/Data");
 
@@ -252,12 +252,14 @@ module.exports = function (app) {
                                         arg.tab = TAB.OPENPROJECT;
                                         req.session.arg = arg;
                                         res.redirect('/project');
-                                    }
 
+                                    }
+                                    return;
                                 });
                             } else {
                                 console.log("Internal error: " + err);
                                 sendProjectError(req, res, err.message, err.status);
+                                return;
                             }
                         }
                     );
