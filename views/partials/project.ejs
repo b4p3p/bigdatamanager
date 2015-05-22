@@ -200,6 +200,11 @@
         showExample();
     });
 
+    $(document).ready(function()
+    {
+      var content = '<%- content.projects %>';
+      projectCtrl.loadData(content);
+    });
 
 
 </script>
