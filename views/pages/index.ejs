@@ -3,23 +3,64 @@
 <head lang="en">
     <meta charset="UTF-8">
 
+    <script src="/node_modules/reload/bin/reload"></script>
+
     <% include ../partials/header.ejs %>
     <% include ../partials/bootstrap.ejs %>
 
     <link href="/public/css/navbar-static-top.css" rel="stylesheet">
 
     <style>
+        .container
+        {
+            margin-left: 0;
+            margin-right: 0;
+            width: 100%;
+        }
+        .content
+        {
+            /*width: 85%;*/
+        }
         .row
         {
             width: 100%;
         }
+        .sidebar-offcanvas
+        {
+            max-width: 300px;
+        }
+        .imageheader
+        {
+            height: 20px;
+        }
+        .img-user
+        {
+            margin-left: 20px;
+        }
+        .img-project
+        {
+            margin-left: 20px;
+        }
+
+        .title
+        {
+            float: right;
+        }
+        .content-header
+        {
+            position: relative;
+            margin-top: 20px;
+        }
+
     </style>
 
 </head>
 <body>
 
 <div class="navbar navbar-default navbar-fixed-top">
+
     <div class="container">
+
         <div class="navbar-header">
 
             <button type="button" class="navbar-toggle" data-toggle="offcanvas" data-target=".sidebar-nav">
@@ -28,19 +69,25 @@
                 <span class="icon-bar"></span>
             </button>
 
-            <!--<a class="icon back" href=""><i class="fa fa-chevron-left"></i></a>-->
-            <!--<a class="icon search" href=""><i class="fa fa-search"></i></a>-->
+            <img src="/public/img/uni-ba.png" class="img-responsive imageheader" alt="Uniba" >
 
-            <!--<a class="navbar-brand " href="#">UX</a>-->
+            <img src="/public/img/icon-user.png" class="img-responsive imageheader img-user" alt="User" >
 
-            <!--<a class="icon tw" href=""><i class="fa fa-twitter"></i></a>-->
-            <!--<a class="icon fb" href=""><i class="fa fa-facebook"></i></a>-->
+            <div class="col-xs-1">
+                <h4 class="content-header"><%= userProject %></h4>
+            </div>
 
-            <img src="/public/img/uni-ba.png" class="img-responsive imageheader" alt="Uniba" height="20px">
+            <img src="/public/img/project.png" class="img-responsive imageheader img-project" alt="Project" >
+
+            <div class="col-xs-1">
+                <h4 class="content-header"><%= projectName %></h4>
+            </div>
+
 
             <h2 class="title">Big Data Manager</h2>
 
         </div>
+
     </div>
 </div>
 
@@ -55,15 +102,28 @@
                 <li><a href="/home" class="btn btn-link"><i class="fa fa-th" style="float: left"></i>Home</a></li>
                 <li><a class="btn btn-link"><i class="fa fa-users" style="float: left"></i>Profile</a></li>
                 <li><a href="/project" class="btn btn-link"><i class="fa fa-database" style="float: left"></i>Projects</a></li>
-                <li><a class="btn btn-link"><i class="fa fa-bar-chart" style="float: left"></i>Statistics</a></li>
+
+                <!--<li><a class="btn btn-link"><i class="fa fa-bar-chart" style="float: left"></i>Statistics</a></li>-->
+
+                <li><a class="btn btn-link" href="#" data-toggle="collapse" data-target="#subStat">
+                        <i class="fa fa-bar-chart" style="float: left"></i>
+                        Statistics
+                        <i class="fa fa-sort-down"></i>
+                    </a>
+                    <ul class="nav collapse" id="subStat">
+                        <li><a href="#">andrea@gmail.com</a></li>
+                        <li><a href="#">lorenzo@gmail.com</a></li>
+                        <li><a href="#">matteo@gmail.com</a></li>
+                    </ul>
+                </li>
 
                 <!--<li><a href="#"> <i class="fa fa-map-marker"></i> Map</a></li>-->
                 <!--<li><a href="#" data-toggle="collapse" data-target="#sub1"> <i class="fa fa-envelope"></i>Contacts (submenu)</a>-->
-                    <!--<ul class="nav collapse" id="sub1">-->
-                        <!--<li><a href="#">andrea@gmail.com</a></li>-->
-                        <!--<li><a href="#">lorenzo@gmail.com</a></li>-->
-                        <!--<li><a href="#">matteo@gmail.com</a></li>-->
-                    <!--</ul>-->
+                <!--<ul class="nav collapse" id="sub1">-->
+                <!--<li><a href="#">andrea@gmail.com</a></li>-->
+                <!--<li><a href="#">lorenzo@gmail.com</a></li>-->
+                <!--<li><a href="#">matteo@gmail.com</a></li>-->
+                <!--</ul>-->
                 <!--</li>-->
                 <!--<li><a href="#"> <i class="fa fa-plus"></i> More..</a></li>-->
             </ul>
@@ -73,9 +133,9 @@
         <div class="col-xs-12  col-sm-8 col-md-9 content">
 
             <% if(page == "home"){ %>
-                <% include ../partials/home.ejs %>
+            <% include ../partials/home.ejs %>
             <% }else if (page == "project") { %>
-                <% include ../partials/project.ejs %>
+            <% include ../partials/project.ejs %>
             <% } %>
 
         </div>
@@ -90,8 +150,11 @@
 
 <script>
     $(document).ready(function() {
-//        alert("anche qui");
+        $('[data-toggle=offcanvas]').click(function() {
+            $('.sidebar-offcanvas').toggleClass('active', 1000);
+        });
     });
+
 </script>
 
 </body>

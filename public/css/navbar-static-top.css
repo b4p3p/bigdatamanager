@@ -12,19 +12,19 @@ h3{font-weight: 300; font-size: 22px;margin-bottom: 40px}
 
 
 .navbar-header{float:none;text-align: center;}
-	
-	/* top bar */
+
+/* top bar */
 .navbar {text-transform: uppercase;background-color: #00001e;border: none}
 .navbar a  {color:#fff;font-weight: 300;text-decoration: none}
 .navbar-default .navbar-brand {color:#fff;font-weight: bold;margin:0;line-height: 50px;float:none; margin-left: auto; margin-right: auto; width: 60px; float: none; }
 
 .icon{margin-bottom: 8px;margin:0;padding: 15px 15px; float:right;}
 
-    .back{float:left;background-color: #feaf8d;}
-    .search{background: #fb7b74; float:left;}
+.back{float:left;background-color: #feaf8d;}
+.search{background: #fb7b74; float:left;}
 
-    .tw{background: #3fc6f3}
-    .fb{background: #0d9be5}
+.tw{background: #3fc6f3}
+.fb{background: #0d9be5}
 
 
 /* toggle button */
@@ -37,12 +37,12 @@ h3{font-weight: 300; font-size: 22px;margin-bottom: 40px}
 
 /* Position where the element is fixed */
 .affix {
-    top: 50px;
-    width: 200px;
+	top: 50px;
+	width: 200px;
 }
 #affix {
-    width: 200px;
-    margin-top: 10px;  /* edit */
+	width: 200px;
+	margin-top: 10px;  /* edit */
 }
 
 .nav li a {border-bottom: 1px solid #ddd; color:#7b7a7e;}
@@ -56,27 +56,38 @@ h3{font-weight: 300; font-size: 22px;margin-bottom: 40px}
 
 .content
 {
-    margin-top: 15px;
-    margin-bottom: 15px;
+	margin-top: 25px;
+	margin-bottom: 15px;
 }
 
 /* collapsed sidebar styles */
 @media screen and (max-width: 767px) {
 
+	.title
+	{
+		visibility: hidden;
+	}
+
+	.content
+	{
+		margin-top: 30px;
+		margin-bottom: 15px;
+	}
+
 	.affix {position: static;}
 
 	#affix
-    {
-        margin-top: 25px;  /* edit */
-        width: 100%;
-    }
-  
+	{
+		margin-top: 25px;  /* edit */
+		width: 70%;
+	}
+
 	.sidebar-offcanvas{-webkit-transition: all 0.3s ease-in-out;
 		-moz-transition: all 0.3s ease-in-out;
 		-ms-transition: all 0.3s ease-in-out;
 		-o-transition: all 0.3s ease-in-out;
 		transition: all 0.3s ease-in-out;
-		
+
 		width:70%;
 		background-color: #fc575e;
 		z-index: 51;
@@ -85,21 +96,18 @@ h3{font-weight: 300; font-size: 22px;margin-bottom: 40px}
 		top:50px;
 		left: -70%;
 	}
-	
+
 	.sidebar-offcanvas ul li{margin:0}
 	.sidebar-offcanvas ul li a{color:#fff;padding: 15px 20px;margin:0;font-size: 15px;border-bottom: 1px solid #d6474d}
 	.sidebar-offcanvas ul li a:hover{background:#54303a;border:none; border-radius:0}
-	
+
 	.nav{margin-top: 0px;}
-	.nav > li > a:hover, 
+	.nav > li > a:hover,
 	.nav > li > a:focus{background-color: #ff625f}
-	
+
+	.navbar-header{height: 18px;}
+
 	.active {left: 0;}
-    
- 
+
+
 }
-
-
-
-
-

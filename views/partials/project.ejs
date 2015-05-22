@@ -1,12 +1,11 @@
 <!-- prendo le variabili -->
 <style>
     .btn-open{
-        position: relative;
-        left: 30%;
+        /*position: relative;*/
+        /*left: 30%;*/
         /*right: 10px;*/
     }
 </style>
-
 
 <script src="/public/js/project.js"></script>
 
@@ -50,8 +49,8 @@
                     <th data-field="creationDate">Creation Date</th>
                     <th data-field="lastEdit">Last Edit</th>
                     <th data-field="size">Size</th>
-                    <th data-field="Open project"
-                        data-formatter="openFormatter">Open</th>
+                    <th data-field="Open project" data-width="55"
+                        data-formatter="projectCtrl.openColumnFormatter">Open</th>
                 </tr>
                 </thead>
             </table>
@@ -202,14 +201,14 @@
     $(document).ready(function()
     {
         var content = '<%- content.projects %>'; // string
-        projectControl.loadData(content);
+        projectCtrl.loadData(content);
     });
 
-    function openFormatter(value, row) {
-
-        return  '<button type="button" class="btn btn-success btn-open">' +
-                  '<span class="glyphicon glyphicon-ok" aria-hidden="true" ></span>' +
-                '</button>';
-    }
+//    function openFormatter(value, row) {
+//
+//        return  '<button type="button" class="btn btn-success btn-open">' +
+//                  '<span class="glyphicon glyphicon-ok" aria-hidden="true" ></span>' +
+//                '</button>';
+//    }
 
 </script>

@@ -1,12 +1,10 @@
-var express = require('express');
-var path = require('path');
-//var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var session = require('express-session');
-var multer  = require('multer');
-
+var express = require('express'),
+    path = require('path'),
+    logger = require('morgan'),
+    cookieParser = require('cookie-parser'),
+    bodyParser = require('body-parser'),
+    session = require('client-sessions'),
+    multer  = require('multer');
 
 var app = express();
 
@@ -23,7 +21,17 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 }));
 app.use(cookieParser());
 
-app.use(session({secret: 'kjhkjsdhjdljaslkjwi___4587'}));
+//app.use(session({secret: 'kjhkjsdhjdljaslkjwi___4587'}));
+
+app.use( session({
+    cookieName: 'session',
+    secret: 'eg[isfd-8yF9-7w2315df{}+Ijsli;;to8',
+    duration: 30 * 60 * 1000,
+    activeDuration: 5 * 60 * 1000,
+    httpOnly: true,
+    secure: true,
+    ephemeral: true
+}));
 
 //DEBUG
 app.use(express.static(__dirname));

@@ -7,6 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('bigdatamanager:server');
 var http = require('http');
+var reload = require('reload');
 
 /**
  * Get port from environment and store in Express.
@@ -20,6 +21,8 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+
+reload(server, app); //Caricamento automatico
 
 /**
  * Listen on provided port, on all network interfaces.
