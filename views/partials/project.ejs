@@ -1,46 +1,57 @@
 <!-- prendo le variabili -->
+<style>
+    .btn-open{
+        position: relative;
+        left: 30%;
+        /*right: 10px;*/
+    }
+</style>
+
 
 <script src="/public/js/project.js"></script>
 
 <ul class="nav nav-tabs">
 
     <% if( tab == "openproject" ) { %>
-        <li class="active">
-    <%} else {%>
-        <li>
-    <% } %>
+    <li class="active">
+        <%} else {%>
+    <li>
+        <% } %>
 
-    <a href="#open" data-toggle="tab">Open project</a></li>
+        <a href="#open" data-toggle="tab">Open project</a></li>
 
     <% if( tab == "newproject" ) {%>
-        <li class="active">
-    <%} else {%>
-        <li>
-    <% } %>
+    <li class="active">
+        <%} else {%>
+    <li>
+        <% } %>
 
-    <a href="#new" data-toggle="tab">New project</a></li>
+        <a href="#new" data-toggle="tab">New project</a></li>
 </ul>
 
 <!-- Tab panes -->
 <div class="tab-content">
 
     <div
-        <% if( tab == "openproject" ) {%>
+            <% if( tab == "openproject" ) {%>
             class="tab-pane active"
-        <%} else {%>
+            <%} else {%>
             class="tab-pane"
-        <% } %>
+            <% } %>
 
-        id="open" >
+            id="open" >
 
         <div class="row" style="margin-top: 10px">
-            <table data-toggle="table" >
+            <table data-toggle="table" id="tableProjects" data-pagination="true" data-search="true">
                 <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Stars</th>
-                    <th>Forks</th>
-                    <th>Description</th>
+                    <th data-field="userProject">Username</th>
+                    <th data-field="projectName">Project Name</th>
+                    <th data-field="creationDate">Creation Date</th>
+                    <th data-field="lastEdit">Last Edit</th>
+                    <th data-field="size">Size</th>
+                    <th data-field="Open project"
+                        data-formatter="openFormatter">Open</th>
                 </tr>
                 </thead>
             </table>
@@ -106,7 +117,7 @@
                            data-show-upload="false"
                            data-show-caption="true"
                            data-show-preview="false"
-                            required>
+                           required>
                 </div>
             </div>
 
@@ -190,9 +201,15 @@
 
     $(document).ready(function()
     {
-        alert("sono qui");
-        var content = '<%- content.projects %>';
-        addData(content);
+        var content = '<%- content.projects %>'; // string
+        projectControl.loadData(content);
     });
+
+    function openFormatter(value, row) {
+
+        return  '<button type="button" class="btn btn-success btn-open">' +
+                  '<span class="glyphicon glyphicon-ok" aria-hidden="true" ></span>' +
+                '</button>';
+    }
 
 </script>

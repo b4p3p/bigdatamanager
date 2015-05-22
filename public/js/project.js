@@ -1,5 +1,12 @@
-function addData(content)
-{
-    var json = JSON.parse(content);
-    alert("CALL: addData\n" + JSON.stringify(json[0]));
-}
+var projectControl = new function() {
+
+    this.loadData = function(content)
+    {
+        var json = JSON.parse(content);
+        var $table = $('#tableProjects');
+
+        $table.bootstrapTable('load', json );
+
+    }
+
+};

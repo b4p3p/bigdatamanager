@@ -36,7 +36,7 @@ Data.prototype.data = {};    //json
  * @param {IstanceOf Data} data The istance of Data to save.
  * @param {callback} callback callback with err result.
  */
-Data.addData = function(data, callback)
+Data.loadData = function(data, callback)
 {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var Model = connection.model(model_name, DATA_SCHEMA);
