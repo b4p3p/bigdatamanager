@@ -2,7 +2,8 @@
 
 * crea la chiave unica
 ```
-db.datas.createIndex( { projectNames: 1, userProject: 1 }, { unique: true } )
+db.projects.createIndex( { projectNames: 1, userProject: 1 }, { unique: true } )
+db.datas.createIndex( { projectNames: 1, id: 1 }, { unique: true } )
 ```
 
 * creazione di progetti di test

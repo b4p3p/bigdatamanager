@@ -75,7 +75,7 @@
               enctype="multipart/form-data">
 
             <div class="form-group">
-                <label for="nameproject" class="col-sm-2 control-label">Project Name:</label>
+                <label for="nameproject" class="col-sm-2 control-label">Project name:</label>
 
                 <div class="col-sm-10">
                     <input type="text" class="form-control" id="nameproject" placeholder="Project Name"
@@ -86,7 +86,7 @@
 
             <div class="form-group">
                 <label for="inputType" class="col-sm-2 control-label"
-                       style="margin-right: 15px">Type Data:</label>
+                       style="margin-right: 15px">Type data:</label>
 
                 <div>
                     <select class="selectpicker" name="cmbType" id="cmbType">
@@ -98,7 +98,7 @@
 
             <div class="form-group">
                 <label class="col-sm-2 control-label"
-                       style="margin-right: 15px">Example Data:</label>
+                       style="margin-right: 15px">Example data:</label>
 
                 <div id="examplecode"
                      class="example-code">
@@ -153,23 +153,23 @@
         var selected = cmbType.find("option:selected").val();
         if (selected == "csv")
             divCode.html(
-                    "<pre>id,date,latitude,longitude,source,text,user,tag\n"+
+                    "<pre>id,[date],[latitude],[longitude],[source],text,[user],[tag]\n"+
                     "'&lt;unique_id&gt;'," +
-                    "'&lt;AAAA-MM-GG&gt;'," +
-                    "&lt;float&gt;," +
-                    "&lt;float&gt;," +
-                    "'&lt;source&gt;'," +
+                    "['&lt;AAAA-MM-GG&gt;']," +
+                    "[&lt;float&gt;]," +
+                    "[&lt;float&gt;]," +
+                    "['&lt;source&gt;]'," +
                     "'&lt;text&gt;'," +
-                    "'&lt;user&gt;'," +
-                    "'&lt;tag&gt;'\n" +
+                    "['&lt;user&gt;]'," +
+                    "['&lt;tag&gt;]'\n" +
                     "'&lt;unique_id&gt;'," +
-                    "'&lt;AAAA-MM-GG&gt;'," +
-                    "&lt;float&gt;," +
-                    "&lt;float&gt;," +
-                    "'&lt;source&gt;'," +
+                    "['&lt;AAAA-MM-GG&gt;']," +
+                    "[&lt;float&gt;]," +
+                    "[&lt;float&gt;]," +
+                    "['&lt;source&gt;]'," +
                     "'&lt;text&gt;'," +
-                    "'&lt;user&gt;'," +
-                    "'&lt;tag&gt;'\n" +
+                    "['&lt;user&gt;]'," +
+                    "['&lt;tag&gt;]'\n" +
                     "...\n"+
                     "</pre>");
         else
@@ -177,22 +177,22 @@
                     "<pre>[\n"+
                     "  {\n" +
                     "    id: '&lt;unique_id&gt;',\n" +
-                    "    date: '&lt;AAAA-MM-GG&gt;',\n"+
-                    "    latitude: &lt;float&gt;,\n"+
-                    "    longitude: &lt;float&gt;,\n"+
-                    "    source: '&lt;source&gt;',\n"+
+                    "    [date: '&lt;AAAA-MM-GG&gt;'],\n"+
+                    "    [latitude: &lt;float&gt;],\n"+
+                    "    [longitude: &lt;float&gt;],\n"+
+                    "    [source: '&lt;source&gt;]',\n"+
                     "    text: '&lt;text&gt;',\n"+
-                    "    user: '&lt;user&gt;',\n"+
-                    "    tag: '&lt;tag&gt;'\n"+
+                    "    [user: '&lt;user&gt;]',\n"+
+                    "    [tag: '&lt;tag&gt;]'\n"+
                     "  },{\n"+
                     "    id: '&lt;unique_id&gt;',\n" +
-                    "    date: '&lt;AAAA-MM-GG&gt;',\n"+
-                    "    latitude: &lt;float&gt;,\n"+
-                    "    longitude: &lt;float&gt;,\n"+
-                    "    source: '&lt;source&gt;',\n"+
+                    "    [date: '&lt;AAAA-MM-GG&gt;'],\n"+
+                    "    [latitude: &lt;float&gt;],\n"+
+                    "    [longitude: &lt;float&gt;],\n"+
+                    "    [source: '&lt;source&gt;]',\n"+
                     "    text: '&lt;text&gt;',\n"+
-                    "    user: '&lt;user&gt;',\n"+
-                    "    tag: '&lt;tag&gt;'\n"+
+                    "    [user: '&lt;user&gt;]',\n"+
+                    "    [tag: '&lt;tag&gt;]'\n"+
                     "  },\n"+
                     "  ...\n"+
                     "]</pre>");

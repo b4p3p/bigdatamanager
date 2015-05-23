@@ -271,7 +271,7 @@ module.exports = function (app) {
                             }
                         }
                     );
-                } else  {
+                } else {
                     sendProjectError(req, res, "Project already exists", 1);
                 }
             }

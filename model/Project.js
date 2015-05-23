@@ -8,8 +8,8 @@ var mongoose = require('mongoose');
 var connection = mongoose.createConnection('mongodb://localhost/oim');
 
 Project.PROJECT_SCHEMA = new mongoose.Schema({
-    projectName: String,
-    userProject: String,
+    projectName: { type : String, required : true },
+    userProject: { type : String, required : true },
     dateCreation: {type: Date, default: Date.now()},
     dateLastUpdate: {type: Date, default: Date.now()}
 });

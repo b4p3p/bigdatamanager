@@ -16,13 +16,13 @@ var model_name = "data";
 var mongoose = require('mongoose');
 
 const DATA_SCHEMA = new mongoose.Schema({
-    projectName: String,
-    id: Number,
+    projectName: String, //TODO inserire projectName come key
+    id: { type : Number, required : true },
     date: Date,
     latitude: Number,
     longitude: Number,
     source: String,
-    text: String,
+    text: { type : String, required : true },
     user: String,
     tag: String
 });
@@ -84,13 +84,15 @@ Data.addDataArray = function(data, callback)
             {
                 connection.close();
                 error = true;
-                callback(err.code, err ); //error
+                callback( 200, err.errors.text.message ); //error
+                return
             }
 
             if (cont == data.length && !error)
             {
                 connection.close();
                 callback(0, "" );       //OK
+                //return
             }
         });
     }
@@ -100,6 +102,7 @@ Data.importFromFile = function(type, fileNames, callback)
 {
     var fs = require('fs');
     var util = require('util');
+    var error = false;
     for(var i = 0; i < fileNames.length; i++) {
         var path = fileNames[i];
 
@@ -108,20 +111,54 @@ Data.importFromFile = function(type, fileNames, callback)
         fs.readFile(path,
             function (err, data) {
                 if (err){
-                    callback(err);
+                    callback(getSampleError( 100, "Read file error" ));
+                    error = true;
                     return;
                 }
                 else {
                     if (type == "csv")
-                        convertData(callback, data);
+                        convertData(checkLast, data);
                     else
-                        writeJson(callback, data);
+                        writeJson(checkLast, data);
 
                 }
             }
         );
+        function checkLast(arg_ERROR)
+        {
+            if(error) return;
+
+            if( arg_ERROR.status > 0)
+            {
+                error = true;
+                callback(arg_ERROR);
+                return;
+            }
+
+            if( i == fileNames.length)
+            {
+                callback(arg_ERROR);
+                return;
+            }
+        }
     }
 };
+
+function getSampleError( status, message )
+{
+    var arg = ERROR;
+    if( status == null || message == null )
+    {
+        arg.status = 0;
+        arg.message = "";
+    }
+    else
+    {
+        arg.status = status;
+        arg.message = message;
+    }
+    return arg;
+}
 
 function writeJson(callback, jsonData)
 {
@@ -140,12 +177,9 @@ function writeJson(callback, jsonData)
     try {
         objJson = jsonlint.parse( jsonData.toString() );
     }
-    catch (e) {
-        var test = e.toString();
-        var arg = ERROR;
-        arg.status = 200;
-        arg.message = e;
-        callback(arg);
+    catch (e)
+    {
+        callback(getSampleError( 200, e.message ));
         return;
     }
     for(var i = 0; i < objJson.length; i ++) {
@@ -182,11 +216,11 @@ function convertData(callback, csvData)
             },
             function (err, data)
             {
-                if(err) return callback(err);
+                if(err) return callback(getSampleError( 200, err ));
 
                 csv.stringify(data, function (err, data) {
 
-                    if ( err ) return callback(err);
+                    if ( err ) return callback(getSampleError( 200, err ));
 
                     _convertCsvToJson(callback, data);
                 });
@@ -199,7 +233,6 @@ function _convertCsvToJson(callback, data)
     //Converter Class
     var Converter = require("csvtojson").core.Converter;
     var csvConverter = new Converter();
-   //var jsonObject = null;
 
     csvConverter.on("end_parsed", function(jsonObj) {
         saveJson(callback, jsonObj);
@@ -215,11 +248,6 @@ function _convertCsvToJson(callback, data)
 function saveJson(callback, jsonObj)
 {
     var Data = require("../model/Data");
-    var newData = new Data(jsonObj);
-
-    //console.log(JSON.stringify(newData));
-    //console.log(JSON.stringify(jsonObj));
-
     Data.addDataArray( jsonObj, function(result, message){
         saveCallback(callback, result, message)
     });
@@ -237,8 +265,8 @@ function saveCallback(callback, result, message)
     }
     else
     {
-        arg.status = message.code;
-        arg.message = message.message;
+        arg.status = result;
+        arg.message = message;
     }
     callback(arg);
 }
