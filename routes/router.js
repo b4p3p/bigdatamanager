@@ -194,8 +194,8 @@ module.exports = function (app) {
             //arg.error = err;
         }
 
-        ////TO DO debug
-        //if (!arg.userProject) arg.userProject= 'oim';
+        //TODO debug
+        if (!arg.userProject) arg.userProject= 'oim';
 
         Project.getProjects(arg.userProject, function(data, err)
         {
@@ -215,67 +215,91 @@ module.exports = function (app) {
      */
     app.post('/newproject', function (req, res) {
 
-        if(app.uploaddonedone == false) return;
+        try {
+            if (app.uploaddonedone == false) return;
 
-        console.log("PAGE /newproject");
+            console.log("PAGE /newproject");
 
-        var Project = require("../model/Project");
+            var Project = require("../model/Project");
 
-        //response = res;
-        //request = req;
+            //response = res;
+            //request = req;
 
-        var dataProject = {
-            projectName : req.body.projectName,
-            userProject : req.session.userProject
-        };
+            var dataProject = {
+                projectName: req.body.projectName,
+                userProject: req.session.userProject
+            };
 
-        dataProject.userProject = 'oim';   //TODO togliere questo
+            dataProject.userProject = 'oim';   //TODO togliere questo
 
-        // Cerco prima se il progetto esiste
-        Project.getProject( dataProject.projectName,
-            function(doc)
-            {
-                // restituisco errore se esiste
-                if ( doc == null )  {
-                    //Creo un nuovo progetto
-                    Project.addProject(dataProject,
-                        function (err){
-                            if ( err == null) {
-                                var type = req.body.cmbType;
-                                var fileNames = app.fileNames;
-                                var Data = require("../model/Data");
+            // Cerco prima se il progetto esiste
+            Project.getProject(dataProject.projectName,
+                function (doc) {
+                    // restituisco errore se esiste
+                    if (doc == null) {
+                        //Creo un nuovo progetto
+                        Project.addProject(dataProject,
 
-                                Data.importFromFile(type, fileNames, function(err) {
+                            function (err) {
+                                if (err == null) {
+                                    var type = req.body.cmbType;
+                                    var fileNames = app.fileNames;
+                                    app.fileNames = [];
+                                    var Data = require("../model/Data");
 
-                                    if (err.status)
-                                    {
-                                        sendProjectError(req, res, err.message, err.status);
-                                    }
-                                    else
-                                    {
-                                        var arg = getArgIndex();
-                                        arg.userProject = req.session.userProject;
-                                        arg.projectName = req.session.projectName;
-                                        arg.page = PAGE.PROJECT;
-                                        arg.tab = TAB.OPENPROJECT;
-                                        req.session.arg = arg;
-                                        res.redirect('/project');
+                                    Data.importFromFile(type, fileNames, dataProject.projectName,
 
-                                    }
+                                        function (err)
+
+                                        {
+
+                                            if (err.status > 0) {
+                                                console.log("CALL: importFromFile ERROR");
+
+                                                sendProjectError(req, res, err.message, err.status);
+                                                return;
+                                            }
+                                            else {
+                                                console.log("CALL: importFromFile OK");
+
+                                                try {
+                                                    var arg = getArgIndex();
+
+                                                    req.session.projectName = dataProject.projectName;
+                                                    arg.userProject = req.session.userProject;
+                                                    arg.projectName = req.session.projectName;
+                                                    arg.page = PAGE.PROJECT;
+                                                    arg.tab = TAB.OPENPROJECT;
+                                                    req.session.arg = arg;
+
+                                                    res.redirect('/project');
+
+                                                }
+                                                catch (e) {
+                                                    console.log("ERR: importFromFile!!!!!");
+                                                    console.log(e);
+
+                                                    res.redirect('/project');
+                                                }
+
+                                            }
+                                        });
+                                } else {
+                                    console.log("Internal error: " + err);
+                                    sendProjectError(req, res, err.message, err.status);
                                     return;
-                                });
-                            } else {
-                                console.log("Internal error: " + err);
-                                sendProjectError(req, res, err.message, err.status);
-                                return;
+                                }
                             }
-                        }
-                    );
-                } else {
-                    sendProjectError(req, res, "Project already exists", 1);
+                        );
+                    } else {
+                        sendProjectError(req, res, "Project already exists", 1);
+                    }
                 }
-            }
-        );
+            );
+        } catch (e) {
+            console.log("ERROR!!!! newprojecterror");
+            console.log(e);
+        }
     });
 
     app.post('/setproject', function (req, res) {
@@ -345,6 +369,7 @@ module.exports = function (app) {
 
     function sendProjectError(request, response, message, status)
     {
+        console.log("CALL: sendProjectError");
         //restituisco errore
         var err = extend({}, ERROR);
         err.message = message;
