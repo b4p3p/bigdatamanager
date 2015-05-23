@@ -3,7 +3,11 @@ var extend = require('util')._extend;
 const PAGE = {
     HOME: "home",
     PROJECT: "project",
-    STAT: "statistics"
+    STAT_MAP: "stat-map",
+    STAT_REGIONS_BAR: "stat-regions-bar",
+    STAT_REGIONS_RADAR: "stat-regions-radar",
+    STAT_TIMELINE: "stat-timeline",
+    STAT_TAG: "stat-tag"
 };
 
 const TAB = {
@@ -22,11 +26,15 @@ const ARG_INDEX = {
     page: '',
     tab: '',
     error: ERROR,
-    content: null
+    content: null       //usata per passare il contenuto alla pagina partials (es: ARG_PROJECTS )
 };
 
 const ARG_PROJECT = {
     projects: ''
+};
+
+const ARG_STAT = {
+    content: ''
 };
 
 function setArgIndex(userProject, projectName, page, error)
@@ -296,6 +304,45 @@ module.exports = function (app) {
 
     });
 
+
+    /***
+     *      STATISTICS
+     */
+    app.get('/showmap', function (req, res)
+    {
+        var statController = require("../controller/StatController");
+        var arg = getArgIndex(req, PAGE.STAT_MAP);
+        var argStat = getArgStat();
+        argStat.content = statController.getMapData();
+        arg.content = argStat;
+
+        res.render('../views/pages/index.ejs', arg );
+    });
+
+    app.get('/showregionsbar', function (req, res)
+    {
+        var arg = getArgIndex(req, PAGE.STAT_REGIONS_BAR);
+        res.render('../views/pages/index.ejs', arg );
+    });
+
+    app.get('/showregionsradar', function (req, res)
+    {
+        var arg = getArgIndex(req, PAGE.STAT_REGIONS_RADAR);
+        res.render('../views/pages/index.ejs', arg );
+    });
+
+    app.get('/showtimeline', function (req, res)
+    {
+        var arg = getArgIndex(req,PAGE.STAT_TIMELINE);
+        res.render('../views/pages/index.ejs', arg );
+    });
+
+    app.get('/showtag', function (req, res)
+    {
+        var arg = getArgIndex(req, PAGE.STAT_TAG);
+        res.render('../views/pages/index.ejs', arg );
+    });
+
     function sendProjectError(request, response, message, status)
     {
         //restituisco errore
@@ -312,14 +359,36 @@ module.exports = function (app) {
         response.redirect("/project");
     }
 
-    function getArgIndex()
+
+    /**
+     *  Crea una copia della variabile ARG_INDEX
+     */
+    function getArgIndex(req, page)
     {
-        return extend({}, ARG_INDEX);
+        var arg = extend({}, ARG_INDEX);
+
+        if ( req != null)
+        {
+            arg.userProject = req.session.userProject;
+            arg.projectName = req.session.projectName;
+        }
+
+        if ( page != null)
+        {
+            arg.page = page;
+        }
+
+        return arg;
     }
 
     function getArgProject()
     {
         return extend({}, ARG_PROJECT);
+    }
+
+    function getArgStat()
+    {
+        return extend({}, ARG_STAT);
     }
 
 };

@@ -8,7 +8,7 @@
   "dependencies": {
     "bootstrap-validator" : "*" ,
     "bootstrap-select" : ">1.7.0" ,
-    "mongo" : "0.1.0" ,
+    "mongodb" : ">=2.0.33" ,
     "mongoose" : "*" ,
     "ejs" : "~2",
     "bootstrap": "~3" ,
@@ -26,7 +26,7 @@
     "sync": "^0.2.5",
     "csvtojson" : "^0.3.21",
     "csv" : "^0.4.2",
-    "reload" : ">=0.1.0"
+    "multer": ">=0.1.8"
   }
 }
 

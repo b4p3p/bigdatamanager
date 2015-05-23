@@ -1,9 +1,13 @@
 <!-- prendo le variabili -->
 <style>
     .btn-open{
-        /*position: relative;*/
-        /*left: 30%;*/
-        /*right: 10px;*/
+        height: 20px;
+        border-radius: 20px;
+    }
+    .btn-open > span
+    {
+        position: relative;
+        top: -3px;
     }
 </style>
 
@@ -49,8 +53,8 @@
                     <th data-field="creationDate">Creation Date</th>
                     <th data-field="lastEdit">Last Edit</th>
                     <th data-field="size">Size</th>
-                    <th data-field="Open project"
-                        data-formatter="openFormatter">Open</th>
+                    <th data-field="Open project" data-width="60"
+                        data-formatter="projectCtrl.openColumnFormatter">Open</th>
                 </tr>
                 </thead>
             </table>

@@ -3,8 +3,6 @@
 <head lang="en">
     <meta charset="UTF-8">
 
-    <script src="/node_modules/reload/bin/reload"></script>
-
     <% include ../partials/header.ejs %>
     <% include ../partials/bootstrap.ejs %>
 
@@ -109,26 +107,26 @@
 
                 <!--<li><a class="btn btn-link"><i class="fa fa-bar-chart" style="float: left"></i>Statistics</a></li>-->
 
-                <li><a class="btn btn-link" href="#" data-toggle="collapse" data-target="#subStat">
+                <li><a class="btn btn-link" data-toggle="collapse" data-target="#subStat">
                         <i class="fa fa-bar-chart" style="float: left"></i>
                         Statistics
                         <i class="fa fa-sort-down"></i>
                     </a>
                     <ul class="nav collapse" id="subStat">
-                        <li><a href="#">
+                        <li><a href="/showmap">
                                 <img src="/public/img/icon-osm.png" class="subMenu-ico"/>
                                 Show maps
                             </a></li>
-                        <li><a href="#">
+                        <li><a href="/showregionsbar">
                                 <img src="/public/img/icon-bar.png" class="subMenu-ico"/>
                                 Show regions</a></li>
-                        <li><a href="#">
+                        <li><a href="/showregionsradar">
                                 <img src="/public/img/icon-radar.png" class="subMenu-ico"/>
                                 Show regions</a></li>
-                        <li><a href="#">
+                        <li><a href="/showtimeline">
                                 <img src="/public/img/icon-line.png" class="subMenu-ico"/>
                                 Time line</a></li>
-                        <li><a href="#">
+                        <li><a href="/showtag">
                                 <img src="/public/img/icon-cloud.png" class="subMenu-ico"/>
                                 Show tags</a></li>
                     </ul>
@@ -150,9 +148,19 @@
         <div class="col-xs-12  col-sm-8 col-md-9 content">
 
             <% if(page == "home"){ %>
-            <% include ../partials/home.ejs %>
+                <% include ../partials/home.ejs %>
             <% }else if (page == "project") { %>
-            <% include ../partials/project.ejs %>
+                <% include ../partials/project.ejs %>
+            <% }else if (page == "stat-map") { %>
+                <% include ../partials/stat-map.ejs %>
+            <% }else if (page == "stat-regions-bar") { %>
+                <% include ../partials/stat-regionsbar.ejs %>
+            <% }else if (page == "stat-regions-radar") { %>
+                <% include ../partials/stat-regionsradar.ejs %>
+            <% }else if (page == "stat-timeline") { %>
+                <% include ../partials/stat-timeline.ejs %>
+            <% }else if (page == "stat-tag") { %>
+                <% include ../partials/stat-tags.ejs %>
             <% } %>
 
         </div>
