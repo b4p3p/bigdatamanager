@@ -89,6 +89,46 @@ NewprojectCtrl.add = function(fileNames, dataProject, callback )
                 }
             );
 
+        },
+        // modifico il progetto creato aggiungendo la dimensione
+        function(next, ris) {
+
+            var MongoClient = require('mongodb').MongoClient;
+            var url = 'mongodb://localhost:27017/oim';
+
+            MongoClient.connect(url, function(err, db) {
+
+                if ( err )
+                {
+                    next(err);
+
+                } else {
+
+                    db.collection('datas').count({projectName:dataProject.projectName},
+                        function(err, cont) {
+                            if ( err ) {
+                                db.close();
+                                next(err);
+
+                            }
+                            else {
+                                db.collection('projects').update(
+                                    {projectName:dataProject.projectName},
+                                    {$set: {size:cont}}, function(err){
+
+                                    if ( err )  {
+                                        next(err);
+                                    }
+                                    else {
+                                        next(null);
+                                    }
+                                    db.close();
+                                });
+                            }
+                        }
+                    );
+                }
+            });
         }
     ],
 

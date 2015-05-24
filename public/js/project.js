@@ -28,10 +28,34 @@ var projectCtrl = new function() {
 
     };
 
+    Number.prototype.padLeft = function(base,chr){
+        var  len = (String(base || 10).length - String(this).length)+1;
+        return len > 0? new Array(len).join(chr || '0')+this : this;
+    };
+
+    Date.prototype.toStringDate = function()
+    {
+       var dformat = [
+                (this.getMonth() + 1).padLeft(),
+                 this.getDate().padLeft(),
+                 this.getFullYear()
+                ].join('/') + ' ' +
+                [
+                    this.getHours().padLeft(),
+                    this.getMinutes().padLeft(),
+                    this.getSeconds().padLeft()
+                ].join(':');
+        return dformat;
+    };
+
     this.dateCreationFormatter = function (value, row) {
+        var d = new Date(value);
+        return d.toStringDate();
+    };
 
-
-
+    this.dateLastUpdateFormatter = function (value, row) {
+        var d = new Date(value);
+        return d.toStringDate();
     };
 
     this.openProject_Click = function (projectName) {

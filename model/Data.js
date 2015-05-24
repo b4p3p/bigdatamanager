@@ -91,15 +91,14 @@ Data.importFromFile = function(type, fileNames, projectName, cb_ris)
                         cb_wf(err);
 
                     }else{
-                        cb_wf(null);
+                        cb_wf(null, jsonData.length);
                     }
 
                 });
-            }
-            ],
+            } ],
 
             // Funzione di errore di waterfall
-            function (err)
+            function (err, ris)
             {
                 if (err)
                 {
@@ -113,26 +112,25 @@ Data.importFromFile = function(type, fileNames, projectName, cb_ris)
                 }
             }
         );
-    //Funzione di errore each
     },
 
-        function(err) {
-            console.log("### END each ### ");
+    //Funzione di errore each
+    function(err) {
+        console.log("### END each ### ");
 
-            if (err)
-            {
-                console.log("    Status: ERROR ### ");
-                console.log("    Error : " + err);
-            }
-            else
-            {
-                console.log("    Status: OK");
-                console.log("###############");
-            }
-            cb_ris(err);
-
+        if (err)
+        {
+            console.log("    Status: ERROR ### ");
+            console.log("    Error : " + err);
         }
-    );
+        else
+        {
+            console.log("    Status: OK");
+            console.log("###############");
+        }
+        cb_ris(err);
+
+    });
 
 };
 
