@@ -1,1 +1,29 @@
-regionsbar
+<div id="RegionsBarContainer" class="graphcontainer"
+     style="width: 100%;display: block;  margin-top: 2%">
+
+    <div class="spinner" id="RegionsBarSpinner" style="text-align: center">
+        <img src="public/img/ajax-loader.gif" alt="Loading" class="spinnerImage"/>
+        <p>Loading regions bar graph...</p>
+    </div>
+
+    <div class="content hidden">
+
+        <form class="form-horizontal" style="margin-left: 30%; width: 100%;">
+            <div class="control-group">
+                <label class="control-label" for="regionsBar_visualizationMode"
+                       style="float: left;margin-right: 5px">Visualization mode:</label>
+                <div class="controls">
+                    <select class="selectpicker"
+                            id="regionsBar_visualizationMode">
+                        <option value=0 >Tweet Number</option>
+                        <option value=1 >Tweet Density</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+
+        <div id="RegionsBar" style="margin-left:20%;margin-right:20%;"></div>
+
+    </div>
+
+</div>

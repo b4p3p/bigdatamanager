@@ -111,6 +111,7 @@
 
                 <li><a href="/home" class="btn btn-link"><i class="fa fa-th" style="float: left"></i>Home</a></li>
                 <li><a class="btn btn-link"><i class="fa fa-users" style="float: left"></i>Profile</a></li>
+                <li><a href="/database" class="btn btn-link"><i class="fa fa-cogs" style="float: left"></i>Database</a></li>
                 <li><a href="/project" class="btn btn-link"><i class="fa fa-database" style="float: left"></i>Projects</a></li>
 
                 <!--<li><a class="btn btn-link"><i class="fa fa-bar-chart" style="float: left"></i>Statistics</a></li>-->
@@ -157,6 +158,8 @@
 
             <% if(page == "home"){ %>
                 <% include ../partials/home.ejs %>
+            <% }else if (page == "database") { %>
+                <% include ../partials/database.ejs %>
             <% }else if (page == "project") { %>
                 <% include ../partials/project.ejs %>
             <% }else if (page == "stat-map") { %>

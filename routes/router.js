@@ -3,6 +3,7 @@ var extend = require('util')._extend;
 const PAGE = {
     HOME: "home",
     PROJECT: "project",
+    DATABASE: "database",
     STAT_MAP: "stat-map",
     STAT_REGIONS_BAR: "stat-regions-bar",
     STAT_REGIONS_RADAR: "stat-regions-radar",
@@ -16,7 +17,7 @@ const TAB = {
 };
 
 const ERROR = {
-    status: 0,
+    status: null,
     message: ''
 };
 
@@ -168,6 +169,50 @@ module.exports = function (app) {
 
         res.render('../views/pages/index.ejs', arg );
 
+    });
+
+    /* DATABASE - PAGES */
+
+    app.get('/database', function (req, res) {
+
+        var arg = getArgIndex();
+
+        if (req.session.arg)                    // uso  i paramenti presenti nella variabile di sessione
+        {
+            arg = req.session.arg;
+            req.session.arg = null;
+        }
+        else                                    // mi costruisco la variabile usando le variabili di sessione
+        {
+            arg = getArgIndex();
+            var sess = req.session;
+            arg.userProject = req.session.userProject;
+            arg.projectName = req.session.projectName;
+            arg.page = PAGE.DATABASE;
+        }
+        res.render('../views/pages/index.ejs', arg );
+
+    });
+
+    app.post('/database', function (req, res) {
+        // Controlla che tutti i file siano stati upload-ati
+        if (app.isUploadDone() == false) return;
+
+        // reset variable upload
+        var fileNames = app.fileNames;
+        app.resetVariableUpload();
+
+        Nation = require('../model/Nation');
+
+        Nation.importFromFile(fileNames,
+            function (err)
+            {
+                if ( err == null )
+                    sendDatabaseError(req, res, "Loading successfully performed", 0);
+                else
+                    sendDatabaseError(req, res, err.message, err.status);
+            }
+        );
     });
 
     app.get('/project', function (req, res) {
@@ -335,6 +380,22 @@ module.exports = function (app) {
 
         request.session.arg = arg;
         response.redirect("/project");
+    }
+
+    function sendDatabaseError(request, response, message, status)
+    {
+        console.log("CALL: sendDatabaseError");
+        //restituisco errore
+        var err = extend({}, ERROR);
+        err.message = message;
+        err.status = status;
+
+        var arg = extend({}, ARG_INDEX);
+        arg.error = err;
+        arg.page = PAGE.DATABASE;
+
+        request.session.arg = arg;
+        response.redirect("/database");
     }
 
 

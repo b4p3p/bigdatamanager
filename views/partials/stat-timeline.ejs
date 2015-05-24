@@ -1,1 +1,30 @@
-regionsradar
+<div id="TimeLineContainer" class="graphcontainer hidden">
+
+    <div class="spinner" id="TimeLineSpinner" style="text-align: center">
+        <img src="public/img/ajax-loader.gif" alt="Loading" class="spinnerImage"/>
+        <p>Loading time line graph...</p>
+    </div>
+
+    <!---->
+    <div class="content hidden">
+
+        <form class="form-horizontal" style="margin-left: 30%;margin-top: 2%; width: 100%;">
+            <div class="control-group">
+                <label class="control-label" for="regionsBar_visualizationMode"
+                       style="float: left;margin-right: 5px">Visualization mode:</label>
+                <div class="controls">
+                    <select class="selectpicker"
+                            id="timeLine_typeData">
+                        <option value=0 >Day</option>
+                        <option value=1 >Week</option>
+                        <option value=2 >Month</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+
+        <canvas id="TimeLine" style="width:600px; height:400px; margin-top:3%; margin-left:25%;margin-right:25%"></canvas>
+
+    </div>
+
+</div>
