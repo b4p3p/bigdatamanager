@@ -28,6 +28,12 @@ var projectCtrl = new function() {
 
     };
 
+    this.dateCreationFormatter = function (value, row) {
+
+
+
+    };
+
     this.openProject_Click = function (projectName) {
 
         console.log(projectName);

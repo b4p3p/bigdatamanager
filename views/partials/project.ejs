@@ -50,8 +50,9 @@
                 <tr>
                     <th data-field="userProject">Username</th>
                     <th data-field="projectName">Project Name</th>
-                    <th data-field="creationDate">Creation Date</th>
-                    <th data-field="lastEdit">Last Edit</th>
+                    <th data-field="dateCreation"
+                        data-formatter="projectCtrl.dateCreationFormatter">Creation Date</th>
+                    <th data-field="dateLastUpdate">Last Edit</th>
                     <th data-field="size">Size</th>
                     <th data-field="Open project" data-width="60"
                         data-formatter="projectCtrl.openColumnFormatter">Open</th>
@@ -71,8 +72,7 @@
         <!-- FORM NUOVO PROGETTO -->
         <!--suppress HtmlUnknownTarget -->
         <form class="form-horizontal" action="/newproject" method="post"
-              id="uploadForm"
-              enctype="multipart/form-data">
+              id="uploadForm" enctype="multipart/form-data">
 
             <div class="form-group">
                 <label for="nameproject" class="col-sm-2 control-label">Project name:</label>

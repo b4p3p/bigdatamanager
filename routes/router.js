@@ -213,150 +213,45 @@ module.exports = function (app) {
 
     });
 
-
-
-    /**
-     *  Crea un nuovo progetto
-     */
-    //app.post('/newproject', function (req, res) {
-    //
-    //    try {
-    //
-    //        if ( app.isUploadDone() == false) return;
-    //
-    //        /* reset variable upload */
-    //        fileNames = app.fileNames;
-    //        app.resetVariableUpload();
-    //
-    //        console.log("PAGE /newproject");
-    //
-    //        var Project = require("../model/Project");
-    //
-    //        //response = res;
-    //        //request = req;
-    //
-    //        var dataProject = {
-    //            projectName: req.body.projectName,
-    //            userProject: req.session.userProject
-    //        };
-    //
-    //        dataProject.userProject = 'oim';   //TODO togliere questo
-    //
-    //        // Cerco prima se il progetto esiste
-    //        Project.getProject(dataProject.projectName,
-    //
-    //            function (doc)
-    //            {
-    //
-    //                // restituisco errore se esiste
-    //                if (doc == null) {
-    //
-    //                    //Creo un nuovo progetto
-    //                    Project.addProject(dataProject,
-    //
-    //                        function (err) {
-    //
-    //                            console.log("END: Project.addProject err:" + err);
-    //
-    //                            if (err == null)
-    //                            {
-    //
-    //                                var type = req.body.cmbType;
-    //                                var Data = require("../model/Data");
-    //
-    //                                console.log("PRE CALL: Data.importFromFile (" + fileNames + " - " + type + ")");
-    //
-    //                                Data.importFromFile(type, fileNames, dataProject.projectName,
-    //
-    //                                    function (err)
-    //
-    //                                    {
-    //
-    //                                        if (err.status > 0) {
-    //                                            console.log("CALL: importFromFile ERROR");
-    //
-    //                                            sendProjectError(req, res, err.message, err.status);
-    //
-    //                                        }
-    //                                        else {
-    //                                            console.log("CALL: importFromFile OK");
-    //
-    //                                            try {
-    //                                                var arg = getArgIndex();
-    //
-    //                                                req.session.projectName = dataProject.projectName;
-    //                                                arg.userProject = req.session.userProject;
-    //                                                arg.projectName = req.session.projectName;
-    //                                                arg.page = PAGE.PROJECT;
-    //                                                arg.tab = TAB.OPENPROJECT;
-    //                                                req.session.arg = arg;
-    //
-    //                                                res.redirect('/project');
-    //
-    //                                            }
-    //                                            catch (e) {
-    //                                                console.log("ERR: importFromFile!!!!!");
-    //                                                console.log(e);
-    //
-    //                                                res.redirect('/project');
-    //                                            }
-    //
-    //                                        }
-    //                                    });
-    //                            }
-    //                            else
-    //                            {
-    //                                console.log("Internal error: " + err);
-    //                                sendProjectError(req, res, err.message, err.status);
-    //                                return;
-    //                            }
-    //                        }
-    //                    );
-    //                } else {
-    //                    sendProjectError(req, res, "Project already exists", 1);
-    //                }
-    //            }
-    //
-    //        );
-    //    } catch (e)
-    //    {
-    //        console.log("ERROR!!!! newprojecterror");
-    //        console.log(e);
-    //    }
-    //
-    //});
+    app.get('/newproject', function (req, res) {
+        res.redirect("/project");
+    });
 
     app.post('/newproject', function (req, res) {
 
-        // Controlla che tutti i file siano stati upload-ati
-        if (app.isUploadDone() == false) return;
+        try { // Controlla che tutti i file siano stati upload-ati
+            if (app.isUploadDone() == false) return;
 
-        // reset variable upload
-        var fileNames = app.fileNames;
-        app.resetVariableUpload();
+            console.log("PAGE: /newproject");
 
-        var dataProject = {
-            projectName: req.body.projectName,
-            userProject: req.session.userProject,
-            type: req.body.cmbType
-        };
+            // reset variable upload
+            var fileNames = app.fileNames;
+            app.resetVariableUpload();
 
-        var newprojectCtrl = require("../controller/newprojectCtrl");
-        newprojectCtrl.add(fileNames, dataProject,
-            function(err) {
-                if ( err )
-                {
-                    sendProjectError(req, res, err.message, err.status);
+            var dataProject = {
+                projectName: req.body.projectName,
+                userProject: req.session.userProject,
+                type: req.body.cmbType
+            };
+
+            var newprojectCtrl = require("../controller/newprojectCtrl");
+            newprojectCtrl.add(fileNames, dataProject,
+                function (err) {
+                    if (err) {
+                        //res.write("ERRORE: " + err + "\n");
+                        sendProjectError(req, res, err.message, err.status);
+                    }
+                    else {
+                        res.redirect("/project");
+                    }
                 }
-                else
-                {
-                    res.write("ERR: " + err + "\n");
-                    res.write("FileNames! " + fileNames + "\n");
-                    res.end();
-                }
-            }
-        );
-
+            );
+        } catch (e)
+        {
+            console.error("EXCEPTION newproject");
+            console.error(e);
+            console.error(e.stack);
+        }
     });
 
     app.post('/setproject', function (req, res) {
@@ -427,6 +322,7 @@ module.exports = function (app) {
     function sendProjectError(request, response, message, status)
     {
         console.log("CALL: sendProjectError");
+
         //restituisco errore
         var err = extend({}, ERROR);
         err.message = message;

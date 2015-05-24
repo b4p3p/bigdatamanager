@@ -51,21 +51,36 @@ app.resetVariableUpload = function()
     app.fileNames = [];
 };
 
-app.use(multer({ dest: './uploads/',
+app.use( multer({ dest: './uploads/',
 
     rename: function (fieldname, filename)
     {
-        console.log('CALL: app.rename');
-        app.contFile++;
+        try {
+            console.log('CALL: app.rename');
+            app.contFile++;
 
-        return filename+Date.now();
+            return Date.now() + "-" + filename;
+
+        } catch (e)
+        {
+            console.error(e);
+        }
     },
     onFileUploadStart: function (file) {
-        console.log('CALL: app.onFileUploadStart (' + file.originalname + ')');
+        try {
+            console.log('CALL: app.onFileUploadStart (' + file.originalname + ')');
+        } catch (e) {
+            console.error(e);
+        }
     },
     onFileUploadComplete: function (file) {
-        console.log('CALL: app.onFileUploadComplete (' + file.path + ')');
-        app.fileNames.push(file.path);
+
+        try {
+            console.log('CALL: app.onFileUploadComplete (' + file.path + ')');
+            app.fileNames.push(file.path);
+        } catch (e) {
+            console.error(e);
+        }
     }
 
 }));
@@ -74,7 +89,7 @@ require('./routes/router')(app);   //chiamo il router
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-    var err = new Error('Not Found');
+    var err = new Error('Not Found: ' + req.method + ":" + req.originalUrl );
     err.status = 404;
     next(err);
 });

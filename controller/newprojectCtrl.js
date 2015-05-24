@@ -4,9 +4,17 @@ var Data = require("../model/Data");
 
 var NewprojectCtrl = function() {};
 
-var ERROR = {
+const ERROR = {
     status: 0,
     message: ''
+};
+
+var createError = function(status, message)
+{
+    var err = ERROR;
+    err.status = status;
+    err.message = message;
+    return err;
 };
 
 NewprojectCtrl.add = function(fileNames, dataProject, callback )
@@ -19,7 +27,7 @@ NewprojectCtrl.add = function(fileNames, dataProject, callback )
 
     async.waterfall( [
 
-
+        // 1) cerco se il progetto esiste")
         function(next) {
 
             console.log("1) cerco se il progetto esiste");
@@ -30,12 +38,13 @@ NewprojectCtrl.add = function(fileNames, dataProject, callback )
                     if ( doc == null)
                         next(null);
                     else
-                        callback( {status:1,message: "project already exists"});
+                        next( {status:1,message: "project already exists"});
                 }
             );
 
-        }, // 1) cerco se il progetto esiste")
+        },
 
+        // 2) se non esiste lo creo")
         function(next) {
 
             console.log("2) se non esiste lo creo");
@@ -46,11 +55,19 @@ NewprojectCtrl.add = function(fileNames, dataProject, callback )
                     if ( err == null )
                         next(null);
                     else
-                        callback(err);
+                    {
+                        for(var k in err.errors){
+                            err = createError(3, err.errors[k].message);
+                            break;
+                        }
+                        next(err);
+                    }
+
                 }
             );
-        }, // 2) se non esiste lo creo");
+        },
 
+        // 3) aggiungo i dati al progetto creato"
         function(next) {
 
             console.log("3) aggiungo i dati al progetto creato");
@@ -61,15 +78,32 @@ NewprojectCtrl.add = function(fileNames, dataProject, callback )
                     if ( err == null )
                         next(null);
                     else
-                        callback(err);
+                    {
+                        for(var k in err.errors){
+                            err = createError(3, err.errors[k].message);
+                            break;
+                        }
+                        next(err);
+                    }
+
                 }
             );
 
-        }  // 3) aggiungo i dati al progetto creato"
+        }
     ],
 
     function (err) {
-        callback(result);
+
+        if (err)
+        {
+            console.error("ERROR newprojectCtrl: " + JSON.stringify(err));
+            callback(err);
+        }
+        else
+        {
+            callback(null);
+        }
+
     });
 
 };
