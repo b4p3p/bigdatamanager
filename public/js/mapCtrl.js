@@ -4,34 +4,58 @@
 
 var MapCtrl = new function()
 {
-this.nameContainer = "pippo";
-this.map = null;
+    this.nameMap = '';
+    this.nameContainer = "";
+    this.mainMap = null;
 
-this.test = function(){
-    console.log( this.nameContainer );
+    this.InitMap = function(nameMap, mapContainer)
+    {
+        this.nameContainer = mapContainer;
+        this.nameMap = nameMap;
+
+        createMap();
+        resizeMap();
+
+        $(window).on("resize", function(){
+            resizeMap();
+        });
+
+
+
+    };
+
 };
 
-this.CreateMap = function(container)
+function resizeMap()
 {
-    this.nameContainer = container;
-    try {
-        this.InitMap();
-    } catch (e) {
-        alert ( "Create map: " +  e );
-    }
-};
 
-this.InitMap = function()
+    var deltaHeight = 200;
+
+    var content = $("#indexContent");
+    var map = $('#' + MapCtrl.nameMap);
+    var container = $('#' + MapCtrl.containerMap);
+    var width = container.width();
+
+    map.css("height", ( $(window).height() ));
+
+    if($(window).width()>=980){
+        map.css("height", $(window).height() - deltaHeight);
+        map.css("margin-top",50);
+        map.css("width", width );
+    }else{
+        map.css("height", $(window).height() - deltaHeight);
+        map.css("margin-top",-21);
+        map.css("width", width );
+    }
+}
+
+function createMap()
 {
     var lat = 42.22;
     var long = 12.986;
 
-    //console.log("sto per creare mappa");
-
     // set up the map
-    this.MainMap = new L.Map(this.nameContainer);
-
-    //console.log("mappa creata");
+    this.mainMap = new L.Map( MapCtrl.nameContainer);
 
     // create the tile layer with correct attribution
     var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
@@ -44,11 +68,9 @@ this.InitMap = function()
     });
 
     // start the map in Italy
-    this.MainMap.setView( new L.LatLng(lat, long), 6 );
-    this.MainMap.addLayer(osm);
-};
-
-};
+    this.mainMap.setView( new L.LatLng(lat, long), 6 );
+    this.mainMap.addLayer(osm);
+}
 
 
 

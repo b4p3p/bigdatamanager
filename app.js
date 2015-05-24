@@ -37,13 +37,27 @@ app.use( session({
 app.use(express.static(__dirname));
 //app.use(express.static(path.join(__dirname, 'public')));
 
-app.uploaddone = false;
+app.contFile = 0;
 app.fileNames = [];
 
+app.isUploadDone = function()
+{
+    return app.fileNames.length == app.contFile;
+};
+
+app.resetVariableUpload = function()
+{
+    app.contFile = 0;
+    app.fileNames = [];
+};
+
 app.use(multer({ dest: './uploads/',
+
     rename: function (fieldname, filename)
     {
         console.log('CALL: app.rename');
+        app.contFile++;
+
         return filename+Date.now();
     },
     onFileUploadStart: function (file) {
@@ -52,16 +66,15 @@ app.use(multer({ dest: './uploads/',
     onFileUploadComplete: function (file) {
         console.log('CALL: app.onFileUploadComplete (' + file.path + ')');
         app.fileNames.push(file.path);
-        app.uploaddone = true;
     }
+
 }));
 
 require('./routes/router')(app);   //chiamo il router
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-    var err =
-        new Error('Not Found');
+    var err = new Error('Not Found');
     err.status = 404;
     next(err);
 });

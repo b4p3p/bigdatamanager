@@ -78,6 +78,9 @@ Data.addDataArray = function(data, callback) {
 
         for (var i in data) {
 
+            //TODO controllare che cosa sta memorizzando
+            //
+
             data[i]['projectName'] = Data.projectName;
 
             var d = new Model(data[i]);
