@@ -21,6 +21,15 @@ const ERROR = {
     message: ''
 };
 
+var Error = function (status, message) {
+    if (!status) status = 1;
+    if (!message) message = 'error';
+    return {
+        status: status,
+        message: message
+    }
+};
+
 const ARG_INDEX = {
     userProject: '' ,
     projectName: '',
@@ -32,10 +41,6 @@ const ARG_INDEX = {
 
 const ARG_PROJECT = {
     projects: ''
-};
-
-const ARG_STAT = {
-    content: ''
 };
 
 function setArgIndex(userProject, projectName, page, error)
@@ -63,13 +68,14 @@ module.exports = function (app) {
 
     /* LOGIN */
 
-    app.get('/login', function (req, res) {
+    app.get('/login', function (req, res)
+    {
         var message = { error:false, message: '' };
         res.render('../views/pages/login.ejs', message);
     });
 
-    app.post('/login', function (req, res) {
-
+    app.post('/login', function (req, res)
+    {
         var userProject = req.body.userProject;
         var password = req.body.password;
         var message = { error:false, message: '' };
@@ -106,12 +112,14 @@ module.exports = function (app) {
 
     /* REGISTER */
 
-    app.get('/register', function (req, res) {
+    app.get('/register', function (req, res)
+    {
         var message = { error:false , message: '' };
         res.render('../views/pages/register.ejs', message);
     });
 
-    app.post('/register', function (req, res) {
+    app.post('/register', function (req, res)
+    {
 
         //var username = req.body.username;
         //var password = req.body.password;
@@ -140,7 +148,8 @@ module.exports = function (app) {
 
     /* INDEX */
 
-    app.get('/index', function (req, res) {
+    app.get('/index', function (req, res)
+    {
 
         var arg = extend({}, ARG_INDEX);
 
@@ -159,7 +168,8 @@ module.exports = function (app) {
 
     /* INDEX - PAGES */
 
-    app.get('/home', function (req, res) {
+    app.get('/home', function (req, res)
+    {
 
         var arg = getArgIndex();
         var sess = req.session;
@@ -173,7 +183,8 @@ module.exports = function (app) {
 
     /* DATABASE - PAGES */
 
-    app.get('/database', function (req, res) {
+    app.get('/database', function (req, res)
+    {
 
         var arg = getArgIndex();
 
@@ -194,7 +205,8 @@ module.exports = function (app) {
 
     });
 
-    app.post('/database', function (req, res) {
+    app.post('/database', function (req, res)
+    {
         // Controlla che tutti i file siano stati upload-ati
         if (app.isUploadDone() == false) return;
 
@@ -213,155 +225,6 @@ module.exports = function (app) {
                     sendDatabaseError(req, res, err.message, err.status);
             }
         );
-    });
-
-    app.get('/project', function (req, res) {
-
-        //TODO debug
-        if ( req.session.userProject == null)
-            req.session.userProject = 'oim';
-
-        //controllo se ho un errore
-        var arg = getArgIndex();
-        var Project = require("../model/Project");
-
-        if (req.session.arg)                    // uso  i paramenti presenti nella variabile di sessione
-        {
-            arg = req.session.arg;
-            req.session.arg = null;
-        }
-        else                                    // mi costruisco la variabile usando le variabili di sessione
-        {
-            //var err = ERROR;
-            //err.status = -1;
-            //err.message = "messaggio di test";
-
-            arg.userProject = req.session.userProject;
-            arg.projectName = req.session.projectName;
-            arg.page = PAGE.PROJECT;
-            arg.tab = TAB.OPENPROJECT;
-            //arg.error = err;
-        }
-
-        //TODO debug
-        if (!arg.userProject) arg.userProject= 'oim';
-
-        Project.getProjects(arg.userProject, function(data, err)
-        {
-            var projectArg = getArgProject();
-            projectArg.projects = JSON.stringify(data);
-            arg.content = projectArg;
-
-            res.render('../views/pages/index.ejs', arg );
-
-        });
-
-    });
-
-    app.get('/newproject', function (req, res) {
-        res.redirect("/project");
-    });
-
-    app.post('/newproject', function (req, res) {
-
-        try { // Controlla che tutti i file siano stati upload-ati
-            if (app.isUploadDone() == false) return;
-
-            console.log("PAGE: /newproject");
-
-            // reset variable upload
-            var fileNames = app.fileNames;
-            app.resetVariableUpload();
-
-            var dataProject = {
-                projectName: req.body.projectName,
-                userProject: req.session.userProject,
-                type: req.body.cmbType
-            };
-
-            var newprojectCtrl = require("../controller/newprojectCtrl");
-            newprojectCtrl.add(fileNames, dataProject,
-                function (err) {
-                    if (err) {
-                        //res.write("ERRORE: " + err + "\n");
-                        sendProjectError(req, res, err.message, err.status);
-                    }
-                    else {
-                        res.redirect("/project");
-                    }
-                }
-            );
-        } catch (e)
-        {
-            console.error("EXCEPTION newproject");
-            console.error(e);
-            console.error(e.stack);
-        }
-    });
-
-    app.post('/setproject', function (req, res) {
-
-        req.session.projectName = req.body.projectName;
-
-        //var projectArg = getArgProject();
-        var arg = getArgIndex();
-
-        //projectArg.projects = req.session.projects;
-
-        arg.userProject = req.session.userProject;
-        arg.projectName = req.session.projectName;
-        arg.page = PAGE.HOME;
-        //arg.tab = TAB.OPENPROJECT;
-        //arg.content = projectArg;
-
-        //res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
-
-        //res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
-        //res.redirect('/project');
-
-        res.setHeader("Content-Type", "text/json");
-        res.setHeader("Access-Control-Allow-Origin", "*");
-        res.end(JSON.stringify({status: 200}));
-
-    });
-
-
-    /***
-     *      STATISTICS
-     */
-    app.get('/showmap', function (req, res)
-    {
-        var statController = require("../controller/StatController");
-        var arg = getArgIndex(req, PAGE.STAT_MAP);
-        var argStat = getArgStat();
-        argStat.content = statController.getMapData();
-        arg.content = argStat;
-
-        res.render('../views/pages/index.ejs', arg );
-    });
-
-    app.get('/showregionsbar', function (req, res)
-    {
-        var arg = getArgIndex(req, PAGE.STAT_REGIONS_BAR);
-        res.render('../views/pages/index.ejs', arg );
-    });
-
-    app.get('/showregionsradar', function (req, res)
-    {
-        var arg = getArgIndex(req, PAGE.STAT_REGIONS_RADAR);
-        res.render('../views/pages/index.ejs', arg );
-    });
-
-    app.get('/showtimeline', function (req, res)
-    {
-        var arg = getArgIndex(req,PAGE.STAT_TIMELINE);
-        res.render('../views/pages/index.ejs', arg );
-    });
-
-    app.get('/showtag', function (req, res)
-    {
-        var arg = getArgIndex(req, PAGE.STAT_TAG);
-        res.render('../views/pages/index.ejs', arg );
     });
 
     function sendProjectError(request, response, message, status)
@@ -398,36 +261,14 @@ module.exports = function (app) {
         response.redirect("/database");
     }
 
-
-    /**
-     *  Crea una copia della variabile ARG_INDEX
-     */
-    function getArgIndex(req, page)
+    function getError(status, msg)
     {
-        var arg = extend({}, ARG_INDEX);
-
-        if ( req != null)
-        {
-            arg.userProject = req.session.userProject;
-            arg.projectName = req.session.projectName;
-        }
-
-        if ( page != null)
-        {
-            arg.page = page;
-        }
-
-        return arg;
+        var err = extend({}, ERROR);
     }
 
     function getArgProject()
     {
         return extend({}, ARG_PROJECT);
-    }
-
-    function getArgStat()
-    {
-        return extend({}, ARG_STAT);
     }
 
 };

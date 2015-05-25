@@ -8,14 +8,19 @@ const ERROR = {
     message: ''
 };
 
+/**
+ * Model data
+ * @param {DATA_SCHEMA[]} data
+ * @constructor
+ */
 var Data = function (data)
 {
     this.data = data;
 };
 
-var model_name = "data";
+Data.MODEL_NAME = "data";
 
-const DATA_SCHEMA = new mongoose.Schema({
+Data.DATA_SCHEMA = new mongoose.Schema({
     projectName: { type : String, required : true },
     id: { type : Number, required : true },
     date: Date,
@@ -29,7 +34,12 @@ const DATA_SCHEMA = new mongoose.Schema({
 
 Data.projectName = null;
 
-Data.prototype.data = {};    //json
+
+/**
+ * JSON of Data object
+ * @type {{}}
+ */
+Data.prototype.data = {};
 
 Data.importFromFile = function(type, fileNames, projectName, cb_ris)
 {
@@ -98,7 +108,7 @@ Data.importFromFile = function(type, fileNames, projectName, cb_ris)
             } ],
 
             // Funzione di errore di waterfall
-            function (err, ris)
+            function (err)
             {
                 if (err)
                 {
@@ -134,12 +144,37 @@ Data.importFromFile = function(type, fileNames, projectName, cb_ris)
 
 };
 
+/**
+ * Get data from datas.
+ * @param {String} projectName - project name.
+ * @param {function(ERROR, Array)} callback - The callback that handles the response.
+ */
+
+Data.getData = function(projectName, callback)
+{
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+    var DataModel = connection.model(Data.MODEL_NAME, Data.DATA_SCHEMA);
+
+    DataModel.find({projectName:projectName})
+        .lean()
+        .exec( function(err, docs)
+        {
+            if (err)
+            {
+                callback(err, {});
+            }else{
+                callback(null, docs);
+            }
+            connection.close();
+        });
+};
+
 function addDataArray(arrayData, projectName, callback) {
 
     try {
 
         var connection = mongoose.createConnection('mongodb://localhost/oim');
-        var DataModel = connection.model(model_name, DATA_SCHEMA);
+        var DataModel = connection.model(Data.MODEL_NAME, Data.DATA_SCHEMA);
         var cont = 0;
 
         console.log("START EACH addDataArray" );
@@ -186,383 +221,11 @@ function addDataArray(arrayData, projectName, callback) {
             }
         });
 
-        //for (var i in data) {
-        //
-        //    data[i].projectName = projectName;
-        //    var newData = new DataModel(data[i]);
-        //    newData.save(function (err) {
-        //
-        //    };
-        //
-        //    continue;
-        //
-        //}
-
-            ////TODO controllare che cosa sta memorizzando
-            ////
-            //
-            //data[i]['projectName'] = Data.projectName;
-            //
-            //var d = new Model(data[i]);
-            //
-            //d.save(function (err) {
-            //
-            //    cont++;
-            //
-            //    if (err && !error) {
-            //
-            //        console.log("CALL: addDataArray - uscita ERR");
-            //
-            //        connection.close();
-            //        error = true;
-            //
-            //        var msg = "";
-            //        for(var e in err.errors)
-            //        {
-            //            var errMongo = err.errors[e];
-            //            msg = errMongo.message;
-            //        }
-            //
-            //        callback(200, msg );        //error
-            //
-            //        return
-            //    }
-            //
-            //    if (cont == data.length && !error) {
-            //
-            //        console.log("CALL: addDataArray - uscita OK");
-            //
-            //        connection.close();
-            //        callback(0, "");       //OK
-            //
-            //        return
-            //    }
-            //});
     } catch (e)
     {
-        console.error("EXCEPTION: addDataArray");
-        console.error(   e);
+        console.error("Data EXCEPTION: addDataArray");
+        console.error(e);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-/**
- * Save an instance of Data.
- *
- * @constructor
- * @this {Data}
- * @param {IstanceOf Data} data The istance of Data to save.
- * @param {callback} callback Callback with err result.
- */
-//Data.loadData = function(data, callback)
-//{
-//    var connection = mongoose.createConnection('mongodb://localhost/oim');
-//    var Model = connection.model(model_name, DATA_SCHEMA);
-//    var newData = new Model( data.data );
-//
-//    newData.save( function(err) {
-//        if (err)
-//            callback(-2, err ); //error
-//        callback(0, "" );       //OK
-//
-//        connection.close();
-//    });
-//};
-
-
-
-/**
- * Save an json array of data.
- *
- * @constructor
- * @this {Data}
- * @param {json array of data} data Json array.
- * @param {callback} callback Callback with err result.
- *                   - null:  no error
- *                   - !null: error
- */
-//Data.addDataArray = function(data, callback) {
-//
-//    try {
-//        console.log("CALL: Data.addDataArray");
-//        //console.log(data);
-//
-//        var error = false;
-//        var cont = 0;
-//
-//        var connection = mongoose.createConnection('mongodb://localhost/oim');
-//        var Model = connection.model(model_name, DATA_SCHEMA);
-//
-//        for (var i in data) {
-//
-//            //TODO controllare che cosa sta memorizzando
-//            //
-//
-//            data[i]['projectName'] = Data.projectName;
-//
-//            var d = new Model(data[i]);
-//
-//            d.save(function (err) {
-//
-//                cont++;
-//
-//                if (err && !error) {
-//
-//                    console.log("CALL: addDataArray - uscita ERR");
-//
-//                    connection.close();
-//                    error = true;
-//
-//                    var msg = "";
-//                    for(var e in err.errors)
-//                    {
-//                        var errMongo = err.errors[e];
-//                        msg = errMongo.message;
-//                    }
-//
-//                    callback(200, msg );        //error
-//
-//                    return
-//                }
-//
-//                if (cont == data.length && !error) {
-//
-//                    console.log("CALL: addDataArray - uscita OK");
-//
-//                    connection.close();
-//                    callback(0, "");       //OK
-//
-//                    return
-//                }
-//            });
-//        }
-//    } catch (e) {
-//        console.log("ERR: addDataArray");
-//        console.log(e);
-//    }
-//};
-
-
-
-//var contExit = 0;
-//var contFile = 0;
-//var error = false;
-//var exitCallback = null;
-
-//Data.importFromFile = function(type, fileNames, projectName, callback)
-//{
-//    Data.projectName = projectName;
-//    var fs = require('fs');
-//    var util = require('util');
-//
-//    exitCallback = callback;
-//    error = false;
-//    contExit = 0;
-//    contFile = fileNames.length;
-//
-//    for(var i = 0; i < fileNames.length; i++) {
-//        var path = fileNames[i];
-//
-//        console.log(path);
-//
-//        fs.readFile(path,
-//            function (err, data) {
-//                if (err){
-//                    callback(getSampleError( 100, "Read file error" ));
-//                    error = true;
-//                    return;
-//                }
-//                else {
-//                    if (type == "csv")
-//                        convertData(checkLast, data);
-//                    else
-//                        writeJson(checkLast, data);
-//
-//                }
-//            }
-//        );
-//    }
-//};
-
-//function checkLast(arg_ERROR)
-//{
-//    contExit++;
-//
-//    console.log("CALL: checkLast arg_ERROR.status: " + arg_ERROR.status);
-//    console.log("      contFile:" + contFile + " contExit:" + contExit);
-//
-//    if(error)
-//    {
-//        console.log("END: checkLast error");
-//        return;
-//    }
-//
-//    //controllo l'errore
-//    if(arg_ERROR.status > 0)
-//    {
-//        console.log("END: checkLast - first error");
-//        error = true;
-//        exitCallback(arg_ERROR);
-//        return;
-//    }
-//
-//    if( contExit < contFile )
-//    {
-//        console.log("END: checkLast - contExit < contFile")
-//        return;
-//    }
-//
-//    console.log("END: checkLast - callback");
-//
-//    exitCallback(arg_ERROR);
-//
-//}
-//
-//function getSampleError( status, message )
-//{
-//    var arg = ERROR;
-//    if( status == null || message == null )
-//    {
-//        arg.status = 0;
-//        arg.message = "";
-//    }
-//    else
-//    {
-//        arg.status = status;
-//        arg.message = message;
-//    }
-//    return arg;
-//}
-
-//function writeJson(callback, jsonData)
-//{
-//    console.log("CALL: writeJson");
-//
-//    var jsonlint = require("jsonlint");
-//
-//    JSON._parse = JSON.parse;
-//    JSON.parse = function (json) {
-//        try {
-//            return JSON._parse(json);
-//        } catch(e) {
-//            jsonlint.parse(json);
-//        }
-//    };
-//
-//    var objJson;
-//    try {
-//        objJson = jsonlint.parse( jsonData.toString() );
-//    }
-//    catch (e)
-//    {
-//        callback( getSampleError( 200, e.message ) );
-//        return;
-//    }
-//
-//    for(var i = 0; i < objJson.length; i ++) {
-//        var obj = objJson[i];
-//        var keys = Object.keys(obj);
-//        for(var k = 0; k < keys.length; k ++) {
-//            var key = keys[k];
-//            obj[key.toLowerCase()] = obj[key];
-//        }
-//    }
-//
-//    saveJson(callback, objJson);
-//}
-
-//function convertData(callback, csvData)
-//{
-//    var csv = require('csv');
-//    var cont = 0;
-//    csv.parse(csvData, function (err, data) {
-//        csv.transform(data,
-//            function (data) {
-//
-//                cont++;
-//
-//                return data.map(
-//                    function (value) {
-//
-//                        if (cont == 1)
-//                            return value.toLowerCase();
-//                        else
-//                            return value;
-//                    }
-//                );
-//
-//            },
-//            function (err, data)
-//            {
-//                if(err) return callback(getSampleError( 200, err ));
-//
-//                csv.stringify(data, function (err, data) {
-//
-//                    if ( err ) return callback(getSampleError( 200, err ));
-//
-//                    _convertCsvToJson(callback, data);
-//                });
-//            });
-//    });
-//}
-
-//function _convertCsvToJson(callback, data)
-//{
-//    //Converter Class
-//    var Converter = require("csvtojson").core.Converter;
-//    var csvConverter = new Converter();
-//
-//    csvConverter.on("end_parsed", function(jsonObj) {
-//        saveJson(callback, jsonObj);
-//    });
-//
-//    csvConverter.fromString(data, function(jsonObj){
-//        //if (jsonObj == null)
-//        //    return;
-//        //return saveJson(callback, jsonObj);
-//    });
-//}
-
-//function saveJson(callback, jsonObj)
-//{
-//    console.log("CALL: saveJson");
-//
-//    var Data = require("../model/Data");
-//    Data.addDataArray( jsonObj,
-//        function(result, message){
-//            saveCallback(callback, result, message)
-//        }
-//    );
-//
-//}
-//
-//function saveCallback(callback, result, message)
-//{
-//    console.log("CALL: saveCallback");
-//
-//    var arg = ERROR;
-//
-//    if ( result <= 0 )
-//    {
-//        arg.status = 0;
-//        arg.message = "";
-//    }
-//    else
-//    {
-//        arg.status = result;
-//        arg.message = message;
-//    }
-//    callback(arg);
-//}
 
 module.exports = Data;

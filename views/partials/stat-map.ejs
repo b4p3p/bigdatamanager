@@ -1,42 +1,69 @@
 <script src="/public/js/mapCtrl.js"></script>
 
 <% include ../partials/leaflet.ejs %>
+<% include ../partials/jquery.ejs %>
 
 <style>
+
     #map{
-        width: 100px;
-        height: 100px;
-        min-height: 100%;
-        min-width: 100%;
-        display: block;
+        width: 105%;
     }
-    #containerMap{
-        width: 100px;
-        height: 100px;
-        min-height: 100%;
-        min-width: 100%;
-        display: block;
-    }
-    .content
+    .row-map
     {
-        display: table;
-        height: 100%;
-        min-height: 100%;
+        padding-top: -40px;
+        margin-top: -40px;
     }
-    .row
+
+    #indexContent
     {
-        height: 100%;
+        margin-top: 0;
+        padding-top: 0;
     }
+    .img-chk
+    {
+        width: 25px;
+        height: 25px;
+    }
+    label
+    {
+        padding-top: 20px;
+    }
+
 </style>
 
-<div id="test"></div>
+<div class="row">
 
-<div  id="containerMap">
+    <form class="form-inline form-map">
+        <div class="checkbox">
+            <i class="fa fa-spinner fa-spin" id="spinner"></i>
+            <label>
+                <img src="/public/img/icon-heatmap.png" class="img-chk">
+                <input type="checkbox" onclick="MapCtrl.showHeatmap()">
+                Show Heatmap
+            </label>
+        </div>
+
+        <div class="checkbox">
+            <label>
+                <img src="/public/img/icon-marker-cluster.png" class="img-chk">
+                <input type="checkbox">
+                Show Cluster
+            </label>
+        </div>
+
+    </form>
+
+</div>
+
+<div class="row row-map">
     <div id="map"></div>
 </div>
 
 <script>
 
-    MapCtrl.InitMap('map', 'containerMap');
+    MapCtrl.initMap('map');
+    MapCtrl.loadData();
+
+//    $( document ).ready(function() {});
 
 </script>

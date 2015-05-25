@@ -63,9 +63,10 @@ h3{font-weight: 300; font-size: 22px;margin-bottom: 40px}
 /* collapsed sidebar styles */
 @media screen and (max-width: 767px) {
 
-	.title
+	.onlydesktop
 	{
 		visibility: hidden;
+		max-width: 0px;
 	}
 
 	.content
@@ -106,6 +107,11 @@ h3{font-weight: 300; font-size: 22px;margin-bottom: 40px}
 	.nav > li > a:focus{background-color: #ff625f}
 
 	.navbar-header{height: 18px;}
+
+	.navbar-fixed-top
+	{
+		height: 25px;
+	}
 
 	.active {left: 0;}
 

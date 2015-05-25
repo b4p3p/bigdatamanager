@@ -18,12 +18,6 @@ Project.prototype.data = {};    //json
 
 Project.getProject = function (projectName, callback)
 {
-    ////TO DO debug - cancellare questa porzione di codice
-    //var connection = mongoose.createConnection('mongodb://localhost/oim');
-    //var Model = connection.model(Project.MODEL_NAME, Project.PROJECT_SCHEMA);
-    //Model.find({ userProject:'oim' }).remove().exec();
-    //connection.close();
-
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var Projects = connection.model(Project.MODEL_NAME, Project.PROJECT_SCHEMA);
 
@@ -42,11 +36,16 @@ Project.getProjects = function(username, callback)
     var ProjectModel = connection.model(Project.MODEL_NAME, Project.PROJECT_SCHEMA);
 
     ProjectModel.find()
-                .lean()
-                .exec( function(err, docs)
+        .lean()
+        .exec( function(err, docs)
     {
-        if (err) { callback(null); return; }
-        callback(docs);
+        if (err) {
+            callback(null);
+        }
+        else
+        {
+            callback(docs);
+        }
     });
 
 

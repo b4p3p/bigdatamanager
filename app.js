@@ -85,7 +85,9 @@ app.use( multer({ dest: './uploads/',
 
 }));
 
-require('./routes/router')(app);   //chiamo il router
+require('./routes/router')(app);           //chiamo il router generico
+require('./routes/project_router')(app);   //chiamo il router per i progetti
+require('./routes/statistics_router')(app);   //chiamo il router per i progetti
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
