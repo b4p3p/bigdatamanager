@@ -36,6 +36,11 @@ db.nations.createIndex( { name: 1 }, { unique: true } )
 db.nations.insert( [ { name: "italy" }, {name: "france" }, {name: "spain" } ])
 ```
 
+* Regions:
+```
+db.regions.createIndex( { 'properties.NAME_1': 1, 'properties.NAME_0': 1  }, { unique: true } )
+```
+
 * Tags:
 ```
 db.tags.createIndex( { tag: 1, projectName: 1 }, { unique: true } )
@@ -68,4 +73,46 @@ db.datas.aggregate(
 )
 
 ```
+
+* ricerca spaziale
+
+```
+db.addr_poly.find({
+    loc:{
+        $geoIntersects: {
+            $geometry: {
+              type: "Point" ,
+              coordinates: [1, 1]
+            }
+         }
+     }
+});
+
+db.geo.find({
+    "loc": {
+        "$geoWithin": {
+            "$geometry":{
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [[ [ 0, 0 ], [ 0, 25 ], [ 25, 25 ], [ 25, 0 ], [ 0, 0 ] ]],
+                    [[ [ 40, 40 ], [ 40, 75 ], [ 75, 75 ], [ 75, 40 ], [ 40, 40 ] ]],
+                    [[ [ 80, 80 ], [ 80, 90 ], [ 90, 90 ], [ 90, 80 ], [ 80, 80 ] ]]
+                ]
+            }
+        }
+    }
+})
+
+```
+
+db.regions.find({
+    geometry.coordinates:{
+        $geoIntersects: {
+            $geometry: {
+              type: "Point" ,
+              coordinates: [40.6073799, 14.9813099]
+            }
+         }
+     }
+})
 

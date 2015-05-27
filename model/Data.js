@@ -157,6 +157,7 @@ Data.getData = function(projectName, callback)
 
     DataModel.find({projectName:projectName})
         .lean()
+        .limit(10)
         .exec( function(err, docs)
         {
             if (err)
@@ -223,7 +224,7 @@ function addDataArray(arrayData, projectName, callback) {
 
     } catch (e)
     {
-        console.error("Data EXCEPTION: addDataArray");
+        console.error("Data EXCEPTION: add DataArray");
         console.error(e);
     }
 }

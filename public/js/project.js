@@ -1,6 +1,6 @@
 var projectCtrl = new function() {
 
-    this.loadData = function (content) {
+    this.getData = function (content) {
         var json = JSON.parse(content);
         var $table = $('#tableProjects');
 

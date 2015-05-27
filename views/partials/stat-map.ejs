@@ -1,4 +1,4 @@
-<script src="/public/js/mapCtrl.js"></script>
+<script src="/public/js/showmapCtrl.js"></script>
 
 <% include ../partials/leaflet.ejs %>
 
@@ -73,8 +73,9 @@
     </script>
 
     <button type="button" class="btn btn-success"
+            id="cmdFilter"
             style="float: right;margin-top: 13px"
-            onclick="MapCtrl.cmdFilter_click()">
+            onclick="ShowmapCtrl.cmdFilter_click()">
         <span class="glyphicon glyphicon-filter" aria-hidden="true"></span>Apply filter</button>
 
 </div>
@@ -86,7 +87,7 @@
         <div class="checkbox">
             <img src="/public/img/icon-heatmap.png" class="img-chk">
             <label>
-                <input type="checkbox" onclick="MapCtrl.heatmap_click()"
+                <input type="checkbox" onclick="ShowmapCtrl.heatmap_click()"
                        id="chk_heatmap">
                 Show Heatmap
             </label>
@@ -95,7 +96,7 @@
         <div class="checkbox">
             <img src="/public/img/icon-marker-cluster.png" class="img-chk">
             <label>
-                <input type="checkbox" onclick="MapCtrl.markerCluster_click()"
+                <input type="checkbox" onclick="ShowmapCtrl.markerCluster_click()"
                        id="chk_markerCluster">
                 Show Cluster
                 <i class="fa fa-spinner fa-spin hidden" id="spinner-cluster"
@@ -106,8 +107,8 @@
         <div class="checkbox">
             <img src="/public/img/boundaries-ico.png" class="img-chk">
             <label>
-                <input type="checkbox" onclick="MapCtrl.showBoundaries_click()"
-                       id="chk_markerCluster">
+                <input type="checkbox" onclick="ShowmapCtrl.showBoundaries_click()"
+                       id="chk_boundaries">
                 Show boundaries
             </label>
         </div>
@@ -126,9 +127,13 @@
 
 <script>
 
+    ShowmapCtrl.initMap('map');
+    ShowmapCtrl.getData();
+    ShowmapCtrl.initGui();
 
-    MapCtrl.initMap('map');
-    MapCtrl.loadData();
-    MapCtrl.initGui();
+    //fix combo close
+    $(document).on('mouseenter','#cmdFilter', function() {
+        $(".btn-group").removeClass("open");
+    });
 
 </script>
