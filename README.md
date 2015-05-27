@@ -1,14 +1,13 @@
 #BigDataManager#
 
-* crea la chiave unica
+* Datas
 ```
-db.projects.createIndex( { projectNames: 1, userProject: 1 }, { unique: true } )
 db.datas.createIndex( { projectNames: 1, id: 1 }, { unique: true } )
-db.nations.createIndex( { nation: 1 }, { unique: true } )
 ```
 
-* creazione di progetti di test
+* Projects
 ```
+db.projects.createIndex( { projectNames: 1, userProject: 1 }, { unique: true } )
 db.projects.insert( { projectName: "oim0", userProject: "oim" })
 db.projects.insert( { projectName: "oim1", userProject: "oim" })
 db.projects.insert( { projectName: "oim2", userProject: "oim" })
@@ -29,8 +28,44 @@ db.projects.insert( { projectName: "oim16", userProject: "oim" })
 db.projects.insert( { projectName: "oim17", userProject: "oim" })
 db.projects.insert( { projectName: "oim18", userProject: "oim" })
 db.projects.insert( { projectName: "oim19", userProject: "oim" })
-
 ```
 
+* Nations:
+```
+db.nations.createIndex( { name: 1 }, { unique: true } )
+db.nations.insert( [ { name: "italy" }, {name: "france" }, {name: "spain" } ])
+```
 
+* Tags:
+```
+db.tags.createIndex( { tag: 1, projectName: 1 }, { unique: true } )
+db.tags.insert( [ 
+    {projectName: "oim", tag:"omofobia" }, 
+    {projectName: "oim", tag:"donne" },
+    {projectName: "oim", tag:"razzismo" },
+    {projectName: "oim", tag:"diversità" }
+])
+```
+* ricerca intervallo
+
+```
+db.datas.aggregate([
+{
+    $group:{
+      _id:"$item",
+      date:{$min:"date"}
+    }
+}
+])
+
+db.datas.aggregate(
+  { $group: { 
+        _id : "$name",
+        data_min: {$min: "$date"},
+        data_max: {$max: "$date"}
+     }
+  }
+)
+
+```
 

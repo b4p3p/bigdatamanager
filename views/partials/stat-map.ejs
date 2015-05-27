@@ -1,12 +1,30 @@
 <script src="/public/js/mapCtrl.js"></script>
 
 <% include ../partials/leaflet.ejs %>
-<% include ../partials/jquery.ejs %>
+
+<script src="/public/lib/jquery-ui/jquery-ui.js"></script>
+
+<link href="/public/lib/bootstrap-select/css/bootstrap-select.css" rel="stylesheet" type="text/css">
+<script src="/public/lib/bootstrap-select/js/bootstrap-select.js"></script>
+<script src="/public/lib/bootstrap-select/js/i18n/defaults-eu.js"></script>
+
+<!-- jQDateRangeSlider -->
+
 
 <style>
 
     #map{
         width: 105%;
+    }
+    #spinner{
+        float: right;
+    }
+    #slider-container
+    {
+        position: relative;
+        /*left: 25%;*/
+        /*width: 50%;*/
+        margin-top: 40px;
     }
     .row-map
     {
@@ -32,23 +50,70 @@
 </style>
 
 <div class="row">
+    <div id="slider-container">
+        <div id="slider"></div>
+    </div>
+</div>
 
-    <form class="form-inline form-map">
+<div class="row">
+
+    <label>Nations:</label>
+    <select class="selectpicker" id="cmbNations"
+            data-live-search="true" title="Loading..."
+            multiple>
+    </select>
+
+    <label>Tags:</label>
+    <select class="selectpicker" id="cmbTags" title="Loading..."
+            data-live-search="true" multiple>
+    </select>
+
+    <script>
+        $('.selectpicker').selectpicker();
+    </script>
+
+    <button type="button" class="btn btn-success"
+            style="float: right;margin-top: 13px"
+            onclick="MapCtrl.cmdFilter_click()">
+        <span class="glyphicon glyphicon-filter" aria-hidden="true"></span>Apply filter</button>
+
+</div>
+
+<div class="row">
+
+    <form class="form-inline form-map" id="form">
+
         <div class="checkbox">
-            <i class="fa fa-spinner fa-spin" id="spinner"></i>
+            <img src="/public/img/icon-heatmap.png" class="img-chk">
             <label>
-                <img src="/public/img/icon-heatmap.png" class="img-chk">
-                <input type="checkbox" onclick="MapCtrl.showHeatmap()">
+                <input type="checkbox" onclick="MapCtrl.heatmap_click()"
+                       id="chk_heatmap">
                 Show Heatmap
             </label>
         </div>
 
         <div class="checkbox">
+            <img src="/public/img/icon-marker-cluster.png" class="img-chk">
             <label>
-                <img src="/public/img/icon-marker-cluster.png" class="img-chk">
-                <input type="checkbox">
+                <input type="checkbox" onclick="MapCtrl.markerCluster_click()"
+                       id="chk_markerCluster">
                 Show Cluster
+                <i class="fa fa-spinner fa-spin hidden" id="spinner-cluster"
+                   style="margin-top: 8px"></i>
             </label>
+        </div>
+
+        <div class="checkbox">
+            <img src="/public/img/boundaries-ico.png" class="img-chk">
+            <label>
+                <input type="checkbox" onclick="MapCtrl.showBoundaries_click()"
+                       id="chk_markerCluster">
+                Show boundaries
+            </label>
+        </div>
+
+        <div class="checkbox" style="float: right;padding-top: 20px">
+            <i class="fa fa-spinner fa-spin" id="spinner"></i>
         </div>
 
     </form>
@@ -61,9 +126,9 @@
 
 <script>
 
+
     MapCtrl.initMap('map');
     MapCtrl.loadData();
-
-//    $( document ).ready(function() {});
+    MapCtrl.initGui();
 
 </script>
