@@ -105,14 +105,5 @@ db.geo.find({
 
 ```
 
-db.regions.find({
-    geometry.coordinates:{
-        $geoIntersects: {
-            $geometry: {
-              type: "Point" ,
-              coordinates: [40.6073799, 14.9813099]
-            }
-         }
-     }
-})
+
 
