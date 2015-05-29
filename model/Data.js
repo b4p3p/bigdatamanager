@@ -3,6 +3,7 @@ var fs = require('fs');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var converter = require('../controller/converterCtrl');
+var MongoClient = require('mongodb').MongoClient;
 
 const ERROR = {
     status: 0,
@@ -19,9 +20,10 @@ var Data = function (data)
     this.data = data;
 };
 
-Data.MODEL_NAME = "data";
+Data.MODEL_NAME = "datas";
 
-Data.DATA_SCHEMA = new Schema({
+Data.DATA_SCHEMA = new Schema(
+{
     projectName: { type : String, required : true },
     id: { type : String, required : true },
     date: Date,
@@ -175,6 +177,12 @@ Data.getData = function(projectName, callback)
         });
 };
 
+/**ù
+ *
+ * @param arrayData
+ * @param projectName
+ * @param callback {Error}
+ */
 function addDataArray(arrayData, projectName, callback) {
 
     try {
@@ -182,63 +190,77 @@ function addDataArray(arrayData, projectName, callback) {
         var connection = mongoose.createConnection('mongodb://localhost/oim');
         var DataModel = connection.model(Data.MODEL_NAME, Data.DATA_SCHEMA);
         var cont = 0;
-
-        console.log("START EACH addDataArray" );
-
-        async.forEach(arrayData, function(data, cb_each)
-        {
-            cont++;
-
-            //applico il lower case a tutte le chiavi
-            var keys = Object.keys(data);
-            for(var k = 0; k < keys.length; k ++) {
-                var key = keys[k];
-                if(key != key.toLowerCase())
-                {
-                    data[key.toLowerCase()] = data[key];
-                    delete data[key];
-                }
-            }
-
-            //aggiungo il project name
-            data.projectName = projectName;
-
-            //aggiungo il punto per le query spaziali
-            data.loc.type ="Point";
-            data.loc.coordinates.push(data.longitude);
-            data.loc.coordinates.push(data.latitude);
-
-            data.id = data.id.toString();
-
-            var newData = new DataModel(data);
-            newData.save( function (err)
+        var url = 'mongodb://localhost:27017/oim';
+        MongoClient.connect(url, function(err, db) {
+            if(err!=null)
             {
-                if (err)
-                    cb_each(err);
-
-                else
-                    cb_each(null);
-            });
-        },
-        function(err) {
-            if (err)
-            {
-                console.error("ERROR addDataArray at row: " + cont);
-                console.error(JSON.stringify(err));
                 callback(err);
+                return;
             }
-            else
-            {
-                console.log("END EACH addDataArray - cont=" + cont );
-                callback(null);
-            }
-        });
 
-    } catch (e)
+            console.log("START EACH addDataArray" );
+
+            var dataCollection = db.collection('datas');
+
+            async.forEach(arrayData, function(data, cb_each)
+            {
+                    cont++;
+
+                    //applico il lower case a tutte le chiavi
+                    var keys = Object.keys(data);
+                    for(var k = 0; k < keys.length; k ++) {
+                        var key = keys[k];
+                        if(key != key.toLowerCase())
+                        {
+                            data[key.toLowerCase()] = data[key];
+                            delete data[key];
+                        }
+                    }
+
+                    //aggiungo il project name
+                    data.projectName = projectName;
+                    data.id = data.id.toString();
+                    data.loc = {
+                        type: "Point",
+                        coordinates:[data.longitude, data.latitude]
+                    };
+
+                    dataCollection.save(data,
+                        function (err)
+                        {
+                            if (err)
+                                cb_each(err);
+
+                            else
+                                cb_each(null);
+                        }
+                    );
+                },
+            function(err)
+            {
+                    if (err)
+                    {
+                        console.error("ERROR addDataArray at row: " + cont);
+                        console.error(JSON.stringify(err));
+                        callback(err);
+                    }
+                    else
+                    {
+                        console.log("END EACH addDataArray - cont=" + cont );
+                        callback(null);
+                    }
+                });
+
+        });
+    }
+    catch (e)
     {
         console.error("Data EXCEPTION: add DataArray");
         console.error(e);
+        console.error(e.stack);
     }
 }
+
+
 
 module.exports = Data;
