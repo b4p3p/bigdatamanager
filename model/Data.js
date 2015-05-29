@@ -1,6 +1,7 @@
 var async = require('async');
 var fs = require('fs');
 var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
 var converter = require('../controller/converterCtrl');
 
 const ERROR = {
@@ -20,17 +21,22 @@ var Data = function (data)
 
 Data.MODEL_NAME = "data";
 
-Data.DATA_SCHEMA = new mongoose.Schema({
+Data.DATA_SCHEMA = new Schema({
     projectName: { type : String, required : true },
-    id: { type : Number, required : true },
+    id: { type : String, required : true },
     date: Date,
     latitude: Number,
     longitude: Number,
+    loc: {
+        type: String,
+        coordinates: []
+    },
     source: String,
     text: { type : String, required : true },
     user: String,
     tag: String
 });
+//Data.DATA_SCHEMA.index({ loc: '2dsphere' });
 
 Data.projectName = null;
 
@@ -157,7 +163,6 @@ Data.getData = function(projectName, callback)
 
     DataModel.find({projectName:projectName})
         .lean()
-        .limit(10)
         .exec( function(err, docs)
         {
             if (err)
@@ -198,8 +203,15 @@ function addDataArray(arrayData, projectName, callback) {
             //aggiungo il project name
             data.projectName = projectName;
 
+            //aggiungo il punto per le query spaziali
+            data.loc.type ="Point";
+            data.loc.coordinates.push(data.longitude);
+            data.loc.coordinates.push(data.latitude);
+
+            data.id = data.id.toString();
+
             var newData = new DataModel(data);
-            newData.save(function (err)
+            newData.save( function (err)
             {
                 if (err)
                     cb_each(err);

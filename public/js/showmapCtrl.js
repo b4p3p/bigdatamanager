@@ -272,6 +272,7 @@ function setData_MarkerCluster()
         var d = ShowmapCtrl.datas[i];
         var etichetta = d.tag;
         var text = d.text;
+        var id = d.id;
         //var date = d.date;
         var lat = d.latitude;
         var lng = d.longitude;
@@ -283,7 +284,9 @@ function setData_MarkerCluster()
                 icon: icon,
                 title: text
             });
-        marker.bindPopup(text + "<br><b>Tag: </b>" + etichetta);
+        marker.bindPopup(text +
+            "<br><b>Tag: </b>" + etichetta +
+            "<br><b>ID: </b>" + id);
         ShowmapCtrl.layerMakerCluster.addLayer( marker );
     }
 }
