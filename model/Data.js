@@ -49,13 +49,28 @@ Data.projectName = null;
  */
 Data.prototype.data = {};
 
+/**
+ *
+ * @param type {String} - "csv" || "json"
+ * @param fileNames {Array} - names array
+ * @param projectName {String}
+ * @param cb_ris - callback({Error},{Result})
+ */
 Data.importFromFile = function(type, fileNames, projectName, cb_ris)
 {
     console.log("### START each ### ");
 
-    async.each(fileNames, function(file, cb_each) {
+    var Result = {
+        success: [],
+        fail: []
+    };
+
+    async.each(fileNames, function(file, cb_each)
+
+    {
 
         async.waterfall(
+
             [
             // 1) leggo il file
             function (cb_wf) {
@@ -101,23 +116,27 @@ Data.importFromFile = function(type, fileNames, projectName, cb_ris)
             function (jsonData, cb_wf){
                 console.log("  3) salvo il json: length" + jsonData.length );
 
-                addDataArray(jsonData, projectName, function(err)
+                addDataArray(jsonData, projectName, function(err, result)
                 {
+                    //non da mai errore, ma result
                     if(err) {
                         console.log("     errore salvataggio file: " + file );
                         console.log("     err: " + err );
                         cb_wf(err);
 
                     }else{
-                        cb_wf(null, jsonData.length);
+                        cb_wf(null, result);
                     }
 
                 });
             } ],
 
             // Funzione di errore di waterfall
-            function (err)
+            function (err, result)
             {
+                Result.success.concat(result.success);
+                Result.fail.concat(result.fail);
+
                 if (err)
                 {
                     console.log("ERROR WATERFALL Data");
@@ -146,7 +165,7 @@ Data.importFromFile = function(type, fileNames, projectName, cb_ris)
             console.log("    Status: OK");
             console.log("###############");
         }
-        cb_ris(err);
+        cb_ris(err, Result);
 
     });
 
@@ -181,7 +200,7 @@ Data.getData = function(projectName, callback)
  *
  * @param arrayData
  * @param projectName
- * @param callback {Error}
+ * @param callback({Error},{Result})
  */
 function addDataArray(arrayData, projectName, callback) {
 
@@ -201,6 +220,11 @@ function addDataArray(arrayData, projectName, callback) {
             console.log("START EACH addDataArray" );
 
             var dataCollection = db.collection('datas');
+            var result =
+            {
+                success: [],
+                fail: []
+            };
 
             async.forEach(arrayData, function(data, cb_each)
             {
@@ -220,6 +244,10 @@ function addDataArray(arrayData, projectName, callback) {
                     //aggiungo il project name
                     data.projectName = projectName;
                     data.id = data.id.toString();
+                    //data.loc = {
+                    //    type: "Point",
+                    //    coordinates:[data.longitude, data.latitude]
+                    //};
                     data.loc = {
                         type: "Point",
                         coordinates:[data.longitude, data.latitude]
@@ -229,10 +257,12 @@ function addDataArray(arrayData, projectName, callback) {
                         function (err)
                         {
                             if (err)
-                                cb_each(err);
+                                result.fail.push(err);
 
                             else
-                                cb_each(null);
+                                result.success.push(true);
+
+                            cb_each(null);
                         }
                     );
                 },
@@ -242,12 +272,12 @@ function addDataArray(arrayData, projectName, callback) {
                     {
                         console.error("ERROR addDataArray at row: " + cont);
                         console.error(JSON.stringify(err));
-                        callback(err);
+                        callback(err, result);
                     }
                     else
                     {
                         console.log("END EACH addDataArray - cont=" + cont );
-                        callback(null);
+                        callback(null, result);
                     }
                 });
 

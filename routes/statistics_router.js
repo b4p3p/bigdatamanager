@@ -41,7 +41,6 @@ module.exports = function (app) {
                 }
 
                 var datas = db.collection('datas');
-                var nations = db.collection('nations');
                 var regions = db.collection('regions');
 
                 async.parallel(
@@ -122,14 +121,20 @@ module.exports = function (app) {
 
                     function (err, results) {
                         // results is now equals to: {one: 1, two: 2}
-                        var obj = {
-                            dateMin: results.minmax.date_min,
-                            dateMax: results.minmax.date_max,
-                            tags: results.tags,
-                            otherTag: results.otherTag == 1,
-                            nations: results.nations,
-                            data: results.data
-                        };
+
+                        var obj = {};
+
+                        if (results.minmax)
+                        {
+                            obj.dateMin = results.minmax.date_min;
+                            obj.dateMax = results.minmax.date_max;
+                        }
+
+                        obj.tags = results.tags;
+                        obj.otherTag=results.otherTag == 1;
+                        obj.nations=results.nations;
+                        obj.data=results.data;
+
                         db.close();
                         res.json(obj);
                     }
@@ -140,6 +145,90 @@ module.exports = function (app) {
             console.error(e);
             console.error(e.stack);
         }
+    });
+
+    /**
+     *  output:
+     *  [
+     *      {
+     *          name: {String}
+     *          geometry: {[]}
+     *          count: {Number}
+     *      } ,
+     *      {...}
+     *  ]
+     */
+    app.get('/getregions', function (req, res)
+    {
+        var url = 'mongodb://localhost:27017/oim';
+        var coll_datas      = null;
+        var coll_regions    = null;
+        var db              = null;
+        var ris = {};
+
+        async.waterfall(
+            [
+                connect,
+                getRegions,
+                processRegions
+            ],
+            function(err){
+
+            }
+        );
+
+        // connessione al db
+        function connect(next)
+        {
+            MongoClient.connect(url, function (err, _db) {
+                coll_datas      = _db.collection('datas');
+                coll_regions    = _db.collection('regions');
+                db = _db;
+                next(null);
+            });
+        }
+
+        //prendo le regioni
+        function getRegions(next)
+        {
+            coll_regions.find( {},
+                ["properties.NAME_1", "geometry"])
+                .toArray( function(err, regions ) {
+
+                next(null, regions);
+
+            });
+        }
+
+        //ciclo sulle regioni
+        function processRegions(regions, next)
+        {
+            async.each(regions, processRegion, function (err) {
+
+                next(null)
+
+            });
+        }
+
+        // processo la singola regione
+        function processRegion(region, next)
+        {
+
+            coll_datas.find({
+                loc: {
+                    $geoWithin:
+                    {
+                        $geometry: region.geometry
+                    }
+                }
+            }).count( function(err, cont) {
+
+                next(null);
+
+            });
+
+        }
+
     });
 
     app.get('/showmap', function (req, res)

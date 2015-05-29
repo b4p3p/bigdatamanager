@@ -277,6 +277,7 @@ function setData_MarkerCluster()
         var lat = d.latitude;
         var lng = d.longitude;
         var icon = getIcon(etichetta);
+        var loc = d.loc;
 
         var marker = new L.Marker(
             new L.LatLng(lat, lng),
@@ -286,7 +287,12 @@ function setData_MarkerCluster()
             });
         marker.bindPopup(text +
             "<br><b>Tag: </b>" + etichetta +
-            "<br><b>ID: </b>" + id);
+            "<br><b>ID: </b>" + id +
+            "<br><b>Lon: </b>" + loc.coordinates[0] +
+            "<br><b>Lat: </b>" + loc.coordinates[1] +
+            "<br><b>Lon: </b>" + lng +
+            "<br><b>Lat: </b>" + lat);
+
         ShowmapCtrl.layerMakerCluster.addLayer( marker );
     }
 }
