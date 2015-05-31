@@ -66,6 +66,12 @@ module.exports = function (app) {
         var _datas = null;
         var _regions = null;
         var cont_modificati = 0;
+        var projectName = req.query.projectName;
+
+        if(projectName == null || projectName == "") {
+            res.json(databaseError(1,"'projectName' is required"));
+            return;
+        }
 
         async.waterfall([
 
@@ -100,14 +106,7 @@ module.exports = function (app) {
             }
 
         ], function (err) {
-
-            var status = {
-                error: 0,
-                update: cont_modificati
-            };
-
-            res.json(status);
-
+            res.json(databaseError(0, cont_modificati));
         });
 
         function updateRegions(regions, callback) {
@@ -124,7 +123,8 @@ module.exports = function (app) {
         function updateRegion(region, callback)
         {
             _datas.find( {
-                loc: {
+                projectName: projectName,
+                loc:{
                     $geoWithin: {
                         $geometry: region.geometry
                     }
@@ -133,11 +133,15 @@ module.exports = function (app) {
 
                 cont_modificati = 0;
 
-                async.each(editDatas, updateDato.bind(null, region), function(err)
-                {
-                    console.log(region.properties.NAME_1 + ": "  + cont_modificati);
+                if(editDatas == null || editDatas.length == 0 )
                     callback(null);
-                });
+
+                else
+                    async.each(editDatas, updateDato.bind(null, region), function(err)
+                    {
+                        console.log(region.properties.NAME_1 + ": "  + cont_modificati);
+                        callback(null);
+                    });
             });
         }
 

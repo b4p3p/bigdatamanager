@@ -16,9 +16,17 @@
     #map{
         width: 105%;
     }
-    #spinner{
-        float: right;
+    .spinner-container
+    {
+        position: relative;
+        top: 12px;
+        display: inline-table;
+        min-width: 15px;
     }
+    #spinner-boundaries  {
+        /*margin-left: 20px;*/
+    }
+
     #slider-container
     {
         position: relative;
@@ -84,6 +92,10 @@
 
     <form class="form-inline form-map" id="form">
 
+        <div class="spinner-container">
+            <i class="fa fa-spinner fa-spin spinner-datas"></i>
+        </div>
+
         <div class="checkbox">
             <img src="/public/img/icon-heatmap.png" class="img-chk">
             <label>
@@ -93,28 +105,36 @@
             </label>
         </div>
 
+        <div class="spinner-container">
+            <i class="fa fa-spinner fa-spin spinner-datas"></i>
+        </div>
+
         <div class="checkbox">
             <img src="/public/img/icon-marker-cluster.png" class="img-chk">
             <label>
                 <input type="checkbox" onclick="ShowmapCtrl.markerCluster_click()"
                        id="chk_markerCluster">
                 Show Cluster
-                <i class="fa fa-spinner fa-spin hidden" id="spinner-cluster"
-                   style="margin-top: 8px"></i>
             </label>
         </div>
 
+        <!-- spinner del show cluster -->
+        <div class="spinner-container">
+            <i class="fa fa-refresh fa-spin hidden" id="spinner-cluster"></i>
+        </div>
+
+        <div class="spinner-container">
+            <i class="fa fa-spinner fa-spin spinner-regions" id="spinner-boundaries"></i>
+        </div>
+
         <div class="checkbox">
+
             <img src="/public/img/boundaries-ico.png" class="img-chk">
             <label>
                 <input type="checkbox" onclick="ShowmapCtrl.showBoundaries_click()"
                        id="chk_boundaries">
                 Show boundaries
             </label>
-        </div>
-
-        <div class="checkbox" style="float: right;padding-top: 20px">
-            <i class="fa fa-spinner fa-spin" id="spinner"></i>
         </div>
 
     </form>
@@ -129,6 +149,7 @@
 
     ShowmapCtrl.initMap('map');
     ShowmapCtrl.getData();
+    ShowmapCtrl.getRegions();
     ShowmapCtrl.initGui();
 
     //fix combo close

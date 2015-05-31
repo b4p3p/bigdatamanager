@@ -28,6 +28,14 @@ var projectCtrl = new function() {
 
     };
 
+    this.deleteColumnFormatter = function (value, row) {
+        return '<button type="button" class="btn btn-danger btn-open">' +
+            '<span class="glyphicon glyphicon-ok" aria-hidden="true" ' +
+            'project="' + row.projectName + '"' +
+            'onclick="projectCtrl.deleteProject_Click(\'' + row.projectName + '\')"/>' +
+            '</button>';
+    };
+
     Number.prototype.padLeft = function(base,chr){
         var  len = (String(base || 10).length - String(this).length)+1;
         return len > 0? new Array(len).join(chr || '0')+this : this;
@@ -56,6 +64,50 @@ var projectCtrl = new function() {
     this.dateLastUpdateFormatter = function (value, row) {
         var d = new Date(value);
         return d.toStringDate();
+    };
+
+    this.deleteProject_Click = function (projectName) {
+
+        bootbox.confirm("Are you sure?", function(result) {
+            if(result)
+                deleteProject(projectName);
+        });
+    };
+
+    var deleteProject = function(projectName)
+    {
+        /**
+         *      success message:
+         *      {
+         *          status: 0 | >0   0:OK  >0:Error
+         *          message: info
+         *      }
+         */
+
+        $.ajax({
+            type: "POST",
+            crossDomain:true,
+            dataType: "json",
+            url: "http://localhost:8080/delproject",
+            data: { projectName: projectName } ,
+            success: function(msg)
+            {
+                if(msg.status == 0)
+                    bootbox.bootbox.dialog({
+                        title: "Result operation",
+                        message: '<div class="alert alert-success">' + msg.message + '</div>'
+                    });
+                else
+                    bootbox.dialog({
+                        title: "Result operation",
+                        message: '<div class="alert alert-danger">' + msg.message + '</div>'
+                    });
+            },
+            error: function(xhr, status, error)
+            {
+                console.error("ERR: openProject_Click: " + status + " " + xhr.status);
+            }
+        });
     };
 
     this.openProject_Click = function (projectName) {

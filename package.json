@@ -29,7 +29,10 @@
     "csvtojson" : "^0.3.21",
     "csv" : "^0.4.2",
     "multer": ">=0.1.8",
-    "leaflet": ">=0.7.3"
+    "leaflet": ">=0.7.3",
+    "request-json": ">=0.5.3",
+    "urlencode": ">=1.0.0",
+    "bootbox": ">=4.4.0"
   }
 }
 

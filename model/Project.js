@@ -1,11 +1,13 @@
+var mongoose = require('mongoose');
+var connection = mongoose.createConnection('mongodb://localhost/oim');
+var url = 'mongodb://localhost:27017/oim';
+var MongoClient = require('mongodb').MongoClient;
+
 var Project = function (data) {
     this.data = data;
 };
 
 Project.MODEL_NAME = "project";
-
-var mongoose = require('mongoose');
-var connection = mongoose.createConnection('mongodb://localhost/oim');
 
 Project.PROJECT_SCHEMA = new mongoose.Schema({
     projectName: { type : String, required : true },
@@ -70,6 +72,33 @@ Project.addProject = function(dataProject, callback)
         }
     );
 
+};
+
+/**
+ * @param projectName
+ * @param callback - { fn(  {status:Number, message:String, deletedCount:Number}  )
+ */
+Project.delProject = function(projectName, callback)
+{
+    MongoClient.connect(url, function(err, db) {
+        if(err!=null)
+        {
+            callback(err);
+            callback({status:1, message:err.toString(), contDeleted: 0});
+        }
+        else
+        {
+            var datas = db.collection('datas');
+            datas.removeMany({projectName: projectName}, function(err, ris)
+            {
+                if ( err == null )
+                    callback({status:0, message:"", deletedCount: ris.deletedCount});
+                else
+                    callback({status:1, message:err.toString(), deletedCount: 0});
+                db.close();
+            });
+        }
+    });
 };
 
 module.exports = Project;

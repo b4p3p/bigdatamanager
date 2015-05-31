@@ -66,9 +66,7 @@ Data.importFromFile = function(type, fileNames, projectName, cb_ris)
     };
 
     async.each(fileNames, function(file, cb_each)
-
     {
-
         async.waterfall(
 
             [
@@ -206,8 +204,8 @@ function addDataArray(arrayData, projectName, callback) {
 
     try {
 
-        var connection = mongoose.createConnection('mongodb://localhost/oim');
-        var DataModel = connection.model(Data.MODEL_NAME, Data.DATA_SCHEMA);
+        //var connection = mongoose.createConnection('mongodb://localhost/oim');
+        //var DataModel = connection.model(Data.MODEL_NAME, Data.DATA_SCHEMA);
         var cont = 0;
         var url = 'mongodb://localhost:27017/oim';
         MongoClient.connect(url, function(err, db) {

@@ -164,7 +164,7 @@ module.exports = function (app) {
         var coll_datas      = null;
         var coll_regions    = null;
         var db              = null;
-        var ris = {};
+        var ris = [];
 
         async.waterfall(
             [
@@ -173,13 +173,15 @@ module.exports = function (app) {
                 processRegions
             ],
             function(err){
-
+                console.log(" end each");
+                res.json(ris);
             }
         );
 
         // connessione al db
         function connect(next)
         {
+            console.log("CALL: connect");
             MongoClient.connect(url, function (err, _db) {
                 coll_datas      = _db.collection('datas');
                 coll_regions    = _db.collection('regions');
@@ -192,28 +194,25 @@ module.exports = function (app) {
         function getRegions(next)
         {
             coll_regions.find( {},
-                ["properties.NAME_1", "geometry"])
+                ["type","properties", "geometry"])
                 .toArray( function(err, regions ) {
-
+                console.log(" found: " + regions.length + " regions");
                 next(null, regions);
-
             });
         }
 
         //ciclo sulle regioni
         function processRegions(regions, next)
         {
-            async.each(regions, processRegion, function (err) {
-
+            console.log(" start each");
+            async.each(regions, findCountData, function (err) {
                 next(null)
-
             });
         }
 
-        // processo la singola regione
-        function processRegion(region, next)
+        // trovo i tweet all'interno della regione
+        function findCountData(region, next)
         {
-
             coll_datas.find({
                 loc: {
                     $geoWithin:
@@ -223,10 +222,12 @@ module.exports = function (app) {
                 }
             }).count( function(err, cont) {
 
+                region.properties.count = cont;
+                region.properties.avg = 1;          //TODO calcolare la media
+                ris.push(region);
                 next(null);
 
             });
-
         }
 
     });

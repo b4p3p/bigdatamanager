@@ -2,6 +2,8 @@ var ConstantsRouter = require('./constants_router');
 var Project = require("../model/Project");
 var Data = require("../model/Data");
 var async = require('async');
+var requestJson = require('request-json');
+var urlencode = require('urlencode');
 
 var argContentProjects = function(data){
 
@@ -108,7 +110,10 @@ module.exports = function (app) {
                         sendProjectError(req, res, err.message, err.status);
                     }
                     else {
+
+                        var URLProjectName = urlencode(req.body.projectName);
                         res.redirect("/project");
+                        sincronizazzioneBatch(urlencode(URLProjectName));
                     }
                 }
             );
@@ -119,6 +124,28 @@ module.exports = function (app) {
             console.error(e.stack);
         }
     });
+
+    app.post('/delproject', function (req, res) {
+
+        var projectName = req.body.projectName;
+        Project.delProject(projectName, function(err, ris)
+        {
+            res.json( ris );
+        });
+
+    });
+
+
+    /**
+     *  Richiesta di sincronizzazione in batch
+     */
+    function sincronizazzioneBatch(projectName)
+    {
+        var client = requestJson.createClient('http://localhost:8080');
+        client.get('synchronize?projectName=' + projectName, function(err, res, body) {
+            console.log(body.rows[0].title);
+        });
+    }
 
     /**
      *  Method: POST

@@ -26,13 +26,17 @@ var cfg =
 ShowmapCtrl.mainMap = null;
 ShowmapCtrl.mapContainer = '';
 ShowmapCtrl.datas = null;
+ShowmapCtrl.regions = null;
 ShowmapCtrl.filteredData = null;
 
 //layer
 ShowmapCtrl.layerHeatmap = null;
 ShowmapCtrl.layerMakerCluster = null;
+ShowmapCtrl.layerBoundaries = null;
+ShowmapCtrl.tagsLegend = null;
 
 //controls
+ShowmapCtrl.legendControl = null;
 ShowmapCtrl.sliderTimer = null;
 ShowmapCtrl.cmbSelectTag = null;
 ShowmapCtrl.cmbSelectNations = null;
@@ -114,12 +118,32 @@ ShowmapCtrl.getData = function ()
             ShowmapCtrl.otherTag = data.otherTag;
             ShowmapCtrl.nations = data.nations;
 
-            HideSpinner();
+            $(".spinner-datas").hide();
+
             loadData();
 
         },
         error: function (xhr, status, error) {
             console.error("ERR: ShowmapCtrl.getData " + status + " " + xhr.status);
+            console.error("     Status: " + status + " " + xhr.status);
+            console.error("     Error: " + error);
+        }
+    });
+};
+
+ShowmapCtrl.getRegions = function()
+{
+    $.ajax({
+        type: "get",
+        crossDomain: true,
+        dataType: "json",
+        url: "http://localhost:8080/getregions",
+        success: function (data) {
+            ShowmapCtrl.regions = data;
+            $(".spinner-regions").hide();
+        },
+        error: function (xhr, status, error) {
+            console.error("ERR: ShowmapCtrl.getRegions " + status + " " + xhr.status);
             console.error("     Status: " + status + " " + xhr.status);
             console.error("     Error: " + error);
         }
@@ -157,7 +181,10 @@ ShowmapCtrl.cmdFilter_click = function()
 
 ShowmapCtrl.showBoundaries_click = function()
 {
-    console.log("showBoundaries_click");
+    if ( $("#chk_boundaries")[0].checked )
+        showBoundaries();
+    else
+        hideBoundaries();
 };
 
 var showHeatmap = function ()
@@ -174,8 +201,12 @@ var showHeatmap = function ()
 
 var showMarkerCluster = function()
 {
-    $("#spinner-cluster").removeClass("hidden");
-    setTimeout(_showMarkerCluster, 5);
+    //visualizzo lo spinner di attesa
+    var spinnerCluster = $("#spinner-cluster");
+    spinnerCluster.removeClass("hidden");
+    spinnerCluster.show();
+
+    setTimeout(_showMarkerCluster, 10);
 };
 
 var _showMarkerCluster = function()
@@ -186,8 +217,151 @@ var _showMarkerCluster = function()
     ShowmapCtrl.mainMap.addLayer( ShowmapCtrl.layerMakerCluster );
     setData_MarkerCluster();
 
-    $("#spinner-cluster").addClass("hidden");
+    //rimuovo lo spinner di attesa
+    var spinnerCluster = $("#spinner-cluster");
+    spinnerCluster.addClass("hidden");
+    spinnerCluster.hide();
 };
+
+var showBoundaries = function () {
+
+    if (ShowmapCtrl.layerBoundaries == null)
+    ShowmapCtrl.layerBoundaries = L.geoJson(
+        ShowmapCtrl.regions ,
+        {
+            style: _style,
+            onEachFeature: _onEachFeature
+        }
+    );
+
+    ShowmapCtrl.layerBoundaries.addTo( ShowmapCtrl.mainMap );
+    ShowmapCtrl.layerBoundaries.bringToFront();
+
+};
+
+function _style(feature)
+{
+    return{
+        fillColor: _getColor( feature.properties.avg ),
+        fillOpacity: 0.5,
+        weight: 2,
+        opacity: 0.5,
+        color: 'white',
+        dashArray: '3'
+    };
+}
+
+function _getColor(percentage)
+{
+    return percentage > 0.8 ? '#800026' :
+        percentage > 0.7 ? '#BD0026' :
+            percentage > 0.6 ? '#E31A1C' :
+                percentage > 0.5 ? '#FC4E2A' :
+                    percentage > 0.4 ? '#FD8D3C' :
+                        percentage > 0.3 ? '#FEB24C' :
+                            percentage > 0.2 ? '#FED976' :
+                                '#FFEDA0';
+}
+
+function _onEachFeature(feature, layer)
+{
+    layer.on
+    (
+        {
+            mouseover: _mouseover_feature,
+            mouseout: _mouseout_feature,
+            click: _click_feature
+        }
+    );
+}
+
+function _mouseover_feature(e)
+{
+    //console.log("PRE -EVENT _mouseover_feature -" + mapManager.activeLayerBoundaries + "- -" + mapManager.showInfoActiveLayer + "-");
+    //
+    //if ( mapManager.activeLayerBoundaries != null &&
+    //    mapManager.showInfoActiveLayer ) return;
+    //
+    ////console.log("POST-EVENT _mouseover_feature");
+    //
+    //var layer = e.target;
+    //mapManager.MainMap.dragging.disable();
+    //
+    //layer.setStyle({
+    //    weight: 5,
+    //    color: '#666',
+    //    dashArray: '',
+    //    fillOpacity: 0.7
+    //});
+    //
+    //if (!L.Browser.ie && !L.Browser.opera) {
+    //    layer.bringToFront();
+    //}
+}
+
+function _mouseout_feature(e)
+{
+    //if ( mapManager.activeLayerBoundaries != null &&
+    //    mapManager.showInfoActiveLayer ) return;
+    //
+    //mapManager.MainMap.dragging.enable();
+    //mapManager.layerBoundaries.resetStyle(e.target);
+}
+
+//this.activeLayerBoundaries = null;
+//this.showInfoActiveLayer = false;
+
+function _click_feature(e)
+{
+    //mapManager.activeLayerBoundaries = e.target;
+    //
+    //if ( mapManager.showInfoActiveLayer )
+    //{
+    //    mapManager.MainMap.closePopup();
+    //    return;
+    //}
+    //
+    //console.log("CALL: _click_feature showInfoActiveLayer=" + mapManager.showInfoActiveLayer );
+    //
+    //var tot_tweet = e.target.feature.properties.count;
+    //var tweets = e.target.feature.properties.tweets;
+    //var pop =
+    //    '<div id="popup">' +
+    //    '<div >' +
+    //    '<h3 style="text-align: center"><b>' + e.target.feature.properties.NOME + '</b></h4>';
+    //
+    //console.log( JSON.stringify( e.target.feature.properties.tweets ) );
+    //$.each( tweetController.tags, function(index, value) {
+    //
+    //    console.log(value.tag + " = " + e.target.feature.properties.tweets[value.tag] );
+    //
+    //    pop = pop +
+    //        '<p style="margin-top: 0px;margin-bottom: 0px">' +
+    //        '<label style="width: 80%; min-width: 100px">' +
+    //        value.tag.charAt(0).toUpperCase() + value.tag.slice(1) + ': ' +
+    //        '</label>' +
+    //        '<label>' +
+    //        e.target.feature.properties.tweets[value.tag] +
+    //        '</label>' +
+    //        '</p>';
+    //});
+    //pop = pop +
+    //    '</div>' +
+    //    '<div style="width:100%; height:1px; background: #000000" ">' +
+    //    '</div>' +
+    //    '<label style="width: 80%;min-width: 100px">' +
+    //    '</label>' +
+    //    '<label style="text-align: right; margin-top: 10px">' + tot_tweet +
+    //    '</label>' +
+    //    '<button type="button" class="btn btn-default btn-sm btn-block" ' +
+    //    'onclick="guiManager.OnClickButton()">' +
+    //    'Show tweets' +
+    //    '</button></div>';
+    //
+    //e.target.bindPopup(pop);
+    //
+    //mapManager.MainMap.fitBounds(e.target.getBounds());
+}
 
 var hideHeatmap = function()
 {
@@ -201,6 +375,16 @@ var hideMarkerCluster = function()
     ShowmapCtrl.mainMap.removeLayer( ShowmapCtrl.layerMakerCluster );
     if ( ShowmapCtrl.tagsLegend != null )
         ShowmapCtrl.mainMap.removeControl( ShowmapCtrl.tagsLegend );
+};
+
+var hideBoundaries = function()
+{
+    if ( ShowmapCtrl.layerBoundaries != null)
+    {
+        ShowmapCtrl.mainMap.removeLayer( ShowmapCtrl.layerBoundaries );
+        ShowmapCtrl.layerBoundaries = null;
+        ShowmapCtrl.mainMap.removeControl( ShowmapCtrl.legendControl );
+    }
 };
 
 var selectedNations = [];
@@ -347,11 +531,6 @@ function refreshData()
     {
         setData_MarkerCluster( null );
     }
-}
-
-function HideSpinner()
-{
-    $("#spinner").hide();
 }
 
 function resizeMap()
