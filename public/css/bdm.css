@@ -25,5 +25,8 @@
     margin-top: 20px;
 
 }
+html, body{
+    height: 95%;
+}
 
 

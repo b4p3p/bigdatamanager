@@ -1,29 +1,66 @@
-<div id="RegionsBarContainer" class="graphcontainer"
-     style="width: 100%;display: block;  margin-top: 2%">
+<script src="/public/js/Stat-RegionBarCtrl.js"></script>
 
-    <div class="spinner" id="RegionsBarSpinner" style="text-align: center">
-        <img src="public/img/ajax-loader.gif" alt="Loading" class="spinnerImage"/>
-        <p>Loading regions bar graph...</p>
-    </div>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 
-    <div class="content hidden">
+<script>
+    google.load("visualization", "1.1", {packages:[ 'bar', 'corechart' ] });
+</script>
 
-        <form class="form-horizontal" style="margin-left: 30%; width: 100%;">
-            <div class="control-group">
-                <label class="control-label" for="regionsBar_visualizationMode"
-                       style="float: left;margin-right: 5px">Visualization mode:</label>
-                <div class="controls">
-                    <select class="selectpicker"
-                            id="regionsBar_visualizationMode">
-                        <option value=0 >Tweet Number</option>
-                        <option value=1 >Tweet Density</option>
-                    </select>
-                </div>
-            </div>
-        </form>
+<style>
 
-        <div id="RegionsBar" style="margin-left:20%;margin-right:20%;"></div>
+    #formType {
+        /*margin-left: 30%;*/
+        /*width: 100%;*/
+        margin-bottom: 10px;
+    }
+    #lblVisualizationMode{
+        /*float: left;*/
+        /*margin-right: 5px*/
+    }
+    #regionsBar
+    {
+        top: 50px;
+        width: 100%;
+    }
 
-    </div>
+</style>
+
+<div id="spinner" style="text-align: center">
+    <img src="/public/img/ajax-loader.gif" alt="Loading" class="spinnerImage"/>
+    <p>Loading regions radar graph...</p>
+</div>
+
+<div id="container" class="hidden">
+
+    <form class="form-inline" id="formType" role="form">
+
+        <div class="form-group">
+            <label class="control-label" for="cmbVisualizationMode"
+                   id="lblVisualizationMode">Visualization mode:</label>
+            <select class="selectpicker"
+                    id="cmbVisualizationMode">
+                <option value=0 >Tweet Number</option>
+                <option value=1 >Tweet Density</option>
+            </select>
+        </div>
+    </form>
+
+    <div id="regionsBar" ></div>
 
 </div>
+
+<script>
+    RegionRadarCtrl.initGUIEvent();
+    RegionRadarCtrl.getData();
+
+</script>
+
+
+
+
+<script>
+
+    RegionBarCtrl.init();
+    RegionBarCtrl.getData();
+
+</script>

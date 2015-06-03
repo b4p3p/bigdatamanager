@@ -1,23 +1,38 @@
-<div id="RegionsRadarContainer"
-     class="graphcontainer hidden"
-     style="margin:4%">
+<style>
+    #container {
+        /*margin:4%*/
+    }
+    #formCompare{
+        margin-bottom: 50px;
+        background:#d3d3d3;
+    }
+    .radar
+    {
+        /*float: right;*/
+    }
+</style>
 
-    <div class="spinner" id="RegionsRadarSpinner" style="text-align: center">
-        <img src="public/img/ajax-loader.gif" alt="Loading" class="spinnerImage"/>
-        <p>Loading regions radar graph...</p>
-    </div>
+<script src="/public/js/Stat-RegionRadarCtrl.js"></script>
+<script src="/public/lib/chartjs/Chart.js"></script>
 
-    <div class="content hidden">
+<div id="spinner" style="text-align: center">
+    <img src="/public/img/ajax-loader.gif" alt="Loading" class="spinnerImage"/>
+    <p>Loading regions radar graph...</p>
+</div>
+
+<div id="container" class="hidden">
+
+    <div class="content">
 
         <!--min-height: 200px;-->
-        <div style="margin-bottom: 50px; background:#d3d3d3;"
-             id="RadarCompare_form">
-            <div id="RadarCompare_hint" style="margin: 0% 0% 0% 0%;" >
+        <div class="hidden" id="formCompare">
+            <div id="RadarCompare_hint" style="margin:0;" >
 
                 <div class="alert alert-warning" role="alert"
                      id="radars_warning">
                     <h4><b>Select</b> at least two regions</h4>
                 </div>
+
                 <!--<button type="button" class="btn btn-default btn-lg"-->
                 <!--id="RadarCompare_cmdCompare" disabled-->
                 <!--style="margin: 0% 44% 0% 46%;">-->
@@ -35,18 +50,15 @@
 
                 <!--class="col-md-2"-->
 
-                <th data-field="region"
-                    data-sortable="true"
-                        >
+                <th data-field="region" data-sortable="true">
                     Region
                 </th>
-                <th data-field="count"
-                    data-sortable="true">
+                <th data-field="count" data-sortable="true">
                     Tweet count
                 </th>
-                <th data-field="id"
-                    data-sortable="true"
-                    data-formatter="statController._drawRegionsRadar_graphColumnFormatter">
+                <th data-field="id" data-sortable="false"
+                    data-formatter="RegionRadarCtrl.drawRegionRadar"
+                    data-halign="right" data-align="right">
                     Tweets
                 </th>
             </tr>
@@ -60,3 +72,8 @@
     <!--</canvas>-->
 
 </div>
+
+<script>
+    RegionRadarCtrl.getData();
+    RegionRadarCtrl.initGUIEvent();
+</script>

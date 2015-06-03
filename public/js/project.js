@@ -30,7 +30,7 @@ var projectCtrl = new function() {
 
     this.deleteColumnFormatter = function (value, row) {
         return '<button type="button" class="btn btn-danger btn-open">' +
-            '<span class="glyphicon glyphicon-ok" aria-hidden="true" ' +
+            '<span class="glyphicon glyphicon-remove" aria-hidden="true" ' +
             'project="' + row.projectName + '"' +
             'onclick="projectCtrl.deleteProject_Click(\'' + row.projectName + '\')"/>' +
             '</button>';
@@ -84,6 +84,8 @@ var projectCtrl = new function() {
          *      }
          */
 
+        var html = "";
+
         $.ajax({
             type: "POST",
             crossDomain:true,
@@ -93,19 +95,29 @@ var projectCtrl = new function() {
             success: function(msg)
             {
                 if(msg.status == 0)
-                    bootbox.bootbox.dialog({
-                        title: "Result operation",
-                        message: '<div class="alert alert-success">' + msg.message + '</div>'
-                    });
+                {
+                    html =
+                        '<div class="alert alert-success">' +
+                            "Project has been removed" + '<br>' +
+                            'Deleted: ' + msg.deletedCount + " items" +
+                        '</div>';
+
+                        bootbox.alert(html, function() {
+                            window.location.reload();
+                        });
+                }
                 else
-                    bootbox.dialog({
-                        title: "Result operation",
-                        message: '<div class="alert alert-danger">' + msg.message + '</div>'
+                {
+                    html = '<div class="alert alert-danger">' + msg.message + '</div>';
+                    bootbox.alert(html, function() {
+                        window.location.reload();
                     });
+                }
             },
             error: function(xhr, status, error)
             {
                 console.error("ERR: openProject_Click: " + status + " " + xhr.status);
+                window.location.reload();
             }
         });
     };
@@ -135,4 +147,4 @@ var projectCtrl = new function() {
 
     };
 
-}
+};

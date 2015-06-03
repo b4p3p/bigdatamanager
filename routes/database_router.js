@@ -76,7 +76,8 @@ module.exports = function (app) {
         async.waterfall([
 
             //connessione al database
-            function (cb_w) {
+            function (cb_w)
+            {
                 var url = 'mongodb://localhost:27017/oim';
                 MongoClient.connect(url, function (err, db) {
 
@@ -90,7 +91,8 @@ module.exports = function (app) {
             },
 
             //prendo le regioni
-            function (cb_w) {
+            function (cb_w)
+            {
                 _regions.find({}, ["properties.NAME_0", "properties.NAME_1", "geometry"]).toArray(
                     function (err, regions) {
                         cb_w(null, regions)
@@ -99,12 +101,13 @@ module.exports = function (app) {
             },
 
             // per ogni regione modifico la tupla di datas
-            function (regions, cb_w) {
+            function (regions, cb_w)
+            {
                 updateRegions(regions, function (err) {
                     cb_w(null);
                 });
             }
-
+            
         ], function (err) {
             res.json(databaseError(0, cont_modificati));
         });

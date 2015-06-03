@@ -43,6 +43,8 @@ ShowmapCtrl.cmbSelectNations = null;
 ShowmapCtrl.chkMarkercluster = null;
 ShowmapCtrl.chkHeatmap = null;
 ShowmapCtrl.chkBoudaries = null;
+ShowmapCtrl.activeLayerBoundaries = null;
+ShowmapCtrl.showInfoActiveLayer = false;
 
 //data variable
 ShowmapCtrl.minData = new Date();
@@ -284,83 +286,75 @@ function _mouseover_feature(e)
     //
     ////console.log("POST-EVENT _mouseover_feature");
     //
-    //var layer = e.target;
-    //mapManager.MainMap.dragging.disable();
-    //
-    //layer.setStyle({
-    //    weight: 5,
-    //    color: '#666',
-    //    dashArray: '',
-    //    fillOpacity: 0.7
-    //});
-    //
-    //if (!L.Browser.ie && !L.Browser.opera) {
-    //    layer.bringToFront();
-    //}
+
+    var layer = e.target;
+    ShowmapCtrl.mainMap.dragging.disable();
+
+    layer.setStyle({
+        weight: 5,
+        color: '#666',
+        dashArray: '',
+        fillOpacity: 0.7
+    });
+
+    if (!L.Browser.ie && !L.Browser.opera) {
+        layer.bringToFront();
+    }
 }
 
 function _mouseout_feature(e)
 {
-    //if ( mapManager.activeLayerBoundaries != null &&
-    //    mapManager.showInfoActiveLayer ) return;
-    //
-    //mapManager.MainMap.dragging.enable();
-    //mapManager.layerBoundaries.resetStyle(e.target);
+    if ( ShowmapCtrl.activeLayerBoundaries != null &&
+        ShowmapCtrl.showInfoActiveLayer ) return;
+
+    ShowmapCtrl.mainMap.dragging.enable();
+    ShowmapCtrl.layerBoundaries.resetStyle(e.target);
 }
 
-//this.activeLayerBoundaries = null;
-//this.showInfoActiveLayer = false;
-
-function _click_feature(e)
+function  _click_feature(e)
 {
-    //mapManager.activeLayerBoundaries = e.target;
-    //
-    //if ( mapManager.showInfoActiveLayer )
-    //{
-    //    mapManager.MainMap.closePopup();
-    //    return;
-    //}
-    //
-    //console.log("CALL: _click_feature showInfoActiveLayer=" + mapManager.showInfoActiveLayer );
-    //
-    //var tot_tweet = e.target.feature.properties.count;
-    //var tweets = e.target.feature.properties.tweets;
-    //var pop =
-    //    '<div id="popup">' +
-    //    '<div >' +
-    //    '<h3 style="text-align: center"><b>' + e.target.feature.properties.NOME + '</b></h4>';
-    //
-    //console.log( JSON.stringify( e.target.feature.properties.tweets ) );
-    //$.each( tweetController.tags, function(index, value) {
-    //
-    //    console.log(value.tag + " = " + e.target.feature.properties.tweets[value.tag] );
-    //
-    //    pop = pop +
-    //        '<p style="margin-top: 0px;margin-bottom: 0px">' +
-    //        '<label style="width: 80%; min-width: 100px">' +
-    //        value.tag.charAt(0).toUpperCase() + value.tag.slice(1) + ': ' +
-    //        '</label>' +
-    //        '<label>' +
-    //        e.target.feature.properties.tweets[value.tag] +
-    //        '</label>' +
-    //        '</p>';
-    //});
-    //pop = pop +
-    //    '</div>' +
-    //    '<div style="width:100%; height:1px; background: #000000" ">' +
-    //    '</div>' +
-    //    '<label style="width: 80%;min-width: 100px">' +
-    //    '</label>' +
-    //    '<label style="text-align: right; margin-top: 10px">' + tot_tweet +
-    //    '</label>' +
-    //    '<button type="button" class="btn btn-default btn-sm btn-block" ' +
-    //    'onclick="guiManager.OnClickButton()">' +
-    //    'Show tweets' +
-    //    '</button></div>';
-    //
-    //e.target.bindPopup(pop);
-    //
-    //mapManager.MainMap.fitBounds(e.target.getBounds());
+    // lock map
+    ShowmapCtrl.activeLayerBoundaries = e.target;
+
+    // chiudo altri popup aperti
+    if ( ShowmapCtrl.showInfoActiveLayer ) {
+        ShowmapCtrl.mainMap.closePopup();
+        return;
+    }
+
+    var tot_tweet = e.target.feature.properties.sum;
+    var counter = e.target.feature.properties.counter;
+
+    var pop = '<div class="popup">' +
+                '<h3 class="title-popup">' +
+                    e.target.feature.properties.NAME_1 +
+                '</h3>';
+
+    for(var k in counter)
+    {
+        var tag = k.charAt(0).toUpperCase() + k.slice(1) + ': ';
+        pop = pop +
+            '<div class="row-popup">' +
+             '<div class="label-popup-left">' + tag + '</div>' +
+             '<div class="label-popup-right">' + counter[k] + '</div>' +
+            '</div>';
+    }
+
+    pop += "<hr class='popup-separator'>";
+
+    pop +=
+        '<div class="row-popup">' +
+            '<div class="label-popup-left">Tot:</div>' +
+            '<div class="label-popup-right">' + tot_tweet + '</div>' +
+        '</div>'
+        '<button type="button" class="btn btn-default btn-sm btn-block" onclick="guiManager.OnClickButton()">' +
+            'Show tweets' +
+        '</button>' +
+        '</div>';
+
+    e.target.bindPopup(pop);
+    //ShowmapCtrl.mainMap.fitBounds(e.target.getBounds());
+
 }
 
 var hideHeatmap = function()
@@ -505,32 +499,10 @@ function getAwesomeMarker(color)
 function refreshData()
 {
     console.log("CALL: refreshData");
-
-    //if ( !mapManager.flagIsLoad ) return;
-    //
-    //console.log("###########################################");
-    //
-    //
-    //var conditions = {
-    //    startDate: this.selectedStartDate,
-    //    endDate: this.selectedEndDate,
-    //    selectedTags: guiManager.GetSelectedOptions(mapManager.cmbSelectTag),
-    //    nations: guiManager.GetSelectedOptions(mapManager.cmbSelectNations),
-    //    region: mapManager.selectRegion
-    //};
-    //
-    //if (!mapManager.chkFilterByTag.checked ) conditions.selectedTags = null;
-    //if (!mapManager.chkFilterByNations.checked ) conditions.nations = null;
-    //
     if ( ShowmapCtrl.chkHeatmap && ShowmapCtrl.chkHeatmap.checked)
-    {
         setData_Heatmap( null );
-    }
-
     if ( ShowmapCtrl.chkMarkercluster && ShowmapCtrl.chkMarkercluster.checked )
-    {
         setData_MarkerCluster( null );
-    }
 }
 
 function resizeMap()

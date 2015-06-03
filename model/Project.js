@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var connection = mongoose.createConnection('mongodb://localhost/oim');
 var url = 'mongodb://localhost:27017/oim';
 var MongoClient = require('mongodb').MongoClient;
+var async = require("async");
 
 var Project = function (data) {
     this.data = data;
@@ -83,18 +84,46 @@ Project.delProject = function(projectName, callback)
     MongoClient.connect(url, function(err, db) {
         if(err!=null)
         {
-            callback(err);
             callback({status:1, message:err.toString(), contDeleted: 0});
         }
         else
         {
             var datas = db.collection('datas');
-            datas.removeMany({projectName: projectName}, function(err, ris)
-            {
-                if ( err == null )
-                    callback({status:0, message:"", deletedCount: ris.deletedCount});
+            var projects = db.collection('projects');
+
+            async.parallel({
+                deletedCount: function(parallel){
+                    setTimeout(function(){
+                        datas.removeMany({projectName: projectName}, function(err, ris)
+                        {
+                            //{status:0, message:"", deletedCount:
+                            if ( err == null )
+                                parallel(null, ris.deletedCount);
+                            else
+                                parallel(err.toString());
+                        });
+                    }, 1);
+                },
+                project: function(parallel){
+                    setTimeout(function(){
+                        projects.removeOne({projectName: projectName}, function(err, ris)
+                        {
+                            if ( err == null )
+                                parallel(null, ris.deletedCount);
+                            else
+                                parallel(err.toString());
+                        });
+                    }, 1);
+                }
+            },
+
+            function(err, results) {
+
+                if(err == null)
+                    callback(null, {status:0, message:"", deletedCount: results.deletedCount});
                 else
-                    callback({status:1, message:err.toString(), deletedCount: 0});
+                    callback(err, {status:1, message:err, deletedCount: 0});
+
                 db.close();
             });
         }

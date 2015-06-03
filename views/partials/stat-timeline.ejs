@@ -1,30 +1,72 @@
-<div id="TimeLineContainer" class="graphcontainer hidden">
+<style>
+    #timeLine
+    {
+        /*width:2000px;*/
+        /*height:400px;*/
+        /*margin-top:3%;*/
+        /*margin-right:25%*/
 
-    <div class="spinner" id="TimeLineSpinner" style="text-align: center">
-        <img src="public/img/ajax-loader.gif" alt="Loading" class="spinnerImage"/>
-        <p>Loading time line graph...</p>
-    </div>
+        position: relative;
+        bottom: 0;
 
-    <!---->
-    <div class="content hidden">
+        height: calc(100% - 50px);
 
-        <form class="form-horizontal" style="margin-left: 30%;margin-top: 2%; width: 100%;">
-            <div class="control-group">
-                <label class="control-label" for="regionsBar_visualizationMode"
-                       style="float: left;margin-right: 5px">Visualization mode:</label>
-                <div class="controls">
-                    <select class="selectpicker"
-                            id="timeLine_typeData">
-                        <option value=0 >Day</option>
-                        <option value=1 >Week</option>
-                        <option value=2 >Month</option>
-                    </select>
-                </div>
-            </div>
-        </form>
+        /*width: 2000px;*/
+        border: 2px solid black;
+        padding:20px;
+    }
+    #timeLineContainer{
+        position: relative;
+        top: 0;
+        bottom:0; !important;
+        width:100%;
+        height: 90%;
+        overflow-x: scroll;
+    }
 
-        <canvas id="TimeLine" style="width:600px; height:400px; margin-top:3%; margin-left:25%;margin-right:25%"></canvas>
+    #cmbTypeBisualization
+    {
+        float: left;
+        margin-right: 5px
+    }
 
-    </div>
+</style>
+
+<script src="/public/js/Stat-RegionTimeLineCtrl.js"></script>
+<script src="/public/lib/chartjs/Chart.js"></script>
+
+
+<div id="spinner" style="text-align: center">
+    <img src="/public/img/ajax-loader.gif" alt="Loading" class="spinnerImage"/>
+    <p>Loading time line graph...</p>
+</div>
+
+<!--style="margin-left: 30%;margin-top: 2%; width: 100%;"-->
+
+<!---->
+<div class="content hidden" id="container">
+
+    <form class="form-inline" role="form">
+        <div class="control-group">
+            <label class="control-label" for="cmbTypeVisualization">
+                Visualization mode:
+            </label>
+            <select class="selectpicker"
+                    id="cmbTypeVisualization">
+                <option value=0 >Day</option>
+                <option value=1 >Week</option>
+                <option value=2 >Month</option>
+            </select>
+        </div>
+    </form>
 
 </div>
+
+<div id="timeLineContainer">
+    <canvas class="content hidden" id="timeLine"></canvas>
+</div>
+
+<script>
+    RegionTimeLineCtrl.initGUI();
+    RegionTimeLineCtrl.getData();
+</script>

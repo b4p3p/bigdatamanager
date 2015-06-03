@@ -143,7 +143,8 @@ module.exports = function (app) {
     {
         var client = requestJson.createClient('http://localhost:8080');
         client.get('synchronize?projectName=' + projectName, function(err, res, body) {
-            console.log(body.rows[0].title);
+
+            console.log( "Sincronizzazione effettuata:" + body.message);
         });
     }
 

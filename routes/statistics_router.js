@@ -2,8 +2,7 @@ var ConstantsRouter = require('./constants_router');
 var StatisticsCtrl = require("../controller/statisticsCtrl");
 var MongoClient = require('mongodb').MongoClient;
 var async = require('async');
-
-var s = new StatisticsCtrl();
+var Data = require("../model/Data");
 
 var argContentStatistics = function(datas){
 
@@ -24,6 +23,16 @@ var statisticsError = function(status, message)
         status: status,
         message: message
     }
+};
+
+var _projectName = null;
+var setProjectName = function(req)
+{
+    _projectName = req.session.projectName;
+
+    //TODO debug
+    if(_projectName == null)
+        _projectName = "oim";
 };
 
 module.exports = function (app) {
@@ -88,9 +97,6 @@ module.exports = function (app) {
                         },
                         otherTag: function (callback) {
                             setTimeout(function () {
-                                var options = {
-                                    "limit": 1
-                                };
 
                                 datas.find({tag:{$exists: false}})
                                     .limit(1)
@@ -165,16 +171,32 @@ module.exports = function (app) {
         var coll_regions    = null;
         var db              = null;
         var ris = [];
+        var max = 0;
+        setProjectName(req);
 
         async.waterfall(
             [
                 connect,
                 getRegions,
-                processRegions
+                processRegions,
+                setAVG
             ],
             function(err){
+
                 console.log(" end each");
-                res.json(ris);
+
+                if(err)
+                {
+                    res.json(JSON.stringify(ris));
+                }
+                else
+                {
+                    if(req.query.DEBUG)
+                        for(var i = 0; i < ris.length; i++)
+                            delete ris[i].geometry;
+
+                    res.json(ris);
+                }
             }
         );
 
@@ -197,6 +219,7 @@ module.exports = function (app) {
                 ["type","properties", "geometry"])
                 .toArray( function(err, regions ) {
                 console.log(" found: " + regions.length + " regions");
+
                 next(null, regions);
             });
         }
@@ -205,31 +228,91 @@ module.exports = function (app) {
         function processRegions(regions, next)
         {
             console.log(" start each");
-            async.each(regions, findCountData, function (err) {
-                next(null)
+            async.each(regions, makeCounter, function (err) {
+                if(err) next(err); else next(null);
             });
         }
 
-        // trovo i tweet all'interno della regione
-        function findCountData(region, next)
+        /// Funzione dell'each sopra ///
+        function makeCounter(region, next)
         {
-            coll_datas.find({
-                loc: {
-                    $geoWithin:
-                    {
-                        $geometry: region.geometry
-                    }
+            async.waterfall([
+
+                function(waterfall)
+                {
+                    region.properties.counter = {};
+
+                    Data.getTags(_projectName, function(err, array){
+
+                        if(err) waterfall(err); else {
+                            for(var tag in array)
+                                region.properties.counter[array[tag]] = 0;
+                            waterfall(null, region)
+                        }
+
+                    });
+                },
+
+                function(region, waterfall)
+                {
+                    coll_datas.aggregate(
+                        {"$match":{loc: { $geoWithin: { $geometry: region.geometry } }}},
+                        {"$group":{"_id":"$tag", "sum":{"$sum":1}}}
+                        , function(err, result)
+                        {
+                            var cont = 0;
+
+                            if(result!=null)
+                                result.forEach(function(obj){
+                                    region.properties.counter[obj._id] = obj.sum;
+                                    cont += obj.sum
+                                });
+
+                            if ( cont > max )  max = cont;
+
+                            region.properties.sum = cont;
+                            region.properties.avg = 1;          //TODO calcolare la media
+                            ris.push(region);
+
+                            waterfall(null);
+
+                        });
                 }
-            }).count( function(err, cont) {
 
-                region.properties.count = cont;
-                region.properties.avg = 1;          //TODO calcolare la media
-                ris.push(region);
-                next(null);
-
-            });
+            ], function(err){
+                if(err) next(err); else next(null);
+            })
         }
 
+        function setAVG(next)
+        {
+            for(var i = 0; i<ris.length; i++)
+                ris[i].properties.avg = ris[i].properties.sum / max;
+
+            next(null);
+        }
+
+    });
+
+    app.get('/gettags', function (req, res)
+    {
+        var projectName = req.session.projectName;
+
+        //TODO debug
+        if(req.session.projectName == null)
+            projectName = "oim";
+
+        if(projectName == null)
+            res.json({status:1,error:"you MUST select a project first"});
+        else
+        {
+            Data.getTags(projectName, function(err, array){
+                if(err)
+                    res.json(JSON.stringify(err));
+                else
+                    res.json(array);
+            });
+        }
     });
 
     app.get('/showmap', function (req, res)
@@ -252,27 +335,82 @@ module.exports = function (app) {
         }
     });
 
+    app.get('/gettimeline', function (req, res)
+    {
+        var url = 'mongodb://localhost:27017/oim';
+        MongoClient.connect(url, function (err, db) {
+            var datas = db.collection('datas');
+            datas.aggregate({
+                $group : {
+                    _id: {
+                        year : {$year : "$date"},
+                        month : {$month : "$date"},
+                        day : {$dayOfMonth : "$date"}
+                    },
+                    count: { $sum: 1 }
+                }
+            },{
+                $sort: {"_id.year":1, "_id.month":1, "_id.day":1 }
+            },{
+                $project: {
+                    _id: 0,
+                    date: {
+                        $concat: [
+                            {"$substr": [ "$_id.year", 0, 4 ] },
+                            "-",
+                            {"$substr": [ "$_id.month", 0, 2 ] },
+                            "-",
+                            {"$substr": [ "$_id.day", 0, 2 ] }
+                        ]
+                    },
+                    count: "$count"
+                }
+            },
+            function(err, data){
+
+                if(err || data == null )
+                {
+                    res.json({});
+                }
+                else
+                {
+                    var ris = {
+                        properties: {
+                            first: data[0].date,
+                            last: data[ data.length-1 ].date,
+                            lenght: data.length
+                        },
+                        data: {}
+                    };
+                    for(var i = 0; i < data.length; i++)
+                        ris.data[data[i].date] = data[i].count;
+                    res.json(ris);
+                }
+            });
+        });
+    });
+
     app.get('/showregionsbar', function (req, res)
     {
-        var arg = ConstantsRouter.argIndex(req, PAGE.STAT_REGIONS_BAR);
+        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.STAT_REGIONS_BAR);
         res.render('../views/pages/index.ejs', arg );
     });
 
     app.get('/showregionsradar', function (req, res)
     {
-        var arg = ConstantsRouter.argIndex(req, PAGE.STAT_REGIONS_RADAR);
+        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.STAT_REGIONS_RADAR);
         res.render('../views/pages/index.ejs', arg );
     });
 
     app.get('/showtimeline', function (req, res)
     {
-        var arg = ConstantsRouter.argIndex(req,PAGE.STAT_TIMELINE);
+        var arg = ConstantsRouter.argIndex(req,ConstantsRouter.PAGE.STAT_TIMELINE);
         res.render('../views/pages/index.ejs', arg );
     });
 
     app.get('/showtag', function (req, res)
     {
-        var arg = ConstantsRouter.argIndex(req, PAGE.STAT_TAG);
+        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.STAT_TAG);
         res.render('../views/pages/index.ejs', arg );
     });
 

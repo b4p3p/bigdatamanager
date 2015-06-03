@@ -4,6 +4,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var converter = require('../controller/converterCtrl');
 var MongoClient = require('mongodb').MongoClient;
+var url = 'mongodb://localhost:27017/oim';
 
 const ERROR = {
     status: 0,
@@ -41,7 +42,6 @@ Data.DATA_SCHEMA = new Schema(
 //Data.DATA_SCHEMA.index({ loc: '2dsphere' });
 
 Data.projectName = null;
-
 
 /**
  * JSON of Data object
@@ -174,7 +174,6 @@ Data.importFromFile = function(type, fileNames, projectName, cb_ris)
  * @param {String} projectName - project name.
  * @param {function(ERROR, Array)} callback - The callback that handles the response.
  */
-
 Data.getData = function(projectName, callback)
 {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
@@ -192,6 +191,26 @@ Data.getData = function(projectName, callback)
             }
             connection.close();
         });
+};
+
+/**
+ *
+ * @param projectName {String}
+ * @param callback {function(ERROR, Array)} callback - The callback that handles the response
+ */
+Data.getTags = function(projectName, callback)
+{
+    MongoClient.connect(url, function (err, db) {
+        var datas = db.collection('datas');
+        datas.distinct("tag",{projectName:projectName}, function(err, array)
+        {
+            db.close();
+            if(err)
+                callback(err, null);
+            else
+                callback(null, array);
+        });
+    });
 };
 
 /**ù
@@ -250,6 +269,8 @@ function addDataArray(arrayData, projectName, callback) {
                         type: "Point",
                         coordinates:[data.longitude, data.latitude]
                     };
+
+                    data.date = new Date(data.date);
 
                     dataCollection.save(data,
                         function (err)
