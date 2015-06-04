@@ -313,11 +313,14 @@ function _mouseout_feature(e)
 
 function  _click_feature(e)
 {
+    console.log("click!");
+
     // lock map
     ShowmapCtrl.activeLayerBoundaries = e.target;
 
     // chiudo altri popup aperti
     if ( ShowmapCtrl.showInfoActiveLayer ) {
+        console.log("showInfoActiveLayer NULL!");
         ShowmapCtrl.mainMap.closePopup();
         return;
     }
@@ -352,7 +355,10 @@ function  _click_feature(e)
         '</button>' +
         '</div>';
 
-    e.target.bindPopup(pop);
+    console.log("bindpopup");
+
+    e.target.bindPopup(pop).openPopup();
+
     //ShowmapCtrl.mainMap.fitBounds(e.target.getBounds());
 
 }
