@@ -14,7 +14,7 @@ h3{font-weight: 300; font-size: 22px;margin-bottom: 40px}
 .navbar-header{float:none;text-align: center;}
 
 /* top bar */
-.navbar {text-transform: uppercase;background-color: #00001e;border: none}
+.navbar {background-color: #00001e;border: none}
 .navbar a  {color:#fff;font-weight: 300;text-decoration: none}
 .navbar-default .navbar-brand {color:#fff;font-weight: bold;margin:0;line-height: 50px;float:none; margin-left: auto; margin-right: auto; width: 60px; float: none; }
 

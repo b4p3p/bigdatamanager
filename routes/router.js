@@ -1,4 +1,5 @@
 var extend = require('util')._extend;
+var ConstantsRouter = require('./constants_router');
 
 const PAGE = {
     HOME: "home",
@@ -103,7 +104,7 @@ module.exports = function (app) {
             else
             {
                 req.session.userProject = userProject;
-                res.redirect('/index');
+                res.redirect('/home');
             }
 
         });
@@ -148,34 +149,36 @@ module.exports = function (app) {
 
     /* INDEX */
 
-    app.get('/index', function (req, res)
-    {
-
-        var arg = extend({}, ARG_INDEX);
-
-        var sess = req.session;
-        var userProject = sess.userProject;
-        var projectName = sess.projectName;
-
-        //TODO se non si dispone del project, redirect alla pagina dei progetti
-
-        arg.userProject = userProject;
-        arg.projectName = projectName;
-        arg.page = PAGE.HOME;
-
-        res.render('../views/pages/index.ejs', arg);
-    });
+    //app.get('/index', function (req, res)
+    //{
+    //
+    //    var arg = extend({}, ARG_INDEX);
+    //
+    //    var sess = req.session;
+    //    var userProject = sess.userProject;
+    //    var projectName = sess.projectName;
+    //
+    //    //TODO se non si dispone del project, redirect alla pagina dei progetti
+    //
+    //    arg.userProject = userProject;
+    //    arg.projectName = projectName;
+    //    arg.page = PAGE.HOME;
+    //
+    //    res.render('../views/pages/index.ejs', arg);
+    //});
 
     /* INDEX - PAGES */
 
     app.get('/home', function (req, res)
     {
 
-        var arg = getArgIndex();
-        var sess = req.session;
+        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.HOME);
+        //var sess = req.session;
+
         arg.userProject = req.session.userProject;
         arg.projectName = req.session.projectName;
-        arg.page = PAGE.HOME;
+
+        //arg.page = PAGE.HOME;
 
         res.render('../views/pages/index.ejs', arg );
 

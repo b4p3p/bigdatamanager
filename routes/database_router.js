@@ -1,6 +1,6 @@
+"use strict";
 var ConstantsRouter = require('./constants_router');
 var async = require("async");
-var MongoClient = require('mongodb').MongoClient;
 
 var databaseError = function(status, message)
 {
@@ -60,7 +60,8 @@ module.exports = function (app) {
      *  Sincronizza i dati con le regioni:
      *   - imposta la regione e la nazione ai dati
      */
-    app.get('/synchronize', function (req, res) {
+    app.get('/synchronize', function (req, res)
+    {
 
         var _db = null;
         var _datas = null;
@@ -164,7 +165,7 @@ module.exports = function (app) {
                 }
             );
         }
-    })
+    });
 };
 
 function sendDatabaseError(request, response, message, status)

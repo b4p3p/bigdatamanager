@@ -242,7 +242,7 @@ module.exports = function (app) {
                 {
                     region.properties.counter = {};
 
-                    Data.getTags(_projectName, function(err, array){
+                    Data.loadTags(_projectName, function(err, array){
 
                         if(err) waterfall(err); else {
                             for(var tag in array)
@@ -306,7 +306,7 @@ module.exports = function (app) {
             res.json({status:1,error:"you MUST select a project first"});
         else
         {
-            Data.getTags(projectName, function(err, array){
+            Data.loadTags(projectName, function(err, array){
                 if(err)
                     res.json(JSON.stringify(err));
                 else
@@ -321,7 +321,7 @@ module.exports = function (app) {
 
         if ( req.session.projectName != null )
         {
-            arg.content = argContentStatistics(data);
+            //arg.content = argContentStatistics(data);
             res.render('../views/pages/index.ejs', arg );
         }
         else

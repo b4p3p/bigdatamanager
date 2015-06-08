@@ -85,10 +85,25 @@ app.use( multer({ dest: './uploads/',
 
 }));
 
-require('./routes/router')(app);           //chiamo il router generico
-require('./routes/project_router')(app);   //chiamo il router per i progetti
-require('./routes/database_router')(app);   //chiamo il router per i progetti
-require('./routes/statistics_router')(app);   //chiamo il router per i progetti
+/*******************************
+ ******   ROUTER
+ *******************************/
+
+var router_vocabulary = express.Router();
+
+app.use('/vocabulary', router_vocabulary);
+
+require('./routes/router')(app);                //chiamo il router generico
+require('./routes/project_router')(app);        //chiamo il router per i progetti
+require('./routes/database_router')(app);       //chiamo il router per i progetti
+require('./routes/statistics_router')(app);     //chiamo il router per i progetti
+require("./routes/vocabulary")(router_vocabulary);
+
+
+/********************************
+ *** END ROUTER
+ ********************************/
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

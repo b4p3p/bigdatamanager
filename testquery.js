@@ -194,3 +194,39 @@ db.datas.aggregate({
 
 //"$_id.year", "-", "$_id.month", "-",
 //    "$_id.day"]
+
+/** MAPREDUCE **/
+var mapWord = function() {
+    var text = this.text;
+    if (text) {
+        // quick lowercase to normalize per your requirements
+        text = text.toLowerCase().split(" ");
+        for (var i = text.length - 1; i >= 0; i--) {
+            // might want to remove punctuation, etc. here
+            if (text[i])  {      // make sure there's something
+                emit(text[i], 1); // store a 1 for each word
+            }
+        }
+    }
+};
+
+var reduceWord = function( key, values ) {
+    var count = 0;
+    values.forEach(function(v) {
+        count += v;
+    });
+    return count;
+}
+
+db.datas.mapReduce(mapWord, reduceWord,
+    {
+        out: "word_count",
+        query: { projectName: "oim"}
+    }
+);
+
+
+
+
+
+db.word_count.find().sort({value:-1})

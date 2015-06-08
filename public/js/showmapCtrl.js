@@ -1,7 +1,4 @@
-/**
- * @constructor
- */
-ShowmapCtrl = function() {};
+function ShowmapCtrl() {};
 
 var cfg =
 {
@@ -343,7 +340,7 @@ function  _click_feature(e)
             '</div>';
     }
 
-    pop += "<hr class='popup-separator'>";
+    pop += "<hr class='separator'>";
 
     pop +=
         '<div class="row-popup">' +
@@ -383,7 +380,8 @@ var hideBoundaries = function()
     {
         ShowmapCtrl.mainMap.removeLayer( ShowmapCtrl.layerBoundaries );
         ShowmapCtrl.layerBoundaries = null;
-        ShowmapCtrl.mainMap.removeControl( ShowmapCtrl.legendControl );
+        if(ShowmapCtrl.legendControl)
+            ShowmapCtrl.mainMap.removeControl( ShowmapCtrl.legendControl );
     }
 };
 
@@ -596,8 +594,6 @@ var addOptionValue = function ( combo , value, isSpecial )
     }
 
 };
-
-
 
 
 

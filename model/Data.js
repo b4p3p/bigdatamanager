@@ -198,7 +198,7 @@ Data.getData = function(projectName, callback)
  * @param projectName {String}
  * @param callback {function(ERROR, Array)} callback - The callback that handles the response
  */
-Data.getTags = function(projectName, callback)
+Data.loadTags = function(projectName, callback)
 {
     MongoClient.connect(url, function (err, db) {
         var datas = db.collection('datas');

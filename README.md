@@ -3,6 +3,7 @@
 * Datas
 ```
 db.datas.createIndex( { projectNames: 1, id: 1 }, { unique: true } )
+db.datas.createIndex( {text: "text"} );
 ```
 
 * Projects

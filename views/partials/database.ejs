@@ -6,8 +6,10 @@
     }
 </style>
 
+<script src="/public/js/DatabaseCtrl.js"></script>
+
 <div class="row">
-    <p class="lead">Import nations</p>
+    <h4>Import nations</h4>
     <div class="well" style="margin-bottom: 10px">
         SRID: <b>EPSG 4326</b><br>
         Type file: <b>geojson</b><br><br>
@@ -118,3 +120,26 @@
         </a>
     </div>
 </div>
+
+<div class="row">
+
+    <h4>Tag</h4>
+
+    <div class="" id="tableTagsContainer">
+
+        <table id="tagsTable"></table>
+
+        <a class="btn btn-default" id= "addButton" style="margin-top: 8px; margin-left: 15px; float: right;"
+           onclick="DatabaseCtrl.showInsertTag()">Add tag
+        </a>
+
+        <a class="btn btn-default" id= "addButton" style="margin-top: 8px; float: right;"
+           onclick="DatabaseCtrl.refreshCounter()">Refresh counter
+        </a>
+    </div>
+
+</div>
+
+<script>
+    DatabaseCtrl.loadTags();
+</script>

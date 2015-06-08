@@ -91,7 +91,7 @@ RegionBarCtrl = {
                     RegionBarCtrl.drawRegionsBar();
             },
             error: function (xhr, status, error) {
-                console.error("ERR: ShowmapCtrl.getTags " + status + " " + xhr.status);
+                console.error("ERR: ShowmapCtrl.loadTags " + status + " " + xhr.status);
                 console.error("     Status: " + status + " " + xhr.status);
                 console.error("     Error: " + error);
             }
