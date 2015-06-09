@@ -123,7 +123,7 @@ ShowmapCtrl.getData = function ()
 
         },
         error: function (xhr, status, error) {
-            console.error("ERR: ShowmapCtrl.getData " + status + " " + xhr.status);
+            console.error("ERR: ShowmapCtrl.loadData " + status + " " + xhr.status);
             console.error("     Status: " + status + " " + xhr.status);
             console.error("     Error: " + error);
         }

@@ -1,16 +1,16 @@
 <!-- prendo le variabili -->
 <style>
-    .btn-open{
+    .btn-open {
         height: 20px;
         border-radius: 20px;
     }
-    .btn-open > span
-    {
+
+    .btn-open > span {
         position: relative;
         top: -5px;
     }
-    .example-code > pre
-    {
+
+    .example-code > pre {
         margin-right: 15px
     }
 </style>
@@ -21,15 +21,15 @@
 
     <% if( tab == "openproject" ) { %>
     <li class="active">
-        <%} else {%>
+        <% } else { %>
     <li>
         <% } %>
 
         <a href="#open" data-toggle="tab">Open project</a></li>
 
-    <% if( tab == "newproject" ) {%>
+    <% if( tab == "newproject" ) { %>
     <li class="active">
-        <%} else {%>
+        <% } else { %>
     <li>
         <% } %>
 
@@ -40,13 +40,13 @@
 <div class="tab-content">
 
     <div
-            <% if( tab == "openproject" ) {%>
+            <% if( tab == "openproject" ) { %>
             class="tab-pane active"
-            <%} else {%>
+            <% } else { %>
             class="tab-pane"
             <% } %>
 
-            id="open" >
+            id="open">
 
         <div class="row" style="margin-top: 10px">
             <table data-toggle="table" id="tableProjects" data-pagination="true" data-search="true">
@@ -55,14 +55,18 @@
                     <th data-field="userProject">Username</th>
                     <th data-field="projectName">Project Name</th>
                     <th data-field="dateCreation"
-                        data-formatter="projectCtrl.dateCreationFormatter">Creation Date</th>
+                        data-formatter="ProjectCtrl.dateCreationFormatter">Creation Date
+                    </th>
                     <th data-field="dateLastUpdate"
-                        data-formatter="projectCtrl.dateLastUpdateFormatter">Last Edit</th>
+                        data-formatter="ProjectCtrl.dateLastUpdateFormatter">Last Edit
+                    </th>
                     <th data-field="size">Size</th>
                     <th data-field="Delete project" data-width="60"
-                        data-formatter="projectCtrl.deleteColumnFormatter">Delete</th>
+                        data-formatter="ProjectCtrl.deleteColumnFormatter">Delete
+                    </th>
                     <th data-field="Open project" data-width="60"
-                        data-formatter="projectCtrl.openColumnFormatter">Open</th>
+                        data-formatter="ProjectCtrl.openColumnFormatter">Open
+                    </th>
                 </tr>
                 </thead>
             </table>
@@ -72,9 +76,9 @@
 
     <div class="tab-pane pane-newproject
 
-        <% if( tab == "newproject" ) {%>
+        <% if( tab == "newproject" ) { %>
             active
-        <% } %> " id="new" >
+        <% } %> " id="new">
 
         <!-- FORM NUOVO PROGETTO -->
         <!--suppress HtmlUnknownTarget -->
@@ -154,68 +158,68 @@
     $('.selectpicker').selectpicker();
     var cmbType = $('#cmbType');
     var divCode = $('#examplecode');
+
     showExample();
-
-    function showExample(){
-        var selected = cmbType.find("option:selected").val();
-        if (selected == "csv")
-            divCode.html(
-                    "<pre>id,[date],[latitude],[longitude],[source],text,[user],[tag]\n"+
-                    "'&lt;unique_id&gt;'," +
-                    "['&lt;AAAA-MM-GG&gt;']," +
-                    "[&lt;float&gt;]," +
-                    "[&lt;float&gt;]," +
-                    "['&lt;source&gt;]'," +
-                    "'&lt;text&gt;'," +
-                    "['&lt;user&gt;]'," +
-                    "['&lt;tag&gt;]'\n" +
-                    "'&lt;unique_id&gt;'," +
-                    "['&lt;AAAA-MM-GG&gt;']," +
-                    "[&lt;float&gt;]," +
-                    "[&lt;float&gt;]," +
-                    "['&lt;source&gt;]'," +
-                    "'&lt;text&gt;'," +
-                    "['&lt;user&gt;]'," +
-                    "['&lt;tag&gt;]'\n" +
-                    "...\n"+
-                    "</pre>");
-        else
-            divCode.html(
-                    "<pre>[\n"+
-                    "  {\n" +
-                    "    id: '&lt;unique_id&gt;',\n" +
-                    "    [date: '&lt;AAAA-MM-GG&gt;'],\n"+
-                    "    [latitude: &lt;float&gt;],\n"+
-                    "    [longitude: &lt;float&gt;],\n"+
-                    "    [source: '&lt;source&gt;]',\n"+
-                    "    text: '&lt;text&gt;',\n"+
-                    "    [user: '&lt;user&gt;]',\n"+
-                    "    [tag: '&lt;tag&gt;]'\n"+
-                    "  },{\n"+
-                    "    id: '&lt;unique_id&gt;',\n" +
-                    "    [date: '&lt;AAAA-MM-GG&gt;'],\n"+
-                    "    [latitude: &lt;float&gt;],\n"+
-                    "    [longitude: &lt;float&gt;],\n"+
-                    "    [source: '&lt;source&gt;]',\n"+
-                    "    text: '&lt;text&gt;',\n"+
-                    "    [user: '&lt;user&gt;]',\n"+
-                    "    [tag: '&lt;tag&gt;]'\n"+
-                    "  },\n"+
-                    "  ...\n"+
-                    "]</pre>");
-
-    }
 
     cmbType.on('change', function () {
         var selected = $(this).find("option:selected").val();
         showExample();
     });
 
-    $(document).ready(function()
-    {
-      var content = '<%- content.projects %>';
-      projectCtrl.getData(content);
+    $(document).ready( function () {
+        var content = '<%- content.projects %>';
+        ProjectCtrl.getData(content);
     });
+
+    function showExample() {
+        var selected = cmbType.find("option:selected").val();
+        if (selected == "csv")
+            divCode.html(
+                    "<pre>id,[date],[latitude],[longitude],[source],text,[user],[tag]\n" +
+                    "'&lt;unique_id&gt;'," +
+                    "['&lt;AAAA-MM-GG&gt;']," +
+                    "[&lt;float&gt;]," +
+                    "[&lt;float&gt;]," +
+                    "['&lt;source&gt;]'," +
+                    "'&lt;text&gt;'," +
+                    "['&lt;user&gt;]'," +
+                    "['&lt;tag&gt;]'\n" +
+                    "'&lt;unique_id&gt;'," +
+                    "['&lt;AAAA-MM-GG&gt;']," +
+                    "[&lt;float&gt;]," +
+                    "[&lt;float&gt;]," +
+                    "['&lt;source&gt;]'," +
+                    "'&lt;text&gt;'," +
+                    "['&lt;user&gt;]'," +
+                    "['&lt;tag&gt;]'\n" +
+                    "...\n" +
+                    "</pre>");
+        else
+            divCode.html(
+                    "<pre>[\n" +
+                    "  {\n" +
+                    "    id: '&lt;unique_id&gt;',\n" +
+                    "    [date: '&lt;AAAA-MM-GG&gt;'],\n" +
+                    "    [latitude: &lt;float&gt;],\n" +
+                    "    [longitude: &lt;float&gt;],\n" +
+                    "    [source: '&lt;source&gt;]',\n" +
+                    "    text: '&lt;text&gt;',\n" +
+                    "    [user: '&lt;user&gt;]',\n" +
+                    "    [tag: '&lt;tag&gt;]'\n" +
+                    "  },{\n" +
+                    "    id: '&lt;unique_id&gt;',\n" +
+                    "    [date: '&lt;AAAA-MM-GG&gt;'],\n" +
+                    "    [latitude: &lt;float&gt;],\n" +
+                    "    [longitude: &lt;float&gt;],\n" +
+                    "    [source: '&lt;source&gt;]',\n" +
+                    "    text: '&lt;text&gt;',\n" +
+                    "    [user: '&lt;user&gt;]',\n" +
+                    "    [tag: '&lt;tag&gt;]'\n" +
+                    "  },\n" +
+                    "  ...\n" +
+                    "]</pre>");
+
+    }
 
 
 </script>

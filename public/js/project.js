@@ -1,12 +1,33 @@
-var projectCtrl = new function() {
+Number.prototype.padLeft = function(base,chr){
+    var  len = (String(base || 10).length - String(this).length)+1;
+    return len > 0? new Array(len).join(chr || '0')+this : this;
+};
 
-    this.getData = function (content) {
+Date.prototype.toStringDate = function()
+{
+    var dformat = [
+            (this.getMonth() + 1).padLeft(),
+            this.getDate().padLeft(),
+            this.getFullYear()
+        ].join('/') + ' ' +
+        [
+            this.getHours().padLeft(),
+            this.getMinutes().padLeft(),
+            this.getSeconds().padLeft()
+        ].join(':');
+    return dformat;
+};
+
+var ProjectCtrl =
+{
+
+    getData : function (content) {
         var json = JSON.parse(content);
         var $table = $('#tableProjects');
 
         $table.bootstrapTable('load', json);
 
-    };
+    },
 
     /**
      * Funzione per formattare la colonna open
@@ -16,65 +37,48 @@ var projectCtrl = new function() {
      *              - row.userProject: utente proprietario del progetto
      * @returns {string} - Html da inserire nella cella
      */
-    this.openColumnFormatter = function (value, row) {
+    openColumnFormatter : function (value, row) {
 
         //'id="' + row.projectName +'">' +
 
         return '<button type="button" class="btn btn-success btn-open">' +
             '<span class="glyphicon glyphicon-ok" aria-hidden="true" ' +
                   'project="' + row.projectName + '"' +
-            'onclick="projectCtrl.openProject_Click(\'' + row.projectName + '\')"/>' +
+            'onclick="ProjectCtrl.openProject_Click(\'' + row.projectName + '\')"/>' +
             '</button>';
 
-    };
+    },
 
-    this.deleteColumnFormatter = function (value, row) {
+    deleteColumnFormatter : function (value, row) {
         return '<button type="button" class="btn btn-danger btn-open">' +
             '<span class="glyphicon glyphicon-remove" aria-hidden="true" ' +
             'project="' + row.projectName + '"' +
-            'onclick="projectCtrl.deleteProject_Click(\'' + row.projectName + '\')"/>' +
+            'onclick="ProjectCtrl.deleteProject_Click(\'' + row.projectName + '\')"/>' +
             '</button>';
-    };
+    },
 
-    Number.prototype.padLeft = function(base,chr){
-        var  len = (String(base || 10).length - String(this).length)+1;
-        return len > 0? new Array(len).join(chr || '0')+this : this;
-    };
 
-    Date.prototype.toStringDate = function()
+
+    dateCreationFormatter : function (value, row) {
+        var d = new Date(value);
+        return d.toStringDate();
+    },
+
+    dateLastUpdateFormatter : function (value, row) {
+        var d = new Date(value);
+        return d.toStringDate();
+    },
+
+    deleteProject_Click : function (projectName)
     {
-       var dformat = [
-                (this.getMonth() + 1).padLeft(),
-                 this.getDate().padLeft(),
-                 this.getFullYear()
-                ].join('/') + ' ' +
-                [
-                    this.getHours().padLeft(),
-                    this.getMinutes().padLeft(),
-                    this.getSeconds().padLeft()
-                ].join(':');
-        return dformat;
-    };
-
-    this.dateCreationFormatter = function (value, row) {
-        var d = new Date(value);
-        return d.toStringDate();
-    };
-
-    this.dateLastUpdateFormatter = function (value, row) {
-        var d = new Date(value);
-        return d.toStringDate();
-    };
-
-    this.deleteProject_Click = function (projectName) {
 
         bootbox.confirm("Are you sure?", function(result) {
             if(result)
                 deleteProject(projectName);
         });
-    };
+    },
 
-    var deleteProject = function(projectName)
+    deleteProject : function(projectName)
     {
         /**
          *      success message:
@@ -120,9 +124,10 @@ var projectCtrl = new function() {
                 window.location.reload();
             }
         });
-    };
+    },
 
-    this.openProject_Click = function (projectName) {
+    openProject_Click : function (projectName)
+    {
 
         console.log(projectName);
 
@@ -144,7 +149,6 @@ var projectCtrl = new function() {
                 console.error("ERR: openProject_Click: " + status + " " + xhr.status);
             }
         });
-
-    };
+    }
 
 };

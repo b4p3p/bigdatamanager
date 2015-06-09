@@ -174,7 +174,7 @@ Data.importFromFile = function(type, fileNames, projectName, cb_ris)
  * @param {String} projectName - project name.
  * @param {function(ERROR, Array)} callback - The callback that handles the response.
  */
-Data.getData = function(projectName, callback)
+Data.loadData = function(projectName, callback)
 {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var DataModel = connection.model(Data.MODEL_NAME, Data.DATA_SCHEMA);

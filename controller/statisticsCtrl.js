@@ -15,7 +15,7 @@ StatisticsCtrl.GetMapData = function(projectName, callback)
 {
     console.log("CALL: StatController.getMapData " + projectName);
 
-    Data.getData(projectName, function(error, data){
+    Data.loadData(projectName, function(error, data){
 
         if(error) {
             callback(error, {});

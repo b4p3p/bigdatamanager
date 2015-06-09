@@ -170,7 +170,7 @@ RegionRadarCtrl = {
                         pointStrokeColor: "#fff",
                         pointHighlightFill: "#fff",
                         pointHighlightStroke: "rgba(220,220,220,1)",
-                        data: this.getDataRadar(index)
+                        data: RegionRadarCtrl.getDataRadar(index)
                     }
                 ]
             };

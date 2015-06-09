@@ -644,7 +644,7 @@ var Heatmap = (function HeatmapClosure() {
       return this;
     },
     getData: function() {
-      return this._store.getData();
+      return this._store.loadData();
     },
     getDataURL: function() {
       return this._renderer.getDataURL();
