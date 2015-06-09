@@ -81,7 +81,7 @@ RegionTimeLineCtrl = {
         this.timeLineID = "timeLine";
     },
 
-    getData: function()
+    loadData: function()
     {
         $.ajax({
             type: "get",

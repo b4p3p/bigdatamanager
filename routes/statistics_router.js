@@ -337,6 +337,8 @@ module.exports = function (app) {
 
     app.get('/gettimeline', function (req, res)
     {
+        console.log("GET: /gettimeline");
+
         var url = 'mongodb://localhost:27017/oim';
         MongoClient.connect(url, function (err, db) {
             var datas = db.collection('datas');
@@ -370,7 +372,7 @@ module.exports = function (app) {
 
                 if(err || data == null )
                 {
-                    res.json({});
+                    res.json({status:1, error: err.toString()});
                 }
                 else
                 {

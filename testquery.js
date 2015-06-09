@@ -147,6 +147,7 @@ db.datas.aggregate( {
     }
 );
 
+/* impossibile la conversione */
 db.datas.aggregate(
     { $project: {
         year : {$year : "$date"},

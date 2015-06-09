@@ -34,7 +34,8 @@
     "urlencode": ">=1.0.0",
     "bootbox": ">=4.4.0",
     "underscore": ">=1.8.3",
-    "npm":">=3.5.5"
+    "bootstrap-table": ">=1.6.0",
+    "d3" : ">=3.5.5"
   }
 }
 

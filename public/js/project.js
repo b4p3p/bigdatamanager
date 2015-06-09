@@ -5,7 +5,7 @@ Number.prototype.padLeft = function(base,chr){
 
 Date.prototype.toStringDate = function()
 {
-    var dformat = [
+    return [
             (this.getMonth() + 1).padLeft(),
             this.getDate().padLeft(),
             this.getFullYear()
@@ -15,7 +15,6 @@ Date.prototype.toStringDate = function()
             this.getMinutes().padLeft(),
             this.getSeconds().padLeft()
         ].join(':');
-    return dformat;
 };
 
 var ProjectCtrl =
@@ -74,7 +73,7 @@ var ProjectCtrl =
 
         bootbox.confirm("Are you sure?", function(result) {
             if(result)
-                deleteProject(projectName);
+                ProjectCtrl.deleteProject(projectName);
         });
     },
 
@@ -120,7 +119,7 @@ var ProjectCtrl =
             },
             error: function(xhr, status, error)
             {
-                console.error("ERR: openProject_Click: " + status + " " + xhr.status);
+                console.error("ERR: openProject_Click: " + status + " " + xhr.status + "\n" + error);
                 window.location.reload();
             }
         });
@@ -146,7 +145,7 @@ var ProjectCtrl =
             },
             error: function(xhr, status, error)
             {
-                console.error("ERR: openProject_Click: " + status + " " + xhr.status);
+                console.error("ERR: openProject_Click: " + status + " " + xhr.status + "\n" + error);
             }
         });
     }

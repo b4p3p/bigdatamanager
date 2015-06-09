@@ -6,7 +6,7 @@ var async = require("async");
 var mongoose = require('mongoose');
 var MODEL_NAME = "vocabularies";
 var VOCABULARY_SCHEMA = new mongoose.Schema({
-    projectname: String,
+    projectName: String,
     tag: String,
     words: []
 });

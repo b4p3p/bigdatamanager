@@ -37,7 +37,8 @@ RegionBarCtrl = {
                 isHtml: true
             },
             chartArea: {'height': '80%', 'right':'0%'},
-            isStacked: true
+            isStacked: true,
+            backgroundColor: 'transparent'
         };
 
         var view = new google.visualization.DataView(dataTable);
