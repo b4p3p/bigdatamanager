@@ -56,9 +56,6 @@ Project.getProjects = function(username, callback)
 
 Project.addProject = function(dataProject, callback)
 {
-    var Project = require("../model/Project");
-    var mongoose = require('mongoose');
-
     console.log("CALL Project.addProject");
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');

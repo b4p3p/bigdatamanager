@@ -1,0 +1,158 @@
+<!-- prendo le variabili -->
+<style>
+    .btn-open > span
+    {
+        position: relative;
+        top: -3px;
+    }
+    .example-code > pre
+    {
+        margin-right: 15px
+    }
+    .control-label
+    {
+        max-width: 100px;
+        padding-left: 0;
+        padding-right: 0;
+        margin-left: 0;
+        margin-right: 0;
+    }
+    #examplecode
+    {
+        padding: 0;
+    }
+</style>
+
+<!-- FORM NUOVO PROGETTO -->
+
+<form class="form-horizontal" action="/newproject" method="post"
+      id="uploadForm" enctype="multipart/form-data">
+
+    <div class="form-group">
+        <label for="nameproject" class="col-sm-2 control-label">Project name:</label>
+
+        <div class="col-sm-10">
+            <input type="text" class="form-control" id="nameproject" placeholder="Project Name"
+                   name="projectName"
+                   required>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="inputType" class="col-sm-2 control-label"
+               style="margin-right: 15px">Type data:</label>
+
+        <div>
+            <select class="selectpicker" name="cmbType" id="cmbType">
+                <option value="csv">CSV</option>
+                <option value="json">JSON</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label"
+               style="margin-right: 15px">Example data:</label>
+
+        <div id="examplecode"
+             class="example-code col-sm-10">
+                <pre></pre>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="files" class="col-sm-2 control-label">Load data:</label>
+
+        <!--multiple="true"-->
+
+        <div class="col-sm-10">
+            <input type="file" class="file" multiple
+                   name="files" id="files"
+                   data-show-upload="false"
+                   data-show-caption="true"
+                   data-show-preview="false"
+                   required>
+        </div>
+    </div>
+
+    <% if (error && error.status > 0) { %>
+    <div class="alert alert-danger" role="alert">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span class="sr-only">Error:</span>
+        <%= error.message %>
+    </div>
+    <% } %>
+
+    <button class="btn btn-success col-sm-10" type="submit"
+            style="border-radius: 50px;float: right;margin-top: 30px;width: 120px">
+        Confirm
+    </button>
+
+</form>
+
+
+
+
+<script>
+
+    $('.selectpicker').selectpicker();
+    var cmbType = $('#cmbType');
+    var divCode = $('#examplecode');
+    showExample();
+
+    function showExample(){
+        var selected = cmbType.find("option:selected").val();
+        if (selected == "csv")
+            divCode.html(
+                    "<pre>id,[date],[latitude],[longitude],[source],text,[user],[tag]\n"+
+                    "'&lt;unique_id&gt;'," +
+                    "['&lt;AAAA-MM-GG&gt;']," +
+                    "[&lt;float&gt;]," +
+                    "[&lt;float&gt;]," +
+                    "['&lt;source&gt;]'," +
+                    "'&lt;text&gt;'," +
+                    "['&lt;user&gt;]'," +
+                    "['&lt;tag&gt;]'\n" +
+                    "'&lt;unique_id&gt;'," +
+                    "['&lt;AAAA-MM-GG&gt;']," +
+                    "[&lt;float&gt;]," +
+                    "[&lt;float&gt;]," +
+                    "['&lt;source&gt;]'," +
+                    "'&lt;text&gt;'," +
+                    "['&lt;user&gt;]'," +
+                    "['&lt;tag&gt;]'\n" +
+                    "...\n"+
+                    "</pre>");
+        else
+            divCode.html(
+                    "<pre>[\n"+
+                    "  {\n" +
+                    "    id: '&lt;unique_id&gt;',\n" +
+                    "    [date: '&lt;AAAA-MM-GG&gt;'],\n"+
+                    "    [latitude: &lt;float&gt;],\n"+
+                    "    [longitude: &lt;float&gt;],\n"+
+                    "    [source: '&lt;source&gt;]',\n"+
+                    "    text: '&lt;text&gt;',\n"+
+                    "    [user: '&lt;user&gt;]',\n"+
+                    "    [tag: '&lt;tag&gt;]'\n"+
+                    "  },{\n"+
+                    "    id: '&lt;unique_id&gt;',\n" +
+                    "    [date: '&lt;AAAA-MM-GG&gt;'],\n"+
+                    "    [latitude: &lt;float&gt;],\n"+
+                    "    [longitude: &lt;float&gt;],\n"+
+                    "    [source: '&lt;source&gt;]',\n"+
+                    "    text: '&lt;text&gt;',\n"+
+                    "    [user: '&lt;user&gt;]',\n"+
+                    "    [tag: '&lt;tag&gt;]'\n"+
+                    "  },\n"+
+                    "  ...\n"+
+                    "]</pre>");
+
+    }
+
+    cmbType.on('change', function () {
+        var selected = $(this).find("option:selected").val();
+        showExample();
+    });
+
+</script>

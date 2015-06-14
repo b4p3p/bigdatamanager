@@ -41,7 +41,7 @@ var ProjectCtrl =
         //'id="' + row.projectName +'">' +
 
         return '<button type="button" class="btn btn-success btn-open">' +
-            '<span class="glyphicon glyphicon-ok" aria-hidden="true" ' +
+            '<span class="glyphicon glyphicon-ok selectProj" aria-hidden="true" ' +
                   'project="' + row.projectName + '"' +
             'onclick="ProjectCtrl.openProject_Click(\'' + row.projectName + '\')"/>' +
             '</button>';
@@ -140,7 +140,7 @@ var ProjectCtrl =
             {
                 if(msg.status == 200)
                 {
-                    location.reload();
+                    location.replace("/editproject");
                 }
             },
             error: function(xhr, status, error)

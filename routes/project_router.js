@@ -34,8 +34,7 @@ function sendProjectError(request, response, message, status)
 
     arg.error = err;
 
-    arg.tab = ConstantsRouter.TAB.NEWPROJECT;
-    arg.page = ConstantsRouter.PAGE.PROJECT;
+    arg.page = ConstantsRouter.PAGE.NEW_PROJECT;
     arg.error = err;
 
     request.session.arg = arg;
@@ -44,44 +43,45 @@ function sendProjectError(request, response, message, status)
 
 module.exports = function (app) {
 
-    app.get('/project', function (req, res)
-    {
-        //TODO debug
-        if ( req.session.userProject == null)
-            req.session.userProject = 'oim';
-
-        //controllo se ho un errore
-        var arg = ConstantsRouter.argIndex();
-        var Project = require("../model/Project");
-
-        if (req.session.arg)                    // uso  i paramenti presenti nella variabile di sessione
-        {
-            arg = req.session.arg;
-            req.session.arg = null;
-        }
-        else                                    // mi costruisco la variabile usando le variabili di sessione
-        {
-            arg.userProject = req.session.userProject;
-            arg.projectName = req.session.projectName;
-            arg.page = ConstantsRouter.PAGE.PROJECT;
-            arg.tab =  ConstantsRouter.TAB.OPENPROJECT;
-        }
-
-        Project.getProjects(arg.userProject, function(data, err)
-        {
-            if(err) {
-
-            }
-
-            arg.content = argContentProjects( data );
-            res.render('../views/pages/index.ejs', arg );
-
-        });
-
-    });
+    //app.get('/project', function (req, res)
+    //{
+    //    //TODO debug
+    //    if ( req.session.userProject == null)
+    //        req.session.userProject = 'oim';
+    //
+    //    //controllo se ho un errore
+    //    var arg = ConstantsRouter.argIndex();
+    //    var Project = require("../model/Project");
+    //
+    //    if (req.session.arg)                    // uso  i paramenti presenti nella variabile di sessione
+    //    {
+    //        arg = req.session.arg;
+    //        req.session.arg = null;
+    //    }
+    //    else                                    // mi costruisco la variabile usando le variabili di sessione
+    //    {
+    //        arg.userProject = req.session.userProject;
+    //        arg.projectName = req.session.projectName;
+    //        arg.page = ConstantsRouter.PAGE.PROJECT;
+    //        arg.tab =  ConstantsRouter.TAB.OPENPROJECT;
+    //    }
+    //
+    //    Project.getProjects(arg.userProject, function(data, err)
+    //    {
+    //        if(err) {
+    //
+    //        }
+    //
+    //        arg.content = argContentProjects( data );
+    //        res.render('../views/pages/index.ejs', arg );
+    //
+    //    });
+    //
+    //});
 
     app.get('/newproject', function (req, res) {
-        res.redirect("/project");
+        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.NEW_PROJECT);
+        res.render('../views/pages/index.ejs', arg );
     });
 
     app.post('/newproject', function (req, res) {
@@ -110,9 +110,10 @@ module.exports = function (app) {
                         sendProjectError(req, res, err.message, err.status);
                     }
                     else {
+                        res.redirect("/openproject");
 
                         var URLProjectName = urlencode(req.body.projectName);
-                        res.redirect("/project");
+                        res.redirect("/openproject");
                         sincronizazzioneBatch(urlencode(URLProjectName));
                     }
                 }
@@ -123,6 +124,46 @@ module.exports = function (app) {
             console.error(e);
             console.error(e.stack);
         }
+    });
+
+    app.get('/editproject', function (req, res) {
+        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.EDIT_PROJECT);
+        res.render('../views/pages/index.ejs', arg );
+    });
+
+    app.get('/openproject', function (req, res)
+    {
+        //TODO debug
+        if ( req.session.userProject == null)
+            req.session.userProject = 'oim';
+
+        //controllo se ho un errore
+        var arg = ConstantsRouter.argIndex();
+        var Project = require("../model/Project");
+
+        if (req.session.arg)                    // uso  i paramenti presenti nella variabile di sessione
+        {
+            arg = req.session.arg;
+            req.session.arg = null;
+        }
+        else                                    // mi costruisco la variabile usando le variabili di sessione
+        {
+            arg.userProject = req.session.userProject;
+            arg.projectName = req.session.projectName;
+            arg.page = ConstantsRouter.PAGE.OPEN_PROJECT;
+        }
+
+        Project.getProjects(arg.userProject, function(data, err)
+        {
+            if(err) {
+
+            }
+
+            arg.content = argContentProjects( data );
+            res.render('../views/pages/index.ejs', arg );
+
+        });
+
     });
 
     app.post('/delproject', function (req, res) {

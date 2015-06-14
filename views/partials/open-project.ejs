@@ -1,0 +1,40 @@
+<style>
+    .btn-open
+    {
+        height: 20px;
+        border-radius: 20px;
+    }
+    .selectProj
+    {
+        position: relative;
+        top: -5px;
+    }
+</style>
+
+<script src="/public/js/project.js"></script>
+
+<div class="row" style="margin-top: 10px">
+    <table data-toggle="table" id="tableProjects" data-pagination="true" data-search="true">
+        <thead>
+        <tr>
+            <th data-field="userProject">Username</th>
+            <th data-field="projectName">Project Name</th>
+            <th data-field="dateCreation"
+                data-formatter="projectCtrl.dateCreationFormatter">Creation Date</th>
+            <th data-field="dateLastUpdate"
+                data-formatter="projectCtrl.dateLastUpdateFormatter">Last Edit</th>
+            <th data-field="size">Size</th>
+            <th data-field="Open project" data-width="60"
+                data-formatter="projectCtrl.openColumnFormatter">Open</th>
+        </tr>
+        </thead>
+    </table>
+</div>
+
+<script>
+    $(document).ready(function()
+    {
+        var content = '<%- content.projects %>';
+        projectCtrl.getData(content);
+    });
+</script>

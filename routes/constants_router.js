@@ -31,7 +31,10 @@ ConstantsRouter.argIndex = function(req, page)
  */
 ConstantsRouter.PAGE = {
     HOME: "home",
-    PROJECT: "project",
+    //PROJECT: "project",
+    NEW_PROJECT: "new-project",
+    OPEN_PROJECT: "open-project",
+    EDIT_PROJECT: "edit-project",
     DATABASE: "database",
     STAT_MAP: "stat-map",
     STAT_REGIONS_BAR: "stat-regions-bar",

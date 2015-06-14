@@ -44,6 +44,10 @@ Nation.importFromFile = function(fileNames, callback)
 
 };
 
+/**
+ * @param file
+ * @param cb {Error}
+ */
 function saveFile(file, cb)
 {
     console.log("CALL saveFile " + file);
@@ -118,19 +122,19 @@ function saveRegion(features, cb)
             {'properties.NAME_1': features.properties.NAME_1 },
             features,
             { upsert:true },
-            function( err, result )
-        {
-            console.log(" regione: " + features.properties.NAME_1);
-            db.close();
-            if(err)
-            {
-                console.error("ERROR: saveRegion.insert");
-                console.error(JSON.stringify(err));
-                callback({status: 100, message: err.toString()});
-            }
-            else
-                cb(null);
-        });
+                function( err, result )
+                {
+                    console.log(" regione: " + features.properties.NAME_1);
+                    db.close();
+                    if(err)
+                    {
+                        console.error("ERROR: saveRegion.insert");
+                        console.error(JSON.stringify(err));
+                        cb({status: 100, message: err.toString()});
+                    }
+                    else
+                        cb(null);
+                });
     });
 }
 

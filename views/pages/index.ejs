@@ -19,7 +19,10 @@
         }
         .content
         {
-            /*width: 85%;*/
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-right: 60px;
+            padding-left: 60px;
         }
         .row
         {
@@ -105,19 +108,35 @@
     <div class="row">
 
         <!-- sidebar -->
-        <div class="col-xs-6 col-sm-4 col-md-3 sidebar-offcanvas">
+        <div class="col-xs-6 col-sm-4 col-md-2 sidebar-offcanvas">
 
             <ul data-spy="affix" data-offset-top="0" id="affix" class="nav nav-stacked">
 
                 <li><a href="/home" class="btn btn-link"><i class="fa fa-th" style="float: left"></i>Home</a></li>
                 <li><a class="btn btn-link"><i class="fa fa-users" style="float: left"></i>Profile</a></li>
                 <li><a href="/database" class="btn btn-link"><i class="fa fa-cogs" style="float: left"></i>Database</a></li>
-                <li><a href="/project" class="btn btn-link"><i class="fa fa-database" style="float: left"></i>Projects</a></li>
 
-                <!--<li><a class="btn btn-link"><i class="fa fa-bar-chart" style="float: left"></i>Statistics</a></li>-->
+                <li><a class="btn btn-link" data-toggle="collapse" data-target="#subProj">
+                        <i class="fa fa-database" style="float: left; margin-right: 33%"></i>
+                        Projects
+                        <i class="fa fa-sort-down"></i>
+                    </a>
+                    <ul class="nav collapse" id="subProj">
+                        <li><a href="/newproject">
+                                <i class="fa fa-plus" style="margin-right: 5px"></i>
+                                New project
+                            </a></li>
+                        <li><a href="/openproject">
+                                <i class="fa fa-folder-open" style="margin-right: 5px"></i>
+                                Open project</a></li>
+                        <li><a href="/editproject">
+                                <i class="fa fa-pencil" style="margin-right: 5px"></i>
+                                Edit project</a></li>
+                    </ul>
+                </li>
 
                 <li><a class="btn btn-link" data-toggle="collapse" data-target="#subStat">
-                        <i class="fa fa-bar-chart" style="float: left"></i>
+                        <i class="fa fa-bar-chart" style="float: left; margin-right: 28%"></i>
                         Statistics
                         <i class="fa fa-sort-down"></i>
                     </a>
@@ -141,27 +160,16 @@
                     </ul>
                 </li>
 
-                <!--<li><a href="#"> <i class="fa fa-map-marker"></i> Map</a></li>-->
-                <!--<li><a href="#" data-toggle="collapse" data-target="#sub1"> <i class="fa fa-envelope"></i>Contacts (submenu)</a>-->
-                <!--<ul class="nav collapse" id="sub1">-->
-                <!--<li><a href="#">andrea@gmail.com</a></li>-->
-                <!--<li><a href="#">lorenzo@gmail.com</a></li>-->
-                <!--<li><a href="#">matteo@gmail.com</a></li>-->
-                <!--</ul>-->
-                <!--</li>-->
-                <!--<li><a href="#"> <i class="fa fa-plus"></i> More..</a></li>-->
             </ul>
         </div>
 
         <!-- content -->
-        <div class="col-xs-12  col-sm-8 col-md-9 content" id="indexContent">
+        <div class="col-xs-12  col-sm-8 col-md-10 content" id="indexContent">
 
             <% if(page == "home"){ %>
                 <% include ../partials/home.ejs %>
             <% }else if (page == "database") { %>
                 <% include ../partials/database.ejs %>
-            <% }else if (page == "project") { %>
-                <% include ../partials/project.ejs %>
             <% }else if (page == "stat-map") { %>
                 <% include ../partials/stat-map.ejs %>
             <% }else if (page == "stat-regions-bar") { %>
@@ -172,6 +180,12 @@
                 <% include ../partials/stat-timeline.ejs %>
             <% }else if (page == "stat-tag") { %>
                 <% include ../partials/stat-tags.ejs %>
+            <% }else if (page == "new-project") { %>
+                <% include ../partials/new-project.ejs %>
+            <% }else if (page == "open-project") { %>
+                <% include ../partials/open-project.ejs %>
+            <% }else if (page == "edit-project") { %>
+                <% include ../partials/edit-project.ejs %>
             <% } %>
 
         </div>

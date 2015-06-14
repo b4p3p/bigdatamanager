@@ -1,10 +1,10 @@
+var mongoose = require('mongoose');
+
 var User = function (data) {
     this.data = data;
 };
 
-var model_name = "users";
-
-var mongoose = require('mongoose');
+var MODEL_NAME = "users";
 
 const USER_SCHEMA = new mongoose.Schema({
     username: String,
@@ -36,7 +36,7 @@ User.save = function(user, callback)
         else
         {
             //var conn = mongoose.createConnection('mongodb://localhost/oim');
-            var Model = connection.model(model_name, USER_SCHEMA);
+            var Model = connection.model(MODEL_NAME, USER_SCHEMA);
             var newuser = new Model( user.data );
 
             newuser.save( function(err) {
@@ -55,7 +55,7 @@ User.getUser = function (username, callback)
 {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
 
-    var Users = connection.model(model_name, USER_SCHEMA);
+    var Users = connection.model(MODEL_NAME, USER_SCHEMA);
 
     Users.findOne( {username: username }, function (err, doc)
     {
@@ -70,7 +70,7 @@ User.getUserPsw = function (username, password , callback)
 {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
 
-    var Users = connection.model(model_name, USER_SCHEMA);
+    var Users = connection.model(MODEL_NAME, USER_SCHEMA);
 
     Users.findOne({username: username, password:password }, function (err, doc)
     {
