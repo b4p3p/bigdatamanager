@@ -41,7 +41,7 @@ function sendProjectError(request, response, message, status)
     response.redirect("/project");
 }
 
-module.exports = function (app) {
+module.exports = function (router) {
 
     //app.get('/project', function (req, res)
     //{
@@ -79,12 +79,12 @@ module.exports = function (app) {
     //
     //});
 
-    app.get('/newproject', function (req, res) {
+    router.get('/newproject', function (req, res) {
         var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.NEW_PROJECT);
         res.render('../views/pages/index.ejs', arg );
     });
 
-    app.post('/newproject', function (req, res) {
+    router.post('/newproject', function (req, res) {
 
         try {
 
@@ -126,12 +126,12 @@ module.exports = function (app) {
         }
     });
 
-    app.get('/editproject', function (req, res) {
+    router.get('/editproject', function (req, res) {
         var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.EDIT_PROJECT);
         res.render('../views/pages/index.ejs', arg );
     });
 
-    app.get('/openproject', function (req, res)
+    router.get('/openproject', function (req, res)
     {
         //TODO debug
         if ( req.session.userProject == null)
@@ -166,7 +166,7 @@ module.exports = function (app) {
 
     });
 
-    app.post('/delproject', function (req, res) {
+    router.post('/delproject', function (req, res) {
 
         var projectName = req.body.projectName;
         Project.delProject(projectName, function(err, ris)
@@ -176,25 +176,12 @@ module.exports = function (app) {
 
     });
 
-
-    /**
-     *  Richiesta di sincronizzazione in batch
-     */
-    function sincronizazzioneBatch(projectName)
-    {
-        var client = requestJson.createClient('http://localhost:8080');
-        client.get('synchronize?projectName=' + projectName, function(err, res, body) {
-
-            console.log( "Sincronizzazione effettuata:" + body.message);
-        });
-    }
-
     /**
      *  Method: POST
      *  @param  POST: req.body.projectName - username da settare
      *  @return {{}}
      */
-    app.post('/setproject', function (req, res) {
+    router.post('/setproject', function (req, res) {
 
         req.session.projectName = req.body.projectName;
 
@@ -211,6 +198,18 @@ module.exports = function (app) {
     });
 
 };
+
+/**
+ *  Richiesta di sincronizzazione in batch
+ */
+function sincronizazzioneBatch(projectName)
+{
+    var client = requestJson.createClient('http://localhost:8080');
+    client.get('synchronize?projectName=' + projectName, function(err, res, body) {
+
+        console.log( "Sincronizzazione effettuata:" + body.message);
+    });
+}
 
 /**
  *

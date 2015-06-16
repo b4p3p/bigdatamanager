@@ -105,7 +105,7 @@ ShowmapCtrl.getData = function ()
         type: "get",
         crossDomain: true,
         dataType: "json",
-        url: "http://localhost:8080/getdata",
+        url: "/getdata",
         success: function (data) {
 
             ShowmapCtrl.datas = data.data;
@@ -136,7 +136,7 @@ ShowmapCtrl.getRegions = function()
         type: "get",
         crossDomain: true,
         dataType: "json",
-        url: "http://localhost:8080/getregions",
+        url: "/getregions",
         success: function (data) {
             ShowmapCtrl.regions = data;
             $(".spinner-regions").hide();

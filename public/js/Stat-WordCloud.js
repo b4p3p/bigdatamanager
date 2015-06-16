@@ -15,7 +15,7 @@ var StatWordCloudCtrl = {
             type: "get",
             crossDomain: true,
             dataType: "json",
-            url: "http://localhost:8080/vocabulary/vocabulary",
+            url: "/vocabulary/vocabulary",
             success: function (data) {
                 StatWordCloudCtrl.vocabulary = data;
                 StatWordCloudCtrl.removeWait();

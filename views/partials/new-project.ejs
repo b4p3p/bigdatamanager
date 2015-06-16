@@ -1,158 +1,212 @@
 <!-- prendo le variabili -->
 <style>
-    .btn-open > span
-    {
-        position: relative;
-        top: -3px;
-    }
-    .example-code > pre
-    {
-        margin-right: 15px
-    }
-    .control-label
-    {
-        max-width: 100px;
-        padding-left: 0;
-        padding-right: 0;
-        margin-left: 0;
-        margin-right: 0;
-    }
-    #examplecode
-    {
-        padding: 0;
-    }
+
+   .btn-open > span {
+      position: relative;
+      top: -3px;
+   }
+
+   .form-group{
+      width: 100%;
+      margin-right: 0;
+      padding-right: 0;
+      margin-left: 0;
+      padding-left: 0;
+   }
+
+   #uploadForm{
+      width: 100%;
+   }
+
+   .example-code > pre {
+      /*margin-right: 15px*/
+   }
+
+   .control-label {
+      /*min-width: 110px;*/
+      max-width: 100px;
+      padding-left: 0;
+      padding-right: 0;
+      margin-left: 0;
+      margin-right: 0;
+   }
+
+   #examplecode {
+      padding: 0;
+   }
+
+   #btn_newproject {
+      /*border-radius: 50px;*/
+      float: right;
+      /*margin-top: 30px;*/
+      /*width: 120px*/
+   }
+
+   /*.col_sx{*/
+      /*min-width: 100px;*/
+   /*}*/
+
+   .col_dx{
+      /*float: right;*/
+      /*margin-left: 0;*/
+      /*padding-left: 0;*/
+      padding-right: 0
+   }
+
 </style>
 
 <!-- FORM NUOVO PROGETTO -->
 
-<form class="form-horizontal" action="/newproject" method="post"
-      id="uploadForm" enctype="multipart/form-data">
+<!--enctype="multipart/form-data"-->
 
-    <div class="form-group">
-        <label for="nameproject" class="col-sm-2 control-label">Project name:</label>
+<form class="form-horizontal" action="/project/newproject"
+      method="post"
+      id="newproject_form" >
 
-        <div class="col-sm-10">
-            <input type="text" class="form-control" id="nameproject" placeholder="Project Name"
-                   name="projectName"
-                   required>
-        </div>
-    </div>
+   <div class="form-group">
+      <label for="nameproject"
+             class="col-sm-2">Project name:</label>
 
-    <div class="form-group">
-        <label for="inputType" class="col-sm-2 control-label"
-               style="margin-right: 15px">Type data:</label>
+      <div class="col-sm-10 col_dx">
+         <input type="text" class="form-control" id="nameproject"
+                placeholder="Project Name"
+                name="projectName"
+                required>
+      </div>
+   </div>
 
-        <div>
-            <select class="selectpicker" name="cmbType" id="cmbType">
-                <option value="csv">CSV</option>
-                <option value="json">JSON</option>
-            </select>
-        </div>
-    </div>
+   <div class="form-group">
+      <label for="description"
+             class="col-sm-2">Description:</label>
 
-    <div class="form-group">
-        <label class="col-sm-2 control-label"
-               style="margin-right: 15px">Example data:</label>
+      <div class="col-sm-10 col_dx">
 
-        <div id="examplecode"
-             class="example-code col-sm-10">
-                <pre></pre>
-        </div>
-    </div>
+         <textarea class="form-control" rows="3"
+                   placeholder="Description..."
+                   name="description"></textarea>
 
-    <div class="form-group">
-        <label for="files" class="col-sm-2 control-label">Load data:</label>
+      </div>
+   </div>
 
-        <!--multiple="true"-->
+   <div class="form-group">
+      <button class="btn btn-success" type="submit" id="btn_newproject">
+         <!--style="">-->
+         Confirm
+      </button>
+   </div>
 
-        <div class="col-sm-10">
-            <input type="file" class="file" multiple
-                   name="files" id="files"
-                   data-show-upload="false"
-                   data-show-caption="true"
-                   data-show-preview="false"
-                   required>
-        </div>
-    </div>
-
-    <% if (error && error.status > 0) { %>
-    <div class="alert alert-danger" role="alert">
-        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-        <span class="sr-only">Error:</span>
-        <%= error.message %>
-    </div>
-    <% } %>
-
-    <button class="btn btn-success col-sm-10" type="submit"
-            style="border-radius: 50px;float: right;margin-top: 30px;width: 120px">
-        Confirm
-    </button>
+   <% if (error && error.status > 0) { %>
+   <div class="alert alert-danger" role="alert">
+      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+      <span class="sr-only">Error:</span>
+      <%= error.message %>
+   </div>
+   <% } %>
 
 </form>
+
+   <!--<div class="form-group">-->
+      <!--<label for="inputType" class="col-sm-2 control-label"-->
+             <!--style="margin-right: 15px">Type data:</label>-->
+
+      <!--<div>-->
+         <!--<select class="selectpicker" name="cmbType" id="cmbType">-->
+            <!--<option value="csv">CSV</option>-->
+            <!--<option value="json">JSON</option>-->
+         <!--</select>-->
+      <!--</div>-->
+   <!--</div>-->
+
+   <!--<div class="form-group">-->
+      <!--<label class="col-sm-2 control-label"-->
+             <!--style="margin-right: 15px">Example data:</label>-->
+
+      <!--<div id="examplecode"-->
+           <!--class="example-code col-sm-10 col_dx">-->
+         <!--<pre></pre>-->
+      <!--</div>-->
+   <!--</div>-->
+
+
+
+   <!--<div class="form-group">-->
+   <!--<label for="files" class="col-sm-2 control-label">Load data:</label>-->
+
+   <!--&lt;!&ndash;multiple="true"&ndash;&gt;-->
+
+   <!--<div class="col-sm-10">-->
+   <!--<input type="file" class="file" multiple-->
+   <!--name="files" id="files"-->
+   <!--data-show-upload="false"-->
+   <!--data-show-caption="true"-->
+   <!--data-show-preview="false"-->
+   <!--required>-->
+   <!--</div>-->
+   <!--</div>-->
 
 
 
 
 <script>
 
-    $('.selectpicker').selectpicker();
-    var cmbType = $('#cmbType');
-    var divCode = $('#examplecode');
-    showExample();
+   $('.selectpicker').selectpicker();
+   var cmbType = $('#cmbType');
+   var divCode = $('#examplecode');
+   showExample();
 
-    function showExample(){
-        var selected = cmbType.find("option:selected").val();
-        if (selected == "csv")
-            divCode.html(
-                    "<pre>id,[date],[latitude],[longitude],[source],text,[user],[tag]\n"+
-                    "'&lt;unique_id&gt;'," +
-                    "['&lt;AAAA-MM-GG&gt;']," +
-                    "[&lt;float&gt;]," +
-                    "[&lt;float&gt;]," +
-                    "['&lt;source&gt;]'," +
-                    "'&lt;text&gt;'," +
-                    "['&lt;user&gt;]'," +
-                    "['&lt;tag&gt;]'\n" +
-                    "'&lt;unique_id&gt;'," +
-                    "['&lt;AAAA-MM-GG&gt;']," +
-                    "[&lt;float&gt;]," +
-                    "[&lt;float&gt;]," +
-                    "['&lt;source&gt;]'," +
-                    "'&lt;text&gt;'," +
-                    "['&lt;user&gt;]'," +
-                    "['&lt;tag&gt;]'\n" +
-                    "...\n"+
-                    "</pre>");
-        else
-            divCode.html(
-                    "<pre>[\n"+
-                    "  {\n" +
-                    "    id: '&lt;unique_id&gt;',\n" +
-                    "    [date: '&lt;AAAA-MM-GG&gt;'],\n"+
-                    "    [latitude: &lt;float&gt;],\n"+
-                    "    [longitude: &lt;float&gt;],\n"+
-                    "    [source: '&lt;source&gt;]',\n"+
-                    "    text: '&lt;text&gt;',\n"+
-                    "    [user: '&lt;user&gt;]',\n"+
-                    "    [tag: '&lt;tag&gt;]'\n"+
-                    "  },{\n"+
-                    "    id: '&lt;unique_id&gt;',\n" +
-                    "    [date: '&lt;AAAA-MM-GG&gt;'],\n"+
-                    "    [latitude: &lt;float&gt;],\n"+
-                    "    [longitude: &lt;float&gt;],\n"+
-                    "    [source: '&lt;source&gt;]',\n"+
-                    "    text: '&lt;text&gt;',\n"+
-                    "    [user: '&lt;user&gt;]',\n"+
-                    "    [tag: '&lt;tag&gt;]'\n"+
-                    "  },\n"+
-                    "  ...\n"+
-                    "]</pre>");
+   function showExample() {
+      var selected = cmbType.find("option:selected").val();
+      if (selected == "csv")
+         divCode.html(
+                 "<pre>id,[date],[latitude],[longitude],[source],text,[user],[tag]\n" +
+                 "'&lt;unique_id&gt;'," +
+                 "['&lt;AAAA-MM-GG&gt;']," +
+                 "[&lt;float&gt;]," +
+                 "[&lt;float&gt;]," +
+                 "['&lt;source&gt;]'," +
+                 "'&lt;text&gt;'," +
+                 "['&lt;user&gt;]'," +
+                 "['&lt;tag&gt;]'\n" +
+                 "'&lt;unique_id&gt;'," +
+                 "['&lt;AAAA-MM-GG&gt;']," +
+                 "[&lt;float&gt;]," +
+                 "[&lt;float&gt;]," +
+                 "['&lt;source&gt;]'," +
+                 "'&lt;text&gt;'," +
+                 "['&lt;user&gt;]'," +
+                 "['&lt;tag&gt;]'\n" +
+                 "...\n" +
+                 "</pre>");
+      else
+         divCode.html(
+                 "<pre>[\n" +
+                 "  {\n" +
+                 "    id: '&lt;unique_id&gt;',\n" +
+                 "    [date: '&lt;AAAA-MM-GG&gt;'],\n" +
+                 "    [latitude: &lt;float&gt;],\n" +
+                 "    [longitude: &lt;float&gt;],\n" +
+                 "    [source: '&lt;source&gt;]',\n" +
+                 "    text: '&lt;text&gt;',\n" +
+                 "    [user: '&lt;user&gt;]',\n" +
+                 "    [tag: '&lt;tag&gt;]'\n" +
+                 "  },{\n" +
+                 "    id: '&lt;unique_id&gt;',\n" +
+                 "    [date: '&lt;AAAA-MM-GG&gt;'],\n" +
+                 "    [latitude: &lt;float&gt;],\n" +
+                 "    [longitude: &lt;float&gt;],\n" +
+                 "    [source: '&lt;source&gt;]',\n" +
+                 "    text: '&lt;text&gt;',\n" +
+                 "    [user: '&lt;user&gt;]',\n" +
+                 "    [tag: '&lt;tag&gt;]'\n" +
+                 "  },\n" +
+                 "  ...\n" +
+                 "]</pre>");
 
-    }
+   }
 
-    cmbType.on('change', function () {
-        var selected = $(this).find("option:selected").val();
-        showExample();
-    });
+   cmbType.on('change', function () {
+      var selected = $(this).find("option:selected").val();
+      showExample();
+   });
 
 </script>

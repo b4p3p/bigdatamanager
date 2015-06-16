@@ -60,7 +60,7 @@ RegionBarCtrl = {
             type: "get",
             crossDomain: true,
             dataType: "json",
-            url: "http://localhost:8080/getregions",
+            url: "/getregions",
             success: function (data) {
                 RegionBarCtrl.regions = data;
 
@@ -82,7 +82,7 @@ RegionBarCtrl = {
             type: "get",
             crossDomain: true,
             dataType: "json",
-            url: "http://localhost:8080/gettags",
+            url: "/gettags",
             success: function (data) {
 
                 RegionBarCtrl.tags = data;

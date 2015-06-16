@@ -1,225 +1,271 @@
 <!-- prendo le variabili -->
 <style>
-    .btn-open {
-        height: 20px;
-        border-radius: 20px;
-    }
+   .btn-open {
+      height: 20px;
+      border-radius: 20px;
+   }
 
-    .btn-open > span {
-        position: relative;
-        top: -5px;
-    }
+   .btn-open > span {
+      position: relative;
+      top: -5px;
+   }
 
-    .example-code > pre {
-        margin-right: 15px
-    }
+   .example-code > pre {
+      margin-right: 15px
+   }
 </style>
 
 <script src="/public/js/project.js"></script>
 
+<script src="/node_modules/socketio-file-upload/client.js"></script>
+<script src="/node_modules/socket.io/lib/socket.js"></script>
+
+<script type="text/javascript">
+   document.addEventListener("DOMContentLoaded", function(){
+
+      // Initialize instances:
+      var socket = io.connect();
+      var siofu = new SocketIOFileUpload(socket);
+
+      // Configure the three ways that SocketIOFileUpload can read files:
+      document.getElementById("upload_btn").addEventListener("click", siofu.prompt, false);
+      siofu.listenOnInput(document.getElementById("upload_input"));
+      siofu.listenOnDrop(document.getElementById("file_drop"));
+
+      // Do something when a file is uploaded:
+      siofu.addEventListener("complete", function(event){
+         console.log(event.success);
+         console.log(event.file);
+      });
+
+   }, false);
+</script>
+
 <ul class="nav nav-tabs">
 
-    <% if( tab == "openproject" ) { %>
-    <li class="active">
-        <% } else { %>
-    <li>
-        <% } %>
+   <% if( tab == "openproject" ) { %>
+   <li class="active">
+      <% } else { %>
+   <li>
+      <% } %>
 
-        <a href="#open" data-toggle="tab">Open project</a></li>
+      <a href="#open" data-toggle="tab">Open project</a></li>
 
-    <% if( tab == "newproject" ) { %>
-    <li class="active">
-        <% } else { %>
-    <li>
-        <% } %>
+   <% if( tab == "newproject" ) { %>
+   <li class="active">
+      <% } else { %>
+   <li>
+      <% } %>
 
-        <a href="#new" data-toggle="tab">New project</a></li>
+      <a href="#new" data-toggle="tab">New project</a></li>
 </ul>
 
 <!-- Tab panes -->
 <div class="tab-content">
 
-    <div
-            <% if( tab == "openproject" ) { %>
-            class="tab-pane active"
-            <% } else { %>
-            class="tab-pane"
-            <% } %>
+   <div
+           <% if( tab == "openproject" ) { %>
+           class="tab-pane active"
+           <% } else { %>
+           class="tab-pane"
+           <% } %>
 
-            id="open">
+           id="open">
 
-        <div class="row" style="margin-top: 10px">
-            <table data-toggle="table" id="tableProjects" data-pagination="true" data-search="true">
-                <thead>
-                <tr>
-                    <th data-field="userProject">Username</th>
-                    <th data-field="projectName">Project Name</th>
-                    <th data-field="dateCreation"
-                        data-formatter="ProjectCtrl.dateCreationFormatter">Creation Date
-                    </th>
-                    <th data-field="dateLastUpdate"
-                        data-formatter="ProjectCtrl.dateLastUpdateFormatter">Last Edit
-                    </th>
-                    <th data-field="size">Size</th>
-                    <th data-field="Delete project" data-width="60"
-                        data-formatter="ProjectCtrl.deleteColumnFormatter">Delete
-                    </th>
-                    <th data-field="Open project" data-width="60"
-                        data-formatter="ProjectCtrl.openColumnFormatter">Open
-                    </th>
-                </tr>
-                </thead>
-            </table>
-        </div>
+      <div class="row" style="margin-top: 10px">
+         <table data-toggle="table" id="tableProjects" data-pagination="true" data-search="true">
+            <thead>
+            <tr>
+               <th data-field="userProject">Username</th>
+               <th data-field="projectName">Project Name</th>
+               <th data-field="dateCreation"
+                   data-formatter="ProjectCtrl.dateCreationFormatter">Creation Date
+               </th>
+               <th data-field="dateLastUpdate"
+                   data-formatter="ProjectCtrl.dateLastUpdateFormatter">Last Edit
+               </th>
+               <th data-field="size">Size</th>
+               <th data-field="Delete project" data-width="60"
+                   data-formatter="ProjectCtrl.deleteColumnFormatter">Delete
+               </th>
+               <th data-field="Open project" data-width="60"
+                   data-formatter="ProjectCtrl.openColumnFormatter">Open
+               </th>
+            </tr>
+            </thead>
+         </table>
+      </div>
 
-    </div>
+   </div>
 
-    <div class="tab-pane pane-newproject
+   <div class="tab-pane pane-newproject
 
         <% if( tab == "newproject" ) { %>
             active
         <% } %> " id="new">
 
-        <!-- FORM NUOVO PROGETTO -->
-        <!--suppress HtmlUnknownTarget -->
-        <form class="form-horizontal" action="/newproject" method="post"
-              id="uploadForm" enctype="multipart/form-data">
+      <!-- FORM NUOVO PROGETTO -->
+      <!--suppress HtmlUnknownTarget -->
+      <form class="form-horizontal" action="/newproject" method="post"
+            id="uploadForm" enctype="multipart/form-data">
 
-            <div class="form-group">
-                <label for="nameproject" class="col-sm-2 control-label">Project name:</label>
-
-                <div class="col-sm-10">
-                    <input type="text" class="form-control" id="nameproject" placeholder="Project Name"
-                           name="projectName"
-                           required>
-                </div>
+         <div class="form-group">
+            <label for="nameproject" class="col-sm-2 control-label">Project name:</label>
+            <div class="col-sm-10">
+               <input type="text" class="form-control" id="nameproject" placeholder="Project Name"
+                      name="projectName"
+                      required>
             </div>
+         </div>
 
-            <div class="form-group">
-                <label for="cmbType" class="col-sm-2 control-label"
-                       style="margin-right: 15px">Type data:</label>
-
-                <div>
-                    <select class="selectpicker" name="cmbType" id="cmbType">
-                        <option value="csv">CSV</option>
-                        <option value="json">JSON</option>
-                    </select>
-                </div>
+         <div class="form-group">
+            <label for="cmbType" class="col-sm-2 control-label"
+                   style="margin-right: 15px">Type data:</label>
+            <div>
+               <select class="selectpicker" name="cmbType" id="cmbType">
+                  <option value="csv">CSV</option>
+                  <option value="json">JSON</option>
+               </select>
             </div>
+         </div>
 
-            <div class="form-group">
-                <label class="col-sm-2 control-label"
-                       style="margin-right: 15px">Example data:</label>
+         <div class="form-group">
+            <label class="col-sm-2 control-label"
+                   style="margin-right: 15px">Example data:</label>
 
-                <div id="examplecode"
-                     class="example-code">
+            <div id="examplecode"
+                 class="example-code">
                         <pre>
 
                         </pre>
-                </div>
             </div>
+         </div>
 
-            <div class="form-group">
-                <label for="files" class="col-sm-2 control-label">Load data:</label>
+         <div class="form-group">
+            <label for="files" class="col-sm-2 control-label">Load data:</label>
 
-                <!--multiple="true"-->
+            <!--multiple="true"-->
 
-                <div class="col-sm-10">
-                    <input type="file" class="file" multiple
-                           name="files" id="files"
-                           data-show-upload="false"
-                           data-show-caption="true"
-                           data-show-preview="false"
-                           required>
-                </div>
+            <div class="col-sm-10">
+               <input type="file" class="file"
+                      name="files" id="btn_files"
+                      data-show-upload="false"
+                      data-show-caption="true"
+                      data-show-preview="false"
+                      multiple required>
             </div>
+         </div>
 
-            <% if (error && error.status > 0) { %>
-            <div class="alert alert-danger" role="alert">
-                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                <span class="sr-only">Error:</span>
-                <%= error.message %>
-            </div>
-            <% } %>
+         <% if (error && error.status > 0) { %>
+         <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            <%= error.message %>
+         </div>
+         <% } %>
 
-            <button class="btn btn-success" type="submit"
-                    style="border-radius: 50px;float: right;margin-top: 30px;width: 120px">
-                Confirm
-            </button>
+         <button class="btn btn-success" type="submit" id="upload_btn"
+                 style="border-radius: 50px;float: right;margin-top: 30px;width: 120px">
+            Confirm
+         </button>
 
-        </form>
+      </form>
 
-    </div>
+      <!--<script src="/bower_components/jquery-form/jquery.form.js"></script>-->
+
+   </div>
 
 </div>
 
 <script>
 
-    $('.selectpicker').selectpicker();
-    var cmbType = $('#cmbType');
-    var divCode = $('#examplecode');
+   $('.selectpicker').selectpicker();
+   var cmbType = $('#cmbType');
+   var divCode = $('#examplecode');
 
-    showExample();
+   showExample();
 
-    cmbType.on('change', function () {
-        var selected = $(this).find("option:selected").val();
-        showExample();
-    });
+   cmbType.on('change', function () {
+      var selected = $(this).find("option:selected").val();
+      showExample();
+   });
 
-    $(document).ready( function () {
-        var content = '<%- content.projects %>';
-        ProjectCtrl.getData(content);
-    });
+   function showExample() {
+      var selected = cmbType.find("option:selected").val();
+      if (selected == "csv")
+         divCode.html(
+                 "<pre>id,[date],[latitude],[longitude],[source],text,[user],[tag]\n" +
+                 "'&lt;unique_id&gt;'," +
+                 "['&lt;AAAA-MM-GG&gt;']," +
+                 "[&lt;float&gt;]," +
+                 "[&lt;float&gt;]," +
+                 "['&lt;source&gt;]'," +
+                 "'&lt;text&gt;'," +
+                 "['&lt;user&gt;]'," +
+                 "['&lt;tag&gt;]'\n" +
+                 "'&lt;unique_id&gt;'," +
+                 "['&lt;AAAA-MM-GG&gt;']," +
+                 "[&lt;float&gt;]," +
+                 "[&lt;float&gt;]," +
+                 "['&lt;source&gt;]'," +
+                 "'&lt;text&gt;'," +
+                 "['&lt;user&gt;]'," +
+                 "['&lt;tag&gt;]'\n" +
+                 "...\n" +
+                 "</pre>");
+      else
+         divCode.html(
+                 "<pre>[\n" +
+                 "  {\n" +
+                 "    id: '&lt;unique_id&gt;',\n" +
+                 "    [date: '&lt;AAAA-MM-GG&gt;'],\n" +
+                 "    [latitude: &lt;float&gt;],\n" +
+                 "    [longitude: &lt;float&gt;],\n" +
+                 "    [source: '&lt;source&gt;]',\n" +
+                 "    text: '&lt;text&gt;',\n" +
+                 "    [user: '&lt;user&gt;]',\n" +
+                 "    [tag: '&lt;tag&gt;]'\n" +
+                 "  },{\n" +
+                 "    id: '&lt;unique_id&gt;',\n" +
+                 "    [date: '&lt;AAAA-MM-GG&gt;'],\n" +
+                 "    [latitude: &lt;float&gt;],\n" +
+                 "    [longitude: &lt;float&gt;],\n" +
+                 "    [source: '&lt;source&gt;]',\n" +
+                 "    text: '&lt;text&gt;',\n" +
+                 "    [user: '&lt;user&gt;]',\n" +
+                 "    [tag: '&lt;tag&gt;]'\n" +
+                 "  },\n" +
+                 "  ...\n" +
+                 "]</pre>");
 
-    function showExample() {
-        var selected = cmbType.find("option:selected").val();
-        if (selected == "csv")
-            divCode.html(
-                    "<pre>id,[date],[latitude],[longitude],[source],text,[user],[tag]\n" +
-                    "'&lt;unique_id&gt;'," +
-                    "['&lt;AAAA-MM-GG&gt;']," +
-                    "[&lt;float&gt;]," +
-                    "[&lt;float&gt;]," +
-                    "['&lt;source&gt;]'," +
-                    "'&lt;text&gt;'," +
-                    "['&lt;user&gt;]'," +
-                    "['&lt;tag&gt;]'\n" +
-                    "'&lt;unique_id&gt;'," +
-                    "['&lt;AAAA-MM-GG&gt;']," +
-                    "[&lt;float&gt;]," +
-                    "[&lt;float&gt;]," +
-                    "['&lt;source&gt;]'," +
-                    "'&lt;text&gt;'," +
-                    "['&lt;user&gt;]'," +
-                    "['&lt;tag&gt;]'\n" +
-                    "...\n" +
-                    "</pre>");
-        else
-            divCode.html(
-                    "<pre>[\n" +
-                    "  {\n" +
-                    "    id: '&lt;unique_id&gt;',\n" +
-                    "    [date: '&lt;AAAA-MM-GG&gt;'],\n" +
-                    "    [latitude: &lt;float&gt;],\n" +
-                    "    [longitude: &lt;float&gt;],\n" +
-                    "    [source: '&lt;source&gt;]',\n" +
-                    "    text: '&lt;text&gt;',\n" +
-                    "    [user: '&lt;user&gt;]',\n" +
-                    "    [tag: '&lt;tag&gt;]'\n" +
-                    "  },{\n" +
-                    "    id: '&lt;unique_id&gt;',\n" +
-                    "    [date: '&lt;AAAA-MM-GG&gt;'],\n" +
-                    "    [latitude: &lt;float&gt;],\n" +
-                    "    [longitude: &lt;float&gt;],\n" +
-                    "    [source: '&lt;source&gt;]',\n" +
-                    "    text: '&lt;text&gt;',\n" +
-                    "    [user: '&lt;user&gt;]',\n" +
-                    "    [tag: '&lt;tag&gt;]'\n" +
-                    "  },\n" +
-                    "  ...\n" +
-                    "]</pre>");
+   }
 
-    }
+   $(document).ready(function () {
+
+      var content = '<%- content.projects %>';
+
+      ProjectCtrl.getData(content);
+
+//      $('#uploadForm').submit(function () {
+//
+//         alert("Uploading file...\nAfter loading, the page will reload automatically");
+//
+//         $(this).ajaxSubmit({
+//
+//            error: function (xhr) {
+//               alert('Error: ' + xhr.status);
+//               window.location.reload();
+//            },
+//
+//            success: function (response) {
+//               window.location.reload();
+//            }
+//
+//         });
+//         //Very important line, it disable the page refresh.
+//         return false;
+//      });
+   });
 
 
 </script>

@@ -87,7 +87,7 @@ RegionTimeLineCtrl = {
             type: "get",
             crossDomain: true,
             dataType: "json",
-            url: "http://localhost:8080/gettimeline",
+            url: "/gettimeline",
             success: function (data) {
                 RegionTimeLineCtrl.data_day = data;
                 RegionTimeLineCtrl.data = data;

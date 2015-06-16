@@ -48,7 +48,7 @@ RegionRadarCtrl = {
             type: "get",
             crossDomain: true,
             dataType: "json",
-            url: "http://localhost:8080/getregions",
+            url: "/getregions",
             success: function (data) {
                 RegionRadarCtrl.regions = data;
                 RegionRadarCtrl.drawRegionsRadar();

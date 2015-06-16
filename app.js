@@ -3,8 +3,14 @@ var express = require('express'),
     logger = require('morgan'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
-    session = require('client-sessions'),
-    multer  = require('multer');
+    session = require('client-sessions');
+
+var SocketIOFileUpload = require('socketio-file-upload'),
+    socketio = require('socket.io');
+
+    //multer  = require('multer');
+    //formidable = require('formidable'),
+    //sys = require('sys');
 
 var app = express();
 
@@ -35,70 +41,104 @@ app.use( session({
 
 //DEBUG
 app.use(express.static(__dirname));
+
+
+/**********
+ * UPLOAD
+ **********/
+
+//app.use(SocketIOFileUpload.router);
+//
+//var io = socketio.listen(app);
+//
+//io.sockets.on("connection", function(socket){
+//
+//    // Make an instance of SocketIOFileUpload and listen on this socket:
+//    var uploader = new SocketIOFileUpload();
+//    uploader.dir   = "uploads";
+//    uploader.listen(socket);
+//
+//    // Do something when a file is saved:
+//    uploader.on("saved", function(event){
+//        console.log(event.file);
+//    });
+//
+//    // Error handler:
+//    uploader.on("error", function(event){
+//        console.log("Error from uploader", event);
+//    });
+//});
+
+/**************
+ * END UPLOAD
+ **************/
+
 //app.use(express.static(path.join(__dirname, 'public')));
 
-app.contFile = 0;
-app.fileNames = [];
-
-app.isUploadDone = function()
-{
-    return app.fileNames.length == app.contFile;
-};
-
-app.resetVariableUpload = function()
-{
-    app.contFile = 0;
-    app.fileNames = [];
-};
-
-app.use( multer({ dest: './uploads/',
-
-    rename: function (fieldname, filename)
-    {
-        try {
-            console.log('CALL: app.rename');
-            app.contFile++;
-
-            return Date.now() + "-" + filename;
-
-        } catch (e)
-        {
-            console.error(e);
-        }
-    },
-    onFileUploadStart: function (file) {
-        try {
-            console.log('CALL: app.onFileUploadStart (' + file.originalname + ')');
-        } catch (e) {
-            console.error(e);
-        }
-    },
-    onFileUploadComplete: function (file) {
-
-        try {
-            console.log('CALL: app.onFileUploadComplete (' + file.path + ')');
-            app.fileNames.push(file.path);
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-}));
+//app.contFile = 0;
+//app.fileNames = [];
+//
+//app.isUploadDone = function()
+//{
+//    return app.fileNames.length == app.contFile;
+//};
+//
+//app.resetVariableUpload = function()
+//{
+//    app.contFile = 0;
+//    app.fileNames = [];
+//};
+//
+//app.use( multer({ dest: './uploads/',
+//
+//    rename: function (fieldname, filename)
+//    {
+//        try {
+//            console.log('CALL: app.rename');
+//            app.contFile++;
+//
+//            return Date.now() + "-" + filename;
+//
+//        } catch (e)
+//        {
+//            console.error(e);
+//        }
+//    },
+//    onFileUploadStart: function (file) {
+//        try {
+//            console.log('CALL: app.onFileUploadStart (' + file.originalname + ')');
+//        } catch (e) {
+//            console.error(e);
+//        }
+//    },
+//    onFileUploadComplete: function (file) {
+//
+//        try {
+//            console.log('CALL: app.onFileUploadComplete (' + file.path + ')');
+//            app.fileNames.push(file.path);
+//        } catch (e) {
+//            console.error(e);
+//        }
+//    }
+//
+//}));
 
 /*******************************
  ******   ROUTER
  *******************************/
 
 var router_vocabulary = express.Router();
+var router_project = express.Router();
 
 app.use('/vocabulary', router_vocabulary);
+app.use('/project', router_project);
 
-require('./routes/router')(app);                //chiamo il router generico
-require('./routes/project_router')(app);        //chiamo il router per i progetti
-require('./routes/database_router')(app);       //chiamo il router per i progetti
-require('./routes/statistics_router')(app);     //chiamo il router per i progetti
+require('./routes/router')(app);                    //chiamo il router generico
+
+require('./routes/database_router')(app);           //chiamo il router per i progetti
+require('./routes/statistics_router')(app);         //chiamo il router per i progetti
 require("./routes/vocabulary")(router_vocabulary);
-
+require('./routes/project_router')(router_project);
 
 /********************************
  *** END ROUTER

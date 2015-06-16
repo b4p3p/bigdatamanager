@@ -49,8 +49,8 @@ var ProjectCtrl =
     },
 
     deleteColumnFormatter : function (value, row) {
-        return '<button type="button" class="btn btn-danger btn-open">' +
-            '<span class="glyphicon glyphicon-remove" aria-hidden="true" ' +
+        return '<button type="button" class="btn btn-danger btn-delete">' +
+            '<span class="glyphicon glyphicon-remove img-delete" aria-hidden="true" ' +
             'project="' + row.projectName + '"' +
             'onclick="ProjectCtrl.deleteProject_Click(\'' + row.projectName + '\')"/>' +
             '</button>';
@@ -93,7 +93,7 @@ var ProjectCtrl =
             type: "POST",
             crossDomain:true,
             dataType: "json",
-            url: "http://localhost:8080/delproject",
+            url: "http://localhost:8080/project/delproject",
             data: { projectName: projectName } ,
             success: function(msg)
             {

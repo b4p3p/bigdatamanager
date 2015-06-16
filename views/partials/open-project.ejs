@@ -4,6 +4,16 @@
         height: 20px;
         border-radius: 20px;
     }
+    .btn-delete
+    {
+        height: 20px;
+        border-radius: 20px;
+    }
+    .img-delete
+    {
+        position: relative;
+        top: -4px;
+    }
     .selectProj
     {
         position: relative;
@@ -20,12 +30,14 @@
             <th data-field="userProject">Username</th>
             <th data-field="projectName">Project Name</th>
             <th data-field="dateCreation"
-                data-formatter="projectCtrl.dateCreationFormatter">Creation Date</th>
+                data-formatter="ProjectCtrl.dateCreationFormatter">Creation Date</th>
             <th data-field="dateLastUpdate"
-                data-formatter="projectCtrl.dateLastUpdateFormatter">Last Edit</th>
+                data-formatter="ProjectCtrl.dateLastUpdateFormatter">Last Edit</th>
             <th data-field="size">Size</th>
+            <th data-field="Delete project" data-width="60"
+                data-formatter="ProjectCtrl.deleteColumnFormatter">Delete</th>
             <th data-field="Open project" data-width="60"
-                data-formatter="projectCtrl.openColumnFormatter">Open</th>
+                data-formatter="ProjectCtrl.openColumnFormatter">Open</th>
         </tr>
         </thead>
     </table>
@@ -35,6 +47,6 @@
     $(document).ready(function()
     {
         var content = '<%- content.projects %>';
-        projectCtrl.getData(content);
+        ProjectCtrl.getData(content);
     });
 </script>
