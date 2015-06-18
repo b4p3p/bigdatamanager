@@ -1,1 +1,214 @@
-settings
+<!-- prendo le variabili -->
+<style>
+
+    .col_dx{
+        /*float: right;*/
+        /*margin-left: 0;*/
+        /*padding-left: 0;*/
+        padding-right: 0
+    }
+
+    .btn-open > span {
+        position: relative;
+        top: -3px;
+    }
+
+    .form-group{
+        width: 100%;
+        margin-right: 0;
+        margin-left: 0;
+
+        padding-right: 0;
+        padding-left: 0;
+    }
+
+    .row-form{
+        width: 100%;
+        margin-right: -15px;
+        margin-left: -15px;
+
+        /*padding-right: 15px;*/
+        /*padding-left: 0;*/
+    }
+
+    .button{
+        /*border-radius: 50px;*/
+        float: right;
+        /*margin-top: 30px;*/
+        width: 108px;
+    }
+
+    #uploadForm{
+        width: 100%;
+    }
+
+    .example-code > pre {
+        /*margin-right: 15px*/
+    }
+
+    #examplecode {
+        padding: 0;
+    }
+
+    #console {
+        padding-left: 10px;
+    }
+
+    .control-label {
+        max-width: 100px;
+        padding-left: 0;
+        padding-right: 0;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    /*.col_sx{*/
+    /*min-width: 100px;*/
+    /*}*/
+
+</style>
+
+<script src="/public/js/ProjectCtrl.js"></script>
+<script src="/bower_components/jquery-form/jquery.form.js"></script>
+
+<script src="/node_modules/socketio-file-upload/client.js"></script>
+<script src="/bower_components/socket.io-client/socket.io.js"></script>
+
+<% if(projectName==null) {%>
+<div class="alert alert-danger" role="alert">
+    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+    <span class="sr-only">Error:</span>
+    You must select project.
+</div>
+<% } else { %>
+
+<h3>Edit project</h3>
+
+<form class="form-horizontal" action="/project/editproject"
+      method="post"
+      id="newproject_form" >
+
+    <div class="form-group">
+        <label for="nameproject"
+               class="col-sm-2">Project name:</label>
+
+        <div class="col-sm-10 col_dx">
+            <input type="text" class="form-control" id="projectName"
+                   placeholder="Project Name"
+                   name="projectName"
+                   required>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="description"
+               class="col-sm-2">Description:</label>
+
+        <div class="col-sm-10 col_dx">
+
+         <textarea class="form-control" rows="3"
+                   placeholder="Description..."
+                   name="description" id="description"></textarea>
+
+        </div>
+    </div>
+
+    <div class="form-group">
+        <button class="btn btn-danger button" type="submit" id="btn_editproject">
+            Edit
+        </button>
+    </div>
+
+    <% if (error && error.status > 0) { %>
+    <div class="alert alert-danger" role="alert">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span class="sr-only">Error:</span>
+        <%= error.message %>
+    </div>
+    <% } %>
+
+</form>
+
+<h3>Edit data</h3>
+
+<form class="form-horizontal"
+      id="uploadForm"
+      action="/project/uploaddata"
+      method="post"
+      enctype="multipart/form-data">
+
+    <div class="form-group" id="uploadForm">
+
+        <label for="cmbType" >Type data:</label>
+
+        <div class="col_dx">
+            <select class="selectpicker" name="cmbType" id="cmbType">
+                <option value="csv">CSV</option>
+                <option value="json">JSON</option>
+            </select>
+        </div>
+
+    </div>
+
+    <div class="form-group">
+
+        <label for="cmbType" >Example:</label>
+
+        <div id="examplecode"
+             class="example-code"><pre></pre>
+        </div>
+
+    </div>
+
+    <div class="form-group">
+
+        <input type="file" class="file"
+               name="files" id="upload_input"
+               data-show-upload="false"
+               data-show-caption="true"
+               data-show-preview="false"
+               multiple>
+    </div>
+
+    <div class="progress-container row-form" id="progress-container">
+
+    </div>
+
+    <!--<div class="form-group">-->
+
+        <!--<label for="console" >Console:</label>-->
+
+        <!--<pre id="console" class="row-form">-->
+
+        <!--</pre>-->
+
+    <!--</div>-->
+
+</form>
+
+<div class="form-group row-form">
+    <button class="btn btn-danger button"
+            id="upload_btn"
+            onclick="ProjectCtrl.sendFiles()">
+        Upload
+    </button>
+</div>
+
+
+
+
+<!--onclick="ProjectCtrl.sendFiles()"-->
+
+<script>
+
+    var projectName = '<%- projectName %>';
+    ProjectCtrl.getProject( projectName , ProjectCtrl.loadEditForm );
+    ProjectCtrl.showExample();
+
+    $('#cmbType').on('change', function () {
+        ProjectCtrl.showExample();
+    });
+
+</script>
+
+<% } %>

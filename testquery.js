@@ -164,8 +164,6 @@ db.datas.aggregate(
     }}
 );
 
-
-
 db.datas.aggregate({
     $group : {
         _id: {

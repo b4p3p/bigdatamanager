@@ -59,6 +59,14 @@
 
 <!--enctype="multipart/form-data"-->
 
+<% if (error && error.status > 0) { %>
+<div class="alert alert-danger" role="alert">
+    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+    <span class="sr-only">Error:</span>
+    <%= error.message %>
+</div>
+<% } %>
+
 <form class="form-horizontal" action="/project/newproject"
       method="post"
       id="newproject_form" >
@@ -94,14 +102,6 @@
          Confirm
       </button>
    </div>
-
-   <% if (error && error.status > 0) { %>
-   <div class="alert alert-danger" role="alert">
-      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-      <span class="sr-only">Error:</span>
-      <%= error.message %>
-   </div>
-   <% } %>
 
 </form>
 

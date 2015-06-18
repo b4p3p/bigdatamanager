@@ -1,3 +1,5 @@
+"use strict";
+
 var mongoose = require('mongoose');
 var connection = mongoose.createConnection('mongodb://localhost/oim');
 var url = 'mongodb://localhost:27017/oim';
@@ -11,14 +13,20 @@ var Project = function (data) {
 Project.MODEL_NAME = "project";
 
 Project.PROJECT_SCHEMA = new mongoose.Schema({
-    projectName: { type : String, required : true },
+    projectName: {type : String, required : true },
     userProject: { type : String, required : true },
     dateCreation: {type: Date, default: Date.now()},
-    dateLastUpdate: {type: Date, default: Date.now()}
+    dateLastUpdate: {type: Date, default: Date.now()},
+    description : {type : String, default:""}
 });
 
 Project.prototype.data = {};    //json
 
+/**
+ *
+ * @param projectName
+ * @param callback - fn({Data})
+ */
 Project.getProject = function (projectName, callback)
 {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
@@ -54,12 +62,17 @@ Project.getProjects = function(username, callback)
 
 };
 
+/**
+ *
+ * @param dataProject
+ * @param callback - fn(Err)
+ */
 Project.addProject = function(dataProject, callback)
 {
     console.log("CALL Project.addProject");
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
-    Model = connection.model(Project.MODEL_NAME, Project.PROJECT_SCHEMA);
+    var Model = connection.model( Project.MODEL_NAME, Project.PROJECT_SCHEMA);
     var newProject = new Model(dataProject);
 
     newProject.save(
@@ -125,6 +138,35 @@ Project.delProject = function(projectName, callback)
             });
         }
     });
+};
+
+/**
+ *
+ * @param data
+ * @param callback - fn(Err, Data)
+ */
+Project.editProject = function (data, callback) {
+
+    console.log("CALL: Project.editProject");
+    console.log("  data: " + JSON.stringify(data));
+
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+    var Model = connection.model(Project.MODEL_NAME, Project.PROJECT_SCHEMA);
+
+    var conditions = { projectName: data.projectName }
+        , update = { $set: {
+            description: data.description,
+            projectName: data.projectName
+        }}
+        , options = { multi: false };
+
+    Model.update(conditions, update, options, function(err, numAffected){
+
+        connection.close();
+        callback(err, numAffected);
+
+    });
+
 };
 
 module.exports = Project;

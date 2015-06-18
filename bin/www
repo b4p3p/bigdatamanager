@@ -19,7 +19,38 @@ app.set('port', port);
  * Create HTTP server.
  */
 
+var SocketIOFileUpload = require('socketio-file-upload'),
+    socketio = require('socket.io');
+
+app.use(SocketIOFileUpload.router);
+
 var server = http.createServer(app);
+
+var io = socketio.listen(server);
+var fs = require('fs');
+
+io.sockets.on("connection", function(socket){
+
+  // Make an instance of SocketIOFileUpload and listen on this socket:
+  var uploader = new SocketIOFileUpload();
+  uploader.dir = "./uploads";
+  uploader.listen(socket);
+
+  // Do something when a file is saved:
+  uploader.on("saved", function(event){
+
+    console.log("UPLOAD OK - " + event.file.pathName);
+    fs.unlinkSync(event.file.pathName);
+
+  });
+
+  // Error handler:
+  uploader.on("error", function(event){
+    console.log("Error from uploader", event);
+  });
+});
+
+
 
 /**
  * Listen on provided port, on all network interfaces.

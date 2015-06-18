@@ -21,7 +21,7 @@
     }
 </style>
 
-<script src="/public/js/project.js"></script>
+<script src="/public/js/ProjectCtrl.js"></script>
 
 <div class="row" style="margin-top: 10px">
     <table data-toggle="table" id="tableProjects" data-pagination="true" data-search="true">
@@ -47,6 +47,6 @@
     $(document).ready(function()
     {
         var content = '<%- content.projects %>';
-        ProjectCtrl.getData(content);
+        ProjectCtrl.loadData(content);
     });
 </script>

@@ -15,7 +15,7 @@
    }
 </style>
 
-<script src="/public/js/project.js"></script>
+<script src="/public/js/ProjectCtrl.js"></script>
 
 <script src="/node_modules/socketio-file-upload/client.js"></script>
 <script src="/node_modules/socket.io/lib/socket.js"></script>
@@ -244,7 +244,7 @@
 
       var content = '<%- content.projects %>';
 
-      ProjectCtrl.getData(content);
+      ProjectCtrl.loadData(content);
 
 //      $('#uploadForm').submit(function () {
 //

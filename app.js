@@ -5,14 +5,16 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     session = require('client-sessions');
 
-var SocketIOFileUpload = require('socketio-file-upload'),
-    socketio = require('socket.io');
 
+
+    //var socketio = require('socket.io');
     //multer  = require('multer');
     //formidable = require('formidable'),
     //sys = require('sys');
 
 var app = express();
+
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
