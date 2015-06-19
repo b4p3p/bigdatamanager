@@ -1,6 +1,32 @@
-<p>
-    Errore <%= error %>
-</p>
-<p>
-    Messaggio <%= message %>
-</p>
+<!DOCTYPE html>
+<html lang="it">
+    <head>
+        <meta charset="UTF-8">
+        <% include ../partials/bootstrap.ejs %>
+    </head>
+
+    <body>
+
+        <h3>Ooooooooops! questo &#232; imbarazzante :(</h3>
+
+        <hr>
+
+        <h4>Error:</h4>
+
+        <p>
+             <%= error %>
+        </p>
+
+        <hr>
+
+        <h4>Message:</h4>
+        <p>
+            <%= message %>
+        </p>
+
+    </body>
+
+</html>
+
+
+

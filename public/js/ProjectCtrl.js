@@ -34,9 +34,10 @@ document.addEventListener("DOMContentLoaded", function(){
 
     // 1 evento per file
     siofu.addEventListener("start", function(event){
-
+        event.file.meta.username = ProjectCtrl.username;
+        event.file.meta.projectName = ProjectCtrl.projectName;
+        event.file.meta.type = ProjectCtrl.type;
         console.log("progress " + event.file.name + ": " + event.bytesLoaded / event.file.size);
-
     });
 
     siofu.addEventListener("progress", function(event){
@@ -50,8 +51,9 @@ document.addEventListener("DOMContentLoaded", function(){
     });
 
     siofu.addEventListener("complete", function(event){
-        console.log(event.success);
-        console.log(event.file);
+
+        console.log("END UPLOAD: " + event.file.name + " " + event.detail.result);
+
     });
 
 });
@@ -94,6 +96,16 @@ var ProjectCtrl =
 {
     files: {},
     progress: {},
+    username: null,
+    projectName: null,
+    type: "",
+
+    init: function(username, projectName)
+    {
+        console.log("SET " + username + " " + projectName);
+        ProjectCtrl.username = username;
+        ProjectCtrl.projectName = projectName;
+    },
 
     loadData : function (content) {
         var json = JSON.parse(content);
@@ -225,13 +237,13 @@ var ProjectCtrl =
      * @param projectName
      * @param callback - fn({Data})
      */
-    getProject: function(projectName, callback){
+    getProject: function(callback)
+    {
 
-        console.log("CALL: getProject - pn=" + projectName);
-
+        console.log("CALL: getProject - pn=" + ProjectCtrl.projectName);
         jQuery.ajax({
             type: "GET",
-            url: '/project/getproject?pn=' + projectName,
+            url: '/project/getproject?pn=' + ProjectCtrl.projectName,
             dataType: 'json',
             async: true,
             success: function (data) {
@@ -243,11 +255,10 @@ var ProjectCtrl =
         });
     },
 
-    loadEditForm: function(data){
+    loadEditForm: function(data)
+    {
 
         console.log("CALL: loadEditForm");
-
-        console.log(JSON.stringify(data));
 
         $("#projectName").val(data.projectName);
         $("#description").val(data.description);
@@ -259,6 +270,7 @@ var ProjectCtrl =
         var cmbType = $('#cmbType');
         var divCode = $('#examplecode');
         var selected = cmbType.find("option:selected").val();
+        ProjectCtrl.type = selected;
         if (selected == "csv")
             divCode.html(
                 "<pre>id,[date],[latitude],[longitude],[source],text,[user],[tag]\n" +
@@ -307,48 +319,10 @@ var ProjectCtrl =
 
     },
 
-    addUploadDataHandler :function()
+    sendFiles: function ()
     {
-        $('#uploadForm').submit( function() {
-
-            status('uploading the file ...');
-
-            $(this).ajaxSubmit({
-
-                error: function(xhr) {
-                    status('Error: ' + xhr.status);
-                },
-
-                success: function(response) {
-
-                    if(response.error) {
-                        status('Opps, something bad happened');
-                        return;
-                    }
-
-                    var imageUrlOnServer = response.path;
-
-                    status('Success, file uploaded to:' + imageUrlOnServer);
-
-                    alert("fatto! + " + imageUrlOnServer);
-
-                }
-            });
-
-            // Have to stop the form from submitting and causing
-            // a page refresh - don't forget this
-            return false;
-        });
-
-        function status(message) {
-            $('#status').text(message);
-        }
-    },
-
-    sendFiles: function () {
-
+        siofu.useText = true;
         siofu.submitFiles(ProjectCtrl.getSelectedFiles());
-
     },
 
     getSelectedFiles: function()
@@ -359,7 +333,8 @@ var ProjectCtrl =
         return fileInput.files;
     },
 
-    initProgress: function(files){
+    initProgress: function(files)
+    {
         ProjectCtrl.files = {};
         ProjectCtrl.progress = {};
         for(var i=0; i<files.length;i++)
@@ -369,5 +344,44 @@ var ProjectCtrl =
         }
     }
 };
+
+
+//addUploadDataHandler :function()
+//{
+//    $('#uploadForm').submit( function() {
+//
+//        status('uploading the file ...');
+//
+//        $(this).ajaxSubmit({
+//
+//            error: function(xhr) {
+//                status('Error: ' + xhr.status);
+//            },
+//
+//            success: function(response) {
+//
+//                if(response.error) {
+//                    status('Opps, something bad happened');
+//                    return;
+//                }
+//
+//                var imageUrlOnServer = response.path;
+//
+//                status('Success, file uploaded to:' + imageUrlOnServer);
+//
+//                alert("fatto! + " + imageUrlOnServer);
+//
+//            }
+//        });
+//
+//        // Have to stop the form from submitting and causing
+//        // a page refresh - don't forget this
+//        return false;
+//    });
+//
+//    function status(message) {
+//        $('#status').text(message);
+//    }
+//},
 
 

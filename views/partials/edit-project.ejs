@@ -166,8 +166,7 @@
                name="files" id="upload_input"
                data-show-upload="false"
                data-show-caption="true"
-               data-show-preview="false"
-               multiple>
+               data-show-preview="false">
     </div>
 
     <div class="progress-container row-form" id="progress-container">
@@ -195,14 +194,19 @@
 </div>
 
 
-
-
 <!--onclick="ProjectCtrl.sendFiles()"-->
 
 <script>
 
-    var projectName = '<%- projectName %>';
-    ProjectCtrl.getProject( projectName , ProjectCtrl.loadEditForm );
+    ProjectCtrl.init('<%= userProject %>', '<%= projectName %>');
+
+//    var data = {
+//        username:ProjectCtrl.username,
+//        projectName:ProjectCtrl.projectName,
+//        description:
+//    };
+
+    ProjectCtrl.getProject( ProjectCtrl.loadEditForm );
     ProjectCtrl.showExample();
 
     $('#cmbType').on('change', function () {

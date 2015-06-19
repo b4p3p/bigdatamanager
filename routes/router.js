@@ -1,5 +1,6 @@
 var extend = require('util')._extend;
 var ConstantsRouter = require('./constants_router');
+var MongoClient = require('mongodb').MongoClient;
 
 const PAGE = {
     HOME: "home",

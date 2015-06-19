@@ -1,3 +1,5 @@
+"use strict";
+
 var async = require('async');
 var fs = require('fs');
 var mongoose = require('mongoose');
@@ -6,39 +8,40 @@ var converter = require('../controller/converterCtrl');
 var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://localhost:27017/oim';
 
-const ERROR = {
-    status: 0,
-    message: ''
-};
+//var ERROR = function() {
+//    return {
+//        status: 0,
+//        message: ''
+//    };
+//};
 
 /**
  * Model data
  * @param {DATA_SCHEMA[]} data
  * @constructor
  */
-var Data = function (data)
-{
+var Data = function (data) {
     this.data = data;
 };
 
 Data.MODEL_NAME = "datas";
 
 Data.DATA_SCHEMA = new Schema(
-{
-    projectName: { type : String, required : true },
-    id: { type : String, required : true },
-    date: Date,
-    latitude: Number,
-    longitude: Number,
-    loc: {
-        type: String,
-        coordinates: []
-    },
-    source: String,
-    text: { type : String, required : true },
-    user: String,
-    tag: String
-});
+    {
+        projectName: {type: String, required: true},
+        id: {type: String, required: true},
+        date: Date,
+        latitude: Number,
+        longitude: Number,
+        loc: {
+            type: String,
+            coordinates: []
+        },
+        source: String,
+        text: {type: String, required: true},
+        user: String,
+        tag: String
+    });
 //Data.DATA_SCHEMA.index({ loc: '2dsphere' });
 
 Data.projectName = null;
@@ -56,8 +59,7 @@ Data.prototype.data = {};
  * @param projectName {String}
  * @param cb_ris - callback({Error},{Result})
  */
-Data.importFromFile = function(type, fileNames, projectName, cb_ris)
-{
+Data.importFromFiles = function (type, fileNames, projectName, cb_ris) {
     console.log("### START each ### ");
 
     var Result = {
@@ -65,11 +67,43 @@ Data.importFromFile = function(type, fileNames, projectName, cb_ris)
         fail: []
     };
 
-    async.each(fileNames, function(file, cb_each)
-    {
-        async.waterfall(
+    async.each(fileNames, function (file, cb_each) {
 
-            [
+            Data.importFromFile(type, file, projectName, function (err, result) {
+
+                cb_each(err);
+
+            });
+        },
+
+        //Funzione di errore each
+        function (err) {
+            console.log("### END each ### ");
+
+            if (err) {
+                console.log("    Status: ERROR ### ");
+                console.log("    Error : " + err);
+            }
+            else {
+                console.log("    Status: OK");
+                console.log("###############");
+            }
+            cb_ris(err, Result);
+
+        });
+
+};
+
+/**
+ *
+ * @param type {String} - "csv" || "json"
+ * @param fileName - name
+ * @param projectName {String}
+ * @param cb_ris - callback({Error},{Result})
+ */
+Data.importFromFile = function (type, file, projectName, cb_ris) {
+
+    async.waterfall([
             // 1) leggo il file
             function (cb_wf) {
 
@@ -77,12 +111,11 @@ Data.importFromFile = function(type, fileNames, projectName, cb_ris)
 
                 fs.readFile(file, 'utf8', function (err, data) {
 
-                    if ( err ) {
+                    if (err) {
                         cb_wf(err);
 
                     } else {
                         cb_wf(null, data);
-
                     }
                 });
 
@@ -101,7 +134,7 @@ Data.importFromFile = function(type, fileNames, projectName, cb_ris)
                         if (jsonData)
                             cb_wf(null, jsonData);
                         else
-                            cb_wf({status:2,message: "Invalid json"});
+                            cb_wf({status: 2, message: "Invalid json"});
                     });
                 }
 
@@ -111,61 +144,41 @@ Data.importFromFile = function(type, fileNames, projectName, cb_ris)
             },
 
             // 3) salvo il file json
-            function (jsonData, cb_wf){
-                console.log("  3) salvo il json: length" + jsonData.length );
+            function (jsonData, cb_wf) {
+                console.log("  3) salvo il json: length" + jsonData.length);
 
-                addDataArray(jsonData, projectName, function(err, result)
-                {
+                addDataArray(jsonData, projectName, function (err, result) {
                     //non da mai errore, ma result
-                    if(err) {
-                        console.log("     errore salvataggio file: " + file );
-                        console.log("     err: " + err );
+                    if (err) {
+                        console.log("     errore salvataggio file: " + file);
+                        console.log("     err: " + err);
                         cb_wf(err);
 
-                    }else{
+                    } else {
                         cb_wf(null, result);
                     }
 
                 });
-            } ],
+            }],
 
-            // Funzione di errore di waterfall
-            function (err, result)
-            {
-                Result.success.concat(result.success);
-                Result.fail.concat(result.fail);
+        // Funzione di errore di waterfall
+        function (err, result) {
 
-                if (err)
-                {
-                    console.log("ERROR WATERFALL Data");
-                    console.log("   Err: " + err);
-                    cb_each(err);
-                }
-                else
-                {
-                    cb_each(null);
-                }
+            var ris = {
+                success: result.success.length,
+                fail: result.fail.length
             }
-        );
-    },
 
-    //Funzione di errore each
-    function(err) {
-        console.log("### END each ### ");
-
-        if (err)
-        {
-            console.log("    Status: ERROR ### ");
-            console.log("    Error : " + err);
+            if (err) {
+                console.log("ERROR WATERFALL Data");
+                console.log("   Err: " + err);
+                cb_ris(err, null);
+            }
+            else {
+                cb_ris(null, ris);
+            }
         }
-        else
-        {
-            console.log("    Status: OK");
-            console.log("###############");
-        }
-        cb_ris(err, Result);
-
-    });
+    );
 
 };
 
@@ -174,19 +187,16 @@ Data.importFromFile = function(type, fileNames, projectName, cb_ris)
  * @param {String} projectName - project name.
  * @param {function(ERROR, Array)} callback - The callback that handles the response.
  */
-Data.loadData = function(projectName, callback)
-{
+Data.loadData = function (projectName, callback) {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var DataModel = connection.model(Data.MODEL_NAME, Data.DATA_SCHEMA);
 
-    DataModel.find({projectName:projectName})
+    DataModel.find({projectName: projectName})
         .lean()
-        .exec( function(err, docs)
-        {
-            if (err)
-            {
+        .exec(function (err, docs) {
+            if (err) {
                 callback(err, {});
-            }else{
+            } else {
                 callback(null, docs);
             }
             connection.close();
@@ -198,14 +208,12 @@ Data.loadData = function(projectName, callback)
  * @param projectName {String}
  * @param callback {function(ERROR, Array)} callback - The callback that handles the response
  */
-Data.loadTags = function(projectName, callback)
-{
+Data.loadTags = function (projectName, callback) {
     MongoClient.connect(url, function (err, db) {
         var datas = db.collection('datas');
-        datas.distinct("tag",{projectName:projectName}, function(err, array)
-        {
+        datas.distinct("tag", {projectName: projectName}, function (err, array) {
             db.close();
-            if(err)
+            if (err)
                 callback(err, null);
             else
                 callback(null, array);
@@ -227,14 +235,13 @@ function addDataArray(arrayData, projectName, callback) {
         //var DataModel = connection.model(Data.MODEL_NAME, Data.DATA_SCHEMA);
         var cont = 0;
         var url = 'mongodb://localhost:27017/oim';
-        MongoClient.connect(url, function(err, db) {
-            if(err!=null)
-            {
+        MongoClient.connect(url, function (err, db) {
+            if (err != null) {
                 callback(err);
                 return;
             }
 
-            console.log("START EACH addDataArray" );
+            console.log("START EACH addDataArray");
 
             var dataCollection = db.collection('datas');
             var result =
@@ -243,16 +250,14 @@ function addDataArray(arrayData, projectName, callback) {
                 fail: []
             };
 
-            async.forEach(arrayData, function(data, cb_each)
-            {
+            async.forEach(arrayData, function (data, cb_each) {
                     cont++;
 
                     //applico il lower case a tutte le chiavi
                     var keys = Object.keys(data);
-                    for(var k = 0; k < keys.length; k ++) {
+                    for (var k = 0; k < keys.length; k++) {
                         var key = keys[k];
-                        if(key != key.toLowerCase())
-                        {
+                        if (key != key.toLowerCase()) {
                             data[key.toLowerCase()] = data[key];
                             delete data[key];
                         }
@@ -267,14 +272,13 @@ function addDataArray(arrayData, projectName, callback) {
                     //};
                     data.loc = {
                         type: "Point",
-                        coordinates:[data.longitude, data.latitude]
+                        coordinates: [data.longitude, data.latitude]
                     };
 
                     data.date = new Date(data.date);
 
                     dataCollection.save(data,
-                        function (err)
-                        {
+                        function (err) {
                             if (err)
                                 result.fail.push(err);
 
@@ -285,31 +289,26 @@ function addDataArray(arrayData, projectName, callback) {
                         }
                     );
                 },
-            function(err)
-            {
-                    if (err)
-                    {
+                function (err) {
+                    if (err) {
                         console.error("ERROR addDataArray at row: " + cont);
                         console.error(JSON.stringify(err));
                         callback(err, result);
                     }
-                    else
-                    {
-                        console.log("END EACH addDataArray - cont=" + cont );
+                    else {
+                        console.log("END EACH addDataArray - cont=" + cont);
                         callback(null, result);
                     }
                 });
 
         });
     }
-    catch (e)
-    {
+    catch (e) {
         console.error("Data EXCEPTION: add DataArray");
         console.error(e);
         console.error(e.stack);
     }
 }
-
 
 
 module.exports = Data;
