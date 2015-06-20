@@ -115,7 +115,7 @@ module.exports = function (app) {
                             },
                             nations: function (callback) {
                                 setTimeout(function () {
-                                    regions.distinct("properties.NAME_0",
+                                    datas.distinct("nation",
                                         function (err, data) {
 
                                             data.sort();
@@ -177,6 +177,13 @@ module.exports = function (app) {
         var db              = null;
         var ris = [];
         var max = 0;
+        var nations = [];
+
+        if( req.query.nations != null )
+            nations = req.query.nations.split(",");
+
+        console.log(nations);
+
         setProjectName(req);
 
         async.waterfall(
@@ -220,13 +227,26 @@ module.exports = function (app) {
         //prendo le regioni
         function getRegions(next)
         {
-            coll_regions.find( {},
-                ["type","properties", "geometry"])
-                .toArray( function(err, regions ) {
-                console.log(" found: " + regions.length + " regions");
+            if( nations.length == 0 )
+            {
+                coll_regions.find({},
+                    ["type", "properties", "geometry"])
+                    .toArray(function (err, regions) {
+                        console.log(" found: " + regions.length + " regions");
 
-                next(null, regions);
-            });
+                        next(null, regions);
+                    });
+            }
+            else
+            {
+                coll_regions.find( { "properties.NAME_0" : { $in: nations }},
+                    ["type","properties", "geometry"])
+                    .toArray( function(err, regions ) {
+                        console.log(" found: " + regions.length + " regions");
+
+                        next(null, regions);
+                    });
+            }
         }
 
         //ciclo sulle regioni

@@ -120,6 +120,7 @@ ShowmapCtrl.getData = function ()
             $(".spinner-datas").hide();
 
             loadData();
+            ShowmapCtrl.getRegions();
 
         },
         error: function (xhr, status, error) {
@@ -136,7 +137,7 @@ ShowmapCtrl.getRegions = function()
         type: "get",
         crossDomain: true,
         dataType: "json",
-        url: "/getregions",
+        url: "/getregions?nations=" + ShowmapCtrl.nations.join(","),
         success: function (data) {
             ShowmapCtrl.regions = data;
             $(".spinner-regions").hide();

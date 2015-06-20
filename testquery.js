@@ -224,8 +224,98 @@ db.datas.mapReduce(mapWord, reduceWord,
     }
 );
 
-
-
-
-
 db.word_count.find().sort({value:-1})
+
+var lori = db.regions.find({"properties.NAME_1":"Lori"}).toArray()[0]
+db.datas.update({
+    projectName: "test",
+    loc: {
+        $geoWithin: {
+            $geometry: lori.geometry
+        }
+    }
+}, {
+    $set: {
+        nation: lori.properties.NAME_0,
+        region: lori.properties.NAME_1
+    }
+}, { multi: true })
+
+//Durr�s - 1
+//Ceuta y Melilla - 1
+//Puglia - 391
+//Basilicata - 21
+//Calabria - 180
+//Campania - 1001
+//Emilia-Romagna - 1261
+//Friuli-Venezia Giulia - 557
+//Lazio - 2297
+//Lombardia - 2634
+//Liguria - 740
+//Molise - 12
+//Ararat - 1
+//Erevan - 1
+//Marche - 76
+//Lake Sevan - 1
+//Piemonte - 648
+//Trentino-Alto Adige - 60
+//Sardegna - 227
+//Sicilia - 349
+//Toscana - 480
+//Umbria - 57
+//Cantabria - 1
+//Arag�n - 3
+//Andaluc�a - 29
+//Veneto - 1484
+//Castilla-La Mancha - 1
+//Comunidad Foral de Navarra - 1
+//Islas Canarias - ND
+//Comunidad de Madrid - 16
+//Catalu�a - 7
+//Castilla y Le�n - 5
+//Comunidad Valenciana - 8
+//Berat - 1
+//Galicia - 1
+//Islas Baleares - 4
+//Extremadura - 6
+//La Rioja - 1
+//Kor�� - 1
+//Dib�r - 1
+//Pa�s Vasco - 3
+//Principado de Asturias - 1
+//Regi�n de Murcia - 6
+//Vlor� - 1
+//Kuk�s - 1
+//Fier - 1
+//Elbasan - 4
+//Gjirokast�r - 1
+//Lori - 1
+//Aragatsotn - 1
+//Lezh� - 1
+//Tiran� - 1
+//Shkod�r - 1
+//Vayots Dzor - 1
+//Armavir - 1
+//Kotayk - 1
+//Gegharkunik - 1
+//Shirak - 1
+//Tavush - 1
+//Syunik - 1
+
+
+db.regions.find({}).forEach(function(region){
+
+    db.datas.update({
+        projectName: "test",
+        loc: {
+            $geoWithin: {
+                $geometry: region.geometry
+            }
+        }
+    },{
+        $set: {
+            nation: region.properties.NAME_0,
+            region: region.properties.NAME_1
+        }
+    },{ multi: true })
+})

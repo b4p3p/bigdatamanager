@@ -3,7 +3,7 @@ var ConstantsRouter = require('./constants_router');
 var MongoClient = require('mongodb').MongoClient;
 var async = require("async");
 
-var databaseError = function(status, message)
+var databaseError = function(status, message, projectName)
 {
     if(status == null)
         status = 1;
@@ -93,23 +93,51 @@ module.exports = function (app) {
                 });
             },
 
-            //prendo le regioni
-            function (cb_w)
-            {
-                _regions.find({}, ["properties.NAME_0", "properties.NAME_1", "geometry"]).toArray(
-                    function (err, regions) {
-                        cb_w(null, regions)
-                    }
-                );
-            },
+            function(cb_r){
 
-            // per ogni regione modifico la tupla di datas
-            function (regions, cb_w)
-            {
-                updateRegions(regions, function (err) {
-                    cb_w(null);
-                });
+                _regions.find({}).forEach( function(region){
+
+                    console.log("EACH: " + region.properties.NAME_0 + " " +  region.properties.NAME_1)
+
+                    _datas.update({
+                        projectName: "test",
+                        loc: {
+                            $geoWithin: {
+                                $geometry: region.geometry
+                            }
+                        }
+                    },{
+                        $set: {
+                            nation: region.properties.NAME_0,
+                            region: region.properties.NAME_1
+                        }
+                    },{ multi: true , w:1})
+                }, function(err, result){
+
+                    console.log("######## bellissima query!!!#####");
+                    cb_r(null);
+
+                })
+
             }
+
+            //prendo le regioni
+            //function (cb_w)
+            //{
+            //    _regions.find({}, ["properties.NAME_0", "properties.NAME_1", "geometry"]).toArray(
+            //        function (err, regions) {
+            //            cb_w(null, regions)
+            //        }
+            //    );
+            //},
+            //
+            //// per ogni regione modifico la tupla di datas
+            //function (regions, cb_w)
+            //{
+            //    updateRegions(regions, function (err) {
+            //        cb_w(null);
+            //    });
+            //}
             
         ], function (err) {
             res.json(databaseError(0, cont_modificati, projectName));
@@ -140,7 +168,7 @@ module.exports = function (app) {
                     nation: region.properties.NAME_0,
                     region: region.properties.NAME_1
                 }
-            }, { multi: true, upsert: true } , function(err, editDatas){
+            }, { multi: true, upsert:false } , function(err, editDatas){
 
                 if ( err == null )
                 {
@@ -199,7 +227,7 @@ module.exports = function (app) {
 function sendDatabaseError(request, response, message, status)
 {
     //restituisco errore
-    var err = databaseError(status, message);
+    var err = databaseError(status, message, request.session.projectName);
     var arg = ConstantsRouter.argIndex(null, ConstantsRouter.PAGE.DATABASE);
     arg.error = err;
 
