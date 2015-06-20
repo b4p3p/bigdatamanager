@@ -147,6 +147,8 @@ var StatWordCloudCtrl = {
 
 function getInterval(data)
 {
+    if(data.length == 0) return {max: 0, min:0};
+
     var max = data[0].size;
     var min = data[0].size;
     for(var d in data)

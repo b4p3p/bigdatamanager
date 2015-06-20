@@ -172,7 +172,7 @@ ShowmapCtrl.cmdFilter_click = function()
 
     console.log("Condizioni:");
     console.log(" Nazioni:" + selectedNations);
-    console.log(" Tags:" + selectedTags);
+    console.log(" Tags:" + selectedTags);           //TODO filtrare le regioni in base alle nazioni selezionate
 
     ShowmapCtrl.filteredData = ShowmapCtrl.datas.filter(filterData);
     refreshData();
@@ -395,11 +395,18 @@ var selectedTags = [];
  */
 function filterData(obj)
 {
-    if(selectedNations.length>0)
+    if(selectedNations.length > 0)
     {
-        var index = selectedNations.indexOf("pippo");
+        var index = selectedNations.indexOf(obj.nation);
         if ( index == -1) return false;
     }
+
+    if(selectedTags.length > 0)
+    {
+        var index = selectedTags.indexOf(obj.tag);
+        if ( index == -1) return false;
+    }
+
 
     return true;
 }
@@ -451,7 +458,7 @@ function setData_MarkerCluster()
 
     for ( var i = 0 ; i < ShowmapCtrl.filteredData.length; i++ )
     {
-        var d = ShowmapCtrl.datas[i];
+        var d = ShowmapCtrl.filteredData[i];
         var etichetta = d.tag;
         var text = d.text;
         var id = d.id;

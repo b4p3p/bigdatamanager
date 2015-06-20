@@ -1,15 +1,21 @@
 RegionBarCtrl = {
 
+    datas: null,
+    filteredData: null,
+    minData: null,
+    maxData: null,
     regions: null,
     tags: null,
     cmbType: null,
     container: null,
+    sliderTimer: null,
     contFn:0,
 
     init: function()
     {
         this.cmbType = $('#cmbVisualizationMode');
         this.container = $('#regionsBar');
+        this.sliderTimer = $("#slider-regionsbar");
         $(this.cmbType).on('change', function(){
             RegionBarCtrl.drawRegionsBar();
         });
@@ -49,9 +55,58 @@ RegionBarCtrl = {
 
     getData:function()
     {
-        this.contFn = 2;
+        this.contFn = 3;
+        this.getDate();
         this.getRegions();
         this.getTags();
+    },
+
+   getDate:function ()
+    {
+        $.ajax({
+            type: "get",
+            crossDomain: true,
+            dataType: "json",
+            url: "/getdata",
+            success: function (data) {
+
+                RegionBarCtrl.datas = data.data;
+                RegionBarCtrl.filteredData = data.data;
+
+                RegionBarCtrl.minData = new Date(data.dateMin);
+                RegionBarCtrl.maxData = new Date(data.dateMax);
+
+                RegionBarCtrl.contFn--;
+
+            },
+            error: function (xhr, status, error) {
+                console.error("ERR: Stat-RegionBarCtrl.getDate " + status + " " + xhr.status);
+                console.error("     Status: " + status + " " + xhr.status);
+                console.error("     Error: " + error);
+            }
+        });
+    },
+
+    initSlider:function()
+    {
+        if( RegionBarCtrl.minData != null && RegionBarCtrl.maxData != null  )
+        {
+            this.sliderTimer.dateRangeSlider(
+                {
+                    enabled : true,
+                    bounds:{
+                        min: new Date( RegionBarCtrl.minData ),
+                        max: new Date( RegionBarCtrl.maxData )
+                    }
+                }
+            );
+        }
+        else
+            this.sliderTimer.dateRangeSlider({
+            enabled: false
+        });
+
+
     },
 
     getRegions:function()
@@ -201,6 +256,24 @@ RegionBarCtrl = {
     removeWait: function () {
         $("#spinner").addClass("hidden");
         $("#container").removeClass("hidden");
+
+        this.sliderTimer.dateRangeSlider(
+            {
+                enabled : true,
+                bounds: {
+                    min: new Date(1950, 1, 1 ) ,
+                    max: new Date(2050, 1, 1 )
+                } ,
+                defaultValues:{
+                    min: new Date(1950, 1, 1 ),
+                    max: new Date(2050, 1, 1 )
+                }
+            });
+
+        RegionBarCtrl.initSlider();
+
     }
+
+
 
 };

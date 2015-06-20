@@ -1,7 +1,7 @@
 "use strict";
 var ConstantsRouter = require('./constants_router');
+var MongoClient = require('mongodb').MongoClient;
 var async = require("async");
-
 
 var databaseError = function(status, message)
 {
@@ -12,7 +12,8 @@ var databaseError = function(status, message)
 
     return{
         status: status,
-        message: message
+        message: message,
+        projectName: projectName
     }
 };
 
@@ -111,7 +112,7 @@ module.exports = function (app) {
             }
             
         ], function (err) {
-            res.json(databaseError(0, cont_modificati));
+            res.json(databaseError(0, cont_modificati, projectName));
         });
 
         function updateRegions(regions, callback) {
@@ -127,45 +128,71 @@ module.exports = function (app) {
 
         function updateRegion(region, callback)
         {
-            _datas.find( {
-                projectName: projectName,
-                loc:{
+            _datas.update({
+                projectName:projectName ,
+                loc: {
                     $geoWithin: {
                         $geometry: region.geometry
                     }
                 }
-            },["_id"]).toArray( function( err, editDatas ) {
-
-                cont_modificati = 0;
-
-                if(editDatas == null || editDatas.length == 0 )
-                    callback(null);
-
-                else
-                    async.each(editDatas, updateDato.bind(null, region), function(err)
-                    {
-                        console.log(region.properties.NAME_1 + ": "  + cont_modificati);
-                        callback(null);
-                    });
-            });
-        }
-
-        function updateDato(region, d, callback)
-        {
-            _datas.update(
-                {"_id": d._id},
-                {
-                    $set : {
-                        nation : region.properties.NAME_0,
-                        region : region.properties.NAME_1
-                    }
-                },
-                function(err){
-                    cont_modificati++;
-                    callback(null);
+            }, {
+                $set: {
+                    nation: region.properties.NAME_0,
+                    region: region.properties.NAME_1
                 }
-            );
+            }, { multi: true, upsert: true } , function(err, editDatas){
+
+                if ( err == null )
+                {
+                    console.log(region.properties.NAME_1 + " - " + editDatas.result.n);
+                    cont_modificati += editDatas.result.n;
+                }else{
+                    console.error(region.properties.NAME_1 + " - ND");
+                }
+
+                callback(null);
+
+            });
+
+            //_datas.find( {
+            //    projectName: projectName,
+            //    loc:{
+            //        $geoWithin: {
+            //            $geometry: region.geometry
+            //        }
+            //    }
+            //},["_id"]).toArray( function( err, editDatas ) {
+            //
+            //    cont_modificati = 0;
+            //
+            //    if(editDatas == null || editDatas.length == 0 )
+            //        callback(null);
+            //
+            //    else
+            //        async.each(editDatas, updateDato.bind(null, region), function(err)
+            //        {
+            //            console.log(region.properties.NAME_1 + ": "  + cont_modificati);
+            //            callback(null);
+            //        });
+            //});
         }
+
+        //function updateDato(region, d, callback)
+        //{
+        //    _datas.update(
+        //        {"_id": d._id},
+        //        {
+        //            $set : {
+        //                nation : region.properties.NAME_0,
+        //                region : region.properties.NAME_1
+        //            }
+        //        },
+        //        function(err){
+        //            cont_modificati++;
+        //            callback(null);
+        //        }
+        //    );
+        //}
     });
 };
 

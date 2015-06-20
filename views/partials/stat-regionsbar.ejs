@@ -2,6 +2,8 @@
 
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 
+<script src="/public/lib/jquery-ui/jquery-ui.js"></script>
+
 <script>
     google.load("visualization", "1.1", {packages:[ 'bar', 'corechart' ] });
 </script>
@@ -19,20 +21,30 @@
     }
     #regionsBar
     {
-        top: 50px;
+        margin-top: -100px;
         width: 100%;
+    }
+
+    #slider-container
+    {
+        /*position: relative;*/
+        /*/!*left: 25%;*!/*/
+        /*/!*width: 50%;*!/*/
+        /*margin-top: 40px;*/
     }
 
 </style>
 
+<div id="pippo"></div>
+
 <div id="spinner" style="text-align: center">
     <img src="/public/img/ajax-loader.gif" alt="Loading" class="spinnerImage"/>
-    <p>Loading regions radar graph...</p>
+    <p>Loading bar...</p>
 </div>
 
 <div id="container" class="hidden">
 
-    <form class="form-inline" id="formType" role="form">
+    <form class="form-horizontal" id="formType" role="form">
 
         <div class="form-group">
             <label class="control-label" for="cmbVisualizationMode"
@@ -43,15 +55,23 @@
                 <option value=1 >Tweet Density</option>
             </select>
         </div>
-    </form>
 
+        <div class="form-group">
+            <div id="slider-container">
+                <div id="slider-regionsbar"></div>
+            </div>
+        </div>
+
+    </form>
     <div id="regionsBar" ></div>
 
 </div>
 
+
+
 <script>
 
     RegionBarCtrl.init();
-    RegionBarCtrl.loadData();
+    RegionBarCtrl.getData();
 
 </script>
