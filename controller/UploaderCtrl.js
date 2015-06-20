@@ -1,9 +1,8 @@
 "use strict";
 
-var wait = require('wait.for');
 var SocketIOFileUpload = require('socketio-file-upload'),
     socketio = require('socket.io');
-var sync = require('synchronize')
+var sync = require('synchronize');
 var deasync = require('deasync');
 
 var Project = require("../model/Project");

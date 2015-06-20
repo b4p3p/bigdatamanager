@@ -37,6 +37,8 @@
     "socketio-file-upload": "^0.4.0",
     "sync": "^0.2.5",
     "underscore": ">=1.8.3",
-    "urlencode": ">=1.0.0"
+    "urlencode": ">=1.0.0",
+    "deasync": ">=0.1.0",
+    "synchronize": ">=0.9.11"
   }
 }
