@@ -251,7 +251,7 @@ module.exports = function (router) {
             req.session.userProject = 'oim';
 
         //controllo se ho un errore
-        var arg = ConstantsRouter.argIndex();
+        var arg = ConstantsRouter.argIndex(req);
         var Project = require("../model/Project");
 
         if (req.session.arg)                    // uso  i paramenti presenti nella variabile di sessione

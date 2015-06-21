@@ -319,3 +319,18 @@ db.regions.find({}).forEach(function(region){
         }
     },{ multi: true })
 })
+
+
+db.datas.aggregate(
+    {
+        $match: { tag:"abresniac" },
+    },
+    {
+        $group:
+        {
+            _id: "$name",
+            date_min: {$min: "$date"},
+            date_max: {$max: "$date"}
+        }
+    }
+)

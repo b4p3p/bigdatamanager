@@ -1,0 +1,142 @@
+<script src="/public/js/DB-NationsCtrl.js"></script>
+
+<h4>Nations</h4>
+
+<!--data-url="http://localhost:8080/getregions"-->
+
+<table id="table-nations" data-toggle="table"
+       data-cache="false" data-pagination="true"
+       data-sort-name="name" data-sort-order="desc">
+   <thead>
+      <tr>
+         <th
+             data-formatter="Formatter.nationFormatter"
+             data-sortable="true">Nation</th>
+         <th
+             data-formatter="Formatter.regionFormatter"
+             data-sortable="true">Item Region</th>
+         <th
+             data-formatter="Formatter.sumFormatter"
+             data-sortable="true">Count</th>
+      </tr>
+   </thead>
+</table>
+
+<h4>Import nations</h4>
+
+<div class="well" style="margin-bottom: 10px">
+   SRID: <b>EPSG 4326</b><br>
+   Type file: <b>geojson</b><br><br>
+   <div class="form-group">
+
+      <a class="btn btn-default"
+         data-toggle="collapse"
+         href="#collapseOne"
+         aria-expanded="false"
+         aria-controls="collapseExample">
+         See example
+      </a>
+
+      <div id="collapseOne"
+           class="panel-collapse collapse"
+           role="tabpanel"
+           aria-labelledby="headingOne">
+             <pre>
+{
+"type":"FeatureCollection",
+"crs":{
+   "type":"name",
+   "properties":{
+      "name":"urn:ogc:def:crs:OGC:1.3:CRS84"
+   }
+},
+"features":[
+   {
+      "type":"Feature",
+      "properties":{
+         "ID_0":112,
+         "ISO":"ITA",
+         "NAME_0":"Italy",
+         "ID_1":1,
+         "NAME_1":"Abruzzo",
+         "NL_NAME_1":null,
+         "VARNAME_1":"Abruzos|Abruzzen|Abruzzes|Abruzzi",
+         "TYPE_1":"Regione",
+         "ENGTYPE_1":"Region"
+      },
+      "geometry":{
+         "type":"MultiPolygon",
+         "coordinates":[
+            [
+               [
+                  [
+                     13.91541576385498,
+                     42.895610809326286
+                  ],
+                  [ ...  ],
+                  [
+                     16.591529846191406,
+                     41.215137481689453
+                  ]
+               ]
+            ],
+            [ ... ],
+                     [
+                     15.875768661499308,
+                     41.137813568115519
+                  ]
+               ]
+            ]
+         ]
+      }
+   },
+   { ... }
+]
+}
+          </pre>
+      </div>
+
+   </div>
+
+   <form action="/database" method="post"
+         id="uploadNationsForm"
+         enctype="multipart/form-data">
+
+      <div class="form-group">
+         <label for="fileNation">Load files</label>
+
+         <input id="fileNation" type="file" class="file" name="fileNation" multiple
+                data-show-caption="true"
+                data-show-preview="false">
+      </div>
+      <% if (error && error.status > 0) { %>
+      <div class="alert alert-danger" role="alert">
+         <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+         <span class="sr-only">Error:</span>
+         <%= error.message %>
+      </div>
+      <% } else if (error && error.status == 0) {%>
+      <div class="alert alert-success" role="alert">
+         <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+         <span class="sr-only">Error:</span>
+         <%= error.message %>
+      </div>
+      <% } %>
+
+   </form>
+</div>
+
+<div>
+   <a style="float: right" href="http://jsonlint.com/"
+      class="btn btn-default"
+      data-toggle="tooltip" data-placement="left" title="jsonlint.com">
+      Validating your json
+   </a>
+</div>
+
+<script>
+   DBNationsCtrl.init();
+   DBNationsCtrl.getNations();
+</script>
+
+

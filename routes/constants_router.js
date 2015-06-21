@@ -4,38 +4,65 @@
 
 var ConstantsRouter = {};
 
-ConstantsRouter.argIndex = function(req, page)
+
+/**
+ *
+ * @param   req - request
+ * @param   page - PAGE
+ * @param   error - { status:{Number}, message: {String} }
+ * @returns arg
+ */
+ConstantsRouter.argIndex = function(req, page, error)
 {
-    var userProject = '';
-    var projectName = '';
-
-    if ( req != null) {
-        userProject = req.session.userProject;
-        projectName = req.session.projectName;
+    //TODO DEBUG
+    if ( req && req.session )
+    {
+        req.session.projectName = req.session.projectName ? req.session.projectName : "oim";
+        req.session.userProject = req.session.userProject ? req.session.userProject : "oim";
     }
 
-    if (!page) page = '';
+    var ris = {};
 
-    return {
-        userProject: userProject ,
-        projectName: projectName,
-        page: page,
-        tab: '',
-        error: {},
-        content: {}
+    if (req && req.session.arg)  // uso  i paramenti presenti nella variabile di sessione
+    {
+        ris = req.session.arg;
+        req.session.arg = null;
     }
+
+    ris.userProject = (req) ? req.session.userProject : "oim";
+    ris.projectName = (req) ? req.session.projectName : "oim";
+    ris.page = page || '';
+    ris.error = { };
+
+    return ris;
+
+    //return {
+    //    userProject: userProject ,
+    //    projectName: projectName,
+    //    page: page,
+    //    tab: '',
+    //    error: {},
+    //    content: {}
+    //}
 };
 
 /**
  *  Constanti delle pagine
  */
 ConstantsRouter.PAGE = {
+
     HOME: "home",
-    //PROJECT: "project",
+
+    //PROJECT
     NEW_PROJECT: "new-project",
     OPEN_PROJECT: "open-project",
     EDIT_PROJECT: "edit-project",
-    DATABASE: "database",
+
+    //NATIONS
+    DB_USERS: "db-users",
+    DB_NATIONS: "db-nations",
+
+    //STAT
     STAT_MAP: "stat-map",
     STAT_REGIONS_BAR: "stat-regions-bar",
     STAT_REGIONS_RADAR: "stat-regions-radar",

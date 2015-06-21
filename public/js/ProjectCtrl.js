@@ -1,5 +1,9 @@
 "use strict";
 
+/**
+ * Controller per l'upload di file sul server
+ */
+
 Number.prototype.padLeft = function(base,chr){
     var  len = (String(base || 10).length - String(this).length)+1;
     return len > 0? new Array(len).join(chr || '0')+this : this;
@@ -37,6 +41,8 @@ document.addEventListener("DOMContentLoaded", function(){
         event.file.meta.username = ProjectCtrl.username;
         event.file.meta.projectName = ProjectCtrl.projectName;
         event.file.meta.type = ProjectCtrl.type;
+        event.file.meta.method = "editproject";
+
         console.log("progress " + event.file.name + ": " + event.bytesLoaded / event.file.size);
     });
 
@@ -44,15 +50,22 @@ document.addEventListener("DOMContentLoaded", function(){
 
         var p = ProjectCtrl.progress[event.file.name];
         var value =  Math.floor( (event.bytesLoaded / event.file.size) * 100).toString();
-        $(p).text(progressCaption(value, event.file.name));
-        $(p).attr("aria-valuenow", value);
-        $(p).css("width", value + "%");
+
+        var obj = $(p).find(".progress-bar")[0];
+        $(obj).text(progressCaption(value, event.file.name));
+        $(obj).attr("aria-valuenow", value);
+        $(obj).css("width", value + "%");
 
     });
 
+    /**
+     *  event.detail.result - { fail:{Number}, success:{Number} }
+     */
     siofu.addEventListener("complete", function(event){
 
-        console.log("END UPLOAD: " + event.file.name + " " + event.detail.result);
+        console.log("CALL: complete upload - success:" + event.success);
+
+        ProjectCtrl.setResultProgress(event.detail.result, event.file.name);
 
     });
 
@@ -66,34 +79,59 @@ function progressCaption(value, name){
 
 function createProgress(name) {
 
-    var d = $('<div class="progress"></div>');
+    var html = '<div class="progress-object"> \
+                    <div class="progress"> \
+                        <div class="progress-bar progress-bar-success progress-bar-striped" \
+                             role="progressbar" \
+                             aria-valuenow="50" \
+                             aria-valuemin="0" \
+                             aria-valuemax="100" \
+                             style="width:50%;text-align:left;color:black;padding-left:10px;"> \
+                        </div> \
+                    </div> \
+                    <div class="progress-result hidden"> \
+                    </div> \
+                </div>';
 
-    var d2 = $('<div class="progress-bar progress-bar-success progress-bar-striped"></div>');
+    //Added: 100 - Discard: 5
 
-    d2.attr("role", "progressbar")
-        .attr("aria-valuenow", "0")
-        .attr("aria-valuemin", "0")
-        .attr("aria-valuemax", "100");
-
-    d2.css("width", "0%")
-        .css("text-align", "left")
-        .css("color", "black")
-        .css("padding-left", "10px");
-
-    d2.text( progressCaption(0, name));
-
-    d.append(d2);
-
-    ProjectCtrl.progress[name] = d2;
+    var d = $(html);
 
     $("#progress-container").append(d);
 
-    return d2;
+    return d;
 
+}
+
+function operateFormatterTag(value, row, index) {
+    return [
+        value +
+        '<a class="editT ml10" href="javascript:void(0)" title="Edit tag">',
+        '<i class="glyphicon glyphicon-pencil"></i>',
+        '</a>'
+    ].join(' ');
+}
+
+function operateFormatterVocabulary(value, row, index) {
+    return [
+        value +
+        '<a class="editV ml10" href="javascript:void(0)" title="Edit vocabulary">',
+        '<i class="glyphicon glyphicon-pencil"></i>',
+        '</a>'
+    ].join(' ');
+}
+
+function operateFormatterDelete(value, row, index) {
+    return [
+        '<a class="remove ml10" href="javascript:void(0)" title="Delete">',
+        '<i class="glyphicon glyphicon-remove"></i>',
+        '</a>'
+    ].join(' ');
 }
 
 var ProjectCtrl =
 {
+    tags: [],
     files: {},
     progress: {},
     username: null,
@@ -105,6 +143,152 @@ var ProjectCtrl =
         console.log("SET " + username + " " + projectName);
         ProjectCtrl.username = username;
         ProjectCtrl.projectName = projectName;
+        ProjectCtrl.setTableTag();
+    },
+
+    setTableTag: function()
+    {
+        $('#tagsTable').bootstrapTable('destroy');
+        $('#tagsTable').bootstrapTable({
+            columns: [
+                {
+                    field: 'tag',
+                    title: 'Tag',
+                    //align: 'center',
+                    //switchable: false,
+                    sortable: true,
+                    formatter: operateFormatterTag,
+                    events:
+                    {
+                        'click .editT': function (e, value, row, index) {
+                            console.log(JSON.stringify(row), index);
+
+                            bootbox.prompt({
+                                title: "Edit tag: " + JSON.stringify(row.tag),
+                                value: row.tag,
+                                callback: function (result) {
+                                    if (result === null) {
+                                        console.log("Prompt edit tag dismissed");
+                                    } else {
+                                        console.log("New tag: " + result);
+                                        var data = {
+                                            newTag: result,
+                                            oldTag: row.tag
+                                        };
+                                        $.ajax({
+                                            url: '/vocabulary/tag',
+                                            contentType: "application/json; charset=utf-8",
+                                            type: 'move',
+                                            async: true,
+                                            data: JSON.stringify(data),
+                                            dataType: "json",
+                                            success: function(html) {
+                                                ProjectCtrl.getTags();
+                                            },
+                                            error: function(xhr, status, error){
+                                                alert("Error: " + error);
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    }
+                },
+                {
+                    field: 'words',
+                    title: 'Vocabulary',
+                    formatter: operateFormatterVocabulary,
+                    events:
+                    {
+                        'click .editV': function (e, value, row, index) {
+                            console.log(row, index);
+
+                            bootbox.prompt({
+                                title: "Edit vocabulary of tag: " + JSON.stringify(row.tag),
+                                value: row.words,
+                                callback: function (result) {
+                                    if (result === null) {
+                                        console.log("Prompt edit vocabulary dismissed");
+                                    } else {
+                                        console.log("New words: " + result);
+                                        var data = {
+                                            tag: row.tag,
+                                            words: result
+                                        };
+                                        $.ajax({
+                                            url: '/vocabulary/words',
+                                            contentType: "application/json; charset=utf-8",
+                                            type: 'PUT',
+                                            async: false,
+                                            data: JSON.stringify(data),
+                                            dataType: "json",
+                                            success: function(html) {
+                                                ProjectCtrl.getTags();
+                                            },
+                                            error: function(xhr, status, error){
+                                                alert("Error: " + error);
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    }
+                },
+                {
+                    field: 'operate',
+                    title: 'Delete tag',
+                    align: 'center',
+                    formatter: operateFormatterDelete,
+                    events: {
+                        'click .remove': function (e, value, row, index) {
+                            console.log(row, index);
+
+                            bootbox.confirm("<h4>Are you sure to delete tag: "
+                                + JSON.stringify(row.tag)
+                                + "?</h4>",
+                                function (result) {
+                                    if (result) {
+                                        console.log("User confirmed delete dialog");
+                                        //var data = {
+                                        //    type: "tag",
+                                        //    data: {
+                                        //        tag: row.tag
+                                        //    }
+                                        //};
+                                        $.ajax({
+                                            url: '/vocabulary/tag',
+                                            contentType: "application/json; charset=utf-8",
+                                            type: 'DELETE',
+                                            async: false,
+                                            data: JSON.stringify({tag:row.tag}),
+                                            dataType: "json",
+                                            success: function(html) {
+                                                ProjectCtrl.getTags();
+                                            },
+                                            error: function(xhr, status, error){
+                                                alert("Error: " + error);
+                                            }
+                                        });
+                                    } else {
+                                        console.log("User declined delete dialog");
+                                    }
+                                });
+                        }
+                    }
+                }],
+            data: ProjectCtrl.tags,
+            search: true,
+            striped: true,
+            dataType: 'json',
+            smartDisplay: true
+            //showRefresh: true,
+            //minimumCountColumns: 1,
+            //showColumns: true,
+            //pagination: true,
+            //clickToSelect: true
+        });
     },
 
     loadData : function (content) {
@@ -114,7 +298,47 @@ var ProjectCtrl =
     },
 
     /**
-     * Funzione per formattare la colonna open
+     *
+     * @param projectName
+     * @param callback - fn({Data})
+     */
+    getProject: function(callback)
+    {
+        console.log("CALL: getProject - pn=" + ProjectCtrl.projectName);
+        jQuery.ajax({
+            type: "GET",
+            url: '/project/getproject?pn=' + ProjectCtrl.projectName,
+            dataType: 'json',
+            async: true,
+            success: function (data) {
+                callback(data)
+            },
+            error: function (data) {
+                alert('getProject fail');
+            }
+        });
+    },
+
+    getTags: function () {
+        jQuery.ajax({
+            type: "GET",
+            url: '/vocabulary/vocabulary',
+            dataType: 'json',
+            async: true,
+            success: function (data) {
+
+                console.log("      success GetTagsVocabulary.php");
+                ProjectCtrl.tags = data;
+                ProjectCtrl.setTableTag()
+            },
+            error: function (data) {
+                alert('GetTagsVocabulary fail');
+            }
+        });
+    },
+
+    /**
+     *
      * @param value
      * @param row - riga del json passato come parametro
      *              - row.projectName: nome del progetto
@@ -232,28 +456,7 @@ var ProjectCtrl =
         });
     },
 
-    /**
-     *
-     * @param projectName
-     * @param callback - fn({Data})
-     */
-    getProject: function(callback)
-    {
 
-        console.log("CALL: getProject - pn=" + ProjectCtrl.projectName);
-        jQuery.ajax({
-            type: "GET",
-            url: '/project/getproject?pn=' + ProjectCtrl.projectName,
-            dataType: 'json',
-            async: true,
-            success: function (data) {
-                callback(data)
-            },
-            error: function (data) {
-                alert('getProject fail');
-            }
-        });
-    },
 
     loadEditForm: function(data)
     {
@@ -325,14 +528,22 @@ var ProjectCtrl =
         siofu.submitFiles(ProjectCtrl.getSelectedFiles());
     },
 
+    sendFilesEnd: function (err, result)
+    {
+
+    },
+
     getSelectedFiles: function()
     {
         console.log("CALL: getSelectedFiles");
-
         var fileInput = document.getElementById("upload_input");
         return fileInput.files;
     },
 
+    /**
+     * Crea delle progress bar vuote
+     * @param files
+     */
     initProgress: function(files)
     {
         ProjectCtrl.files = {};
@@ -342,6 +553,30 @@ var ProjectCtrl =
             ProjectCtrl.files[files[i].name] = i;
             ProjectCtrl.progress[files[i].name] = createProgress(files[i].name);
         }
+    },
+
+    /**
+     *
+     * @param result - { fail:{Number}, success:{Number} }
+     * @param fileName - {String}
+     */
+    setResultProgress: function(result, fileName)
+    {
+        var p = ProjectCtrl.progress[fileName];
+        var resContainer = $(p).find(".progress-result")[0];
+
+        $(resContainer).append("Added: " + result.success + " ");
+        $(resContainer).append('<span class="glyphicon glyphicon-ok" style="color: green" aria-hidden="true"></span>');
+        $(resContainer).append(" - ");
+        $(resContainer).append("Discard:" + result.fail + " ");
+        $(resContainer).append('<span class="glyphicon glyphicon-remove" style="color: red" aria-hidden="true"></span>');
+        $(resContainer).removeClass("hidden");
+
+        //$(resContainer).text("Added: " + result.success + "  - Discard:" + result.fail);
+        //$(resContainer).html(html);
+        //$(resContainer).append("ciao!");
+        //$(resContainer).append("ciao!");
+
     }
 };
 

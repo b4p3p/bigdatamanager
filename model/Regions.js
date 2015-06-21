@@ -7,7 +7,8 @@ var async = require("async");
 var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://localhost:27017/oim';
 
-var Nation = function (data) {
+var Regions = function (data)
+{
     this.data = data;
 };
 
@@ -23,7 +24,7 @@ JSON.parse = function (data) {
     }
 };
 
-Nation.importFromFile = function(fileNames, callback)
+Regions.importFromFile = function(fileNames, callback)
 {
 
     var path = fileNames[0];
@@ -34,12 +35,37 @@ Nation.importFromFile = function(fileNames, callback)
         {
             console.error("EACH ERROR: importFromFile");
             console.error("  " + JSON.stringify(err));
-        }else
+        }
+        else
         {
             console.log("END EACH");
         }
 
         callback(err);
+    });
+
+};
+
+/**
+ * @param callback - fn({Err},{Data})
+ */
+Regions.getLightRegions = function(callback){
+
+    MongoClient.connect(url, function (err, db) {
+
+        var regions = db.collection('regions');
+        regions.find({},{"properties.NAME_0":1, "properties.NAME_1":1}).toArray( function(err, data){
+            callback(err, data);
+        });
+    });
+
+    db.regions.aggregate({
+        $project :
+        {
+            nation: "$properties.NAME_0",
+            region: "$properties.NAME_1",
+            sum: "$properties.sum"
+        }
     });
 
 };
@@ -138,41 +164,4 @@ function saveRegion(features, cb)
     });
 }
 
-//Nation.addDataArray = function(objJson, callback) {
-//
-//    try {
-//        console.log("CALL: Nation.add DataArray");
-//        //console.log(data);
-//        var MongoClient = require('mongodb').MongoClient
-//            , assert = require('assert');
-//
-//        // Connection URL
-//        var url = 'mongodb://localhost:27017/oim';
-//        // Use connect method to connect to the Server
-//        MongoClient.connect(url, function(err, db) {
-//            assert.equal(null, err);
-//            console.log("Connected correctly to server");
-//
-//                var nationsCollection = db.collection('nations');
-//                nationsCollection.insert(objJson, function( err, result )
-//                {
-//                    db.close();
-//                    if(err)
-//                    {
-//                        console.error("ERROR: nationsCollection.insert");
-//                        console.error(JSON.stringify(err));
-//                        callback({status: 100, message: err.toString()});
-//
-//                    }
-//                    else
-//                        callback(null);
-//                });
-//            });
-//
-//    } catch (e) {
-//        console.log("ERR: add DataArray");
-//        console.log(e);
-//    }
-//};
-
-module.exports = Nation;
+module.exports = Regions;

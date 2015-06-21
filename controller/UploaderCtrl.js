@@ -9,14 +9,22 @@ var Project = require("../model/Project");
 
 var io = null;
 var fs = null;
+var _app;
+var _server;
+var _socket = null;
 
 var UploaderCtrl = function(server, app){
+
+    _app = app;
+    _server = server;
 
     app.use(SocketIOFileUpload.router);
     io = socketio.listen(server);
     fs = require('fs');
 
     io.sockets.on("connection", function(socket){
+
+        _socket = socket;
 
         var MB = 1024 * 1024;
 
@@ -35,21 +43,28 @@ var UploaderCtrl = function(server, app){
 
             var ris=null;
 
-            //salvo i dati caricati
-            var projectData = {
-                filePath : event.file.pathName,
-                username: event.file.meta.username,
-                projectName: event.file.meta.projectName,
-                type: event.file.meta.type
-            };
-
-            var Project = require("../model/Project");
-
-            Project.addData(projectData, function(err, result)
+            if(event.file.meta.method == "editproject")
             {
-                //fai - success
-                ris = result;
-            });
+                //salvo i dati caricati
+                var projectData = {
+                    filePath : event.file.pathName,
+                    username: event.file.meta.username,
+                    projectName: event.file.meta.projectName,
+                    type: event.file.meta.type,
+                    serverUrl: io.sockets.sockets[0].client.conn.request.headers.host
+                };
+
+                var Project = require("../model/Project");
+
+                Project.addData(projectData, function(err, result)
+                {
+                    ris = result;
+                });
+            }
+            else
+            {
+                ris = { status:1, error: "missing method" }
+            }
 
             require('deasync').loopWhile(function(){ return ris==null; });
 
@@ -59,7 +74,7 @@ var UploaderCtrl = function(server, app){
             //ris = {};
             //ris.message = {};
 
-            event.file.clientDetail.result = ris.message;
+            event.file.clientDetail.result = ris;
 
         });
 

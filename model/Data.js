@@ -145,6 +145,7 @@ Data.importFromFile = function (type, file, projectName, cb_ris) {
 
             // 3) salvo il file json
             function (jsonData, cb_wf) {
+
                 console.log("  3) salvo il json: length" + jsonData.length);
 
                 addDataArray(jsonData, projectName, function (err, result) {
@@ -250,7 +251,10 @@ function addDataArray(arrayData, projectName, callback) {
                 fail: []
             };
 
-            async.forEach(arrayData, function (data, cb_each) {
+            async.forEach(arrayData,
+
+                function (data, cb_each) {
+
                     cont++;
 
                     //applico il lower case a tutte le chiavi
@@ -266,6 +270,7 @@ function addDataArray(arrayData, projectName, callback) {
                     //aggiungo il project name
                     data.projectName = projectName;
                     data.id = data.id.toString();
+
                     //data.loc = {
                     //    type: "Point",
                     //    coordinates:[data.longitude, data.latitude]
@@ -289,6 +294,7 @@ function addDataArray(arrayData, projectName, callback) {
                         }
                     );
                 },
+
                 function (err) {
                     if (err) {
                         console.error("ERROR addDataArray at row: " + cont);
@@ -299,7 +305,8 @@ function addDataArray(arrayData, projectName, callback) {
                         console.log("END EACH addDataArray - cont=" + cont);
                         callback(null, result);
                     }
-                });
+                }
+            );
 
         });
     }

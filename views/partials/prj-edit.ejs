@@ -38,6 +38,20 @@
         width: 108px;
     }
 
+    .progress{
+        margin-bottom: 0;
+    }
+
+    .progress-result
+    {
+        margin-top: 0;
+        padding-top: 0;
+    }
+
+    .progress-badge{
+        margin-left: 10px;
+    }
+
     #uploadForm{
         width: 100%;
     }
@@ -171,42 +185,61 @@
 
     <div class="progress-container row-form" id="progress-container">
 
+        <div class="progress-object">
+
+            <!--<div class="progress" id="progressTest">-->
+                <!--<div class="progress-bar progress-bar-success progress-bar-striped"-->
+                     <!--role="progressbar"-->
+                     <!--aria-valuenow="50"-->
+                     <!--aria-valuemin="0"-->
+                     <!--aria-valuemax="100"-->
+                     <!--style="width:50%;text-align:left;color:black;padding-left:10px;">-->
+                    <!--Ciao mondo-->
+                <!--</div>-->
+            <!--</div>-->
+
+            <!--<div class="progress-result">-->
+                <!--Added: 100-->
+                <!--<span class="glyphicon glyphicon-ok" style="color: green" aria-hidden="true"></span>-->
+                <!-&#45;&#45; Discard: 5-->
+                <!--<span class="glyphicon glyphicon-remove" style="color: red" aria-hidden="true"></span>-->
+            <!--</div>-->
+
+        </div>
+
     </div>
 
-    <!--<div class="form-group">-->
-
-        <!--<label for="console" >Console:</label>-->
-
-        <!--<pre id="console" class="row-form">-->
-
-        <!--</pre>-->
-
-    <!--</div>-->
+    <div class="form-group row-form">
+        <button class="btn btn-danger button"
+                id="upload_btn"
+                onclick="ProjectCtrl.sendFiles()">
+            Upload
+        </button>
+    </div>
 
 </form>
 
-<div class="form-group row-form">
-    <button class="btn btn-danger button"
-            id="upload_btn"
-            onclick="ProjectCtrl.sendFiles()">
-        Upload
-    </button>
+<h3>Tag</h3>
+
+<div class="" id="tableTagsContainer">
+
+    <table id="tagsTable"></table>
+
+    <a class="btn btn-default" id= "addButton" style="margin-top: 8px; margin-left: 15px; float: right;"
+       onclick="DatabaseCtrl.showInsertTag()">Add tag
+    </a>
+
+    <a class="btn btn-default" id= "addButton" style="margin-top: 8px; float: right;"
+       onclick="DatabaseCtrl.refreshCounter()">Refresh counter
+    </a>
 </div>
-
-
-<!--onclick="ProjectCtrl.sendFiles()"-->
 
 <script>
 
     ProjectCtrl.init('<%= userProject %>', '<%= projectName %>');
 
-//    var data = {
-//        username:ProjectCtrl.username,
-//        projectName:ProjectCtrl.projectName,
-//        description:
-//    };
-
     ProjectCtrl.getProject( ProjectCtrl.loadEditForm );
+    ProjectCtrl.getTags();
     ProjectCtrl.showExample();
 
     $('#cmbType').on('change', function () {

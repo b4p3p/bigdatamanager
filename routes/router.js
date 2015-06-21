@@ -207,8 +207,6 @@ module.exports = function (app) {
         response.redirect("/project");
     }
 
-
-
     function getError(status, msg)
     {
         var err = extend({}, ERROR);

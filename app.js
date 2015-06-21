@@ -131,16 +131,22 @@ app.use( multer({ dest: './uploads/',
 
 var router_vocabulary = express.Router();
 var router_project = express.Router();
+var router_view = express.Router();
+var router_regions = express.Router();
 
 app.use('/vocabulary', router_vocabulary);
 app.use('/project', router_project);
+app.use('/view', router_view);
+app.use('/regions', router_regions);
 
-require('./routes/router')(app);                    //chiamo il router generico
-require('./routes/database_router')(app);           //chiamo il router per i progetti
-require('./routes/statistics_router')(app);         //chiamo il router per i progetti
+require('./routes/router')(app);
+require('./routes/database_router')(app);
+require('./routes/statistics_router')(app);
 
 require("./routes/vocabulary")(router_vocabulary);
 require('./routes/project_router')(router_project);
+require('./routes/view_router')(router_view);
+require('./routes/regions_router')(router_regions);
 
 
 /********************************
@@ -162,25 +168,25 @@ app.use(function(req, res, next) {
 
 // development error handler
 // will print stacktrace
-if (app.get('env') === 'development') {
-  app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-
-      res.render('pages/error.ejs', {
-      message: err.message,
-      error: err.stack
-    });
-  });
-}
-
-// production error handler
-// no stacktraces leaked to user
-app.use( function(err, req, res, next) {
-  res.status(err.status || 500);
-  res.render('pages/error', {
-    message: err.message,
-    error: {}
-  });
-});
+//if (app.get('env') === 'development') {
+//  app.use(function(err, req, res, next) {
+//    res.status(err.status || 500);
+//
+//      res.render('pages/error.ejs', {
+//      message: err.message,
+//      error: err.stack
+//    });
+//  });
+//}
+//
+//// production error handler
+//// no stacktraces leaked to user
+//app.use( function(err, req, res, next) {
+//  res.status(err.status || 500);
+//  res.render('pages/error', {
+//    message: err.message,
+//    error: {}
+//  });
+//});
 
 module.exports = app;

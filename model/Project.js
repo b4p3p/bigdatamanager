@@ -5,6 +5,7 @@ var connection = mongoose.createConnection('mongodb://localhost/oim');
 var url = 'mongodb://localhost:27017/oim';
 var MongoClient = require('mongodb').MongoClient;
 var async = require("async");
+var request = require("request");
 
 var Project = function (data) {
     this.data = data;
@@ -189,6 +190,18 @@ Project.addData = function (projectData, callback){
                 _result = result;
                 next(null);
 
+            });
+        },
+
+        // 2) sincronizzo i dati
+        function(next)
+        {
+            request({
+                uri: "http://" + projectData.serverUrl + "/synchronize?projectName=" + projectData.projectName,
+            }, function(error, response, body) {
+
+                next(null);
+                console.log("SINCRONIZZAZIONE EFFETTUATA: " + body );
             });
         }
 
