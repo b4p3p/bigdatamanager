@@ -46,6 +46,8 @@ ShowmapCtrl.showInfoActiveLayer = false;
 //data variable
 ShowmapCtrl.minData = new Date();
 ShowmapCtrl.maxData = new Date();
+ShowmapCtrl.selectedMinData = new Date();
+ShowmapCtrl.selectedMaxData = new Date();
 ShowmapCtrl.tags = null;
 ShowmapCtrl.otherTag = null;
 ShowmapCtrl.nations = null;
@@ -166,17 +168,52 @@ ShowmapCtrl.markerCluster_click = function()
         hideMarkerCluster();
 };
 
+ShowmapCtrl.createUrl = function()
+{
+    var url = "/getdatas";
+    var conditions = [];
+    var selectedNations = getSelectedCombo(ShowmapCtrl.cmbSelectNations);
+    var selectedTags = getSelectedCombo(ShowmapCtrl.cmbSelectTag);
+    var values = ShowmapCtrl.sliderTimer.dateRangeSlider("values");
+
+    console.log("CONDIZIONI: ");
+    console.log(" Nazioni: " + selectedNations);
+    console.log(" Tags: " + selectedTags);
+    console.log(" Min data: " + values.min);
+    console.log(" Max data: " + values.max);
+
+    if(selectedNations.length > 0)
+        conditions.push("nations=" + selectedNations.join(","));
+
+    if(selectedTags.length > 0)
+        conditions.push("tags=" + selectedTags.join(","));
+
+    conditions.push("min=" + values.min.yyyymmdd());
+    conditions.push("max=" + values.max.yyyymmdd());
+
+    if( conditions != [] )
+        url += "?" + conditions.join("&");
+    console.log(url);
+    return url;
+};
+
 ShowmapCtrl.cmdFilter_click = function()
 {
-    selectedNations = getSelectedCombo(ShowmapCtrl.cmbSelectNations);
-    selectedTags = getSelectedCombo(ShowmapCtrl.cmbSelectTag);
-
-    console.log("Condizioni:");
-    console.log(" Nazioni:" + selectedNations);
-    console.log(" Tags:" + selectedTags);           //TODO filtrare le regioni in base alle nazioni selezionate
-
-    ShowmapCtrl.filteredData = ShowmapCtrl.datas.filter(filterData);
-    refreshData();
+    $.ajax({
+        type: "get",
+        crossDomain: true,
+        dataType: "json",
+        url: ShowmapCtrl.createUrl(),
+        success: function (data) {
+            ShowmapCtrl.filteredData = data;
+            refreshData();
+        },
+        error: function (xhr, status, error) {
+            console.error("ERR: ShowmapCtrl.getFilteredData " + status + " " + xhr.status);
+            console.error("     Status: " + status + " " + xhr.status);
+            console.error("     Error: " + error);
+        }
+    });
 };
 
 ShowmapCtrl.showBoundaries_click = function()
@@ -388,29 +425,6 @@ var hideBoundaries = function()
 
 var selectedNations = [];
 var selectedTags = [];
-
-/**
- * Funzione per filtrare datas
- * @param obj - object of datas
- * @returns {boolean} - True: insert in filteredData
- */
-function filterData(obj)
-{
-    if(selectedNations.length > 0)
-    {
-        var index = selectedNations.indexOf(obj.nation);
-        if ( index == -1) return false;
-    }
-
-    if(selectedTags.length > 0)
-    {
-        var index = selectedTags.indexOf(obj.tag);
-        if ( index == -1) return false;
-    }
-
-
-    return true;
-}
 
 function getSelectedCombo( combo )
 {

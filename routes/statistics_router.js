@@ -35,6 +35,22 @@ var setProjectName = function(req)
         _projectName = "oim";
 };
 
+function getFilter(req)
+{
+    var ris = {};
+
+    if( req.query.nations != null )
+        ris.nation = {$in: req.query.nations.split(",")};
+
+    if( req.query.tags != null )
+        ris.tag = {$in: req.query.tags.split(",")};
+
+    if( req.query.min != null && req.query.max != null)
+        ris.date = {$gt: new Date(req.query.min), $lt: new Date(req.query.max)};
+
+    return ris;
+}
+
 module.exports = function (app) {
 
     app.get('/getdata', function (req, res)
@@ -115,7 +131,7 @@ module.exports = function (app) {
                             },
                             nations: function (callback) {
                                 setTimeout(function () {
-                                    datas.distinct("nation",
+                                    regions.distinct("properties.NAME_0",
                                         function (err, data) {
 
                                             data.sort();
@@ -149,6 +165,150 @@ module.exports = function (app) {
                             res.json(obj);
                         }
                     );
+
+                });
+            }
+        } catch (e) {
+            console.error(e);
+            console.error(e.stack);
+        }
+    });
+
+    app.get('/getdatas', function (req, res)
+    {
+        try {
+            if (req.session.projectName == null) {
+                res.json({});
+            }
+            else
+            {
+                var url = 'mongodb://localhost:27017/oim';
+                MongoClient.connect(url, function (err, db) {
+
+                    if (err) {
+                        callback(err);
+                        res.json({});
+                        return;
+                    }
+
+                    var datas = db.collection('datas');
+                    var regions = db.collection('regions');
+
+                    datas.find(getFilter(req)).toArray( function(err, data)
+                    {
+                        console.log(data.length);
+                        res.json(data);
+                    });
+
+                    //var cursor = datas.find(getFilter(req));
+                    //async.parallel(
+                    //    {
+                    //        data: function (callback)
+                    //        {
+                    //            setTimeout(function () {
+                    //
+                    //                cursor.explain(function(err, data)
+                    //                {
+                    //                    console.log(data);
+                    //                });
+                    //
+                    //                //
+                    //                //StatisticsCtrl.GetMapData(req.session.projectName, function (err, data) {
+                    //                //    callback(err, data);
+                    //                    //res.json(data);
+                    //                //});
+                    //            }, 1);
+                    //        },
+                    //
+                    //        minmax: function (callback)
+                    //        {
+                    //            setTimeout(function () {
+                    //
+                    //                datas.aggregate(
+                    //                    {
+                    //                        $group: {
+                    //                            _id: "$name",
+                    //                            date_min: {$min: "$date"},
+                    //                            date_max: {$max: "$date"}
+                    //                        }
+                    //                    },
+                    //                    function (err, data) {
+                    //                        if (err)
+                    //                            callback(err, null);
+                    //                        else {
+                    //                            var ris = data[0];
+                    //                            callback(null, ris);
+                    //                        }
+                    //                    });
+                    //            }, 10); //end timeout
+                    //        },
+                    //
+                    //        tags: function (callback)
+                    //        {
+                    //            setTimeout(function () {
+                    //
+                    //                datas.distinct("tag",
+                    //                    function (err, data) {
+                    //                        if (err)
+                    //                            callback(err, null);
+                    //                        else
+                    //                            callback(null, data);
+                    //                    });
+                    //            }, 10); //end timeout
+                    //        },
+                    //
+                    //        otherTag: function (callback)
+                    //        {
+                    //            setTimeout(function () {
+                    //
+                    //                datas.find({tag: {$exists: false}})
+                    //                    .limit(1)
+                    //                    .count(function (err, data) {
+                    //                        if (err)
+                    //                            callback(err, null);
+                    //                        else
+                    //                            callback(null, data);
+                    //                    });
+                    //            }, 10); //end timeout
+                    //        },
+                    //
+                    //        nations: function (callback)
+                    //        {
+                    //            setTimeout(function () {
+                    //                datas.distinct("nation",
+                    //                    function (err, data) {
+                    //
+                    //                        data.sort();
+                    //
+                    //                        if (err)
+                    //                            callback(err, null);
+                    //                        else
+                    //                            callback(null, data);
+                    //                    });
+                    //
+                    //            }, 10); //end timeout
+                    //        }
+                    //    },
+                    //
+                    //    function (err, results) {
+                    //        // results is now equals to: {one: 1, two: 2}
+                    //
+                    //        var obj = {};
+                    //
+                    //        if (results.minmax) {
+                    //            obj.dateMin = results.minmax.date_min;
+                    //            obj.dateMax = results.minmax.date_max;
+                    //        }
+                    //
+                    //        obj.tags = results.tags;
+                    //        obj.otherTag = results.otherTag == 1;
+                    //        obj.nations = results.nations;
+                    //        obj.data = results.data;
+                    //
+                    //        db.close();
+                    //        res.json(obj);
+                    //    }
+                    //);
 
                 });
             }

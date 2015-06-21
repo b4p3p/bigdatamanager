@@ -95,26 +95,43 @@ module.exports = function (app) {
 
             function(cb_r){
 
+                _regions.find({}, function(err, cursor){
+
+                    console.log("Ci sono " + cursor.size + " regioni.");
+
+                });
+
+                //console.log("Ci sono " + cursor.count() + " regioni.");
+                //
                 _regions.find({}).forEach( function(region){
 
-                    console.log("EACH: " + region.properties.NAME_0 + " " +  region.properties.NAME_1)
+                    //console.log("EACH: " + region.properties.NAME_0 + " " +  region.properties.NAME_1)
 
-                    _datas.update({
-                        projectName: "test",
+                    _datas.update(
+                        {
+                        projectName: projectName,
                         loc: {
                             $geoWithin: {
                                 $geometry: region.geometry
                             }
                         }
-                    },{
-                        $set: {
+                    },
+                        { $set: {
                             nation: region.properties.NAME_0,
                             region: region.properties.NAME_1
                         }
-                    },{ multi: true , w:1})
+                    },
+                        { multi: true , w:1},
+                        function(err, result)
+                        {
+                            if ( result != null)
+                                console.log(region.properties.NAME_0 + " " +  region.properties.NAME_1 + ": " + result.result.n);
+                            else
+                                console.error(err);
+                        }
+                    )
                 }, function(err, result){
-
-                    console.log("######## bellissima query!!!#####");
+                    //console.log(result);
                     cb_r(null);
 
                 })
@@ -143,44 +160,44 @@ module.exports = function (app) {
             res.json(databaseError(0, cont_modificati, projectName));
         });
 
-        function updateRegions(regions, callback) {
+        //function updateRegions(regions, callback) {
+        //
+        //    console.log("### update regions ###");
+        //
+        //    async.each(regions, updateRegion, function(err)
+        //    {
+        //        console.log("### end ###");
+        //        callback(null);
+        //    });
+        //}
 
-            console.log("### update regions ###");
-
-            async.each(regions, updateRegion, function(err)
-            {
-                console.log("### end ###");
-                callback(null);
-            });
-        }
-
-        function updateRegion(region, callback)
-        {
-            _datas.update({
-                projectName:projectName ,
-                loc: {
-                    $geoWithin: {
-                        $geometry: region.geometry
-                    }
-                }
-            }, {
-                $set: {
-                    nation: region.properties.NAME_0,
-                    region: region.properties.NAME_1
-                }
-            }, { multi: true, upsert:false } , function(err, editDatas){
-
-                if ( err == null )
-                {
-                    console.log(region.properties.NAME_1 + " - " + editDatas.result.n);
-                    cont_modificati += editDatas.result.n;
-                }else{
-                    console.error(region.properties.NAME_1 + " - ND");
-                }
-
-                callback(null);
-
-            });
+        //function updateRegion(region, callback)
+        //{
+        //    _datas.update({
+        //        projectName:projectName ,
+        //        loc: {
+        //            $geoWithin: {
+        //                $geometry: region.geometry
+        //            }
+        //        }
+        //    }, {
+        //        $set: {
+        //            nation: region.properties.NAME_0,
+        //            region: region.properties.NAME_1
+        //        }
+        //    }, { multi: true, upsert:false } , function(err, editDatas){
+        //
+        //        if ( err == null )
+        //        {
+        //            console.log(region.properties.NAME_1 + " - " + editDatas.result.n);
+        //            cont_modificati += editDatas.result.n;
+        //        }else{
+        //            console.error(region.properties.NAME_1 + " - ND");
+        //        }
+        //
+        //        callback(null);
+        //
+        //    });
 
             //_datas.find( {
             //    projectName: projectName,
@@ -203,7 +220,7 @@ module.exports = function (app) {
             //            callback(null);
             //        });
             //});
-        }
+        //}
 
         //function updateDato(region, d, callback)
         //{
