@@ -46,8 +46,6 @@ ShowmapCtrl.showInfoActiveLayer = false;
 //data variable
 ShowmapCtrl.minData = new Date();
 ShowmapCtrl.maxData = new Date();
-ShowmapCtrl.selectedMinData = new Date();
-ShowmapCtrl.selectedMaxData = new Date();
 ShowmapCtrl.tags = null;
 ShowmapCtrl.otherTag = null;
 ShowmapCtrl.nations = null;
@@ -120,13 +118,34 @@ ShowmapCtrl.getData = function ()
             ShowmapCtrl.nations = data.nations;
 
             $(".spinner-datas").hide();
-
+            $("#count-container").removeClass("hidden");
+            $("#count").text(data.data.length);
             loadData();
             ShowmapCtrl.getRegions();
 
         },
         error: function (xhr, status, error) {
             console.error("ERR: ShowmapCtrl.loadData " + status + " " + xhr.status);
+            console.error("     Status: " + status + " " + xhr.status);
+            console.error("     Error: " + error);
+        }
+    });
+};
+
+ShowmapCtrl.cmdFilter_click = function()
+{
+    $.ajax({
+        type: "get",
+        crossDomain: true,
+        dataType: "json",
+        url: ShowmapCtrl.createUrl(),
+        success: function (data) {
+            ShowmapCtrl.filteredData = data.data;
+            $("#count").text(data.data.length);
+            refreshData();
+        },
+        error: function (xhr, status, error) {
+            console.error("ERR: ShowmapCtrl.cmdFilter_click " + status + " " + xhr.status);
             console.error("     Status: " + status + " " + xhr.status);
             console.error("     Error: " + error);
         }
@@ -170,7 +189,7 @@ ShowmapCtrl.markerCluster_click = function()
 
 ShowmapCtrl.createUrl = function()
 {
-    var url = "/getdatas";
+    var url = "/getdata";
     var conditions = [];
     var selectedNations = getSelectedCombo(ShowmapCtrl.cmbSelectNations);
     var selectedTags = getSelectedCombo(ShowmapCtrl.cmbSelectTag);
@@ -195,25 +214,6 @@ ShowmapCtrl.createUrl = function()
         url += "?" + conditions.join("&");
     console.log(url);
     return url;
-};
-
-ShowmapCtrl.cmdFilter_click = function()
-{
-    $.ajax({
-        type: "get",
-        crossDomain: true,
-        dataType: "json",
-        url: ShowmapCtrl.createUrl(),
-        success: function (data) {
-            ShowmapCtrl.filteredData = data;
-            refreshData();
-        },
-        error: function (xhr, status, error) {
-            console.error("ERR: ShowmapCtrl.getFilteredData " + status + " " + xhr.status);
-            console.error("     Status: " + status + " " + xhr.status);
-            console.error("     Error: " + error);
-        }
-    });
 };
 
 ShowmapCtrl.showBoundaries_click = function()

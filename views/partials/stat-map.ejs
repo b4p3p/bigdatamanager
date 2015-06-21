@@ -137,9 +137,15 @@
 
     <button type="button" class="btn btn-success"
             id="cmdFilter"
-            style="float: right; margin-top: 15px"
-            onclick="ShowmapCtrl.cmdFilter_click()">
+            style="float: right; margin-top: 15px; margin-left: 10px;"
+            onclick="ShowmapCtrl.initGui()">
         <span class="glyphicon glyphicon-filter" aria-hidden="true"></span>Apply filter</button>
+
+    <button type="button" class="btn btn-danger"
+            id="cmdFilter"
+            style="float: right; margin-top: 15px; margin-left: 10px;"
+            onclick="ShowmapCtrl.cmdFilter_click()">
+        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>Restore</button>
 </div>
 
 
@@ -198,7 +204,11 @@
 
 <div class="row row-map">
     <div id="map"></div>
+
 </div>
+
+<div id="count-container" class="hidden">Found: <span id="count">15000</span></div>
+
 
 <script>
 

@@ -3,6 +3,7 @@ var StatisticsCtrl = require("../controller/statisticsCtrl");
 var MongoClient = require('mongodb').MongoClient;
 var async = require('async');
 var Data = require("../model/Data");
+var _ = require('underscore');
 
 var argContentStatistics = function(datas){
 
@@ -48,6 +49,9 @@ function getFilter(req)
     if( req.query.min != null && req.query.max != null)
         ris.date = {$gt: new Date(req.query.min), $lt: new Date(req.query.max)};
 
+    if(_.keys(ris).length == 0 )
+        return null;
+
     return ris;
 }
 
@@ -72,83 +76,107 @@ module.exports = function (app) {
 
                     var datas = db.collection('datas');
                     var regions = db.collection('regions');
+                    var query = getFilter(req);
 
                     async.parallel(
+                    {
+                        data: function (callbackP)
                         {
-                            data: function (callback) {
-                                setTimeout(function () {
-                                    StatisticsCtrl.GetMapData(req.session.projectName, function (err, data) {
-                                        callback(err, data);
-                                        //res.json(data);
-                                    });
-                                }, 1);
-                            },
-                            minmax: function (callback) {
-                                setTimeout(function () {
-
-                                    datas.aggregate(
-                                        {
-                                            $group: {
-                                                _id: "$name",
-                                                date_min: {$min: "$date"},
-                                                date_max: {$max: "$date"}
-                                            }
-                                        },
-                                        function (err, data) {
-                                            if (err)
-                                                callback(err, null);
-                                            else {
-                                                var ris = data[0];
-                                                callback(null, ris);
-                                            }
-                                        });
-                                }, 10); //end timeout
-                            },
-                            tags: function (callback) {
-                                setTimeout(function () {
-
-                                    datas.distinct("tag",
-                                        function (err, data) {
-                                            if (err)
-                                                callback(err, null);
-                                            else
-                                                callback(null, data);
-                                        });
-                                }, 10); //end timeout
-                            },
-                            otherTag: function (callback) {
-                                setTimeout(function () {
-
-                                    datas.find({tag: {$exists: false}})
-                                        .limit(1)
-                                        .count(function (err, data) {
-                                            if (err)
-                                                callback(err, null);
-                                            else
-                                                callback(null, data);
-                                        });
-                                }, 10); //end timeout
-                            },
-                            nations: function (callback) {
-                                setTimeout(function () {
-                                    regions.distinct("properties.NAME_0",
-                                        function (err, data) {
-
-                                            data.sort();
-
-                                            if (err)
-                                                callback(err, null);
-                                            else
-                                                callback(null, data);
-                                        });
-
-                                }, 10); //end timeout
-                            }
+                            setTimeout(function () {
+                                datas.find(query).toArray(function (err, data) {
+                                    callbackP(err, data);
+                                });
+                            }, 1);
                         },
 
-                        function (err, results) {
-                            // results is now equals to: {one: 1, two: 2}
+                        minmax: function (callbackP)
+                        {
+                            var keys = _.keys(query);
+                            var values = _.map(keys, function(k) {
+                                var obj = {};
+                                obj[k] = query[k];
+                                return obj;
+                            });
+                            console.log(values);
+                            setTimeout(function () {
 
+                                var match = query ? {$and: values} : {};
+
+                                datas.aggregate(
+                                    {
+                                        $match: match
+                                    },
+                                    {
+                                        $group: {
+                                            _id:"$name",
+                                            date_min: {$min: "$date"},
+                                            date_max: {$max: "$date"}
+                                        }
+                                    },
+                                    function (err, data) {
+                                        if (err)
+                                            callbackP(err, null);
+                                        else {
+                                            var ris = data[0];
+                                            callbackP(null, ris);
+                                        }
+                                    });
+                            }, 2); //end timeout
+                        },
+
+                        tags: function (callbackP)
+                        {
+                            setTimeout(function () {
+
+                                datas.distinct("tag", query,
+                                    function (err, data) {
+                                        if (err)
+                                            callbackP(err, null);
+                                        else
+                                            callbackP(null, data);
+                                    });
+                            }, 3); //end timeout
+                        },
+
+                        otherTag: function (callbackP)
+                        {
+                            setTimeout(function () {
+
+                                var tmpQuery = query ? _.clone(query) : {};
+                                tmpQuery.tag = {$exists: false};
+
+                                datas.find(tmpQuery)
+                                    .limit(1)
+                                    .count(function (err, data) {
+                                        if (err)
+                                            callbackP(err, null);
+                                        else
+                                            callbackP(null, data);
+                                    });
+                            }, 4); //end timeout
+                        },
+
+                        nations: function (callbackP)
+                        {
+                            setTimeout(function () {
+                                datas.distinct("nation", query,
+                                    function (err, data) {
+
+                                        if(!err)
+                                            data.sort();
+
+                                        if (err)
+                                            callbackP(err, null);
+                                        else
+                                            callbackP(null, data);
+                                    });
+
+                            }, 5); //end timeout
+                        }
+
+                    },
+                        function (err, results)
+                        {
                             var obj = {};
 
                             if (results.minmax) {
@@ -165,151 +193,6 @@ module.exports = function (app) {
                             res.json(obj);
                         }
                     );
-
-                });
-            }
-        } catch (e) {
-            console.error(e);
-            console.error(e.stack);
-        }
-    });
-
-    app.get('/getdatas', function (req, res)
-    {
-        try {
-            if (req.session.projectName == null) {
-                res.json({});
-            }
-            else
-            {
-                var url = 'mongodb://localhost:27017/oim';
-                MongoClient.connect(url, function (err, db) {
-
-                    if (err) {
-                        callback(err);
-                        res.json({});
-                        return;
-                    }
-
-                    var datas = db.collection('datas');
-                    var regions = db.collection('regions');
-
-                    datas.find(getFilter(req)).toArray( function(err, data)
-                    {
-                        console.log(data.length);
-                        res.json(data);
-                    });
-
-                    //var cursor = datas.find(getFilter(req));
-                    //async.parallel(
-                    //    {
-                    //        data: function (callback)
-                    //        {
-                    //            setTimeout(function () {
-                    //
-                    //                cursor.explain(function(err, data)
-                    //                {
-                    //                    console.log(data);
-                    //                });
-                    //
-                    //                //
-                    //                //StatisticsCtrl.GetMapData(req.session.projectName, function (err, data) {
-                    //                //    callback(err, data);
-                    //                    //res.json(data);
-                    //                //});
-                    //            }, 1);
-                    //        },
-                    //
-                    //        minmax: function (callback)
-                    //        {
-                    //            setTimeout(function () {
-                    //
-                    //                datas.aggregate(
-                    //                    {
-                    //                        $group: {
-                    //                            _id: "$name",
-                    //                            date_min: {$min: "$date"},
-                    //                            date_max: {$max: "$date"}
-                    //                        }
-                    //                    },
-                    //                    function (err, data) {
-                    //                        if (err)
-                    //                            callback(err, null);
-                    //                        else {
-                    //                            var ris = data[0];
-                    //                            callback(null, ris);
-                    //                        }
-                    //                    });
-                    //            }, 10); //end timeout
-                    //        },
-                    //
-                    //        tags: function (callback)
-                    //        {
-                    //            setTimeout(function () {
-                    //
-                    //                datas.distinct("tag",
-                    //                    function (err, data) {
-                    //                        if (err)
-                    //                            callback(err, null);
-                    //                        else
-                    //                            callback(null, data);
-                    //                    });
-                    //            }, 10); //end timeout
-                    //        },
-                    //
-                    //        otherTag: function (callback)
-                    //        {
-                    //            setTimeout(function () {
-                    //
-                    //                datas.find({tag: {$exists: false}})
-                    //                    .limit(1)
-                    //                    .count(function (err, data) {
-                    //                        if (err)
-                    //                            callback(err, null);
-                    //                        else
-                    //                            callback(null, data);
-                    //                    });
-                    //            }, 10); //end timeout
-                    //        },
-                    //
-                    //        nations: function (callback)
-                    //        {
-                    //            setTimeout(function () {
-                    //                datas.distinct("nation",
-                    //                    function (err, data) {
-                    //
-                    //                        data.sort();
-                    //
-                    //                        if (err)
-                    //                            callback(err, null);
-                    //                        else
-                    //                            callback(null, data);
-                    //                    });
-                    //
-                    //            }, 10); //end timeout
-                    //        }
-                    //    },
-                    //
-                    //    function (err, results) {
-                    //        // results is now equals to: {one: 1, two: 2}
-                    //
-                    //        var obj = {};
-                    //
-                    //        if (results.minmax) {
-                    //            obj.dateMin = results.minmax.date_min;
-                    //            obj.dateMax = results.minmax.date_max;
-                    //        }
-                    //
-                    //        obj.tags = results.tags;
-                    //        obj.otherTag = results.otherTag == 1;
-                    //        obj.nations = results.nations;
-                    //        obj.data = results.data;
-                    //
-                    //        db.close();
-                    //        res.json(obj);
-                    //    }
-                    //);
-
                 });
             }
         } catch (e) {
@@ -418,7 +301,6 @@ module.exports = function (app) {
             });
         }
 
-        /// Funzione dell'each sopra ///
         function makeCounter(region, next)
         {
             async.waterfall([
