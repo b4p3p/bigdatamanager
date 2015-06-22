@@ -37,7 +37,8 @@ var UploaderCtrl = function(server, app){
         uploader.chunkSize = 1024 * 50;            // 200k
 
         // Do something when a file is saved:
-        uploader.on("saved", function(event){
+        uploader.on("saved", function(event)
+        {
 
             console.log("UPLOAD OK - " + event.file.pathName);
 
@@ -79,7 +80,8 @@ var UploaderCtrl = function(server, app){
         });
 
         // Error handler:
-        uploader.on("error", function(event){
+        uploader.on("error", function(event)
+        {
             console.error("Error from uploader", event);
         });
     });

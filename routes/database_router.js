@@ -19,7 +19,8 @@ var databaseError = function(status, message, projectName)
 
 module.exports = function (app) {
 
-    app.get('/database', function (req, res) {
+    app.get('/database', function (req, res)
+    {
         var arg = ConstantsRouter.argIndex();
 
         if (req.session.arg)                    // uso  i paramenti presenti nella variabile di sessione

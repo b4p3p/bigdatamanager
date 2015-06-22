@@ -76,17 +76,24 @@
         margin-right: 0;
     }
 
+    h3{
+        margin-left: -20px;
+    }
+
     /*.col_sx{*/
     /*min-width: 100px;*/
     /*}*/
 
 </style>
 
+<script src="/node_modules/underscore/underscore.js"></script>
+<script src="/public/js/DOMUtil.js"></script>
+<script src="/public/js/DateUtil.js"></script>
 <script src="/public/js/ProjectCtrl.js"></script>
 <script src="/bower_components/jquery-form/jquery.form.js"></script>
 
-<script src="/node_modules/socketio-file-upload/client.js"></script>
-<script src="/bower_components/socket.io-client/socket.io.js"></script>
+<!--<script src="/node_modules/socketio-file-upload/client.js"></script>-->
+<!--<script src="/bower_components/socket.io-client/socket.io.js"></script>-->
 
 <% if(projectName==null) {%>
 <div class="alert alert-danger" role="alert">
@@ -95,6 +102,8 @@
     You must select project.
 </div>
 <% } else { %>
+
+<h3>Data</h3>
 
 <h3>Edit project</h3>
 
@@ -156,7 +165,7 @@
         <label for="cmbType" >Type data:</label>
 
         <div class="col_dx">
-            <select class="selectpicker" name="cmbType" id="cmbType">
+            <select class="selectpicker" name="type" id="cmbType">
                 <option value="csv">CSV</option>
                 <option value="json">JSON</option>
             </select>
@@ -166,11 +175,9 @@
 
     <div class="form-group">
 
-        <label for="cmbType" >Example:</label>
+        <label for="examplecode" >Example:</label>
 
-        <div id="examplecode"
-             class="example-code"><pre></pre>
-        </div>
+        <div id="examplecode" class="example-code"><pre></pre></div>
 
     </div>
 
@@ -180,7 +187,8 @@
                name="files" id="upload_input"
                data-show-upload="false"
                data-show-caption="true"
-               data-show-preview="false">
+               data-show-preview="false" multiple>
+
     </div>
 
     <div class="progress-container row-form" id="progress-container">
@@ -201,7 +209,7 @@
             <!--<div class="progress-result">-->
                 <!--Added: 100-->
                 <!--<span class="glyphicon glyphicon-ok" style="color: green" aria-hidden="true"></span>-->
-                <!-&#45;&#45; Discard: 5-->
+                <!--- Discard: 5-->
                 <!--<span class="glyphicon glyphicon-remove" style="color: red" aria-hidden="true"></span>-->
             <!--</div>-->
 
@@ -209,15 +217,15 @@
 
     </div>
 
-    <div class="form-group row-form">
-        <button class="btn btn-danger button"
-                id="upload_btn"
-                onclick="ProjectCtrl.sendFiles()">
-            Upload
-        </button>
-    </div>
-
 </form>
+
+<div class="form-group row-form">
+    <button class="btn btn-danger button"
+            id="upload_btn"
+            onclick="ProjectCtrl.sendFiles()">
+        Uploads
+    </button>
+</div>
 
 <h3>Tag</h3>
 

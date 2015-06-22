@@ -1,13 +1,11 @@
+
 var DBNationsCtrl =
 {
     $tableNations: null,
     regions: null,
 
     init:function()
-    {
-        DBNationsCtrl.$tableNations = $('#table-nations');
-        //DBNationsCtrl.$tableNations.bootstrapTable();
-    },
+    {},
 
     getNations: function()
     {
@@ -29,25 +27,54 @@ var DBNationsCtrl =
             }
         });
 
+    },
+
+    delNation: function(nation)
+    {
+        console.log(nation);
+    },
+
+    upload:function()
+    {
+        if (window.File && window.FileReader && window.FileList && window.Blob)
+            console.log("Posso farlo");
+
+        console.log( $("#fileNation").val() );
+
     }
 };
 
 var Formatter = {
 
-    nationFormatter: function(value, row, index)
+    deleteFormatter: function(value, row, index)
     {
-        return row.properties.NAME_0;
-    },
+        var $button = $('<button type="button" class="btn btn-danger btn-delete">')
+            .attr("onclick", "DBNationsCtrl.delNation(\"" + row.nation + "\")" )
+            .append('<i class="glyphicon glyphicon-remove"></i>');
 
-    regionFormatter: function(value, row, index)
-    {
-        return row.properties.NAME_1;
-    },
+        return $button.outerHTML();
 
-    sumFormatter: function(value, row, index)
-    {
-        return parseInt( row.properties.sum );
+        //onclick="DBNationsCtrl.deleteRegion(' + row.nation + ')"
+
+        //return ' +
+        //         '<i class="glyphicon glyphicon-remove"></i>' +
+        //       '</button>';
     }
+
+    //nationFormatter: function(value, row, index)
+    //{
+    //    return row.properties.NAME_0;
+    //},
+    //
+    //regionFormatter: function(value, row, index)
+    //{
+    //    return row.properties.NAME_1;
+    //},
+    //
+    //sumFormatter: function(value, row, index)
+    //{
+    //    return parseInt( row.properties.sum );
+    //}
 
     //nationSorter: function(a, b){
     //    if (a > b) return 1;

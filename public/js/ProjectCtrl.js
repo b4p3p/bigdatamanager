@@ -1,95 +1,24 @@
 "use strict";
 
-/**
- * Controller per l'upload di file sul server
- */
-
-Number.prototype.padLeft = function(base,chr){
-    var  len = (String(base || 10).length - String(this).length)+1;
-    return len > 0? new Array(len).join(chr || '0')+this : this;
-};
-
-Date.prototype.toStringDate = function()
-{
-    return [
-            (this.getMonth() + 1).padLeft(),
-            this.getDate().padLeft(),
-            this.getFullYear()
-        ].join('/') + ' ' +
-        [
-            this.getHours().padLeft(),
-            this.getMinutes().padLeft(),
-            this.getSeconds().padLeft()
-        ].join(':');
-};
-
-var socket = null;
-var siofu = null;
-
-document.addEventListener("DOMContentLoaded", function(){
-
-    socket = io.connect();
-    siofu = new SocketIOFileUpload(socket);
-
-    //evento generato al click sull'upload
-    siofu.addEventListener("choose", function(event){
-        ProjectCtrl.initProgress(event.files);
-    });
-
-    // 1 evento per file
-    siofu.addEventListener("start", function(event){
-        event.file.meta.username = ProjectCtrl.username;
-        event.file.meta.projectName = ProjectCtrl.projectName;
-        event.file.meta.type = ProjectCtrl.type;
-        event.file.meta.method = "editproject";
-
-        console.log("progress " + event.file.name + ": " + event.bytesLoaded / event.file.size);
-    });
-
-    siofu.addEventListener("progress", function(event){
-
-        var p = ProjectCtrl.progress[event.file.name];
-        var value =  Math.floor( (event.bytesLoaded / event.file.size) * 100).toString();
-
-        var obj = $(p).find(".progress-bar")[0];
-        $(obj).text(progressCaption(value, event.file.name));
-        $(obj).attr("aria-valuenow", value);
-        $(obj).css("width", value + "%");
-
-    });
-
-    /**
-     *  event.detail.result - { fail:{Number}, success:{Number} }
-     */
-    siofu.addEventListener("complete", function(event){
-
-        console.log("CALL: complete upload - success:" + event.success);
-
-        ProjectCtrl.setResultProgress(event.detail.result, event.file.name);
-
-    });
-
-});
-
 function progressCaption(value, name){
-
     return  value + "% - " + name;
-
 }
 
 function createProgress(name) {
 
     var html = '<div class="progress-object"> \
                     <div class="progress"> \
-                        <div class="progress-bar progress-bar-success progress-bar-striped" \
+                        <div class="progress-bar progress-bar-success progress-bar-striped active" \
                              role="progressbar" \
-                             aria-valuenow="50" \
+                             aria-valuenow="0" \
                              aria-valuemin="0" \
                              aria-valuemax="100" \
-                             style="width:50%;text-align:left;color:black;padding-left:10px;"> \
+                             style="width:0%;text-align:left;color:black;padding-left:10px;"> \
+                             ' + name + ' \
                         </div> \
                     </div> \
-                    <div class="progress-result hidden"> \
+                    <div class="progress-result" style="min-height: 25px"> \
+                    Wait... \
                     </div> \
                 </div>';
 
@@ -144,6 +73,45 @@ var ProjectCtrl =
         ProjectCtrl.username = username;
         ProjectCtrl.projectName = projectName;
         ProjectCtrl.setTableTag();
+        ProjectCtrl.$btnUpload = $("#upload_input");
+
+        $(document).ready(function() {
+
+            $('#uploadForm').submit( function() {
+
+                $(this).ajaxSubmit({
+
+                    beforeSend: function(event, files, altro)
+                    {
+                        console.log("CALL: Before Send")
+                        var fileList = ProjectCtrl.$btnUpload[0].files;
+                        ProjectCtrl.initProgress(fileList);
+                    },
+
+                    uploadProgress: function(event, position, total, percentage, file)
+                    {
+                        ProjectCtrl.updateProgress(percentage);
+                    },
+
+                    error: function(xhr) {
+                        status('Error: ' + xhr.status);
+                    },
+
+                    success: function(response) {
+                        console.log("success: " + JSON.stringify(response) );
+                        $("#upload_input").fileinput('clear');
+                        ProjectCtrl.writeResultProgress(response);
+                        //DomUtil.replaceItSelf( $("#upload_input") );
+                    }
+                });
+
+                // Have to stop the form from submitting and causing
+                // a page refresh - don't forget this
+                return false;
+
+            });
+
+        });
     },
 
     setTableTag: function()
@@ -325,9 +293,10 @@ var ProjectCtrl =
             url: '/vocabulary/vocabulary',
             dataType: 'json',
             async: true,
+            timeout: 1 * 60 * 1000,                   // 1m
             success: function (data) {
 
-                console.log("      success GetTagsVocabulary.php");
+                console.log("SUCCESS: /vocabulary/vocabulary");
                 ProjectCtrl.tags = data;
                 ProjectCtrl.setTableTag()
             },
@@ -347,15 +316,11 @@ var ProjectCtrl =
      */
     openColumnFormatter : function (value, row)
     {
-
-        //'id="' + row.projectName +'">' +
-
         return '<button type="button" class="btn btn-success btn-open">' +
             '<span class="glyphicon glyphicon-ok selectProj" aria-hidden="true" ' +
                   'project="' + row.projectName + '"' +
             'onclick="ProjectCtrl.openProject_Click(\'' + row.projectName + '\')"/>' +
             '</button>';
-
     },
 
     deleteColumnFormatter : function (value, row) {
@@ -376,27 +341,21 @@ var ProjectCtrl =
         return d.toStringDate();
     },
 
-    deleteProject_Click : function (projectName)
-    {
-
+    deleteProject_Click : function (projectName) {
         bootbox.confirm("Are you sure?", function(result) {
             if(result)
                 ProjectCtrl.deleteProject(projectName);
         });
     },
 
-    deleteProject : function(projectName)
-    {
+    deleteProject : function(projectName) {
         /**
-         *      success message:
-         *      {
+         *      success message: {
          *          status: 0 | >0   0:OK  >0:Error
          *          message: info
          *      }
          */
-
         var html = "";
-
         $.ajax({
             type: "POST",
             crossDomain:true,
@@ -433,9 +392,7 @@ var ProjectCtrl =
         });
     },
 
-    openProject_Click : function (projectName)
-    {
-
+    openProject_Click : function (projectName) {
         $.ajax({
             type: "POST",
             crossDomain:true,
@@ -456,20 +413,14 @@ var ProjectCtrl =
         });
     },
 
-
-
-    loadEditForm: function(data)
-    {
-
+    loadEditForm: function(data) {
         console.log("CALL: loadEditForm");
 
         $("#projectName").val(data.projectName);
         $("#description").val(data.description);
-
     },
 
-    showExample:function()
-    {
+    showExample:function() {
         var cmbType = $('#cmbType');
         var divCode = $('#examplecode');
         var selected = cmbType.find("option:selected").val();
@@ -522,19 +473,9 @@ var ProjectCtrl =
 
     },
 
-    sendFiles: function ()
-    {
-        siofu.useText = true;
-        siofu.submitFiles(ProjectCtrl.getSelectedFiles());
-    },
+    sendFiles: function () { $('#uploadForm').submit(); },
 
-    sendFilesEnd: function (err, result)
-    {
-
-    },
-
-    getSelectedFiles: function()
-    {
+    getSelectedFiles: function() {
         console.log("CALL: getSelectedFiles");
         var fileInput = document.getElementById("upload_input");
         return fileInput.files;
@@ -544,8 +485,7 @@ var ProjectCtrl =
      * Crea delle progress bar vuote
      * @param files
      */
-    initProgress: function(files)
-    {
+    initProgress: function(files) {
         ProjectCtrl.files = {};
         ProjectCtrl.progress = {};
         for(var i=0; i<files.length;i++)
@@ -556,67 +496,43 @@ var ProjectCtrl =
     },
 
     /**
+     * Modifica la lunghezza della progress bar
+     * @param percentage
+     */
+    updateProgress: function (percentage) {
+
+        var keys = _.keys(ProjectCtrl.progress);
+        for(var k in keys){
+
+            var p = ProjectCtrl.progress[ keys[k] ];
+            var pc = $(p).find(".progress-bar");
+
+            $(pc).width(percentage + "%");
+            $(pc).attr("aria-valuenow", percentage.toString() );
+        }
+
+    },
+    
+    /**
+     * Scrive i risultati delle insert sotto le progress bar
      *
      * @param result - { fail:{Number}, success:{Number} }
      * @param fileName - {String}
      */
-    setResultProgress: function(result, fileName)
+    writeResultProgress: function(result)
     {
-        var p = ProjectCtrl.progress[fileName];
-        var resContainer = $(p).find(".progress-result")[0];
-
-        $(resContainer).append("Added: " + result.success + " ");
-        $(resContainer).append('<span class="glyphicon glyphicon-ok" style="color: green" aria-hidden="true"></span>');
-        $(resContainer).append(" - ");
-        $(resContainer).append("Discard:" + result.fail + " ");
-        $(resContainer).append('<span class="glyphicon glyphicon-remove" style="color: red" aria-hidden="true"></span>');
-        $(resContainer).removeClass("hidden");
-
-        //$(resContainer).text("Added: " + result.success + "  - Discard:" + result.fail);
-        //$(resContainer).html(html);
-        //$(resContainer).append("ciao!");
-        //$(resContainer).append("ciao!");
-
+        var keys = _.keys(ProjectCtrl.progress);
+        for(var k in keys){
+            var p = ProjectCtrl.progress[ keys[k] ];
+            var pb = $(p).find(".progress-bar");
+            pb.removeClass("active");
+            var resContainer = $(p).find(".progress-result")[0];
+            $(resContainer).text('');
+            $(resContainer).append("Added: " + result[keys[k]].success + " ");
+            $(resContainer).append('<span class="glyphicon glyphicon-ok" style="color: green" aria-hidden="true"></span>');
+            $(resContainer).append(" - ");
+            $(resContainer).append("Discard:" + result[keys[k]].fail + " ");
+            $(resContainer).append('<span class="glyphicon glyphicon-remove" style="color: red" aria-hidden="true"></span>');
+        }
     }
 };
-
-
-//addUploadDataHandler :function()
-//{
-//    $('#uploadForm').submit( function() {
-//
-//        status('uploading the file ...');
-//
-//        $(this).ajaxSubmit({
-//
-//            error: function(xhr) {
-//                status('Error: ' + xhr.status);
-//            },
-//
-//            success: function(response) {
-//
-//                if(response.error) {
-//                    status('Opps, something bad happened');
-//                    return;
-//                }
-//
-//                var imageUrlOnServer = response.path;
-//
-//                status('Success, file uploaded to:' + imageUrlOnServer);
-//
-//                alert("fatto! + " + imageUrlOnServer);
-//
-//            }
-//        });
-//
-//        // Have to stop the form from submitting and causing
-//        // a page refresh - don't forget this
-//        return false;
-//    });
-//
-//    function status(message) {
-//        $('#status').text(message);
-//    }
-//},
-
-

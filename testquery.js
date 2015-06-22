@@ -334,3 +334,48 @@ db.datas.aggregate(
         }
     }
 )
+
+
+// test per il contatore multiplo
+
+//{ "$group": {
+//    "_id": {
+//        "addr": "$addr",
+//            "book": "$book"
+//    },
+//    "bookCount": { "$sum": 1 }
+//}},
+//{ "$group": {
+//    "_id": "$_id.addr",
+//        "books": {
+//        "$push": {
+//            "book": "$_id.book",
+//                "count": "$bookCount"
+//        },
+//    },
+//    "count": { "$sum": "$bookCount" }
+//}},
+
+
+db.regions.find(
+    {},
+    {"geometry":1, "properties.NAME_0":1, "properties.NAME_1":1}
+).forEach(
+    function (region)
+    {
+        db.datas.aggregate(
+            {"$match": {loc: {$geoWithin: {$geometry: region.geometry}}}},
+            {"$group": {"_id": "$tag", "sum": {"$sum": 1}}}
+        )
+    }
+)
+
+//{"$project": {
+//    _id: 0,
+//        nation: {$literal: region.properties.NAME_0},
+//    nameRegion: {$literal: region.properties.NAME_1},
+//    sumTag: "$sumTag",
+//        sumTot: "$sumTot",
+//        tag: "$_id"
+//}
+//}

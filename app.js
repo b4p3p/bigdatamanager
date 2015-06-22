@@ -3,12 +3,11 @@ var express = require('express'),
     logger = require('morgan'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
-    session = require('client-sessions');
-
-
-
-    //var socketio = require('socket.io');
+    session = require('client-sessions'),
     multer  = require('multer');
+
+    //path = require('path');
+    //var socketio = require('socket.io');
     //formidable = require('formidable'),
     //sys = require('sys');
 
@@ -21,11 +20,20 @@ app.set('view engine', 'ejs');
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
-app.use(bodyParser.json() );       // to support JSON-encoded bodies
+
+app.use(bodyParser.json() );        // to support JSON-encoded bodies
+
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: true
 }));
+
 app.use(cookieParser());
+
+//app.use( bodyParser( {
+//    keepExtensions: true,
+//    uploadDir: __dirname + '/uploads',
+//    limit: '2mb'
+//}));
 
 /**
  *  Utilizzo dei cookie per le sessioni dell'utente
@@ -43,11 +51,6 @@ app.use( session({
 
 //DEBUG
 app.use(express.static(__dirname));
-
-
-/**********
- * UPLOAD
- **********/
 
 //app.use(SocketIOFileUpload.router);
 //
@@ -71,11 +74,11 @@ app.use(express.static(__dirname));
 //    });
 //});
 
-/**************
- * END UPLOAD
- **************/
+/**********
+ * UPLOAD
+ **********/
 
-//app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.contFile = 0;
 app.fileNames = [];
@@ -91,7 +94,14 @@ app.resetVariableUpload = function()
     app.fileNames = [];
 };
 
-app.use( multer({ dest: './uploads/',
+app.getUploadedFiles = function()
+{
+    var ris = this.fileNames;
+    this.resetVariableUpload();
+    return ris;
+};
+
+app.use( multer( { dest: './uploads/',
 
     rename: function (fieldname, filename)
     {
@@ -117,13 +127,17 @@ app.use( multer({ dest: './uploads/',
 
         try {
             console.log('CALL: app.onFileUploadComplete (' + file.path + ')');
-            app.fileNames.push(file.path);
+            app.fileNames.push(file);
         } catch (e) {
             console.error(e);
         }
     }
 
 }));
+
+/**************
+ * END UPLOAD
+ **************/
 
 /*******************************
  ******   ROUTER
@@ -143,11 +157,10 @@ require('./routes/router')(app);
 require('./routes/database_router')(app);
 require('./routes/statistics_router')(app);
 
-require("./routes/vocabulary")(router_vocabulary);
-require('./routes/project_router')(router_project);
-require('./routes/view_router')(router_view);
 require('./routes/regions_router')(router_regions);
-
+require("./routes/vocabulary")(router_vocabulary);
+require('./routes/project_router')(router_project, app);
+require('./routes/view_router')(router_view);
 
 /********************************
  *** END ROUTER

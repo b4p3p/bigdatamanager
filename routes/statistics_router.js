@@ -343,7 +343,7 @@ module.exports = function (app) {
 
                             waterfall(null);
 
-                        });
+                    });
                 }
 
             ], function(err){

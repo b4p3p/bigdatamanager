@@ -6,6 +6,7 @@ var Data = require("../model/Data");
 var async = require('async');
 var requestJson = require('request-json');
 var urlencode = require('urlencode');
+var fs = require("fs");
 
 function argContentProjects(data)
 {
@@ -56,43 +57,7 @@ function sincronizazzioneBatch(projectName)
     });
 }
 
-module.exports = function (router) {
-
-    //app.get('/project', function (req, res)
-    //{
-    //    //TODO debug
-    //    if ( req.session.userProject == null)
-    //        req.session.userProject = 'oim';
-    //
-    //    //controllo se ho un errore
-    //    var arg = ConstantsRouter.argIndex();
-    //    var Project = require("../model/Project");
-    //
-    //    if (req.session.arg)                    // uso  i paramenti presenti nella variabile di sessione
-    //    {
-    //        arg = req.session.arg;
-    //        req.session.arg = null;
-    //    }
-    //    else                                    // mi costruisco la variabile usando le variabili di sessione
-    //    {
-    //        arg.userProject = req.session.userProject;
-    //        arg.projectName = req.session.projectName;
-    //        arg.page = ConstantsRouter.PAGE.PROJECT;
-    //        arg.tab =  ConstantsRouter.TAB.OPENPROJECT;
-    //    }
-    //
-    //    Project.getProjects(arg.userProject, function(data, err)
-    //    {
-    //        if(err) {
-    //
-    //        }
-    //
-    //        arg.content = argContentProjects( data );
-    //        res.render('../views/pages/index.ejs', arg );
-    //
-    //    });
-    //
-    //});
+module.exports = function (router, app) {
 
     router.get('/newproject', function (req, res)
     {
@@ -127,60 +92,6 @@ module.exports = function (router) {
             }
         });
 
-        //try {
-        //
-        //    // Controlla che tutti i file siano stati upload-ati
-        //
-        //    //if (app.isUploadDone() == false) return;
-        //
-        //    // reset variable upload
-        //    //var fileNames = app.fileNames;
-        //    //app.resetVariableUpload();
-        //
-        //    var dataProject = {
-        //        projectName: req.body.projectName,
-        //        userProject: req.session.userProject,
-        //        description: req.body.description
-        //    };
-        //
-        //    var Project = require("../model/Project");
-        //    Project.addProject(dataProject, function(err){
-        //
-        //        if (err) {
-        //            sendProjectError(req, res, err.message, err.status);
-        //        }
-        //        else
-        //        {
-        //
-        //            next();
-        //
-        //            //var URLProjectName = urlencode(req.body.projectName);
-        //            //res.redirect("/openproject");
-        //            //sincronizazzioneBatch(urlencode(URLProjectName));
-        //
-        //        }
-        //    });
-        //
-        //    //addNewProjectWithData(fileNames, dataProject,
-        //    //    function (err) {
-        //    //        if (err) {
-        //    //            sendProjectError(req, res, err.message, err.status);
-        //    //        }
-        //    //        else {
-        //    //            res.redirect("/openproject");
-        //    //
-        //    //            var URLProjectName = urlencode(req.body.projectName);
-        //    //            res.redirect("/openproject");
-        //    //            sincronizazzioneBatch(urlencode(URLProjectName));
-        //    //        }
-        //    //    }
-        //    //);
-        //} catch (e)
-        //{
-        //    console.error("EXCEPTION newproject");
-        //    console.error(e);
-        //    console.error(e.stack);
-        //}
     });
 
     router.post('/newproject', function (req, res, next)
@@ -279,7 +190,8 @@ module.exports = function (router) {
 
     });
 
-    router.post('/delproject', function (req, res) {
+    router.post('/delproject', function (req, res)
+    {
 
         var projectName = req.body.projectName;
         Project.delProject(projectName, function(err, ris)
@@ -325,15 +237,146 @@ module.exports = function (router) {
         }
     });
 
+    router.get('/uploaddata', function (req, res)
+    {
+        res.redirect("/project/editproject");
+    });
+
     router.post('/uploaddata', function (req, res)
     {
+        if( !app.isUploadDone() )
+        {
+            console.log("UPLOADING....");
+            return;
+        }
 
-        console.log("CALL: uploaddata");
-        console.log(JSON.stringify(req.body.files));
-        res.json({});
+        var files = app.getUploadedFiles();
+        var username = req.session.username;
+        var projectName = req.session.projectName;
+        var type = req.body.type;
+        var ris = {}
+
+        async.each(files, function(f, next){
+
+            var projectData = {
+                filePath : f.path,
+                username: username,
+                projectName: projectName,
+                type: type,
+                serverUrl: req.headers.host
+            };
+
+            var Project = require("../model/Project");
+
+            Project.addData(projectData, false, function(err, result)
+            {
+                ris[f.originalname] = result;
+                fs.unlinkSync(f.path);
+                next(err);
+            });
+
+        }, function(err){
+
+            var url = req.headers.host;
+            Project.synchronize(url, projectName, function(err){
+                res.json(ris);
+            });
+
+        });
 
     });
 
-
 };
 
+
+//app.get('/project', function (req, res)
+//{
+//    //TODO debug
+//    if ( req.session.userProject == null)
+//        req.session.userProject = 'oim';
+//
+//    //controllo se ho un errore
+//    var arg = ConstantsRouter.argIndex();
+//    var Project = require("../model/Project");
+//
+//    if (req.session.arg)                    // uso  i paramenti presenti nella variabile di sessione
+//    {
+//        arg = req.session.arg;
+//        req.session.arg = null;
+//    }
+//    else                                    // mi costruisco la variabile usando le variabili di sessione
+//    {
+//        arg.userProject = req.session.userProject;
+//        arg.projectName = req.session.projectName;
+//        arg.page = ConstantsRouter.PAGE.PROJECT;
+//        arg.tab =  ConstantsRouter.TAB.OPENPROJECT;
+//    }
+//
+//    Project.getProjects(arg.userProject, function(data, err)
+//    {
+//        if(err) {
+//
+//        }
+//
+//        arg.content = argContentProjects( data );
+//        res.render('../views/pages/index.ejs', arg );
+//
+//    });
+//
+//});
+
+
+//try {
+//
+//    // Controlla che tutti i file siano stati upload-ati
+//
+//    //if (app.isUploadDone() == false) return;
+//
+//    // reset variable upload
+//    //var fileNames = app.fileNames;
+//    //app.resetVariableUpload();
+//
+//    var dataProject = {
+//        projectName: req.body.projectName,
+//        userProject: req.session.userProject,
+//        description: req.body.description
+//    };
+//
+//    var Project = require("../model/Project");
+//    Project.addProject(dataProject, function(err){
+//
+//        if (err) {
+//            sendProjectError(req, res, err.message, err.status);
+//        }
+//        else
+//        {
+//
+//            next();
+//
+//            //var URLProjectName = urlencode(req.body.projectName);
+//            //res.redirect("/openproject");
+//            //sincronizazzioneBatch(urlencode(URLProjectName));
+//
+//        }
+//    });
+//
+//    //addNewProjectWithData(fileNames, dataProject,
+//    //    function (err) {
+//    //        if (err) {
+//    //            sendProjectError(req, res, err.message, err.status);
+//    //        }
+//    //        else {
+//    //            res.redirect("/openproject");
+//    //
+//    //            var URLProjectName = urlencode(req.body.projectName);
+//    //            res.redirect("/openproject");
+//    //            sincronizazzioneBatch(urlencode(URLProjectName));
+//    //        }
+//    //    }
+//    //);
+//} catch (e)
+//{
+//    console.error("EXCEPTION newproject");
+//    console.error(e);
+//    console.error(e.stack);
+//}

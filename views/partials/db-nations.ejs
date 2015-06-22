@@ -1,23 +1,38 @@
+<script src="/public/js/JQueryUtil.js"></script>
 <script src="/public/js/DB-NationsCtrl.js"></script>
 
-<h4>Nations</h4>
+<style>
+   .btn-delete{
+      position: relative;
+      left: 25px;
+      border-radius: 50px;
+      width: 20px;
+      height: 20px;
+      padding: 0;
+      margin: 0;
+   }
+</style>
 
-<!--data-url="http://localhost:8080/getregions"-->
+<h4>Regions</h4>
+
+<!--data-formatter="Formatter.nationFormatter"-->
 
 <table id="table-nations" data-toggle="table"
+       data-url="http://localhost:8080/regions/nations-light"
        data-cache="false" data-pagination="true"
        data-sort-name="name" data-sort-order="desc">
    <thead>
       <tr>
+         <th data-sortable="true" data-field="nation">
+            Nation
+         </th>
          <th
-             data-formatter="Formatter.nationFormatter"
-             data-sortable="true">Nation</th>
-         <th
-             data-formatter="Formatter.regionFormatter"
-             data-sortable="true">Item Region</th>
-         <th
-             data-formatter="Formatter.sumFormatter"
-             data-sortable="true">Count</th>
+             data-sortable="true" data-field="sum">
+            Count
+         </th>
+         <th data-formatter="Formatter.deleteFormatter" data-width="50">
+            Delete nation
+         </th>
       </tr>
    </thead>
 </table>
@@ -98,7 +113,8 @@
 
    </div>
 
-   <form action="/database" method="post"
+   <form method="post"
+         action="/regions/putnation"
          id="uploadNationsForm"
          enctype="multipart/form-data">
 
@@ -107,7 +123,17 @@
 
          <input id="fileNation" type="file" class="file" name="fileNation" multiple
                 data-show-caption="true"
-                data-show-preview="false">
+                data-show-preview="false"
+                 data-show-upload="false">
+
+         <button type="submit" class="btn btn-danger" aria-label="Right Align"
+                 style="position: relative; left: calc(100% - 108px); width: 108px; margin-top: 10px"
+                 onclick="DBNationsCtrl.upload()">
+            <span class="glyphicon glyphicon-upload" aria-hidden="true"></span>
+            Upload
+         </button>
+
+
       </div>
       <% if (error && error.status > 0) { %>
       <div class="alert alert-danger" role="alert">
@@ -135,8 +161,8 @@
 </div>
 
 <script>
-   DBNationsCtrl.init();
-   DBNationsCtrl.getNations();
+//    DBNationsCtrl.init();
+//   DBNationsCtrl.getNations();
 </script>
 
 

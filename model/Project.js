@@ -36,7 +36,7 @@ Project.getProject = function (projectName, callback)
     Projects.findOne( {projectName: projectName },
         function (err, doc)
         {
-            console.log("CALL getProject -> findOne ( doc is " + doc +")");
+            console.log("CALL getProject.findOne - foundDoc:" + (doc != null).toString() );
             connection.close();
             callback(doc);
         }
@@ -175,7 +175,7 @@ Project.editProject = function (data, callback) {
  * @param projectData - { file: {String} }
  * @param callback - fn({Error}, {Ris})
  */
-Project.addData = function (projectData, callback){
+Project.addData = function (projectData, sync,  callback){
 
     var DataModel = require("../model/Data");
     var _result = null;
@@ -196,13 +196,16 @@ Project.addData = function (projectData, callback){
         // 2) sincronizzo i dati
         function(next)
         {
-            request({
-                uri: "http://" + projectData.serverUrl + "/synchronize?projectName=" + projectData.projectName,
-            }, function(error, response, body) {
-
+            if(sync)
+            {
+                Project.synchronize(projectData.serverUrl, projectData.projectName, function(err){
+                    next(null);
+                });
+            }
+            else
+            {
                 next(null);
-                console.log("SINCRONIZZAZIONE EFFETTUATA: " + body );
-            });
+            }
         }
 
     ], function(err){
@@ -212,6 +215,22 @@ Project.addData = function (projectData, callback){
     });
 
 };
+
+/**
+ * @param callback
+ */
+Project.synchronize = function(url, projectName,  callback)
+{
+    request({
+        uri: "http://" + url + "/synchronize?projectName=" + projectName,
+    }, function(error, response, body) {
+
+        console.log("SINCRONIZZAZIONE EFFETTUATA: " + body );
+
+        callback(null);
+
+    });
+}
 
 /**
  *

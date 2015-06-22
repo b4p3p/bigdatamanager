@@ -17,5 +17,19 @@ module.exports = function (router) {
         });
     });
 
+    router.get('/nations-light', function (req, res)
+    {
+        Regions.getLightNations(function(err, data){
+            res.json(data);
+        });
+    });
+
+    router.post("/putnation", function (req, res){
+
+        var files = req.files.fileNation;
+
+        res.json("");
+
+    });
 };
 
