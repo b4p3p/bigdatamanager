@@ -140,7 +140,7 @@ app.use( multer( { dest: './uploads/',
  **************/
 
 /*******************************
- ******   ROUTER
+ ******   ROUTERvar spinnerCluster = $("#spinner-cluster");
  *******************************/
 
 var router_vocabulary = express.Router();

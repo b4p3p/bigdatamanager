@@ -4,6 +4,7 @@
 
 <script src="/public/lib/jquery-ui/jquery-ui.js"></script>
 <script src="/public/js/DateUtil.js"></script>
+<script src="/public/js/DOMUtil.js"></script>
 
 <link href="/public/lib/bootstrap-select/css/bootstrap-select.css" rel="stylesheet" type="text/css">
 <script src="/public/lib/bootstrap-select/js/bootstrap-select.js"></script>
@@ -13,9 +14,21 @@
 
 <style>
 
+    .fix-label{
+        min-width: 50px;
+        margin-bottom: 0;
+        padding-bottom: 0;
+        float: left;
+    }
+
     #map{
         width: 105%;
     }
+
+    #form-combos{
+        margin-left: 20px;
+    }
+
     .spinner-container
     {
         position: relative;
@@ -109,6 +122,9 @@
         border-radius: 20px;
     }
 
+    .form-combo{
+        margin-right: 10px;
+    }
 
 </style>
 
@@ -118,34 +134,62 @@
     </div>
 </div>
 
+
 <div class="row">
 
-    <label>Nations:</label>
-    <select class="selectpicker" id="cmbNations"
-            data-live-search="true" title="Loading..."
-            multiple>
-    </select>
+<form class="form-inline" id="form-combos">
 
-    <label>Tags:</label>
-    <select class="selectpicker" id="cmbTags" title="Loading..."
-            data-live-search="true" multiple>
-    </select>
+    <div class="form-group form-combo">
+        <label class="fix-label" for="cmbNations">Nations</label><br>
+        <select class="selectpicker" id="cmbNations"
+                data-live-search="true" title="Loading..."
+                multiple>
+        </select>
+    </div>
+
+    <div class="form-group form-combo">
+        <label class="fix-label" for="cmbTags">Tags</label><br>
+        <select class="selectpicker" id="cmbTags" title="Loading..."
+                data-live-search="true" multiple>
+        </select>
+    </div>
+
+    <div class="form-group form-combo">
+        <label class="fix-label" for="cmbUsers">Users</label><br>
+        <select class="selectpicker" id="cmbUsers"
+                data-live-search="true" title="Loading..."
+                multiple>
+        </select>
+    </div>
+
+    <div class="form-group form-combo">
+        <label class="fix-label" for="cmbTerms">Terms</label><br>
+        <select class="selectpicker" id="cmbTerms" title="Loading..."
+                data-live-search="true" multiple>
+        </select>
+    </div>
 
     <script>
         $('.selectpicker').selectpicker();
     </script>
 
+</form>
+    </div>
+
+<div class="row">
     <button type="button" class="btn btn-success"
             id="cmdFilter"
             style="float: right; margin-top: 15px; margin-left: 10px;"
-            onclick="ShowmapCtrl.initGui()">
-        <span class="glyphicon glyphicon-filter" aria-hidden="true"></span>Apply filter</button>
+            onclick="ShowmapCtrl.cmdFilter_click()"
+            disabled>
+        <span id="img-filter" class="glyphicon glyphicon-filter" aria-hidden="true"></span> Apply filter</button>
 
     <button type="button" class="btn btn-danger"
-            id="cmdFilter"
+            id="cmdRestore"
             style="float: right; margin-top: 15px; margin-left: 10px;"
-            onclick="ShowmapCtrl.cmdFilter_click()">
-        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>Restore</button>
+            onclick="ShowmapCtrl.getData()"
+            disabled>
+        <span id="img-restore" class="glyphicon glyphicon-remove" aria-hidden="true"></span> Restore</button>
 </div>
 
 
@@ -154,10 +198,10 @@
     <form class="form-inline form-map" id="form">
 
         <div class="spinner-container">
-            <i class="fa fa-spinner fa-spin spinner-datas"></i>
+            <i id="spinner-heatmap" class="fa fa-spinner fa-spin spinner-datas"></i>
         </div>
 
-        <div class="checkbox">
+        <div class="checkbox" style="margin-right: 10px;">
             <img src="/public/img/icon-heatmap.png" class="img-chk">
             <label>
                 <input type="checkbox" onclick="ShowmapCtrl.heatmap_click()"
@@ -167,10 +211,10 @@
         </div>
 
         <div class="spinner-container">
-            <i class="fa fa-spinner fa-spin spinner-datas"></i>
+            <i id="spinner-cluster" class="fa fa-spinner fa-spin spinner-datas"></i>
         </div>
 
-        <div class="checkbox">
+        <div class="checkbox" style="margin-right: 10px;">
             <img src="/public/img/icon-marker-cluster.png" class="img-chk">
             <label>
                 <input type="checkbox" onclick="ShowmapCtrl.markerCluster_click()"
@@ -179,16 +223,11 @@
             </label>
         </div>
 
-        <!-- spinner del show cluster -->
         <div class="spinner-container">
-            <i class="fa fa-refresh fa-spin hidden" id="spinner-cluster"></i>
+            <i id="spinner-boundaries" class="fa fa-spinner fa-spin spinner-regions"></i>
         </div>
 
-        <div class="spinner-container">
-            <i class="fa fa-spinner fa-spin spinner-regions" id="spinner-boundaries"></i>
-        </div>
-
-        <div class="checkbox">
+        <div class="checkbox" style="margin-right: 10px;">
 
             <img src="/public/img/boundaries-ico.png" class="img-chk">
             <label>
@@ -207,7 +246,7 @@
 
 </div>
 
-<div id="count-container" class="hidden">Found: <span id="count">15000</span></div>
+<div id="count-container" class="hidden" style="margin-left: -15px">Found: <span id="count">15000</span></div>
 
 
 <script>
@@ -220,9 +259,5 @@
     $(document).on('mouseenter','#cmdFilter', function() {
         $(".btn-group").removeClass("open");
     });
-
-//    $("#cmdFilter").isDisabled = true;
-
-    $("#cmdFilter").prop("disabled", true);
 
 </script>
