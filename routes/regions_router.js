@@ -19,7 +19,9 @@ module.exports = function (router, app) {
 
     router.get('/regions', function (req, res)
     {
-        Regions.getRegions(function(err, data){
+        var nations = req.query.nations ? req.query.nations.split(',') : [];
+
+        Regions.getRegions(nations, function(err, data){
             res.json(data);
         });
     });
@@ -27,7 +29,6 @@ module.exports = function (router, app) {
     router.get('/nations-light', function (req, res)
     {
         Regions.getLightNations( function(err, data) {
-            console.log("sono qui");
             res.json(data);
         });
     });

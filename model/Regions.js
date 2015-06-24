@@ -208,61 +208,6 @@ Regions.getLightRegions = function (callback)
             )}
         )
     });
-
-
-    //    regions.find({},{"geometry":1, "properties.NAME_0":1, "properties.NAME_1":1}).forEach(function (region) {
-    //
-    //        datas.aggregate(
-    //            {"$match":{loc: { $geoWithin: { $geometry: region.geometry } }}},
-    //            {"$group":{"_id":"$region", "sumTag":{"$sum":1}}},
-    //            {"$project": {
-    //                _id: 0 ,
-    //                nation: { $literal: region.properties.NAME_0 } ,
-    //                nameRegion: { $literal: region.properties.NAME_1 } ,
-    //                sumTag: "$sumTag",
-    //                sumTot: "$sumTot",
-    //                tag: "$_id"
-    //            }},
-    //            function(err, result)
-    //            {
-    //
-    //                console.log("ciao");
-    //
-    //                //var cont = 0;
-    //                //
-    //                //if(result!=null)
-    //                //    result.forEach(function(obj){
-    //                //        region.properties.counter[obj._id] = obj.sum;
-    //                //        cont += obj.sum
-    //                //    });
-    //                //
-    //                //if ( cont > max )  max = cont;
-    //                //
-    //                //region.properties.sum = cont;
-    //                //region.properties.avg = 1;          //TODO calcolare la media
-    //                //ris.push(region);
-    //                //
-    //                //waterfall(null);
-    //
-    //            }
-    //        );
-    //    });
-    //
-    //});
-
-    //db.regions.find({},{"geometry":1}).forEach(function (doc) {
-    //    print(doc.geometry);
-    //});
-    //
-    //db.regions.aggregate({
-    //    $project :
-    //    {
-    //        nation: "$properties.NAME_0",
-    //        region: "$properties.NAME_1",
-    //        sum: "$properties.sum"
-    //    }
-    //});
-
 };
 
 /**
@@ -406,11 +351,12 @@ Regions.removeNation = function(nation, callback)
  *
  * @param callback
  */
-Regions.getRegions = function(callback){
+Regions.getRegions = function(nations, callback){
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var Regions = connection.model("regions", Any);
     var Datas = connection.model("datas", Any);
+    var query = nations.length > 0 ? {"properties.NAME_0": {$in: nations }} : {};
 
     var maxSum = 0;
     var totRegions = 0;
@@ -425,9 +371,15 @@ Regions.getRegions = function(callback){
             //prendo la maggior parte dei dati
             function(next){
 
-                Regions.find({}, function (err, regions) {
+                Regions.find(query, function (err, regions) {
 
                     console.log("CALL: Region.getRegion - #regions %s" , regions.length);
+
+                    if( regions.length == 0 )
+                    {
+                        callback(null, {});
+                        return;
+                    }
 
                     totRegions = regions.length;
 
