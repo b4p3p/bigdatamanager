@@ -19,9 +19,11 @@ module.exports = function (router, app) {
 
     router.get('/regions', function (req, res)
     {
+        var projectName = req.session.projectName;
         var nations = req.query.nations ? req.query.nations.split(',') : [];
+        var tags = req.query.tags ? req.query.tags.split(',') : [];
 
-        Regions.getRegions(nations, function(err, data){
+        Regions.getRegions(projectName, nations, tags,  function(err, data){
             res.json(data);
         });
     });
