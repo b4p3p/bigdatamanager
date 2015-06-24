@@ -8,11 +8,18 @@ var async = require('async');
 var requestJson = require('request-json');
 var urlencode = require('urlencode');
 
-module.exports = function (router) {
+module.exports = function (router, app) {
 
     router.get('/regions-light', function (req, res)
     {
         Regions.getLightRegions(function(err, data){
+            res.json(data);
+        });
+    });
+
+    router.get('/regions', function (req, res)
+    {
+        Regions.getRegions(function(err, data){
             res.json(data);
         });
     });
@@ -24,11 +31,41 @@ module.exports = function (router) {
         });
     });
 
-    router.post("/putnation", function (req, res){
+    router.get("/putnation", function (req, res)
+    {
+        res.redirect('/view/db/nations')
+    }),
 
-        var files = req.files.fileNation;
+    router.post("/putnation", function (req, res)
+    {
 
-        res.json("");
+        if( !app.isUploadDone() )
+        {
+            console.log("UPLOADING....");
+            return;
+        }
+
+        var files = app.getUploadedFiles();
+        var username = req.session.username;
+        var projectName = req.session.projectName;
+        var ris = {};
+
+        var Regions = require('../model/Regions');
+
+        Regions.importFromFile(files,
+            function (err, result) {
+
+                if (err == null)
+                {
+                    var Project = require("../model/Project");
+                    Project.synchronize( req.headers.host, projectName, function(err){
+                        res.json( {status:0, result:result } );
+                    })
+                }
+                else
+                    res.json( {status:1, error:err.message } );
+            }
+        );
 
     });
 };

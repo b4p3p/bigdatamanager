@@ -4,9 +4,8 @@
 
 var ConstantsRouter = {};
 
-
 /**
- *
+ * Parametro da passare al  modulo di render di ejs
  * @param   req - request
  * @param   page - PAGE
  * @param   error - { status:{Number}, message: {String} }
@@ -44,6 +43,14 @@ ConstantsRouter.argIndex = function(req, page, error)
     //    error: {},
     //    content: {}
     //}
+};
+
+ConstantsRouter.error = function(status, message )
+{
+    return{
+        status: status,
+        message: message
+    }
 };
 
 /**

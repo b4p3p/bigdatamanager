@@ -157,7 +157,7 @@ require('./routes/router')(app);
 require('./routes/database_router')(app);
 require('./routes/statistics_router')(app);
 
-require('./routes/regions_router')(router_regions);
+require('./routes/regions_router')(router_regions, app);
 require("./routes/vocabulary")(router_vocabulary);
 require('./routes/project_router')(router_project, app);
 require('./routes/view_router')(router_view);

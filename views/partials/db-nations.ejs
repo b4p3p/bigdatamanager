@@ -1,8 +1,11 @@
+<script src="/bower_components/jquery-form/jquery.form.js"></script>
+<script src="/node_modules/underscore/underscore.js"></script>
 <script src="/public/js/JQueryUtil.js"></script>
+<script src="/public/js/UploaderCtrl.js"></script>
 <script src="/public/js/DB-NationsCtrl.js"></script>
 
 <style>
-   .btn-delete{
+   .btn-delete {
       position: relative;
       left: 25px;
       border-radius: 50px;
@@ -22,18 +25,18 @@
        data-cache="false" data-pagination="true"
        data-sort-name="name" data-sort-order="desc">
    <thead>
-      <tr>
-         <th data-sortable="true" data-field="nation">
-            Nation
-         </th>
-         <th
-             data-sortable="true" data-field="sum">
-            Count
-         </th>
-         <th data-formatter="Formatter.deleteFormatter" data-width="50">
-            Delete nation
-         </th>
-      </tr>
+   <tr>
+      <th data-sortable="true" data-field="nation">
+         Nation
+      </th>
+      <th
+              data-sortable="true" data-field="sum">
+         Count
+      </th>
+      <th data-formatter="Formatter.deleteFormatter" data-width="50">
+         Delete nation
+      </th>
+   </tr>
    </thead>
 </table>
 
@@ -42,6 +45,7 @@
 <div class="well" style="margin-bottom: 10px">
    SRID: <b>EPSG 4326</b><br>
    Type file: <b>geojson</b><br><br>
+
    <div class="form-group">
 
       <a class="btn btn-default"
@@ -121,35 +125,64 @@
       <div class="form-group">
          <label for="fileNation">Load files</label>
 
-         <input id="fileNation" type="file" class="file" name="fileNation" multiple
+         <input id="btnFilesNations" type="file" class="file" name="fileNation" multiple
                 data-show-caption="true"
                 data-show-preview="false"
-                 data-show-upload="false">
+                data-show-upload="false">
+      </div>
 
-         <button type="submit" class="btn btn-danger" aria-label="Right Align"
-                 style="position: relative; left: calc(100% - 108px); width: 108px; margin-top: 10px"
-                 onclick="DBNationsCtrl.upload()">
-            <span class="glyphicon glyphicon-upload" aria-hidden="true"></span>
-            Upload
-         </button>
+      <div class="progress-container row-form" id="progress-container">
 
+         <!--<div class="progress-object">-->
+
+            <!--<div class="progress" id="progressTest" style="margin-bottom: 0">-->
+               <!--<div class="progress-bar progress-bar-success progress-bar-striped"-->
+                    <!--role="progressbar"-->
+                    <!--aria-valuenow="50"-->
+                    <!--aria-valuemin="0"-->
+                    <!--aria-valuemax="100"-->
+                    <!--style="width:50%;text-align:left;color:black;padding-left:10px;">-->
+                  <!--Ciao mondo-->
+               <!--</div>-->
+            <!--</div>-->
+
+            <!--<div class="progress-result">-->
+               <!--Added: 100-->
+               <!--<span class="glyphicon glyphicon-ok" style="color: green" aria-hidden="true"></span>-->
+               <!-&#45;&#45; Discard: 5-->
+               <!--<span class="glyphicon glyphicon-remove" style="color: red" aria-hidden="true"></span>-->
+            <!--</div>-->
+
+         <!--</div>-->
 
       </div>
-      <% if (error && error.status > 0) { %>
-      <div class="alert alert-danger" role="alert">
-         <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-         <span class="sr-only">Error:</span>
-         <%= error.message %>
-      </div>
-      <% } else if (error && error.status == 0) {%>
-      <div class="alert alert-success" role="alert">
-         <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-         <span class="sr-only">Error:</span>
-         <%= error.message %>
-      </div>
-      <% } %>
 
    </form>
+
+   <!--onclick="uploaderCtrl.upload();"-->
+
+   <button id="btnClick"
+           class="btn btn-danger" aria-label="Right Align"
+           style="position: relative; left: calc(100% - 108px); width: 108px; margin-top: 10px"
+           onclick="uploaderCtrl.upload();">
+      <span class="glyphicon glyphicon-upload" aria-hidden="true"></span>
+      Upload
+   </button>
+
+   <% if (error && error.status > 0) { %>
+   <div class="alert alert-danger" role="alert">
+      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+      <span class="sr-only">Error:</span>
+      <%= error.message %>
+   </div>
+   <% } else if (error && error.status == 0) { %>
+   <div class="alert alert-success" role="alert">
+      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+      <span class="sr-only">Error:</span>
+      <%= error.message %>
+   </div>
+   <% } %>
+
 </div>
 
 <div>
@@ -161,8 +194,14 @@
 </div>
 
 <script>
-//    DBNationsCtrl.init();
-//   DBNationsCtrl.getNations();
+
+   DBNationsCtrl.init();
+   uploaderCtrl = new UploaderCtrl(
+           $("#uploadNationsForm"),
+           $("#btnFilesNations"),
+           $("#progress-container"),
+           optionsCtrl, submitFn);
+
 </script>
 
 

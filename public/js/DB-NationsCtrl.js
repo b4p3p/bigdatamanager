@@ -1,3 +1,30 @@
+var uploaderCtrl = null;
+
+var optionsCtrl = {
+
+    timeout: 1000 * 120,  //120s,
+
+    beforeSend: function (event) { uploaderCtrl.initProgress(); },
+
+    uploadProgress: function (event, position, total, percentage, file) { uploaderCtrl.updateProgress(percentage); },
+
+    error: function (xhr) { uploaderCtrl.onError(xhr); } ,
+
+    success: function (response) {
+        uploaderCtrl.onSuccess(response);
+        DBNationsCtrl.$tableNations.bootstrapTable('refresh', {silent: true});
+    }
+};
+
+function submitFn()
+{
+    $(this).ajaxSubmit( optionsCtrl ) ;
+
+    // Have to stop the form from submitting and causing
+    // a page refresh - don't forget this
+    return false;
+
+}
 
 var DBNationsCtrl =
 {
@@ -5,7 +32,9 @@ var DBNationsCtrl =
     regions: null,
 
     init:function()
-    {},
+    {
+        DBNationsCtrl.$tableNations = $("#table-nations")
+    },
 
     getNations: function()
     {
@@ -31,16 +60,10 @@ var DBNationsCtrl =
 
     delNation: function(nation)
     {
+        bootbox.confirm("Are you sure you want to delete the follow nation:<br>" + nation.toUpperCase() , function(result) {
+
+        });
         console.log(nation);
-    },
-
-    upload:function()
-    {
-        if (window.File && window.FileReader && window.FileList && window.Blob)
-            console.log("Posso farlo");
-
-        console.log( $("#fileNation").val() );
-
     }
 };
 
@@ -118,3 +141,43 @@ var Formatter = {
     //}
 
 }
+
+
+
+//$(document).ready(function() {
+//
+//    $('#uploadForm').submit( function() {
+//
+//        $(this).ajaxSubmit({
+//
+//            beforeSend: function(event, files, altro)
+//            {
+//                console.log("CALL: Before Send")
+//                var fileList = ProjectCtrl.$btnFiles[0].files;
+//                ProjectCtrl.initProgress(fileList);
+//            },
+//
+//            uploadProgress: function(event, position, total, percentage, file)
+//            {
+//                ProjectCtrl.updateProgress(percentage);
+//            },
+//
+//            error: function(xhr) {
+//                status('Error: ' + xhr.status);
+//            },
+//
+//            success: function(response) {
+//                console.log("success: " + JSON.stringify(response) );
+//                $("#upload_input").fileinput('clear');
+//                ProjectCtrl.writeResultProgress(response);
+//                //DomUtil.replaceItSelf( $("#upload_input") );
+//            }
+//        });
+//
+//        // Have to stop the form from submitting and causing
+//        // a page refresh - don't forget this
+//        return false;
+//
+//    });
+//
+//});

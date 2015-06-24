@@ -489,7 +489,7 @@
                 self.refreshContainer();
             }
             self.$progress = self.$container.find('.kv-upload-progress');
-            self.$btnUpload = self.$container.find('.kv-fileinput-upload');
+            self.$btnFiles = self.$container.find('.kv-fileinput-upload');
             self.$captionContainer = getElement(options, 'elCaptionContainer', self.$container.find('.file-caption'));
             self.$caption = getElement(options, 'elCaptionText', self.$container.find('.file-caption-name'));
             self.$previewContainer = getElement(options, 'elPreviewContainer', self.$container.find('.file-preview'));
@@ -1047,7 +1047,7 @@
             self.uploadCache = {content: [], config: [], tags: [], append: true};
             self.uploadCount = 0;
             self.uploadPercent = 0;
-            self.$btnUpload.removeAttr('disabled');
+            self.$btnFiles.removeAttr('disabled');
             self.setProgress(0);
             addCss(self.$progress, 'hide');
             self.resetErrors(false);
@@ -1073,7 +1073,7 @@
         },
         clear: function () {
             var self = this, cap;
-            self.$btnUpload.removeAttr('disabled');
+            self.$btnFiles.removeAttr('disabled');
             self.resetUpload();
             self.filestack = [];
             self.clearFileInput();
@@ -1558,7 +1558,7 @@
                 self.clearFileInput();
             }
             addCss(self.$container, 'has-error');
-            self.$btnUpload.attr('disabled', true);
+            self.$btnFiles.attr('disabled', true);
             return true;
         },
         errorHandler: function (evt, caption) {

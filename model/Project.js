@@ -223,12 +223,10 @@ Project.synchronize = function(url, projectName,  callback)
 {
     request({
         uri: "http://" + url + "/synchronize?projectName=" + projectName,
-    }, function(error, response, body) {
-
+    }, function(error, response, body)
+    {
         console.log("SINCRONIZZAZIONE EFFETTUATA: " + body );
-
         callback(null);
-
     });
 }
 
@@ -311,6 +309,7 @@ function addNewProjectWithData(fileNames, dataProject, callback )
                 );
 
             },
+
             // modifico il progetto creato aggiungendo la dimensione
             function(next) {
 
@@ -365,7 +364,8 @@ function addNewProjectWithData(fileNames, dataProject, callback )
                 callback(null);
             }
 
-        });
+        }
+    );
 
 };
 

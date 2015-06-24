@@ -82,7 +82,8 @@ module.exports = function (app) {
             function (cb_w)
             {
                 var url = 'mongodb://localhost:27017/oim';
-                MongoClient.connect(url, function (err, db) {
+                MongoClient.connect(url, function (err, db)
+                {
 
                     _datas = db.collection('datas');
                     _regions = db.collection('regions');
@@ -148,7 +149,9 @@ module.exports = function (app) {
 
             }
             
-        ], function (err, cont_success) {
+        ], function (err, cont_success)
+        {
+            _db.close();
             res.json(databaseError(0, cont_success, projectName));
         });
 

@@ -70,10 +70,11 @@ var ProjectCtrl =
     init: function(username, projectName)
     {
         console.log("SET " + username + " " + projectName);
+
         ProjectCtrl.username = username;
         ProjectCtrl.projectName = projectName;
         ProjectCtrl.setTableTag();
-        ProjectCtrl.$btnUpload = $("#upload_input");
+        ProjectCtrl.$btnFiles = $("#upload_input");
 
         $(document).ready(function() {
 
@@ -84,7 +85,7 @@ var ProjectCtrl =
                     beforeSend: function(event, files, altro)
                     {
                         console.log("CALL: Before Send")
-                        var fileList = ProjectCtrl.$btnUpload[0].files;
+                        var fileList = ProjectCtrl.$btnFiles[0].files;
                         ProjectCtrl.initProgress(fileList);
                     },
 
@@ -101,6 +102,7 @@ var ProjectCtrl =
                         console.log("success: " + JSON.stringify(response) );
                         $("#upload_input").fileinput('clear');
                         ProjectCtrl.writeResultProgress(response);
+
                         //DomUtil.replaceItSelf( $("#upload_input") );
                     }
                 });
@@ -523,16 +525,25 @@ var ProjectCtrl =
     {
         var keys = _.keys(ProjectCtrl.progress);
         for(var k in keys){
+
             var p = ProjectCtrl.progress[ keys[k] ];
             var pb = $(p).find(".progress-bar");
             pb.removeClass("active");
             var resContainer = $(p).find(".progress-result")[0];
-            $(resContainer).text('');
-            $(resContainer).append("Added: " + result[keys[k]].success + " ");
-            $(resContainer).append('<span class="glyphicon glyphicon-ok" style="color: green" aria-hidden="true"></span>');
-            $(resContainer).append(" - ");
-            $(resContainer).append("Discard:" + result[keys[k]].fail + " ");
-            $(resContainer).append('<span class="glyphicon glyphicon-remove" style="color: red" aria-hidden="true"></span>');
+
+            if ( result[keys[k]] == null)
+            {
+                $(resContainer).text('Undefined error...');
+            }
+            else
+            {
+                $(resContainer).text('');
+                $(resContainer).append("Added: " + result[keys[k]].success + " ");
+                $(resContainer).append('<span class="glyphicon glyphicon-ok" style="color: green" aria-hidden="true"></span>');
+                $(resContainer).append(" - ");
+                $(resContainer).append("Discard:" + result[keys[k]].fail + " ");
+                $(resContainer).append('<span class="glyphicon glyphicon-remove" style="color: red" aria-hidden="true"></span>');
+            }
         }
     }
 };

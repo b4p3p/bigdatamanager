@@ -306,7 +306,7 @@ ShowmapCtrl.getRegions = function()
         type: "get",
         crossDomain: true,
         dataType: "json",
-        url: "/getregions?nations=" + ShowmapCtrl.nations.join(","),
+        url: "/regions/regions?nations=" + ShowmapCtrl.nations.join(","),
         success: function (data) {
             ShowmapCtrl.regions = data;
             refreshBoundaries();
@@ -735,9 +735,6 @@ var addOptionValue = function ( combo , value, isSpecial )
     }
 
 };
-
-
-
 
 
 
