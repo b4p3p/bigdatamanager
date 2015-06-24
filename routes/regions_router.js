@@ -26,7 +26,8 @@ module.exports = function (router, app) {
 
     router.get('/nations-light', function (req, res)
     {
-        Regions.getLightNations(function(err, data){
+        Regions.getLightNations( function(err, data) {
+            console.log("sono qui");
             res.json(data);
         });
     });
@@ -66,6 +67,18 @@ module.exports = function (router, app) {
                     res.json( {status:1, error:err.message } );
             }
         );
+
+    });
+
+    /**
+     *  @return: { deletedRegion: {Number}, updatedData: {Number}
+     */
+    router.delete("/nation", function (req, res)
+    {
+        var nation = req.body.nation;
+        Regions.removeNation(nation, function(err, data){
+            res.json(data);
+        });
 
     });
 };

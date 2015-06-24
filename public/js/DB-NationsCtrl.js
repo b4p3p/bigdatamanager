@@ -12,7 +12,7 @@ var optionsCtrl = {
 
     success: function (response) {
         uploaderCtrl.onSuccess(response);
-        DBNationsCtrl.$tableNations.bootstrapTable('refresh', {silent: true});
+        DBNationsCtrl.updateTable();
     }
 };
 
@@ -30,6 +30,11 @@ var DBNationsCtrl =
 {
     $tableNations: null,
     regions: null,
+
+    updateTable: function()
+    {
+        DBNationsCtrl.$tableNations.bootstrapTable('refresh', {silent: true});
+    },
 
     init:function()
     {
@@ -60,10 +65,36 @@ var DBNationsCtrl =
 
     delNation: function(nation)
     {
-        bootbox.confirm("Are you sure you want to delete the follow nation:<br>" + nation.toUpperCase() , function(result) {
+        bootbox.confirm("Are you sure you want to delete the follow nation:<br>" + nation.toUpperCase() ,
+            function(confirm) {
 
-        });
-        console.log(nation);
+                if(confirm) {
+
+                    $.ajax({
+                        type: "delete",
+                        url: "/regions/nation",
+                        data: {nation: nation},
+                        success: function (data) {
+
+                            //example data: deletedRegion: {Number}, updatedData: {Number}
+
+                            console.log("SUCCESS delete nation - " + JSON.stringify(data));
+
+                            bootbox.alert("<b>Deleted region:</b> " + data.deletedRegion + "<br>" +
+                                          "<b>Updated data:</b> " + data.updatedData);
+
+                            DBNationsCtrl.updateTable();
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("ERR: ShowmapCtrl.delNation " + status + " " + xhr.status);
+                            console.error("     Status: " + status + " " + xhr.status);
+                            console.error("     Error: " + error);
+                        }
+                    });
+
+                }
+            }
+        );
     }
 };
 

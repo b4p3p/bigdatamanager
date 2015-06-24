@@ -40,8 +40,12 @@ Data.DATA_SCHEMA = new Schema(
         source: String,
         text: {type: String, required: true},
         user: String,
-        tag: String
-    });
+        tag: String,
+        nation : String,
+        region: String
+    },
+    { strict: false }
+);
 //Data.DATA_SCHEMA.index({ loc: '2dsphere' });
 
 Data.projectName = null;

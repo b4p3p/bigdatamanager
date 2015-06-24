@@ -11,6 +11,7 @@ var _ = require("underscore");
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var Any = new mongoose.Schema({ any: Schema.Types.Mixed });
+var SchemaData = require("../model/Data").DATA_SCHEMA;
 
 var Regions = function (data) {
     this.data = data;
@@ -269,11 +270,14 @@ Regions.getLightRegions = function (callback)
  */
 Regions.getLightNations = function (callback)
 {
+    console.log("CALL: Regions.getLightNations");
+
     MongoClient.connect(url, function (err, db) {
         var regions = db.collection('regions');
         var datas = db.collection('datas');
         var cont = 0;
         var ris = {};
+        var first = true;
 
         regions.find(
             {},
@@ -281,12 +285,15 @@ Regions.getLightNations = function (callback)
         ).each (
             function (err, region)
             {
-                if(!region && cont==0) { callback(null, {} ); return; }
-                if(!region) return;
+                if(!region && cont==0 && first)  //non ci sono regioni
+                {
+                    callback(null, {} );
+                    return;
+                }
 
-                //if(region == null && cont==0 ) { callback(null, {} ); return; }
-                //if(region == null) return;
-                //if(region == null && cont==0 ) { callback(null, {} ); return; }
+                first = false;
+
+                if(!region) return;
 
                 cont ++;
 
@@ -319,7 +326,7 @@ Regions.getLightNations = function (callback)
                         }
 
                         cont--;
-                        console.log(doc[0].nation + " " + doc[0].nation + " " + doc[0].sum);
+                        //console.log(doc[0].nation + " " + doc[0].nation + " " + doc[0].sum);
 
                         if( !ris[doc[0].nation] )
                             ris[doc[0].nation] = { nation: doc[0].nation, sum: doc[0].sum};
@@ -328,6 +335,7 @@ Regions.getLightNations = function (callback)
 
                         if ( cont == 0)
                         {
+                            console.log("FINE");
                             var keys = _.keys(ris);
                             ris = _.map(keys, function(k) {
                                 return { nation: ris[k].nation, sum: ris[k].sum }
@@ -340,6 +348,58 @@ Regions.getLightNations = function (callback)
         )
     }
     );
+};
+
+/**
+ *
+ * @param region - {String}
+ * @param callback - fn({Err},{Data[]})
+ */
+Regions.removeNation = function(nation, callback)
+{
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+    var Regions = connection.model("regions", Any);
+    var Datas = connection.model("datas", SchemaData );
+    var ris = {
+        deletedRegion: 0,
+        updatedData: 0
+    };
+
+    async.waterfall(
+        [
+            //rimuovo le regioni della nazione selezionata
+            function(next)
+            {
+                Regions.remove({"properties.NAME_0": nation}, function(err, result)
+                {
+                    ris.deletedRegion = result.result.n;
+                    next(null);
+                });
+            },
+
+
+            //rimuovo dai dati il riferimento delle regioni
+            function(next){
+
+                Datas.update(
+                    {nation:nation},
+                    {$unset: { nation: true, region: true } },
+                    {multi: true, safe: false} ,
+                    function(err, result){
+                        ris.updatedData = result.n;
+                        next(null);
+                    }
+                );
+
+            }
+
+        ],
+
+        function(err){
+            callback(err, ris);
+        }
+    );
+
 };
 
 /**

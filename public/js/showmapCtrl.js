@@ -736,6 +736,14 @@ var addOptionValue = function ( combo , value, isSpecial )
 
 };
 
+function tmpfn()
+{
+    var o = ShowmapCtrl.cmbSelectNations.find('option[value="Italy"]');
+    $(o).attr("disabled", "disabled");
+    ShowmapCtrl.cmbSelectNations.selectpicker('refresh');
+
+    return;
+};
 
 
 
