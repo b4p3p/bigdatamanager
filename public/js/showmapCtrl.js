@@ -170,6 +170,10 @@ ShowmapCtrl.getData = function ()
             ShowmapCtrl.getRegions();
 
             $(".spinner-datas").hide();
+
+            $('#chk_markerCluster').removeAttr("disabled");
+            $('#chk_heatmap').removeAttr("disabled");
+
             $("#count-container").removeClass("hidden");
             $("#count").text(data.data.length);
             if(imgRestore.hasClass('fa fa-spinner fa-spin')) {
@@ -307,6 +311,7 @@ ShowmapCtrl.getRegions = function()
             ShowmapCtrl.regions = data;
             refreshBoundaries();
             $(".spinner-regions").hide();
+            $('#chk_boundaries').removeAttr("disabled");
 
             cmdFilter.removeAttr('disabled');
 
@@ -410,6 +415,8 @@ var showBoundaries = function ()
     spinnerBoundaries.addClass("fa fa-refresh fa-spin");
     spinnerBoundaries.show();
 
+    insertLegend();
+
     if (ShowmapCtrl.layerBoundaries != null)
         hideBoundaries();
     ShowmapCtrl.layerBoundaries = L.geoJson(
@@ -428,6 +435,37 @@ var showBoundaries = function ()
     spinnerBoundaries.addClass("fa fa-spinner fa-spin spinner-regions");
     spinnerBoundaries.hide();
 };
+
+insertLegend = function()
+{
+    console.log("CALL: insertLegend");
+
+    if ( ShowmapCtrl.legendControl === null)
+    {
+        ShowmapCtrl.legendControl = L.control({position: 'bottomleft'});
+
+        ShowmapCtrl.legendControl.onAdd = function (map)
+        {
+            var div = L.DomUtil.create('div', 'info legend'),
+                grades = [0, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8],
+                labels = [],
+                from, to;
+            labels.push('<label style="margin: 0px; margin-bottom: 10px; text-align: center"><b>Percentage of<br>total tweets</b></label>');
+            for (var i = 0; i < grades.length; i++) {
+                from = grades[i];
+                to = grades[i + 1];
+
+                labels.push(
+                    '<i style="background:' + _getColor(from + 0.01) + '"></i> ' +
+                    from + (to ? '&ndash;' + to : '+'));
+            }
+            div.innerHTML = labels.join('<br>');
+            return div;
+        };
+    }
+    ShowmapCtrl.legendControl.addTo(ShowmapCtrl.mainMap);
+};
+
 
 function _style(feature)
 {
@@ -563,7 +601,7 @@ var hideBoundaries = function()
     {
         ShowmapCtrl.mainMap.removeLayer( ShowmapCtrl.layerBoundaries );
         ShowmapCtrl.layerBoundaries = null;
-        if(ShowmapCtrl.legendControl)
+        if( ShowmapCtrl.legendControl )
             ShowmapCtrl.mainMap.removeControl( ShowmapCtrl.legendControl );
     }
 };
