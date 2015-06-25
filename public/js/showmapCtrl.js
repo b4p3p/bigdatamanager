@@ -1,3 +1,5 @@
+"use strict";
+
 function ShowmapCtrl() {};
 
 var cfg =
@@ -35,7 +37,7 @@ ShowmapCtrl.tagsLegend = null;
 //controls
 ShowmapCtrl.legendControl = null;
 ShowmapCtrl.sliderTimer = null;
-ShowmapCtrl.cmbSelectTag = null;
+ShowmapCtrl.cmbSelectTags = null;
 ShowmapCtrl.cmbSelectNations = null;
 ShowmapCtrl.cmbSelectUsers = null;
 ShowmapCtrl.cmbSelectTerms = null;
@@ -46,6 +48,8 @@ ShowmapCtrl.activeLayerBoundaries = null;
 ShowmapCtrl.showInfoActiveLayer = false;
 
 //data variable
+ShowmapCtrl.nationsProject = null;
+ShowmapCtrl.tagsProject = null;
 ShowmapCtrl.minData = new Date();
 ShowmapCtrl.maxData = new Date();
 ShowmapCtrl.tags = null;
@@ -76,7 +80,7 @@ ShowmapCtrl.initMap = function(mapContainer)
 
 };
 
-var createMap = function()
+function createMap()
 {
     var lat = 42.22;
     var long = 12.986;
@@ -114,7 +118,7 @@ function resizeMap()
 
 ShowmapCtrl.initGui = function()
 {
-    ShowmapCtrl.cmbSelectTag = $('#cmbTags');
+    ShowmapCtrl.cmbSelectTags = $('#cmbTags');
     ShowmapCtrl.cmbSelectNations = $('#cmbNations');
     ShowmapCtrl.cmbSelectUsers = $('#cmbUsers');
     ShowmapCtrl.cmbSelectTerms = $('#cmbTerms');
@@ -167,6 +171,9 @@ ShowmapCtrl.getData = function ()
             ShowmapCtrl.otherTag = data.otherTag;
             ShowmapCtrl.nations = data.nations;
 
+            ShowmapCtrl.nationsProject = data.nations;
+            ShowmapCtrl.tagsProject = data.tags;
+
             ShowmapCtrl.getRegions();
 
             $(".spinner-datas").hide();
@@ -179,7 +186,7 @@ ShowmapCtrl.getData = function ()
             if(imgRestore.hasClass('fa fa-spinner fa-spin')) {
                 imgRestore.removeClass("fa fa-spinner fa-spin");
                 imgRestore.addClass("glyphicon glyphicon-remove");
-                DomUtil.clearSelectpicker(ShowmapCtrl.cmbSelectTag);
+                DomUtil.clearSelectpicker(ShowmapCtrl.cmbSelectTags);
                 DomUtil.clearSelectpicker(ShowmapCtrl.cmbSelectNations);
                 DomUtil.clearSelectpicker(ShowmapCtrl.cmbSelectUsers);
                 DomUtil.clearSelectpicker(ShowmapCtrl.cmbSelectTerms);
@@ -210,17 +217,17 @@ ShowmapCtrl.loadData = function()
     ShowmapCtrl.sliderTimer.dateRangeSlider("min", ShowmapCtrl.minData);
     ShowmapCtrl.sliderTimer.dateRangeSlider("max", ShowmapCtrl.maxData);
 
-    ShowmapCtrl.cmbSelectTag.attr("title", "Select Tags");
+    ShowmapCtrl.cmbSelectTags.attr("title", "Select Tags");
     ShowmapCtrl.cmbSelectNations.attr("title", "Select Nations");
     ShowmapCtrl.cmbSelectUsers.attr("title", "Select Users");
     ShowmapCtrl.cmbSelectTerms.attr("title", "Select Terms");
 
     if(ShowmapCtrl.otherTag)
     {
-        addOptionValue(ShowmapCtrl.cmbSelectTag, "Other", true);
+        addOptionValue(ShowmapCtrl.cmbSelectTags, "Other", true);
     }
     ShowmapCtrl.tags.forEach(function(tag) {
-        addOptionValue(ShowmapCtrl.cmbSelectTag, tag);
+        addOptionValue(ShowmapCtrl.cmbSelectTags, tag);
     });
 
     ShowmapCtrl.nations.forEach(function(nation) {
@@ -249,11 +256,14 @@ ShowmapCtrl.cmdFilter_click = function()
         success: function (data) {
             ShowmapCtrl.filteredData = data.data;
             ShowmapCtrl.nations = data.nations;
+            ShowmapCtrl.tags = data.tags;
+
             $("#count").text(data.data.length);
 
             ShowmapCtrl.nations = getSelectedCombo(ShowmapCtrl.cmbSelectNations);
             ShowmapCtrl.getRegions();
             refreshData();
+            //disableOption();
 
             var cmdRestore = $("#cmdRestore");
             cmdRestore.removeAttr("disabled");
@@ -267,12 +277,38 @@ ShowmapCtrl.cmdFilter_click = function()
     });
 };
 
+//function disableOption()
+//{
+//    var tags = getSelectedCombo(ShowmapCtrl.cmbSelectTags);
+//    if( tags.length > 0 ) {
+//        var nationsToDeselect = _.difference(ShowmapCtrl.nationsProject, ShowmapCtrl.nations);
+//        for (var i = 0; i < nationsToDeselect.length; i += 1) {
+//            var optionNation = ShowmapCtrl.cmbSelectNations.find('option[value="' + nationsToDeselect[i] + '"]');
+//            $(optionNation).attr("disabled", "disabled");
+//        }
+//    }
+//
+//    var nations = getSelectedCombo(ShowmapCtrl.cmbSelectNations);
+//    if( nations.length > 0 ) {
+//        var tagsToDeselect = _.difference(ShowmapCtrl.tagsProject, ShowmapCtrl.tags);
+//        for (i = 0; i < tagsToDeselect.length; i += 1) {
+//            var optionTag = ShowmapCtrl.cmbSelectTags.find('option[value="' + tagsToDeselect[i] + '"]');
+//            $(optionTag).attr("disabled", "disabled");
+//        }
+//    }
+//    //var value = $('#cmbNations').find('option');
+//
+//    ShowmapCtrl.cmbSelectNations.selectpicker('refresh');
+//    ShowmapCtrl.cmbSelectTags.selectpicker('refresh');
+//};
+
+
 ShowmapCtrl.createUrl = function()
 {
     var url = "/getdata";
     var conditions = [];
     var selectedNations = getSelectedCombo(ShowmapCtrl.cmbSelectNations);
-    var selectedTags = getSelectedCombo(ShowmapCtrl.cmbSelectTag);
+    var selectedTags = getSelectedCombo(ShowmapCtrl.cmbSelectTags);
     var values = ShowmapCtrl.sliderTimer.dateRangeSlider("values");
 
     console.log("CONDIZIONI: ");
@@ -302,13 +338,15 @@ ShowmapCtrl.getRegions = function()
 
     var imgFilter = $("#img-filter");
     var cmdFilter = $("#cmdFilter");
+
     $.ajax({
         type: "get",
         crossDomain: true,
         dataType: "json",
-        url: "/regions/regions?nations=" + ShowmapCtrl.nations.join(","),
+        url: "/regions/regions?nations=" + ShowmapCtrl.nations.join(",") + "&tags=" + ShowmapCtrl.tags.join(","),
         success: function (data) {
             ShowmapCtrl.regions = data;
+            ShowmapCtrl.tags = data.tags;
             refreshBoundaries();
             $(".spinner-regions").hide();
             $('#chk_boundaries').removeAttr("disabled");
@@ -375,7 +413,7 @@ var showHeatmap = function ()
     spinnerHeatmap.hide();
 };
 
-var showMarkerCluster = function()
+function showMarkerCluster()
 {
     console.log("CALL: showMarkerCluster");
 
@@ -388,7 +426,7 @@ var showMarkerCluster = function()
     setTimeout(_showMarkerCluster, 10);
 };
 
-var _showMarkerCluster = function()
+function _showMarkerCluster()
 {
     console.log("CALL: _showMarkerCluster");
 
@@ -405,7 +443,7 @@ var _showMarkerCluster = function()
     spinnerCluster.hide();
 };
 
-var showBoundaries = function ()
+function showBoundaries()
 {
     console.log("CALL: showBoundaries");
 
@@ -436,7 +474,7 @@ var showBoundaries = function ()
     spinnerBoundaries.hide();
 };
 
-insertLegend = function()
+function insertLegend()
 {
     console.log("CALL: insertLegend");
 
@@ -450,7 +488,7 @@ insertLegend = function()
                 grades = [0, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8],
                 labels = [],
                 from, to;
-            labels.push('<label style="margin: 0px; margin-bottom: 10px; text-align: center"><b>Percentage of<br>total tweets</b></label>');
+            labels.push('<label style="margin: 0px; margin-bottom: 10px; text-align: center"><b>Percentage of<br>total points</b></label>');
             for (var i = 0; i < grades.length; i++) {
                 from = grades[i];
                 to = grades[i + 1];
@@ -547,7 +585,7 @@ function  _click_feature(e)
     var counter = e.target.feature.properties.counter;
 
     var pop = '<div class="popup">' +
-                '<h3 class="title-popup">' +
+                '<h3 class="title-popup" style="min-width: 100px">' +
                     e.target.feature.properties.NAME_1 +
                 '</h3>';
 
@@ -718,7 +756,7 @@ function refreshData()
         setData_MarkerCluster( null );
 }
 
-var addOptionValue = function ( combo , value, isSpecial )
+function addOptionValue( combo , value, isSpecial )
 {
     var o = new Option(value, value);
     var jqo = $(o);
@@ -735,16 +773,3 @@ var addOptionValue = function ( combo , value, isSpecial )
     }
 
 };
-
-function tmpfn()
-{
-    var o = ShowmapCtrl.cmbSelectNations.find('option[value="Italy"]');
-    $(o).attr("disabled", "disabled");
-    ShowmapCtrl.cmbSelectNations.selectpicker('refresh');
-
-    return;
-};
-
-
-
-
