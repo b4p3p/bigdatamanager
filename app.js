@@ -147,11 +147,13 @@ var router_vocabulary = express.Router();
 var router_project = express.Router();
 var router_view = express.Router();
 var router_regions = express.Router();
+var router_users = express.Router();
 
 app.use('/vocabulary', router_vocabulary);
 app.use('/project', router_project);
 app.use('/view', router_view);
 app.use('/regions', router_regions);
+app.use('/users', router_users);
 
 require('./routes/router')(app);
 require('./routes/database_router')(app);
@@ -161,6 +163,7 @@ require('./routes/regions_router')(router_regions, app);
 require("./routes/vocabulary")(router_vocabulary);
 require('./routes/project_router')(router_project, app);
 require('./routes/view_router')(router_view);
+require('./routes/users_router')(router_users);
 
 /********************************
  *** END ROUTER

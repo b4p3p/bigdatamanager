@@ -157,7 +157,6 @@ Regions.importFromFile = function (fileNames, callback)
 
     });
 
-
 };
 
 /**
@@ -211,7 +210,7 @@ Regions.getLightRegions = function (callback)
 };
 
 /**
- * @param callback - fn({Err},{Data[]})
+ * @param callback  - fn({Err},{Data[]})
  */
 Regions.getLightNations = function (callback)
 {
@@ -296,9 +295,8 @@ Regions.getLightNations = function (callback)
 };
 
 /**
- *
- * @param region - {String}
- * @param callback - fn({Err},{Data[]})
+ * @param region    - {String}
+ * @param callback  - fn({Err},{Data[]})
  */
 Regions.removeNation = function(nation, callback)
 {
@@ -608,164 +606,4 @@ Regions.getRegions = function(projectName, arg_nations, arg_tags,  callback) {
     //});
 };
 
-
 module.exports = Regions;
-
-
-//    regions.find({},{"geometry":1, "properties.NAME_0":1, "properties.NAME_1":1}).forEach(function (region) {
-//
-//        datas.aggregate(
-//            {"$match":{loc: { $geoWithin: { $geometry: region.geometry } }}},
-//            {"$group":{"_id":"$region", "sumTag":{"$sum":1}}},
-//            {"$project": {
-//                _id: 0 ,
-//                nation: { $literal: region.properties.NAME_0 } ,
-//                nameRegion: { $literal: region.properties.NAME_1 } ,
-//                sumTag: "$sumTag",
-//                sumTot: "$sumTot",
-//                tag: "$_id"
-//            }},
-//            function(err, result)
-//            {
-//
-//                console.log("ciao");
-//
-//                //var cont = 0;
-//                //
-//                //if(result!=null)
-//                //    result.forEach(function(obj){
-//                //        region.properties.counter[obj._id] = obj.sum;
-//                //        cont += obj.sum
-//                //    });
-//                //
-//                //if ( cont > max )  max = cont;
-//                //
-//                //region.properties.sum = cont;
-//                //region.properties.avg = 1;          //TODO calcolare la media
-//                //ris.push(region);
-//                //
-//                //waterfall(null);
-//
-//            }
-//        );
-//    });
-//
-//});
-
-//db.regions.find({},{"geometry":1}).forEach(function (doc) {
-//    print(doc.geometry);
-//});
-//
-//db.regions.aggregate({
-//    $project :
-//    {
-//        nation: "$properties.NAME_0",
-//        region: "$properties.NAME_1",
-//        sum: "$properties.sum"
-//    }
-//});
-
-
-
-
-/**
- * @param file
- * @param cb {Error}
- */
-//function saveFile(file, cb) {
-//
-//    console.log("CALL saveFile " + file.path);
-//
-//    var path = file.path;
-//
-//    async.waterfall([
-//        function (callback) {
-//            console.log("CALL: read file");
-//
-//            fs.readFile(path, 'utf8',
-//
-//                function (err, data) {
-//                    if (err) {
-//                        console.error("ERROR: fs.readFile");
-//                        console.error(JSON.stringify(err));
-//                        callback( {status: 100, message: err.toString() });
-//                    }
-//                    else {
-//                        callback(null, data);
-//                    }
-//                }
-//            );
-//        },
-//        function (data, callback)
-//        {
-//            console.log("CALL: saveFile");
-//
-//            var nationJson = jsonlint.parse(data.toString());
-//
-//            async.each( nationJson.features,
-//
-//                function(features, cb) {
-//
-//                    MongoClient.connect(url, function (err, db) {
-//
-//                        var regionsCollection = db.collection('regions');
-//                        regionsCollection.update(
-//                            {'properties.NAME_1': features.properties.NAME_1},
-//                            features,
-//                            {upsert: true},
-//                            function (err, result) {
-//                                console.log(" regione: " + features.properties.NAME_1);
-//                                db.close();
-//                                if (err) {
-//                                    console.error("ERROR: saveRegion.insert");
-//                                    console.error(JSON.stringify(err));
-//                                    cb({status: 100, message: err.toString()});
-//                                }
-//                                else
-//                                    cb(null);
-//                            });
-//                    });
-//                },
-//                function (err)
-//                {
-//                    if (err) {
-//                        console.error("ERROR EACH saveJson ");
-//                        console.error("  " + JSON.stringify(err));
-//                    } else {
-//                        console.log("END EACH saveJson");
-//                    }
-//                    callback(err);
-//                }
-//            );
-//        }
-//    ], function (err)
-//    {
-//        if (err) {
-//            console.error("WATERFALL ERROR: saveFile");
-//            console.error("  " + JSON.stringify(err));
-//        } else {
-//            console.log("END WATERFALL");
-//        }
-//
-//        cb(err)
-//    });
-//}
-
-
-//var regionsCollection = db.collection('regions');
-//regionsCollection.update(
-//    {'properties.NAME_1': features.properties.NAME_1},
-//    features,
-//    {upsert: true},
-//    function (err, result) {
-//        console.log(" regione: " + features.properties.NAME_1);
-//        db.close();
-//        if (err) {
-//            console.error("ERROR: saveRegion.insert");
-//            console.error(JSON.stringify(err));
-//            cb({status: 100, message: err.toString()});
-//        }
-//        else
-//            cb(null);
-//    }
-//);
