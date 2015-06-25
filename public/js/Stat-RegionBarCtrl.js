@@ -115,7 +115,7 @@ RegionBarCtrl = {
             type: "get",
             crossDomain: true,
             dataType: "json",
-            url: "/getregions",
+            url: "/regions/regions",
             success: function (data) {
                 RegionBarCtrl.regions = data;
 
