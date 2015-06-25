@@ -164,7 +164,6 @@ Regions.importFromFile = function (fileNames, callback)
  */
 Regions.getLightRegions = function (callback)
 {
-
     MongoClient.connect(url, function (err, db) {
 
         var ris = [];

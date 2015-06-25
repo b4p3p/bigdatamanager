@@ -1,1 +1,42 @@
+<script src="/public/js/DateUtil.js"></script>
+
 <h4>Users</h4>
+
+<table id="table-nations" data-toggle="table"
+       data-url="/users/users"
+       data-cache="false" data-pagination="true"
+       data-sort-name="name" data-sort-order="desc"
+       data-search="true">
+   <thead>
+   <tr>
+      <th data-sortable="true" data-field="username">
+         Username
+      </th>
+      <th data-sortable="true" data-field="firstName">
+         First Name
+      </th>
+      <th data-sortable="true" data-field="lastName">
+         Last Name
+      </th>
+      <th data-sortable="true" data-field="created" data-formatter="toStringDate">
+         Created
+      </th>
+      <th data-sortable="true" data-field="lastLogin">
+         Last login
+      </th>
+      <th data-width="50">
+         Delete users
+      </th>
+   </tr>
+   </thead>
+</table>
+
+<script>
+
+   function toStringDate(value, obj, index)
+   {
+      var date = new Date(value);
+      return date.toStringDate();
+   }
+
+</script>

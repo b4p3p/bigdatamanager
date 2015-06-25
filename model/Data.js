@@ -194,6 +194,7 @@ Data.importFromFile = function (type, file, projectName, cb_ris)
  * @param {function(ERROR, Array)} callback - The callback that handles the response.
  */
 Data.loadData = function (projectName, callback) {
+
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var DataModel = connection.model(Data.MODEL_NAME, Data.DATA_SCHEMA);
 
@@ -224,6 +225,47 @@ Data.loadTags = function (projectName, callback) {
             else
                 callback(null, array);
         });
+    });
+};
+
+Data.getUsers = function(projectName, par, callback){
+
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+    var datas = connection.model(Data.MODEL_NAME, Data.DATA_SCHEMA);
+    if(!par) par = {};
+
+    //sort=name&order=desc&limit=10&offset=0&_=1435244766146
+
+    var query = datas.aggregate()
+        .match({ projectName: projectName})
+        .group({
+            "_id": {  u:"$user", t:"$tag" } ,
+            "subtotal": {"$sum": 1} })
+        .group({
+            _id:"$_id.u",
+            counter:{ $push:{tag:"$_id.t", subtotal:"$subtotal"} },
+            sum:{ $sum:"$subtotal"}})
+        .project({
+            _id:0,
+            "user":"$_id",
+            counter:1,
+            sum: 1});
+
+
+    // ordinamento di default
+    if( !par.sort ){ par.sort = "sum"; par.order = "desc"; }
+
+    var sort = par.sort;
+    if(par.order)
+        sort = par.order == "desc" ? "-" + sort : sort;
+    query.sort(sort);
+
+    if( par.limit )
+        query.limit( parseInt(par.limit) );
+
+    query.exec( function(err, docs){
+            connection.close();
+            callback(err, docs);
     });
 };
 

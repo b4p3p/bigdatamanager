@@ -61,19 +61,8 @@ function setArgIndex(userProject, projectName, page, error)
 
 module.exports = function (app) {
 
-    //var request;
-    //var response;
-
     app.get('/', function (req, res) {
-        res.redirect('/login');
-    });
-
-    /* LOGIN */
-
-    app.get('/login', function (req, res)
-    {
-        var message = { error:false, message: '' };
-        res.render('../views/pages/login.ejs', message);
+        res.redirect('/view/login');
     });
 
     app.post('/login', function (req, res)
@@ -93,7 +82,7 @@ module.exports = function (app) {
 
         User = require('../model/User');
 
-        User.getUserPsw(userProject, password, function(data)
+        User.getUserPsw( userProject, password, function(data)
         {
             message.error = true;
             message.message = "User not found";
@@ -112,64 +101,6 @@ module.exports = function (app) {
 
     });
 
-    /* REGISTER */
-
-    app.get('/register', function (req, res)
-    {
-        var message = { error:false , message: '' };
-        res.render('../views/pages/register.ejs', message);
-    });
-
-    app.post('/register', function (req, res)
-    {
-
-        //var username = req.body.username;
-        //var password = req.body.password;
-        //var name = req.body.name;
-        //var lastname = req.body.lastname;
-
-        User = require("../model/User");
-
-        var newUser = new User(req.body);
-        User.save( newUser,
-            function(result, message)
-            {
-                var arg = { error:false, message: '' };
-
-                if ( result >= 0 )
-                    res.redirect('/login');
-                else
-                {
-                    arg.message = message;
-                    arg.error = true;
-                    res.render('../views/pages/register.ejs', arg);
-                }
-            }
-        );
-    });
-
-    /* INDEX */
-
-    //app.get('/index', function (req, res)
-    //{
-    //
-    //    var arg = extend({}, ARG_INDEX);
-    //
-    //    var sess = req.session;
-    //    var userProject = sess.userProject;
-    //    var projectName = sess.projectName;
-    //
-    //    //TODO se non si dispone del project, redirect alla pagina dei progetti
-    //
-    //    arg.userProject = userProject;
-    //    arg.projectName = projectName;
-    //    arg.page = PAGE.HOME;
-    //
-    //    res.render('../views/pages/index.ejs', arg);
-    //});
-
-    /* INDEX - PAGES */
-
     app.get('/home', function (req, res)
     {
 
@@ -184,10 +115,6 @@ module.exports = function (app) {
         res.render('../views/pages/index.ejs', arg );
 
     });
-
-    /* DATABASE - PAGES */
-
-
 
     function sendProjectError(request, response, message, status)
     {

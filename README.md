@@ -3,6 +3,7 @@
 * Indexes
 
 ```
+db.users.createIndex( { username: 1 }, { unique: true } )
 db.datas.createIndex( { projectNames: 1, id: 1 }, { unique: true } )
 db.datas.createIndex( {text: "text"} );
 db.projects.createIndex( { projectNames: 1, userProject: 1 }, { unique: true } )

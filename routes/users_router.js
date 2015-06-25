@@ -18,5 +18,53 @@ module.exports = function (router, app) {
         });
     });
 
+    router.post('/adduser', function (req, res)
+    {
+        var obj = {
+            username : req.body.username,
+            password : req.body.password,
+            firstName : req.body.firstName,
+            lastName : req.body.lastName,
+            created : new Date()
+        };
+
+        Users.addUser(obj, function(err){
+
+            if(err)
+            {
+                var arg = {error: true};
+                if(err.code == 11000)
+                    arg.message = "Username already exists";
+                else
+                    arg.message = err.message;
+
+                res.render('../views/pages/register.ejs', arg );
+            }
+            else
+                res.redirect('/views/login');
+        })
+
+    });
+
+    //router.post('/register', function (req, res)
+    //{
+    //    var newUser = new User(obj);
+    //    User.save( newUser,
+    //        function(result, message)
+    //        {
+    //            var arg = { error:false, message: '' };
+    //
+    //            if ( result >= 0 )
+    //                res.redirect('/login');
+    //            else
+    //            {
+    //                arg.message = message;
+    //                arg.error = true;
+    //                res.render('../views/pages/register.ejs', arg);
+    //            }
+    //        }
+    //    );
+    //});
+
 };
 
