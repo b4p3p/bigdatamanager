@@ -105,7 +105,8 @@ Data.importFromFiles = function (type, fileNames, projectName, cb_ris) {
  * @param projectName {String}
  * @param cb_ris - callback({Error},{Result})
  */
-Data.importFromFile = function (type, file, projectName, cb_ris) {
+Data.importFromFile = function (type, file, projectName, cb_ris)
+{
 
     async.waterfall([
             // 1) leggo il file
@@ -226,7 +227,7 @@ Data.loadTags = function (projectName, callback) {
     });
 };
 
-/**ù
+/**
  *
  * @param arrayData
  * @param projectName

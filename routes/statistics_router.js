@@ -40,6 +40,8 @@ function getFilter(req)
 {
     var ris = {};
 
+    ris.projectName = {projectName:'oim'};
+
     if( req.query.nations != null )
         ris.nation = {$in: req.query.nations.split(",")};
 

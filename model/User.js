@@ -11,7 +11,7 @@ const USER_SCHEMA = new mongoose.Schema({
     password: String,
     name: String,
     lastName: String
-});
+}, {strict: false});
 
 User.prototype.data = {};    //json
 
@@ -69,7 +69,6 @@ User.getUser = function (username, callback)
 User.getUserPsw = function (username, password , callback)
 {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
-
     var Users = connection.model(MODEL_NAME, USER_SCHEMA);
 
     Users.findOne({username: username, password:password }, function (err, doc)
@@ -78,6 +77,23 @@ User.getUserPsw = function (username, password , callback)
         console.log("CALL getUsers -> findOne");
         callback(doc);
         connection.close();
+    });
+};
+
+/**
+ *
+ * @param callback  - fn({Error}, {Users})
+ */
+User.getUsers = function(callback){
+
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+    var Users = connection.model(MODEL_NAME, USER_SCHEMA);
+
+    Users.find({}, function(err, data){
+
+        connection.close();
+        callback(err, data);
+
     });
 };
 
