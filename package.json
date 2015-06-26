@@ -42,7 +42,6 @@
     "synchronize": ">=0.9.11",
     "request":">=2.58.0",
     "underscore": ">=1.8.3",
-    "detect-character-encoding":">=0.1.0",
     "iconv-lite":">=0.4.10"
   }
 }
