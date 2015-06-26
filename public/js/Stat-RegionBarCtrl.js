@@ -61,7 +61,7 @@ RegionBarCtrl = {
         this.getTags();
     },
 
-   getDate:function ()
+    getDate:function ()
     {
         $.ajax({
             type: "get",
@@ -105,8 +105,6 @@ RegionBarCtrl = {
             this.sliderTimer.dateRangeSlider({
             enabled: false
         });
-
-
     },
 
     getRegions:function()

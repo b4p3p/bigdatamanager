@@ -2,6 +2,9 @@
 var ConstantsRouter = require('./constants_router');
 var MongoClient = require('mongodb').MongoClient;
 var async = require("async");
+var mongoose = require('mongoose');
+var Datas = require('../model/Data');
+var Summary = require('../model/Summary');
 
 var databaseError = function(status, message, projectName)
 {
@@ -39,7 +42,8 @@ module.exports = function (app) {
 
     });
 
-    app.post('/database', function (req, res) {
+    app.post('/database', function (req, res)
+    {
         // Controlla che tutti i file siano stati upload-ati
         if (app.isUploadDone() == false) return;
 
@@ -59,11 +63,26 @@ module.exports = function (app) {
         );
     });
 
+
+    app.get('/synchronize', function (req, res)
+    {
+        var projectName = req.session.projectName || req.query.projectName;
+
+        console.log("CALL: /synchronize of %s", projectName);
+
+        if(!projectName)
+            res.json(result);
+        else
+            Summary.sync(projectName, function(err, result){
+                res.json(result);
+            });
+    });
+
     /**
      *  Sincronizza i dati con le regioni:
      *   - imposta la regione e la nazione ai dati
      */
-    app.get('/synchronize', function (req, res)
+    app.get('/synchronize_bak', function (req, res)
     {
         var _db = null;
         var _datas = null;

@@ -399,7 +399,7 @@ var ProjectCtrl =
             type: "POST",
             crossDomain:true,
             dataType: "json",
-            url: "http://localhost:8080/project/setproject",
+            url: "/project/setproject",
             data: { projectName: projectName } ,
             success: function(msg)
             {

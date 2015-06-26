@@ -65,8 +65,19 @@ module.exports = function (app) {
         res.redirect('/view/login');
     });
 
+    app.get('/guest', function (req, res)
+    {
+        console.log("CALL: /guest");
+        req.session.isGuest = true;
+        req.session.username = "";
+        res.redirect("/home");
+
+    });
+
     app.post('/login', function (req, res)
     {
+        console.log("CALL: login");
+
         var userProject = req.body.userProject;
         var password = req.body.password;
         var message = { error:false, message: '' };

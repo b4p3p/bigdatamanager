@@ -8,6 +8,9 @@ var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://localhost:27017/oim';
 var _ = require("underscore");
 
+var detectCharacterEncoding = require('detect-character-encoding');
+var iconvlite = require('iconv-lite');
+
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var Any = new mongoose.Schema({ any: Schema.Types.Mixed });
@@ -63,9 +66,15 @@ Regions.importFromFile = function (fileNames, callback)
 
                             console.log("CALL: read file");
 
-                            fs.readFile(path , "utf-8",
+                            // "utf-8",
+
+                            fs.readFile(path ,
 
                                 function (err, data) {
+
+                                    var charsetMatch = detectCharacterEncoding(data);
+                                    data = iconvlite.decode(data, charsetMatch.encoding);
+
                                     if (err) {
                                         console.error("ERROR: fs.readFile");
                                         console.error(JSON.stringify(err));
@@ -157,55 +166,6 @@ Regions.importFromFile = function (fileNames, callback)
 
     });
 
-};
-
-/**
- * @param callback - fn({Err},{Data[]})
- */
-Regions.getLightRegions = function (callback)
-{
-    MongoClient.connect(url, function (err, db) {
-
-        var ris = [];
-        var regions = db.collection('regions');
-        var datas = db.collection('datas');
-        var cont = 0;
-
-        regions.find(
-            {},
-            {"geometry": 1, "properties.NAME_0": 1, "properties.NAME_1": 1}
-        ).each (
-            function (err, region) {
-
-                if(region == null) return;
-
-                cont ++;
-
-                datas.aggregate(
-                {"$match": {loc: {$geoWithin: {$geometry: region.geometry}}}},
-                {"$group": {"_id": "$region", "sum": {"$sum": 1}}},
-                {
-                    "$project": {
-                        _id: 0,
-                        nation: {$literal: region.properties.NAME_0},
-                        region: {$literal: region.properties.NAME_1},
-                        sum: "$sum"
-                    }
-                },
-                function (err, doc) {
-
-                    cont--;
-                    console.log(doc[0].nation + " " + doc[0].region + " " + doc[0].sum);
-                    ris.push(doc[0]);
-
-                    if ( cont == 0)
-                    {
-                        callback(null, ris);
-                    }
-                }
-            )}
-        )
-    });
 };
 
 /**
@@ -348,8 +308,8 @@ Regions.removeNation = function(nation, callback)
  *
  * @param callback
  */
-Regions.getRegions = function(projectName, arg_nations, arg_tags,  callback) {
-
+Regions.getRegions = function(projectName, arg_nations, arg_tags, isLight, callback)
+{
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var Regions = connection.model("regions", Any);
     var Datas = connection.model("datas", Any);
@@ -384,24 +344,31 @@ Regions.getRegions = function(projectName, arg_nations, arg_tags,  callback) {
 
                     for(var i in regions)
                     {
-                        var region = regions[i]._doc;
-                        ris.push(region);
-                        dict[region._id.id] = i;
+                        var nation = regions[i]._doc.properties.NAME_0;
+                        var region = regions[i]._doc.properties.NAME_1;
+                        var geometry = regions[i]._doc.geometry;
+                        var id = regions[i]._doc._id.id;
 
-                        //{$geoWithin: {$geometry: region.geometry} };
-                        //{tag: { $in: arg_tags } };
+                        delete regions[i]._doc._id;
 
-                        //var cond = [];
-                        //cond.push ( {$geoWithin: {$geometry: region.geometry} } );
-                        //cond.push ( {tag: { $in: arg_tags } } );
+                        if(isLight) {
+                            //delete regions[i]._doc._id;
+                            delete regions[i]._doc.properties;
+                            delete regions[i]._doc.type;
+                            delete regions[i]._doc.geometry;
+                            regions[i]._doc.properties = {};
+                            regions[i]._doc.properties.NAME_0 = nation;
+                            regions[i]._doc.properties.NAME_1 = region;
+                        }
 
-                        //queryTags["loc"] = {$geoWithin: {$geometry: region.geometry} };
+                        ris.push(regions[i]._doc);
+                        dict[id] = i;
 
                         Datas.aggregate(
 
                             { "$match": {
                                 projectName: projectName,
-                                loc: { $geoWithin: { $geometry: region.geometry} } }
+                                loc: { $geoWithin: { $geometry: geometry } } }
                             },
 
                             {"$group": {
@@ -415,21 +382,21 @@ Regions.getRegions = function(projectName, arg_nations, arg_tags,  callback) {
                                 counter:{ $push:{tag:"$_id.t", subtotal:"$subtotal"} },
                                 sum:{ $sum:"$subtotal"}}},
 
-                            {"$project": {
+                            { "$project": {
                                 _id: 1,
+                                geometry: 1,
                                 counter: 1,
-                                nation: { $literal: region.properties.NAME_0 },
-                                region: { $literal: region.properties.NAME_1 },
-                                IDregion: { $literal: region._id.id },
-                                sum: "$sum" }},
-                            function(err, risGroup){
+                                nation: { $literal: nation },
+                                region: { $literal: region },
+                                IDregion: { $literal: id },
+                                sum: "$sum" } },
 
-                                //if(cont==0)
-                                //    console.log("##(1)##  group by tag ####");
+                            function(err, risGroup) {
 
                                 cont++;
 
-                                if(risGroup && risGroup[0]){
+                                if(risGroup && risGroup[0])
+                                {
                                     //console.log("%d) %s - %s - %d",cont, risGroup[0].nation, risGroup[0].region, risGroup[0].sum);
 
                                     var index = dict[risGroup[0].IDregion];
@@ -443,7 +410,8 @@ Regions.getRegions = function(projectName, arg_nations, arg_tags,  callback) {
 
                                     ris[index].properties.counter = counter;
                                 }
-                                else{
+                                else
+                                {
                                     //console.log("%d) ND", cont);
                                 }
 
@@ -606,3 +574,64 @@ Regions.getRegions = function(projectName, arg_nations, arg_tags,  callback) {
 };
 
 module.exports = Regions;
+
+///**
+// * @param callback - fn({Err},{Data[]})
+// */
+//Regions.getLightRegions = function (projectName, callback)
+//{
+//    var connection = mongoose.createConnection('mongodb://localhost/oim');
+//    var regions = connection.model("regions", Any);
+//    var datas = connection.model("datas", Any);
+//
+//    var ris = [];
+//    var dict = {};
+//    var cont = 0;
+//
+//    regions.find(
+//        {},
+//        {"_id":1, geometry : 1, "properties.NAME_0": 1, "properties.NAME_1": 1},
+//        function(err, res_region){
+//
+//            async.each(res_region,
+//
+//                function(region, next){
+//
+//                    dict[region._doc._id.id] = cont; cont++;
+//
+//                    datas.aggregate (
+//
+//                        {"$match": {
+//                            loc: {$geoWithin: {$geometry: region._doc.geometry}},
+//                            projectName: projectName }},
+//
+//                        {"$group": {
+//                            "_id": { t:"$tag", r:"$properties.NAME_0" } ,
+//                            "subtotal": {"$sum": 1}}},
+//
+//                        { "$match": queryTags },
+//
+//                        {"$group": {"_id": "$region", "sum": {"$sum": 1}}},
+//
+//                        {"$project": {
+//                            _id: 0,
+//                            nation: {$literal: region._doc.properties.NAME_0},
+//                            region: {$literal: region._doc.properties.NAME_1},
+//                            sum: "$sum"}
+//                        },
+//                        function (err, doc)
+//                        {
+//                            console.log( doc[0].nation + " " + doc[0].region + " " + doc[0].sum);
+//                            ris.push(doc[0]);
+//                            next(null);
+//                        }
+//                    );
+//                },
+//
+//                function(err){
+//                    callback(null, ris);
+//                }
+//            );
+//        }
+//    );
+//};

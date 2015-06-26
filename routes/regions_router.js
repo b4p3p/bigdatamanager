@@ -10,25 +10,19 @@ var urlencode = require('urlencode');
 
 module.exports = function (router, app) {
 
-    router.get('/regions-light', function (req, res)
-    {
-        Regions.getLightRegions(function(err, data){
-            res.json(data);
-        });
-    });
-
     router.get('/regions', function (req, res)
     {
         var projectName = req.session.projectName;
         var nations = req.query.nations ? req.query.nations.split(',') : [];
         var tags = req.query.tags ? req.query.tags.split(',') : [];
+        var isLight = req.query.light ? true : false;
 
-        Regions.getRegions(projectName, nations, tags,  function(err, data){
+        Regions.getRegions(projectName, nations, tags, isLight, function(err, data){
             res.json(data);
         });
     });
 
-    router.get('/nations-light', function (req, res)
+    router.get('/nations', function (req, res)
     {
         Regions.getLightNations( function(err, data) {
             res.json(data);

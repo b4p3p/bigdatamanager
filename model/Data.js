@@ -7,6 +7,7 @@ var Schema = mongoose.Schema;
 var converter = require('../controller/converterCtrl');
 var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://localhost:27017/oim';
+var detectCharacterEncoding = require('detect-character-encoding');
 
 //var ERROR = function() {
 //    return {
@@ -107,14 +108,13 @@ Data.importFromFiles = function (type, fileNames, projectName, cb_ris) {
  */
 Data.importFromFile = function (type, file, projectName, cb_ris)
 {
-
     async.waterfall([
             // 1) leggo il file
             function (cb_wf) {
 
                 console.log("  1) leggo il file " + file);
 
-                fs.readFile(file, 'utf8', function (err, data) {
+                fs.readFile(file,'utf8',  function (err, data) {
 
                     if (err) {
                         cb_wf(err);
@@ -215,7 +215,8 @@ Data.loadData = function (projectName, callback) {
  * @param projectName {String}
  * @param callback {function(ERROR, Array)} callback - The callback that handles the response
  */
-Data.loadTags = function (projectName, callback) {
+Data.loadTags = function (projectName, callback)
+{
     MongoClient.connect(url, function (err, db) {
         var datas = db.collection('datas');
         datas.distinct("tag", {projectName: projectName}, function (err, array) {
@@ -228,7 +229,8 @@ Data.loadTags = function (projectName, callback) {
     });
 };
 
-Data.getUsers = function(projectName, par, callback){
+Data.getUsers = function(projectName, par, callback)
+{
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var datas = connection.model(Data.MODEL_NAME, Data.DATA_SCHEMA);

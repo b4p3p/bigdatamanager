@@ -35,14 +35,6 @@ ConstantsRouter.argIndex = function(req, page, error)
 
     return ris;
 
-    //return {
-    //    userProject: userProject ,
-    //    projectName: projectName,
-    //    page: page,
-    //    tab: '',
-    //    error: {},
-    //    content: {}
-    //}
 };
 
 ConstantsRouter.error = function(status, message )

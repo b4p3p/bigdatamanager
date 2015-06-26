@@ -47,15 +47,38 @@
 
             <hr class="separator">
 
-            <button type="submit" class="btn btn-success btn-block" >Guest account</button>
-
         </form>
 
-
+        <button class="btn btn-success btn-block" onclick="guestClick()" >Guest account</button>
 
     </div>
 
 </div>
 
 </body>
+
+<script>
+    function guestClick() {
+
+        window.location = "/guest";
+
+//        $.ajax({
+//            type: "POST",
+//            crossDomain:true,
+//            dataType: "json",
+//            url: "/login",
+//            data: { isGuest: true } ,
+//            success: function(msg)
+//            {
+//                console.log("SUCCESS: " + JSON.stringify(msg));
+//                if(msg.status == 0) location.replace("/home");
+//            },
+//            error: function(xhr, status, error)
+//            {
+//                console.error("ERR: openProject_Click: " + status + " " + xhr.status + "\n" + error);
+//            }
+//        });
+    }
+</script>
+
 </html>
