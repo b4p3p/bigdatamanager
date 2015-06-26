@@ -8,7 +8,6 @@ var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://localhost:27017/oim';
 var _ = require("underscore");
 
-var detectCharacterEncoding = require('detect-character-encoding');
 var iconvlite = require('iconv-lite');
 
 var mongoose = require('mongoose');
@@ -72,8 +71,7 @@ Regions.importFromFile = function (fileNames, callback)
 
                                 function (err, data) {
 
-                                    var charsetMatch = detectCharacterEncoding(data);
-                                    data = iconvlite.decode(data, charsetMatch.encoding);
+                                    data = iconvlite.decode(data, "ISO-8859-1");
 
                                     if (err) {
                                         console.error("ERROR: fs.readFile");

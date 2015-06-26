@@ -7,7 +7,6 @@ var Schema = mongoose.Schema;
 var converter = require('../controller/converterCtrl');
 var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://localhost:27017/oim';
-var detectCharacterEncoding = require('detect-character-encoding');
 
 //var ERROR = function() {
 //    return {
