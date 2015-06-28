@@ -26,21 +26,21 @@ var statisticsError = function(status, message)
     }
 };
 
-var _projectName = null;
-var setProjectName = function(req)
+var _project = null;
+var setproject = function(req)
 {
-    _projectName = req.session.projectName;
+    _project = req.session.project;
 
     //TODO debug
-    if(_projectName == null)
-        _projectName = "oim";
+    if(_project == null)
+        _project = "oim";
 };
 
 function getFilter(req)
 {
     var ris = {};
 
-    ris.projectName = req.session.projectName;
+    ris.project = req.session.project;
 
     if( req.query.nations != null )
         ris.nation = {$in: req.query.nations.split(",")};
@@ -62,7 +62,7 @@ module.exports = function (app) {
     app.get('/getdata', function (req, res)
     {
         try {
-            if (req.session.projectName == null)
+            if (req.session.project == null)
             {
                 res.json({});
             }
@@ -206,42 +206,22 @@ module.exports = function (app) {
 
     app.get('/gettags', function (req, res)
     {
-        var projectName = req.session.projectName;
+        var project = req.session.project;
 
         //TODO debug
-        if(req.session.projectName == null)
-            projectName = "oim";
+        if(req.session.project == null)
+            project = "oim";
 
-        if(projectName == null)
+        if(project == null)
             res.json({status:1,error:"you MUST select a project first"});
         else
         {
-            Data.loadTags(projectName, function(err, array){
+            Data.loadTags(project, function(err, array){
                 if(err)
                     res.json(JSON.stringify(err));
                 else
                     res.json(array);
             });
-        }
-    });
-
-    app.get('/showmap', function (req, res)
-    {
-        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.STAT_MAP);
-
-        if ( req.session.projectName != null )
-        {
-            //arg.content = argContentStatistics(data);
-            res.render('../views/pages/index.ejs', arg );
-        }
-        else
-        {
-            console.error("PAGE: showmap: nessun progetto selezionato");
-
-            arg.content =   argContentStatistics();
-            arg.error =     statisticsError(1, "No project selected");
-
-            res.render('../views/pages/index.ejs', arg );
         }
     });
 
@@ -302,30 +282,6 @@ module.exports = function (app) {
         });
     });
 
-    app.get('/showregionsbar', function (req, res)
-    {
-        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.STAT_REGIONS_BAR);
-        res.render('../views/pages/index.ejs', arg );
-    });
-
-    app.get('/showregionsradar', function (req, res)
-    {
-        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.STAT_REGIONS_RADAR);
-        res.render('../views/pages/index.ejs', arg );
-    });
-
-    app.get('/showtimeline', function (req, res)
-    {
-        var arg = ConstantsRouter.argIndex(req,ConstantsRouter.PAGE.STAT_TIMELINE);
-        res.render('../views/pages/index.ejs', arg );
-    });
-
-    app.get('/showtag', function (req, res)
-    {
-        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.STAT_TAG);
-        res.render('../views/pages/index.ejs', arg );
-    });
-
 };
 
 
@@ -355,7 +311,7 @@ module.exports = function (app) {
 //
 //    console.log(nations);
 //
-//    setProjectName(req);
+//    setproject(req);
 //
 //    async.waterfall(
 //        [
@@ -437,7 +393,7 @@ module.exports = function (app) {
 //            {
 //                region.properties.counter = {};
 //
-//                Data.loadTags(_projectName, function(err, array){
+//                Data.loadTags(_project, function(err, array){
 //
 //                    if(err)
 //                        waterfall(err);

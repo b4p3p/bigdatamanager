@@ -39,7 +39,7 @@ app.use(cookieParser());
  *  Utilizzo dei cookie per le sessioni dell'utente
  */
 
-app.use( session({
+app.use( session( {
     cookieName: 'session',
     secret: 'eg[isfd-8yF9-7w2315df{}+Ijsli;;to8',
     duration: 30 * 60 * 1000,

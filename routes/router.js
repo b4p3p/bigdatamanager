@@ -1,63 +1,8 @@
+"use strict";
+
 var extend = require('util')._extend;
 var ConstantsRouter = require('./constants_router');
 var MongoClient = require('mongodb').MongoClient;
-
-const PAGE = {
-    HOME: "home",
-    PROJECT: "project",
-    DATABASE: "database",
-    STAT_MAP: "stat-map",
-    STAT_REGIONS_BAR: "stat-regions-bar",
-    STAT_REGIONS_RADAR: "stat-regions-radar",
-    STAT_TIMELINE: "stat-timeline",
-    STAT_TAG: "stat-tag"
-};
-
-const TAB = {
-    NEWPROJECT: "newproject",
-    OPENPROJECT: "openproject"
-};
-
-const ERROR = {
-    status: null,
-    message: ''
-};
-
-var Error = function (status, message) {
-    if (!status) status = 1;
-    if (!message) message = 'error';
-    return {
-        status: status,
-        message: message
-    }
-};
-
-const ARG_INDEX = {
-    userProject: '' ,
-    projectName: '',
-    page: '',
-    tab: '',
-    error: ERROR,
-    content: null       //usata per passare il contenuto alla pagina partials (es: ARG_PROJECTS )
-};
-
-const ARG_PROJECT = {
-    projects: ''
-};
-
-function setArgIndex(userProject, projectName, page, error)
-{
-    var arg = extend({}, ARG_INDEX);
-    arg.userProject = userProject;
-    arg.projectName = projectName;
-    arg.page = page;
-    arg.error = error;
-
-    if (page == null) arg.page = PAGE.HOME;
-    if (error == null) arg.error = extend({}, ERROR);
-
-    return arg;
-}
 
 module.exports = function (app) {
 
@@ -68,9 +13,11 @@ module.exports = function (app) {
     app.get('/guest', function (req, res)
     {
         console.log("CALL: /guest");
+
+        req.session.destroy();
         req.session.isGuest = true;
-        req.session.username = "";
-        res.redirect("/home");
+
+        res.redirect("/view/home");
 
     });
 
@@ -78,81 +25,70 @@ module.exports = function (app) {
     {
         console.log("CALL: login");
 
-        var userProject = req.body.userProject;
+        req.session.destroy();
+
+        var username = req.body.username;
         var password = req.body.password;
         var message = { error:false, message: '' };
 
-        request = req;
+        var arg = ConstantsRouter.argIndex(req);
 
-        if ( userProject == "" || password == "" ) {
-            message.error = true;
-            message.message = "Username or password missing";
-            res.render('../views/pages/login.ejs', message);
+        if ( username == "" || password == "" ) {
+            arg.status = ConstantsRouter.status(1, "Username or password missing");
+            res.render('../views/pages/login.ejs', arg);
             return;
         }
 
-        User = require('../model/User');
+        var User = require('../model/User');
 
-        User.getUserPsw( userProject, password, function(data)
+        User.getUserPsw( username, password, function(data)
         {
-            message.error = true;
-            message.message = "User not found";
+            arg.status = ConstantsRouter.status(1, "User not found");
 
             if ( data == null )
-            {
-                res.render('../views/pages/login.ejs', message );
-            }
+                res.render('../views/pages/login.ejs', arg );
+
             else
             {
-                req.session.userProject = userProject;
-                res.redirect('/home');
+                // ### success ###
+
+                req.session.user = username;
+                req.session.isGuest = false;
+                res.redirect('/view/home');
             }
 
         });
 
     });
 
-    app.get('/home', function (req, res)
-    {
 
-        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.HOME);
-        //var sess = req.session;
-
-        arg.userProject = req.session.userProject;
-        arg.projectName = req.session.projectName;
-
-        //arg.page = PAGE.HOME;
-
-        res.render('../views/pages/index.ejs', arg );
-
-    });
-
-    function sendProjectError(request, response, message, status)
-    {
-        console.log("CALL: sendProjectError");
-
-        //restituisco errore
-        var err = extend({}, ERROR);
-        err.message = message;
-        err.status = status;
-
-        var arg = extend({}, ARG_INDEX);
-        arg.error = err;
-        arg.tab = TAB.NEWPROJECT;
-        arg.page = PAGE.PROJECT;
-
-        request.session.arg = arg;
-        response.redirect("/project");
-    }
-
-    function getError(status, msg)
-    {
-        var err = extend({}, ERROR);
-    }
-
-    function getArgProject()
-    {
-        return extend({}, ARG_PROJECT);
-    }
 
 };
+
+//function sendProjectError(request, response, message, status)
+//{
+//    console.log("CALL: sendProjectError");
+//
+//    //restituisco errore
+//    var err = extend({}, ERROR);
+//    err.message = message;
+//    err.status = status;
+//
+//    var arg = extend({}, ARG_INDEX);
+//    arg.error = err;
+//    arg.tab = TAB.NEWPROJECT;
+//    arg.page = PAGE.PROJECT;
+//
+//    request.session.arg = arg;
+//    response.redirect("/project");
+//}
+//
+//function getError(status, msg)
+//{
+//    var err = extend({}, ERROR);
+//}
+//
+//function getArgProject()
+//{
+//    return extend({}, ARG_PROJECT);
+//}

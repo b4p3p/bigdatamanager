@@ -1,10 +1,12 @@
 "use strict";
 
-function progressCaption(value, name){
+function progressCaption(value, name)
+{
     return  value + "% - " + name;
 }
 
-function createProgress(name) {
+function createProgress(name)
+{
 
     var html = '<div class="progress-object"> \
                     <div class="progress"> \
@@ -32,7 +34,8 @@ function createProgress(name) {
 
 }
 
-function operateFormatterTag(value, row, index) {
+function operateFormatterTag(value, row, index)
+{
     return [
         value +
         '<a class="editT ml10" href="javascript:void(0)" title="Edit tag">',
@@ -41,7 +44,8 @@ function operateFormatterTag(value, row, index) {
     ].join(' ');
 }
 
-function operateFormatterVocabulary(value, row, index) {
+function operateFormatterVocabulary(value, row, index)
+{
     return [
         value +
         '<a class="editV ml10" href="javascript:void(0)" title="Edit vocabulary">',
@@ -50,7 +54,8 @@ function operateFormatterVocabulary(value, row, index) {
     ].join(' ');
 }
 
-function operateFormatterDelete(value, row, index) {
+function operateFormatterDelete(value, row, index)
+{
     return [
         '<a class="remove ml10" href="javascript:void(0)" title="Delete">',
         '<i class="glyphicon glyphicon-remove"></i>',
@@ -64,21 +69,23 @@ var ProjectCtrl =
     files: {},
     progress: {},
     username: null,
-    projectName: null,
+    project: null,
     type: "",
 
-    init: function(username, projectName)
+    init: function(username, project)
     {
-        console.log("SET " + username + " " + projectName);
+        console.log("SET " + username + " " + project);
 
         ProjectCtrl.username = username;
-        ProjectCtrl.projectName = projectName;
+        ProjectCtrl.project = project;
         ProjectCtrl.setTableTag();
         ProjectCtrl.$btnFiles = $("#upload_input");
 
         $(document).ready(function() {
 
-            $('#uploadForm').submit( function() {
+            $('#uploadForm').submit(
+                function()
+                {
 
                 $(this).ajaxSubmit({
 
@@ -111,7 +118,8 @@ var ProjectCtrl =
                 // a page refresh - don't forget this
                 return false;
 
-            });
+            }
+            );
 
         });
     },
@@ -261,23 +269,17 @@ var ProjectCtrl =
         });
     },
 
-    loadData : function (content) {
-        var json = JSON.parse(content);
-        var $table = $('#tableProjects');
-        $table.bootstrapTable('load', json);
-    },
-
     /**
      *
-     * @param projectName
+     * @param project
      * @param callback - fn({Data})
      */
     getProject: function(callback)
     {
-        console.log("CALL: getProject - pn=" + ProjectCtrl.projectName);
+        console.log("CALL: getProject - pn=" + ProjectCtrl.project);
         jQuery.ajax({
             type: "GET",
-            url: '/project/getproject?pn=' + ProjectCtrl.projectName,
+            url: '/project/getproject?pn=' + ProjectCtrl.project,
             dataType: 'json',
             async: true,
             success: function (data) {
@@ -312,7 +314,7 @@ var ProjectCtrl =
      *
      * @param value
      * @param row - riga del json passato come parametro
-     *              - row.projectName: nome del progetto
+     *              - row.project: nome del progetto
      *              - row.userProject: utente proprietario del progetto
      * @returns {string} - Html da inserire nella cella
      */
@@ -328,8 +330,8 @@ var ProjectCtrl =
     deleteColumnFormatter : function (value, row) {
         return '<button type="button" class="btn btn-danger btn-delete">' +
             '<span class="glyphicon glyphicon-remove img-delete" aria-hidden="true" ' +
-            'project="' + row.projectName + '"' +
-            'onclick="ProjectCtrl.deleteProject_Click(\'' + row.projectName + '\')"/>' +
+            'project="' + row.project + '"' +
+            'onclick="ProjectCtrl.deleteProject_Click(\'' + row.project + '\')"/>' +
             '</button>';
     },
 
@@ -343,14 +345,14 @@ var ProjectCtrl =
         return d.toStringDate();
     },
 
-    deleteProject_Click : function (projectName) {
+    deleteProject_Click : function (project) {
         bootbox.confirm("Are you sure?", function(result) {
             if(result)
-                ProjectCtrl.deleteProject(projectName);
+                ProjectCtrl.deleteProject(project);
         });
     },
 
-    deleteProject : function(projectName) {
+    deleteProject : function(project) {
         /**
          *      success message: {
          *          status: 0 | >0   0:OK  >0:Error
@@ -363,7 +365,7 @@ var ProjectCtrl =
             crossDomain:true,
             dataType: "json",
             url: "http://localhost:8080/project/delproject",
-            data: { projectName: projectName } ,
+            data: { project: project } ,
             success: function(msg)
             {
                 if(msg.status == 0)
@@ -394,18 +396,19 @@ var ProjectCtrl =
         });
     },
 
-    openProject_Click : function (projectName) {
+    openProject_Click : function (project)
+    {
         $.ajax({
             type: "POST",
             crossDomain:true,
             dataType: "json",
             url: "/project/setproject",
-            data: { projectName: projectName } ,
+            data: { project: project } ,
             success: function(msg)
             {
                 if(msg.status == 200)
                 {
-                    location.replace("/home");
+                    location.replace("/view/home");
                 }
             },
             error: function(xhr, status, error)
@@ -415,10 +418,11 @@ var ProjectCtrl =
         });
     },
 
-    loadEditForm: function(data) {
+    loadEditForm: function(data)
+    {
         console.log("CALL: loadEditForm");
 
-        $("#projectName").val(data.projectName);
+        $("#project").val(data.projectName);
         $("#description").val(data.description);
     },
 

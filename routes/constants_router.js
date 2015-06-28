@@ -11,14 +11,14 @@ var ConstantsRouter = {};
  * @param   error - { status:{Number}, message: {String} }
  * @returns arg
  */
-ConstantsRouter.argIndex = function(req, page, error)
+ConstantsRouter.argIndex = function(req, page)
 {
-    //TODO DEBUG
-    if ( req && req.session )
-    {
-        req.session.projectName = req.session.projectName ? req.session.projectName : "oim";
-        req.session.userProject = req.session.userProject ? req.session.userProject : "oim";
-    }
+    ////TODO DEBUG
+    //if ( req && req.session )
+    //{
+    //    req.session.project = req.session.project ? req.session.project : "oim";
+    //    req.session.user = req.session.user ? req.session.user : "oim";
+    //}
 
     var ris = {};
 
@@ -28,18 +28,26 @@ ConstantsRouter.argIndex = function(req, page, error)
         req.session.arg = null;
     }
 
-    ris.userProject = (req) ? req.session.userProject : "oim";
-    ris.projectName = (req) ? req.session.projectName : "oim";
-    ris.page = page || '';
-    ris.error = { };
+    ris.isGuest     = req.session.isGuest;
+    ris.page        = page || '';
+    ris.status      = { status:0, message: '' };
+    ris.user        = (req) ? req.session.user    : "";
+    ris.project     = (req) ? req.session.project : "";
 
     return ris;
 
 };
 
-ConstantsRouter.error = function(status, message )
+ConstantsRouter.argError = function(status, message)
 {
-    return{
+    var arg = ConstantsRouter.argIndex();
+    arg.status = ConstantsRouter.status(status, message);
+    return arg;
+};
+
+ConstantsRouter.status = function(status, message )
+{
+    return {
         status: status,
         message: message
     }
@@ -48,9 +56,11 @@ ConstantsRouter.error = function(status, message )
 /**
  *  Constanti delle pagine
  */
-ConstantsRouter.PAGE = {
+ConstantsRouter.PAGE =
+{
 
     HOME: "home",
+    PROFILE: "profile",
 
     //PROJECT
     NEW_PROJECT: "new-project",
@@ -72,7 +82,8 @@ ConstantsRouter.PAGE = {
 /**
  *  Tab delle pagine
  */
-ConstantsRouter.TAB = {
+ConstantsRouter.TAB =
+{
     NEWPROJECT: "newproject",
     OPENPROJECT: "openproject"
 };

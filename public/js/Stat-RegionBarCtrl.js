@@ -226,7 +226,7 @@ RegionBarCtrl.getRegions = function()
         type: "get",
         crossDomain: true,
         dataType: "json",
-        url: "regions/regions?light=1",
+        url: "/regions/regions?light=1",
         success: function (data) {
 
             RegionBarCtrl.regionsProject = data;

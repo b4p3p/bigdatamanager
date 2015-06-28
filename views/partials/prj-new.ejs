@@ -59,11 +59,11 @@
 
 <!--enctype="multipart/form-data"-->
 
-<% if (error && error.status > 0) { %>
+<% if (status && status.status > 0) { %>
 <div class="alert alert-danger" role="alert">
     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
     <span class="sr-only">Error:</span>
-    <%= error.message %>
+    <%= status.message %>
 </div>
 <% } %>
 
@@ -78,7 +78,7 @@
       <div class="col-sm-10 col_dx">
          <input type="text" class="form-control" id="nameproject"
                 placeholder="Project Name"
-                name="projectName"
+                name="project"
                 required>
       </div>
    </div>

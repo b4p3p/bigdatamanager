@@ -105,7 +105,7 @@ var Vocabulary = {
         connection = mongoose.createConnection('mongodb://localhost/oim');
         var Data = require("../model/Data");
         var ModelVocabulary = connection.model(MODEL_NAME, VOCABULARY_SCHEMA);
-        var ModelData = connection.model(Data.MODEL_NAME, Data.DATA_SCHEMA);
+        var ModelData = connection.model(Data.MODEL_NAME, Data.SCHEMA);
         var _ = require('underscore');
 
         async.waterfall([

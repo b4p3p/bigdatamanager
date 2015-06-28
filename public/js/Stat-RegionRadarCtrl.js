@@ -44,11 +44,13 @@ RegionRadarCtrl = {
 
     loadData: function()
     {
+        console.log("CALL: loadData");
+
         $.ajax({
             type: "get",
             crossDomain: true,
             dataType: "json",
-            url: "/getregions",
+            url: "/regions/regions",
             success: function (data) {
                 RegionRadarCtrl.regions = data;
                 RegionRadarCtrl.drawRegionsRadar();

@@ -1,7 +1,7 @@
 "use strict";
 
 var mongoose = require('mongoose');
-var connection = mongoose.createConnection('mongodb://localhost/oim');
+//var connection = mongoose.createConnection('mongodb://localhost/oim');
 var url = 'mongodb://localhost:27017/oim';
 var MongoClient = require('mongodb').MongoClient;
 var async = require("async");
@@ -43,24 +43,22 @@ Project.getProject = function (projectName, callback)
     );
 };
 
-Project.getProjects = function(username, callback)
+Project.getProjects = function(callback)
 {
-    var ProjectModel = connection.model(Project.MODEL_NAME, Project.PROJECT_SCHEMA);
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+    var projects = connection.model(Project.MODEL_NAME, Project.PROJECT_SCHEMA);
 
-    ProjectModel.find()
-        .lean()
-        .exec( function(err, docs)
-    {
-        if (err) {
-            callback(null);
-        }
-        else
+    projects.find(
+        {},
         {
-            callback(docs);
+            '_id': 0, projectName: 1, userProject:1,
+            "description" : 1, "dateLastUpdate" : 1, "dateCreation" : 1
+        },
+        function(err, docs){
+            connection.close();
+            callback(err, docs);
         }
-    });
-
-
+    );
 };
 
 /**

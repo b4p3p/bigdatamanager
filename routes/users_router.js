@@ -21,7 +21,7 @@ module.exports = function (router, app) {
     router.post('/adduser', function (req, res)
     {
         var obj = {
-            username : req.body.username,
+            username : req.body.user,
             password : req.body.password,
             firstName : req.body.firstName,
             lastName : req.body.lastName,

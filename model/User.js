@@ -52,8 +52,6 @@ User.getUserPsw = function (username, password , callback)
 
     Users.findOne({username: username, password:password }, function (err, doc)
     {
-        console.log(doc);
-        console.log("CALL getUsers -> findOne");
         callback(doc);
         connection.close();
     });
@@ -63,7 +61,8 @@ User.getUserPsw = function (username, password , callback)
  * Get users
  * @param callback  - fn({Error}, {Users})
  */
-User.getUsers = function(callback) {
+User.getUsers = function(callback)
+{
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var Users = connection.model(MODEL_NAME, USER_SCHEMA);

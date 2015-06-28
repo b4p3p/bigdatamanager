@@ -23,7 +23,7 @@
         <form action="/login" method="post">
             <div class="form-group">
                 <label for="username">Username</label>
-                <input type="text" class="form-control" name="userProject" id="userProject"
+                <input type="text" class="form-control" name="username" id="username"
                        placeholder="Enter username" required>
             </div>
             <div class="form-group">
@@ -32,11 +32,11 @@
                        placeholder="Password" required>
             </div>
 
-            <% if (error) { %>
+            <% if (status.status > 0) { %>
             <div class="alert alert-danger" role="alert">
                 <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                 <span class="sr-only">Error:</span>
-                <%= message %>
+                <%= status.message %>
             </div>
             <% } %>
 
@@ -59,25 +59,7 @@
 
 <script>
     function guestClick() {
-
         window.location = "/guest";
-
-//        $.ajax({
-//            type: "POST",
-//            crossDomain:true,
-//            dataType: "json",
-//            url: "/login",
-//            data: { isGuest: true } ,
-//            success: function(msg)
-//            {
-//                console.log("SUCCESS: " + JSON.stringify(msg));
-//                if(msg.status == 0) location.replace("/home");
-//            },
-//            error: function(xhr, status, error)
-//            {
-//                console.error("ERR: openProject_Click: " + status + " " + xhr.status + "\n" + error);
-//            }
-//        });
     }
 </script>
 

@@ -5,15 +5,15 @@ module.exports = function (router) {
     {
         console.log("GET /vocabulary");
 
-        if(req.session.projectName == null)
+        if(req.session.project == null)
         {
             //TODO debug
-            console.error("req.session.projectName is null: set 'oim'");
-            req.session.projectName = "oim";
+            console.error("req.session.project is null: set 'oim'");
+            req.session.project = "oim";
         }
 
         var Vocabulary = require("../model/Vocabulary");
-        Vocabulary.getTags(req.session.projectName, function(err, docs){
+        Vocabulary.getTags(req.session.project, function(err, docs){
             res.json(docs);
         })
     });
@@ -25,7 +25,7 @@ module.exports = function (router) {
     {
 
         var Vocabulary = require("../model/Vocabulary");
-        Vocabulary.insertTags(req.session.projectName, req.body, function(err)
+        Vocabulary.insertTags(req.session.project, req.body, function(err)
         {
             if(err==null)
                 res.json({status:"ok", error:""});
@@ -40,7 +40,7 @@ module.exports = function (router) {
     router.move('/tag', function (req, res){
 
         var Vocabulary = require("../model/Vocabulary");
-        Vocabulary.renameTag(req.session.projectName, req.body, function(err){
+        Vocabulary.renameTag(req.session.project, req.body, function(err){
             if(err==null)
                 res.json({status:"ok", error:""});
             else
@@ -53,7 +53,7 @@ module.exports = function (router) {
     router.delete('/tag', function (req, res){
 
         var Vocabulary = require("../model/Vocabulary");
-        Vocabulary.deleteTag(req.session.projectName, req.body.tag, function(err){
+        Vocabulary.deleteTag(req.session.project, req.body.tag, function(err){
             if(err==null)
                 res.json({status:"ok", error:""});
             else
@@ -68,7 +68,7 @@ module.exports = function (router) {
     router.put('/words', function (req, res){
 
         var Vocabulary = require("../model/Vocabulary");
-        Vocabulary.renameWords(req.session.projectName, req.body, function(err){
+        Vocabulary.renameWords(req.session.project, req.body, function(err){
             if(err==null)
                 res.json({status:"ok", error:""});
             else
@@ -78,15 +78,15 @@ module.exports = function (router) {
 
     router.get('/refresh', function (req, res){
 
-        if(req.session.projectName == null)
+        if(req.session.project == null)
         {
             //TODO debug
-            console.error("req.session.projectName is null: set 'oim'");
-            req.session.projectName = "oim";
+            console.error("req.session.project is null: set 'oim'");
+            req.session.project = "oim";
         }
 
         var Vocabulary = require("../model/Vocabulary");
-        Vocabulary.refreshCounter(req.session.projectName, function(err, data){
+        Vocabulary.refreshCounter(req.session.project, function(err, data){
             if(err==null)
                 res.json(data);
             else

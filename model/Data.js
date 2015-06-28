@@ -17,7 +17,7 @@ var url = 'mongodb://localhost:27017/oim';
 
 /**
  * Model data
- * @param {DATA_SCHEMA[]} data
+ * @param {SCHEMA[]} data
  * @constructor
  */
 var Data = function (data) {
@@ -26,7 +26,7 @@ var Data = function (data) {
 
 Data.MODEL_NAME = "datas";
 
-Data.DATA_SCHEMA = new Schema(
+Data.SCHEMA = new Schema(
     {
         projectName: {type: String, required: true},
         id: {type: String, required: true},
@@ -46,7 +46,7 @@ Data.DATA_SCHEMA = new Schema(
     },
     { strict: false }
 );
-//Data.DATA_SCHEMA.index({ loc: '2dsphere' });
+//Data.SCHEMA.index({ loc: '2dsphere' });
 
 Data.projectName = null;
 
@@ -195,7 +195,7 @@ Data.importFromFile = function (type, file, projectName, cb_ris)
 Data.loadData = function (projectName, callback) {
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
-    var DataModel = connection.model(Data.MODEL_NAME, Data.DATA_SCHEMA);
+    var DataModel = connection.model(Data.MODEL_NAME, Data.SCHEMA);
 
     DataModel.find({projectName: projectName})
         .lean()
@@ -232,7 +232,7 @@ Data.getUsers = function(projectName, par, callback)
 {
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
-    var datas = connection.model(Data.MODEL_NAME, Data.DATA_SCHEMA);
+    var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
     if(!par) par = {};
 
     //sort=name&order=desc&limit=10&offset=0&_=1435244766146
@@ -281,7 +281,7 @@ function addDataArray(arrayData, projectName, callback) {
     try {
 
         //var connection = mongoose.createConnection('mongodb://localhost/oim');
-        //var DataModel = connection.model(Data.MODEL_NAME, Data.DATA_SCHEMA);
+        //var DataModel = connection.model(Data.MODEL_NAME, Data.SCHEMA);
         var cont = 0;
         var url = 'mongodb://localhost:27017/oim';
         MongoClient.connect(url, function (err, db) {

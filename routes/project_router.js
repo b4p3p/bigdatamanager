@@ -3,81 +3,26 @@
 var ConstantsRouter = require('./constants_router');
 var Project = require("../model/Project");
 var Data = require("../model/Data");
+var Summary = require("../model/Summary");
 var async = require('async');
 var requestJson = require('request-json');
-var urlencode = require('urlencode');
+//var urlencode = require('urlencode');
 var fs = require("fs");
-
-function argContentProjects(data)
-{
-
-    if (!data) data = {};
-
-    return {
-        projects: JSON.stringify(data)
-    }
-};
-
-function projectError (status, message)
-{
-    if(!status) status = 1;
-    if(!message) message = 'error';
-
-    return{
-        status: status,
-        message: message
-    }
-};
-
-function sendProjectError(request, response, message, status)
-{
-    console.log("CALL: sendProjectError");
-
-    var err = projectError(status, message);
-    var arg = ConstantsRouter.argIndex();
-
-    arg.error = err;
-
-    arg.page = ConstantsRouter.PAGE.NEW_PROJECT;
-    arg.error = err;
-
-    request.session.arg = arg;
-    response.redirect("/project");
-}
-
-/**
- *  Richiesta di sincronizzazione in batch
- */
-function sincronizazzioneBatch(projectName)
-{
-    var client = requestJson.createClient('http://localhost:8080');
-    client.get('synchronize?projectName=' + projectName, function(err, res, body) {
-
-        console.log( "Sincronizzazione effettuata:" + body.message);
-    });
-}
 
 module.exports = function (router, app) {
 
-    router.get('/newproject', function (req, res)
-    {
-        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.NEW_PROJECT);
-        res.render('../views/pages/index.ejs', arg );
-    });
-
     router.post('/newproject', function (req, res, next)
     {
-
         console.log("PAGE: /newproject");
 
         var dataProject = {
-            projectName: req.body.projectName,
-            userProject: req.session.userProject,
+            project: req.body.project,
+            username: req.session.user,
             description: req.body.description
         };
 
         var Project = require("../model/Project");
-        Project.getProject(dataProject.projectName, function(data){
+        Project.getProject(dataProject.project, function(data){
 
             if(data == null)
                 next(null);
@@ -98,8 +43,8 @@ module.exports = function (router, app) {
     {
 
         var dataProject = {
-            projectName: req.body.projectName,
-            userProject: req.session.userProject,
+            project: req.body.project,
+            username: req.session.user,
             description: req.body.description
         };
 
@@ -118,24 +63,12 @@ module.exports = function (router, app) {
             }
             else
             {
-                req.session.projectName = dataProject.projectName;
+                req.session.project = dataProject.project;
                 arg.error = null;
                 res.redirect("/home");
             }
 
         });
-    });
-
-    router.get('/editproject', function (req, res)
-    {
-        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.EDIT_PROJECT);
-
-        if ( req.session.projectName != null)
-            arg.projectName = req.session.projectName;
-        else
-            arg.projectName = null;
-
-        res.render('../views/pages/index.ejs', arg );
     });
 
     router.post('/editproject', function (req, res)
@@ -155,66 +88,20 @@ module.exports = function (router, app) {
 
     });
 
-    router.get('/openproject', function (req, res)
-    {
-        //TODO debug
-        if ( req.session.userProject == null)
-            req.session.userProject = 'oim';
-
-        //controllo se ho un errore
-        var arg = ConstantsRouter.argIndex(req);
-        var Project = require("../model/Project");
-
-        if (req.session.arg)                    // uso  i paramenti presenti nella variabile di sessione
-        {
-            arg = req.session.arg;
-            req.session.arg = null;
-        }
-        else                                    // mi costruisco la variabile usando le variabili di sessione
-        {
-            arg.userProject = req.session.userProject;
-            arg.projectName = req.session.projectName;
-            arg.page = ConstantsRouter.PAGE.OPEN_PROJECT;
-        }
-
-        Project.getProjects(arg.userProject, function(data, err)
-        {
-            if(err) {
-
-            }
-
-            arg.content = argContentProjects( data );
-            res.render('../views/pages/index.ejs', arg );
-
-        });
-
-    });
-
     router.post('/delproject', function (req, res)
     {
 
-        var projectName = req.body.projectName;
-        Project.delProject(projectName, function(err, ris)
+        var project = req.body.project;
+        Project.delProject(project, function(err, ris)
         {
             res.json( ris );
         });
 
     });
 
-    /**
-     *  Method: POST
-     *  @param  POST: req.body.projectName - username da settare
-     *  @return {{}}
-     */
     router.post('/setproject', function (req, res)
     {
-        req.session.projectName = req.body.projectName;
-
-        var arg = ConstantsRouter.argIndex();
-
-        arg.userProject =   req.session.userProject;
-        arg.projectName =   req.session.projectName;
-        arg.page =          ConstantsRouter.PAGE.HOME;
+        req.session.project = req.body.project;
 
         res.setHeader("Content-Type", "text/json");
         res.setHeader("Access-Control-Allow-Origin", "*");
@@ -222,16 +109,23 @@ module.exports = function (router, app) {
 
     });
 
+    router.get('/projects', function (req, res)
+    {
+        Project.getProjects(function(err, data){
+            res.json(data);
+        })
+    });
+
     router.get('/getproject', function (req, res)
     {
-        var projectName = req.query.pn;
+        var project = req.query.pn;
 
-        if(projectName==null)
+        if(project==null)
             res.json({});
         else
         {
             var Project = require("../model/Project");
-            Project.getProject(projectName, function(data){
+            Project.getProject(project, function(data){
                 res.json(data);
             });
         }
@@ -251,8 +145,8 @@ module.exports = function (router, app) {
         }
 
         var files = app.getUploadedFiles();
-        var username = req.session.username;
-        var projectName = req.session.projectName;
+        var username = req.session.user;
+        var project = req.session.project;
         var type = req.body.type;
         var ris = {}
 
@@ -261,7 +155,7 @@ module.exports = function (router, app) {
             var projectData = {
                 filePath : f.path,
                 username: username,
-                projectName: projectName,
+                project: project,
                 type: type,
                 serverUrl: req.headers.host
             };
@@ -278,12 +172,38 @@ module.exports = function (router, app) {
         }, function(err){
 
             var url = req.headers.host;
-            Project.synchronize(url, projectName, function(err){
+            Project.synchronize(url, project, function(err){
                 res.json(ris);
             });
 
         });
 
+    });
+
+    router.get('/synchronize', function (req, res)
+    {
+        var project =   req.session.project || req.query.project;
+        var username =  req.session.user;
+
+        console.log("CALL: /synchronize of %s", project);
+
+        if( !project || !username )
+            res.json({});
+        else
+            Summary.sync(project, username,  function(err, result){
+                res.json(result);
+            });
+    });
+
+    router.get('/stat', function (req, res)
+    {
+        if(req.session.project)
+            Summary.getStat( req.session.user, req.session.project, function(err, data)
+            {
+                res.json(data);
+            });
+        else
+            res.redirect("/view/project/openproject");
     });
 
 };
@@ -292,8 +212,8 @@ module.exports = function (router, app) {
 //app.get('/project', function (req, res)
 //{
 //    //TODO debug
-//    if ( req.session.userProject == null)
-//        req.session.userProject = 'oim';
+//    if ( req.session.user == null)
+//        req.session.user = 'oim';
 //
 //    //controllo se ho un errore
 //    var arg = ConstantsRouter.argIndex();
@@ -306,13 +226,13 @@ module.exports = function (router, app) {
 //    }
 //    else                                    // mi costruisco la variabile usando le variabili di sessione
 //    {
-//        arg.userProject = req.session.userProject;
-//        arg.projectName = req.session.projectName;
+//        arg.user = req.session.user;
+//        arg.project = req.session.project;
 //        arg.page = ConstantsRouter.PAGE.PROJECT;
 //        arg.tab =  ConstantsRouter.TAB.OPENPROJECT;
 //    }
 //
-//    Project.getProjects(arg.userProject, function(data, err)
+//    Project.getProjects(arg.user, function(data, err)
 //    {
 //        if(err) {
 //
@@ -337,8 +257,8 @@ module.exports = function (router, app) {
 //    //app.resetVariableUpload();
 //
 //    var dataProject = {
-//        projectName: req.body.projectName,
-//        userProject: req.session.userProject,
+//        project: req.body.project,
+//        username: req.session.user,
 //        description: req.body.description
 //    };
 //
@@ -353,9 +273,9 @@ module.exports = function (router, app) {
 //
 //            next();
 //
-//            //var URLProjectName = urlencode(req.body.projectName);
+//            //var URLproject = urlencode(req.body.project);
 //            //res.redirect("/openproject");
-//            //sincronizazzioneBatch(urlencode(URLProjectName));
+//            //sincronizazzioneBatch(urlencode(URLproject));
 //
 //        }
 //    });
@@ -368,9 +288,9 @@ module.exports = function (router, app) {
 //    //        else {
 //    //            res.redirect("/openproject");
 //    //
-//    //            var URLProjectName = urlencode(req.body.projectName);
+//    //            var URLproject = urlencode(req.body.project);
 //    //            res.redirect("/openproject");
-//    //            sincronizazzioneBatch(urlencode(URLProjectName));
+//    //            sincronizazzioneBatch(urlencode(URLproject));
 //    //        }
 //    //    }
 //    //);

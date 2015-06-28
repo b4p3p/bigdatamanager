@@ -96,7 +96,7 @@
 <!--<script src="/node_modules/socketio-file-upload/client.js"></script>-->
 <!--<script src="/bower_components/socket.io-client/socket.io.js"></script>-->
 
-<% if(projectName==null) {%>
+<% if(project==null) {%>
 <div class="alert alert-danger" role="alert">
     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
     <span class="sr-only">Error:</span>
@@ -117,9 +117,9 @@
                class="col-sm-2">Project name:</label>
 
         <div class="col-sm-10 col_dx">
-            <input type="text" class="form-control" id="projectName"
+            <input type="text" class="form-control" id="project"
                    placeholder="Project Name"
-                   name="projectName"
+                   name="project"
                    required>
         </div>
 
@@ -144,11 +144,11 @@
         </button>
     </div>
 
-    <% if (error && error.status > 0) { %>
+    <% if (status && status.status > 0) { %>
     <div class="alert alert-danger" role="alert">
         <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
         <span class="sr-only">Error:</span>
-        <%= error.message %>
+        <%= status.message %>
     </div>
     <% } %>
 
@@ -246,7 +246,7 @@
 
 <script>
 
-    ProjectCtrl.init('<%= userProject %>', '<%= projectName %>');
+    ProjectCtrl.init('<%= user %>', '<%= project %>');
 
     ProjectCtrl.getProject( ProjectCtrl.loadEditForm );
     ProjectCtrl.getTags();

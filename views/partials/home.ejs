@@ -8,7 +8,12 @@
     </div>
     <div style="padding-left: 20px">
         <p><b>Username:</b></p>
-        <p><%= userProject %></p>
+        <%if(isGuest){%>
+            <p>Guest account</p>
+            <p>To create projects, you must be registered</p>
+        <%} else { %>
+            <p><%= user %></p>
+        <%}%>
     </div>
 </div>
 
@@ -19,7 +24,11 @@
     </div>
     <div style="padding-left: 20px">
         <p><b>Project:</b></p>
-        <p><%= projectName %></p>
+        <%if(!project){%>
+            <a href="/view/project/openproject">Open project</a>
+        <%} else { %>
+            <p><%= project %></p>
+        <% } %>
     </div>
 </div>
 

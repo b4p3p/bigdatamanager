@@ -12,12 +12,12 @@ module.exports = function (router, app) {
 
     router.get('/regions', function (req, res)
     {
-        var projectName = req.session.projectName;
+        var project = req.session.project;
         var nations = req.query.nations ? req.query.nations.split(',') : [];
         var tags = req.query.tags ? req.query.tags.split(',') : [];
         var isLight = req.query.light ? true : false;
 
-        Regions.getRegions(projectName, nations, tags, isLight, function(err, data){
+        Regions.getRegions(project, nations, tags, isLight, function(err, data){
             res.json(data);
         });
     });
@@ -32,11 +32,10 @@ module.exports = function (router, app) {
     router.get("/putnation", function (req, res)
     {
         res.redirect('/view/db/nations')
-    }),
+    });
 
     router.post("/putnation", function (req, res)
     {
-
         if( !app.isUploadDone() )
         {
             console.log("UPLOADING....");
@@ -44,19 +43,19 @@ module.exports = function (router, app) {
         }
 
         var files = app.getUploadedFiles();
-        var username = req.session.username;
-        var projectName = req.session.projectName;
+        var username = req.session.user;
+        var project = req.session.project;
         var ris = {};
 
         var Regions = require('../model/Regions');
 
         Regions.importFromFile(files,
-            function (err, result) {
-
+            function (err, result)
+            {
                 if (err == null)
                 {
                     var Project = require("../model/Project");
-                    Project.synchronize( req.headers.host, projectName, function(err){
+                    Project.synchronize( req.headers.host, project, function(err){
                         res.json( {status:0, result:result } );
                     })
                 }

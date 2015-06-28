@@ -83,16 +83,24 @@
 
             <img src="/public/img/uni-ba.png" class="img-responsive imageheader onlydesktop" alt="Uniba" >
 
-            <img src="/public/img/icon-user.png" class="img-responsive imageheader img-user" alt="User" >
+            <% if(isGuest){ %>
+                <img src="/public/img/guest.png" class="img-responsive imageheader img-user" alt="User" >
+            <%} else {%>
+                <img src="/public/img/icon-user.png" class="img-responsive imageheader img-user" alt="User" >
+            <%}%>
 
             <div class="col-xs-1">
-                <h4 class="content-header"><%= userProject %></h4>
+                <% if(isGuest){ %>
+                    <h4 class="content-header">guest</h4>
+                <%} else {%>
+                    <h4 class="content-header"><%= user %></h4>
+                <%}%>
             </div>
 
             <img src="/public/img/project.png" class="img-responsive imageheader img-project" alt="Project" >
 
             <div class="col-xs-1">
-                <h4 class="content-header"><%= projectName %></h4>
+                <h4 class="content-header"><%= project %></h4>
             </div>
 
             <h2 class="title onlydesktop">Big Data Manager</h2>
@@ -112,9 +120,8 @@
 
             <ul data-spy="affix" data-offset-top="0" id="affix" class="nav nav-stacked">
 
-                <li><a href="/home" class="btn btn-link"><i class="fa fa-th" style="float: left"></i>Home</a></li>
-                <li><a class="btn btn-link"><i class="fa fa-users" style="float: left"></i>Profile</a></li>
-
+                <li><a href="/view/home" class="btn btn-link"><i class="fa fa-th" style="float: left"></i>Home</a></li>
+                <li><a href="/view/profile" class="btn btn-link"><i class="fa fa-users" style="float: left"></i>Profile</a></li>
 
                 <!-- DATABASE -->
                 <li>
@@ -151,18 +158,18 @@
                         <i class="fa fa-sort-down"></i>
                     </a>
                     <ul class="nav collapse" id="subProj">
-                        <li><a href="/project/newproject">
+                        <li><a href="/view/project/newproject">
                                 <i class="fa fa-plus"
                                    style="margin-right: 5px"></i>
                                 New project
                             </a>
                         </li>
-                        <li><a href="/project/openproject">
+                        <li><a href="/view/project/openproject">
                                 <i class="fa fa-folder-open" style="margin-right: 5px"></i>
                                 Open project
                             </a>
                         </li>
-                        <li><a href="/project/editproject">
+                        <li><a href="/view/project/editproject">
                                 <i class="fa fa-pencil" style="margin-right: 5px"></i>
                                 Edit project</a>
                         </li>
@@ -176,20 +183,20 @@
                         <i class="fa fa-sort-down"></i>
                     </a>
                     <ul class="nav collapse" id="subStat">
-                        <li><a href="/showmap">
+                        <li><a href="/view/stat/showmap">
                                 <img src="/public/img/icon-osm.png" class="subMenu-ico"/>
                                 Show map
                             </a></li>
-                        <li><a href="/showregionsbar">
+                        <li><a href="/view/stat/showregionsbar">
                                 <img src="/public/img/icon-bar.png" class="subMenu-ico"/>
                                 Show bar chart</a></li>
-                        <li><a href="/showregionsradar">
+                        <li><a href="/view/stat/showregionsradar">
                                 <img src="/public/img/icon-radar.png" class="subMenu-ico"/>
                                 Show radar chart</a></li>
-                        <li><a href="/showtimeline">
+                        <li><a href="/view/stat/showtimeline">
                                 <img src="/public/img/icon-line.png" class="subMenu-ico"/>
                                 Time line</a></li>
-                        <li><a href="/showtag">
+                        <li><a href="/view/stat/showtag">
                                 <img src="/public/img/icon-cloud.png" class="subMenu-ico"/>
                                 Show cloud</a></li>
                     </ul>
@@ -204,6 +211,9 @@
             <!-- HOME -->
             <% if(page == "home"){ %>
                 <% include ../partials/home.ejs %>
+
+            <% }else if (page == "profile") { %>
+                <% include ../partials/profile.ejs %>
 
             <!-- DATABASE -->
             <% }else if (page == "db-users") { %>

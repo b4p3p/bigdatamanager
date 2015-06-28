@@ -170,17 +170,17 @@
       Upload
    </button>
 
-   <% if (error && error.status > 0) { %>
+   <% if (status && status.status > 0) { %>
    <div class="alert alert-danger" role="alert">
       <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
       <span class="sr-only">Error:</span>
-      <%= error.message %>
+      <%= status.message %>
    </div>
-   <% } else if (error && error.status == 0) { %>
+   <% } else if (status && status.status < 0) { %>
    <div class="alert alert-success" role="alert">
       <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
       <span class="sr-only">Error:</span>
-      <%= error.message %>
+      <%= status.message %>
    </div>
    <% } %>
 

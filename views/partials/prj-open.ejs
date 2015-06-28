@@ -25,7 +25,8 @@
 <script src="/public/js/ProjectCtrl.js"></script>
 
 <div class="row" style="margin-top: 10px">
-    <table data-toggle="table" id="tableProjects" data-pagination="true" data-search="true">
+    <table data-toggle="table" id="tableProjects" data-pagination="true" data-search="true"
+           data-url="/project/projects">
         <thead>
         <tr>
             <th data-field="userProject">Username</th>
@@ -45,9 +46,5 @@
 </div>
 
 <script>
-    $(document).ready(function()
-    {
-        var content = '<%- content.projects %>';
-        ProjectCtrl.loadData(content);
-    });
+
 </script>

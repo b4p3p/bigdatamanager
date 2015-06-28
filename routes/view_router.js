@@ -9,17 +9,43 @@ var urlencode = require('urlencode');
 
 module.exports = function (router) {
 
-    // HOME
+    // LOGIN
     router.get('/login', function (req, res)
     {
-        var message = { error:false, message: '' };
-        res.render('../views/pages/login.ejs', message);
+        //var message = { error:false, message: '' };
+        res.render('../views/pages/login.ejs', ConstantsRouter.argIndex(req) );
     });
 
     router.get('/register', function (req, res)
     {
         var message = { error:false , message: '' };
         res.render('../views/pages/register.ejs', message);
+    });
+
+    router.get('/*', function (req, res, next)
+    {
+        if( !req.session.user )
+        {
+            res.redirect("/view/login");
+        }
+        else
+            next(null);
+
+    });
+
+    //HOME
+    router.get('/profile', function (req, res)
+    {
+        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.PROFILE);
+        res.render('../views/pages/index.ejs', arg );
+    });
+
+
+    router.get('/home', function (req, res)
+    {
+        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.HOME);
+        res.render('../views/pages/index.ejs', arg );
+
     });
 
     /// DB
@@ -35,5 +61,67 @@ module.exports = function (router) {
         res.render('../views/pages/index.ejs', arg);
     });
 
+    ///PROJECT
+    router.get('/project/newproject', function (req, res)
+    {
+        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.NEW_PROJECT);
+        res.render('../views/pages/index.ejs', arg );
+    });
+
+    router.get('/project/editproject', function (req, res)
+    {
+        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.EDIT_PROJECT);
+        res.render('../views/pages/index.ejs', arg );
+    });
+
+    router.get('/project/openproject', function (req, res)
+    {
+        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.OPEN_PROJECT);
+        res.render('../views/pages/index.ejs', arg );
+    });
+
+    ///STAT
+    router.get('/stat/showmap', function (req, res)
+    {
+        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.STAT_MAP);
+        res.render('../views/pages/index.ejs', arg );
+    });
+
+    router.get('/stat/showregionsbar', function (req, res)
+    {
+        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.STAT_REGIONS_BAR);
+        res.render('../views/pages/index.ejs', arg );
+    });
+
+    router.get('/stat/showregionsradar', function (req, res)
+    {
+        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.STAT_REGIONS_RADAR);
+        res.render('../views/pages/index.ejs', arg );
+    });
+
+    router.get('/stat/showtimeline', function (req, res)
+    {
+        var arg = ConstantsRouter.argIndex(req,ConstantsRouter.PAGE.STAT_TIMELINE);
+        res.render('../views/pages/index.ejs', arg );
+    });
+
+    router.get('/stat/showtag', function (req, res)
+    {
+        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.STAT_TAG);
+        res.render('../views/pages/index.ejs', arg );
+    });
+
 };
 
+//
+//if (req.session.arg)                    // uso  i paramenti presenti nella variabile di sessione
+//{
+//    arg = req.session.arg;
+//    req.session.arg = null;
+//}
+//else                                    // mi costruisco la variabile usando le variabili di sessione
+//{
+//    arg.user = req.session.user;
+//    arg.project = req.session.project;
+//    arg.page = ConstantsRouter.PAGE.OPEN_PROJECT;
+//}

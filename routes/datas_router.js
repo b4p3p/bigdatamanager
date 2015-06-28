@@ -12,7 +12,7 @@ module.exports = function (router, app) {
 
     router.get('/users', function (req, res)
     {
-        Data.getUsers( req.session.projectName , req.query, function(err, docs){
+        Data.getUsers( req.session.project , req.query, function(err, docs){
             if(!docs) docs = {}
             res.json(docs);
         });
