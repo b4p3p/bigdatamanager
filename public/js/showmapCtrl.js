@@ -224,14 +224,14 @@ ShowmapCtrl.loadData = function()
 
     if(ShowmapCtrl.otherTag)
     {
-        addOptionValue(ShowmapCtrl.cmbSelectTags, "Other", true);
+        DomUtil.addOptionValue(ShowmapCtrl.cmbSelectTags, "Other", true);
     }
     ShowmapCtrl.tags.forEach(function(tag) {
-        addOptionValue(ShowmapCtrl.cmbSelectTags, tag);
+        DomUtil.addOptionValue(ShowmapCtrl.cmbSelectTags, tag);
     });
 
     ShowmapCtrl.nations.forEach(function(nation) {
-        addOptionValue(ShowmapCtrl.cmbSelectNations, nation);
+        DomUtil.addOptionValue(ShowmapCtrl.cmbSelectNations, nation);
     });
 
     $('.selectpicker').selectpicker('refresh');
@@ -756,20 +756,4 @@ function refreshData()
         setData_MarkerCluster( null );
 }
 
-function addOptionValue( combo , value, isSpecial )
-{
-    var o = new Option(value, value);
-    var jqo = $(o);
-    jqo.html(value);
-    combo.append(o);
 
-    if(isSpecial)
-    {
-        var line = new Option();
-        var jqline = $(line);
-        jqline.attr("data-divider", true);
-        jqo.attr("data-subtext", "No tag");
-        combo.append(line);
-    }
-
-};

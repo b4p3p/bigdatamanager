@@ -154,6 +154,8 @@ module.exports = function (app) {
                                 multi: true , w:1
                             }, function(err, result)
                             {
+                                if(!result)
+                                    console.log("");
                                 cont_success+=result.result.n;
                                 cont_fatti++;
                                 console.log(result.result.n);
