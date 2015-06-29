@@ -245,16 +245,26 @@
 
 <div id="count-container" class="hidden" style="margin-left: -15px">Points found: <span id="count">15000</span></div>
 
-
 <script>
 
     ShowmapCtrl.initMap('map');
+
     ShowmapCtrl.getData();
-    ShowmapCtrl.initGui();
+
+    //    ShowmapCtrl.getData();
+    //    ShowmapCtrl.initGui();
 
     //fix combo close
     $(document).on('mouseenter','#cmdFilter', function() {
         $(".btn-group").removeClass("open");
     });
+
+    var project = '<%= project  %>';
+    var user = '<%= user  %>';
+
+    if(!project)
+    {
+        bootbox.alert("You must first select a project<br><a href='/view/project/openproject'>Select project</a>");
+    }
 
 </script>

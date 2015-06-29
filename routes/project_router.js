@@ -206,97 +206,21 @@ module.exports = function (router, app) {
             res.redirect("/view/project/openproject");
     });
 
+    router.get('/lastupdate', function (req, res)
+    {
+        var project = req.session.project || req.query.project;
+        var user = req.session.user || req.query.user;
+
+        if(!project || !user)
+        {
+            res.redirect("/view/login");
+            return;
+        }
+
+        Project.getLastUpdate( project, user, function(err, data){
+            res.json(data);
+        })
+    });
+
 };
 
-
-//app.get('/project', function (req, res)
-//{
-//    //TODO debug
-//    if ( req.session.user == null)
-//        req.session.user = 'oim';
-//
-//    //controllo se ho un errore
-//    var arg = ConstantsRouter.argIndex();
-//    var Project = require("../model/Project");
-//
-//    if (req.session.arg)                    // uso  i paramenti presenti nella variabile di sessione
-//    {
-//        arg = req.session.arg;
-//        req.session.arg = null;
-//    }
-//    else                                    // mi costruisco la variabile usando le variabili di sessione
-//    {
-//        arg.user = req.session.user;
-//        arg.project = req.session.project;
-//        arg.page = ConstantsRouter.PAGE.PROJECT;
-//        arg.tab =  ConstantsRouter.TAB.OPENPROJECT;
-//    }
-//
-//    Project.getProjects(arg.user, function(data, err)
-//    {
-//        if(err) {
-//
-//        }
-//
-//        arg.content = argContentProjects( data );
-//        res.render('../views/pages/index.ejs', arg );
-//
-//    });
-//
-//});
-
-
-//try {
-//
-//    // Controlla che tutti i file siano stati upload-ati
-//
-//    //if (app.isUploadDone() == false) return;
-//
-//    // reset variable upload
-//    //var fileNames = app.fileNames;
-//    //app.resetVariableUpload();
-//
-//    var dataProject = {
-//        project: req.body.project,
-//        username: req.session.user,
-//        description: req.body.description
-//    };
-//
-//    var Project = require("../model/Project");
-//    Project.addProject(dataProject, function(err){
-//
-//        if (err) {
-//            sendProjectError(req, res, err.message, err.status);
-//        }
-//        else
-//        {
-//
-//            next();
-//
-//            //var URLproject = urlencode(req.body.project);
-//            //res.redirect("/openproject");
-//            //sincronizazzioneBatch(urlencode(URLproject));
-//
-//        }
-//    });
-//
-//    //addNewProjectWithData(fileNames, dataProject,
-//    //    function (err) {
-//    //        if (err) {
-//    //            sendProjectError(req, res, err.message, err.status);
-//    //        }
-//    //        else {
-//    //            res.redirect("/openproject");
-//    //
-//    //            var URLproject = urlencode(req.body.project);
-//    //            res.redirect("/openproject");
-//    //            sincronizazzioneBatch(urlencode(URLproject));
-//    //        }
-//    //    }
-//    //);
-//} catch (e)
-//{
-//    console.error("EXCEPTION newproject");
-//    console.error(e);
-//    console.error(e.stack);
-//}

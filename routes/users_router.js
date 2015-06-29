@@ -46,25 +46,5 @@ module.exports = function (router, app) {
 
     });
 
-    //router.post('/register', function (req, res)
-    //{
-    //    var newUser = new User(obj);
-    //    User.save( newUser,
-    //        function(result, message)
-    //        {
-    //            var arg = { error:false, message: '' };
-    //
-    //            if ( result >= 0 )
-    //                res.redirect('/login');
-    //            else
-    //            {
-    //                arg.message = message;
-    //                arg.error = true;
-    //                res.render('../views/pages/register.ejs', arg);
-    //            }
-    //        }
-    //    );
-    //});
-
 };
 

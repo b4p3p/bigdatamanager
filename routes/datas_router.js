@@ -12,8 +12,10 @@ module.exports = function (router, app) {
 
     router.get('/users', function (req, res)
     {
-        Data.getUsers( req.session.project , req.query, function(err, docs){
-            if(!docs) docs = {}
+        var project = req.session.project || req.query.project;
+
+        Data.getUsers( project , req.query, function(err, docs){
+            if(!docs) docs = {};
             res.json(docs);
         });
     });

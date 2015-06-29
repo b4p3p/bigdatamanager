@@ -28,12 +28,12 @@ Project.prototype.data = {};    //json
  * @param projectName
  * @param callback - fn({Data})
  */
-Project.getProject = function (projectName, callback)
+Project.getProject = function (projectName, username, callback)
 {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var Projects = connection.model(Project.MODEL_NAME, Project.PROJECT_SCHEMA);
 
-    Projects.findOne( {projectName: projectName },
+    Projects.findOne( {projectName: projectName, userProject: username },
         function (err, doc)
         {
             console.log("CALL getProject.findOne - foundDoc:" + (doc != null).toString() );
@@ -214,19 +214,31 @@ Project.addData = function (projectData, sync,  callback){
 
 };
 
-/**
- * @param callback
- */
-Project.synchronize = function(url, projectName,  callback)
-{
-    request({
-        uri: "http://" + url + "/synchronize?projectName=" + projectName,
-    }, function(error, response, body)
-    {
-        console.log("SINCRONIZZAZIONE EFFETTUATA: " + body );
-        callback(null);
-    });
-}
+//Project.synchronize = function(url, projectName,  callback)
+//{
+//    request({
+//        uri: "http://" + url + "/synchronize?projectName=" + projectName,
+//    }, function(error, response, body)
+//    {
+//        console.log("SINCRONIZZAZIONE EFFETTUATA: " + body );
+//        callback(null);
+//    });
+//}
+
+Project.getLastUpdate = function(project , user, callback){
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+    var projects = connection.model( Project.MODEL_NAME, Project.PROJECT_SCHEMA);
+
+    projects.findOne(
+        {projectName: project, userProject: user },
+        {dateLastUpdate: 1, _id:0},
+        function (err, doc)
+        {
+            connection.close();
+            callback(err, doc);
+        }
+    );
+};
 
 /**
  *

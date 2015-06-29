@@ -8,6 +8,7 @@ var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://localhost:27017/oim';
 var Regions = require("../model/Regions");
 var Datas = require("../model/Data");
+var Projects = require("../model/Project");
 var _ = require("underscore");
 
 var Summary = function(){};
@@ -36,6 +37,7 @@ Summary.SCHEMA = new Schema(
     {
         projectName: {type: String, required: true},
         username: {type: String, required: true},
+        lastUpdate: Date,
         data: {
             syncTags: [String],
             allTags: [String],
@@ -65,12 +67,14 @@ Summary.sync = function(project, username,  callback)
     var regions     = connection.model( Regions.MODEL_NAME, Regions.SCHEMA);
     var datas       = connection.model( Datas.MODEL_NAME, Datas.SCHEMA);
     var summaries   = connection.model( Summary.MODEL_NAME, Summary.SCHEMA);
+    var projects    = connection.model( Projects.MODEL_NAME, Projects.PROJECT_SCHEMA);
     var dictNations = {};
     var cont = 0;
 
     var docSync = {
         project : project,
         username: username,
+        lastUpdate: null,
         data: {
             syncTags: [],
             allTags: [],
@@ -149,8 +153,8 @@ Summary.sync = function(project, username,  callback)
             },
 
             //costruisco il docSync
-            function(regions, next) {
-
+            function(regions, next)
+            {
                 async.each( regions,
 
                     function(region, next)
@@ -217,23 +221,15 @@ Summary.sync = function(project, username,  callback)
                     },
 
                     function(err){
-
-                        summaries.update(
-                            { project : project, username: username } ,
-                            docSync,
-                            { upsert:true, w:1 },
-                            function (err, result) {
-                                next(null, regions);
-                            }
-                        );
+                        next(null, regions);
                     }
 
                 );
             },
 
             //cancello la precedente sincronizzazione
-            function(regions, next){
-
+            function(regions, next)
+            {
                 datas.update(
                     { projectName: project } ,
                     { $unset: { region:'', nation:'' } },
@@ -292,7 +288,8 @@ Summary.sync = function(project, username,  callback)
             },
 
             //prendo tutti i tag del progetto
-            function(next){
+            function(next)
+            {
                 datas.distinct("tag", {projectName: project} ,  function(err, result){
                     docSync.data.allTags = result;
                     next(null);
@@ -300,11 +297,39 @@ Summary.sync = function(project, username,  callback)
             },
 
             //conto i dati
-            function(next){
+            function(next)
+            {
                 datas.count( {projectName: project} ,  function(err, result){
                     docSync.data.countTot = result;
                     next(null);
                 });
+            },
+
+            //prendo il last update
+            function(next)
+            {
+                projects.findOne(
+                    {projectName: project, userProject: username},
+                    {dateLastUpdate: 1},
+                    function(err, doc){
+                        var d = new Date(doc.dateLastUpdate);
+                        docSync.lastUpdate = d;
+                        next(null);
+                    }
+                )
+            },
+
+            //salvo il nuovo docSync
+            function(next)
+            {
+                summaries.update(
+                    { project : project, username: username } ,
+                    docSync,
+                    { upsert:true, w:1 },
+                    function (err, result) {
+                        next(null);
+                    }
+                );
             }
         ],
 

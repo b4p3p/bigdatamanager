@@ -48,6 +48,7 @@ ShowmapCtrl.activeLayerBoundaries = null;
 ShowmapCtrl.showInfoActiveLayer = false;
 
 //data variable
+ShowmapCtrl.stat = null;
 ShowmapCtrl.nationsProject = null;
 ShowmapCtrl.tagsProject = null;
 ShowmapCtrl.minData = new Date();
@@ -149,7 +150,8 @@ ShowmapCtrl.getData = function ()
 
     var imgRestore = $("#img-restore");
     var cmdRestore = $("#cmdRestore");
-    if(!cmdRestore.is(':disabled')) {
+    if(!cmdRestore.is(':disabled'))
+    {
         cmdRestore.prop("disabled", true);
         imgRestore.removeClass("glyphicon glyphicon-remove");
         imgRestore.addClass("fa fa-spinner fa-spin");
