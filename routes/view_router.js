@@ -18,13 +18,13 @@ module.exports = function (router) {
 
     router.get('/register', function (req, res)
     {
-        var message = { error:false , message: '' };
-        res.render('../views/pages/register.ejs', message);
+        var arg = ConstantsRouter.argIndex(req);
+        res.render('../views/pages/register.ejs', arg);
     });
 
     router.get('/*', function (req, res, next)
     {
-        if( !req.session.user )
+        if( !req.session.user &&  !req.session.isGuest )
         {
             res.redirect("/view/login");
         }

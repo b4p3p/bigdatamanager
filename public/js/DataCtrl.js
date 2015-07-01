@@ -1,109 +1,209 @@
 "use strict";
 
-var DataCtrl = new function(){
+var DataCtrl = function(){};
 
-    this.FIELD = {
-        LAST_UPDATE : {
-            KEY: "lastUpdate",
-            URL: "/project/lastUpdate"
-        },
-        STAT: {
-            KEY: "stat",
-            URL: "/project/stat"
-        },
-        REGIONSJSON: {
-            KEY: "regionsjson",
-            URL: "/regions/regions"
-        }
-    };
+var desiredCapacity = 125 * 1024 * 1024;
 
-    /**
-     *
-     * @returns {{result: boolean, lastUpdate: Date}}
-     */
-    this.requireRefresh = function()
-    {
-        var result = null;
-        var lastUpdate = this.getFromUrl( DataCtrl.FIELD.LAST_UPDATE).dateLastUpdate;
-        var lastUpdateStorage = localStorage.getItem(DataCtrl.FIELD.LAST_UPDATE.KEY);
+DataCtrl.storageIsReady = false;
+DataCtrl.storage = new LargeLocalStorage({size: desiredCapacity, name: 'myDb'});
 
-        if(lastUpdateStorage == null)
-            result = {
-                result: true,
-                lastUpdate: lastUpdate
-            };
-        else
+DataCtrl.storage.initialized.then(function(grantedCapacity) {
+    // Check to see how much space the user authorized us to actually use.
+    // Some browsers don't indicate how much space was granted in which case
+    // grantedCapacity will be 1.
+    if (grantedCapacity != -1 && grantedCapacity != desiredCapacity) {
+        console.log("storage inizializzato");
+        DataCtrl.storageIsReady = true;
+    }
+});
+
+DataCtrl.FIELD = {
+    LASTUPDATE : {
+        KEY: "lastUpdate",
+        URL: "/project/lastUpdate",
+    },
+    STAT: {
+        KEY: "stat",
+        URL: "/project/stat",
+        LASTUPDATE: "stat-lastupdate"
+    },
+    DATA: {
+        KEY: "data",
+        URL: "/datas/datas",
+        LASTUPDATE: "data-lastupdate"
+    },
+    REGIONSJSON: {
+        KEY: "regionsjson",
+        URL: "/regions/regions",
+        LASTUPDATE: "regionsjson-lastupdate"
+    },
+    USERS: {
+        KEY: "users",
+        URL: "/datas/users",
+        LASTUPDATE: "users-lastupdate"
+    }
+};
+
+/**
+ *
+ * @param field: @instance {DataCtrl.FIELD.}
+ * @param callback
+ */
+DataCtrl.requireRefresh = function(field, callback)
+{
+    async.parallel(
         {
-            result = {
-                result: lastUpdate > lastUpdateStorage,
-                lastUpdate: lastUpdate
-            };
-        }
+            dbLstUpd : function(next){
 
-        if( result.result )
-            console.log("require refresh!");
-        else
-            console.log("no refresh");
+                console.log("CALL: DataCtrl.requireRefresh - " + field.KEY);
 
-        return result;
-
-    };
-
-    this.getFromUrl = function(field)
-    {
-        console.log("CALL: DataCtrl.getFromUrl\n" +
-                    "      url: " + field.URL + " key: " + field.KEY );
-
-        var result = null;
-
-        $.ajax({
-            type: "get",
-            url: field.URL,
-            async: false,
-
-            success: function(data){
-                console.log("     success");
-                result = data;
+                DataCtrl.storage
+                    .getContents(field.LASTUPDATE)
+                    .then( function(value)
+                    {
+                        console.log("    storage lastupdate - key: " + field.LASTUPDATE + " value: " + value);
+                        next(null, value);
+                    }
+                );
             },
 
-            error:function(status, error){
-                console.log("     error");
+            urlLstUpd: function (next) {
+                DataCtrl.getFromUrl( DataCtrl.FIELD.LASTUPDATE, function(data)
+                {
+                    next(null, data);
+                });
             }
 
-        });
+        },
 
-        return result;
+        function(err, result)
+        {
 
-    };
+            var lastUpdate = result.urlLstUpd.dateLastUpdate;
 
-    /**
-     *
-     * @param field {DataCtrl.FIELD}
-     */
-    this.getField = function(field){
+            if(result.dbLstUpd == null || result.dbLstUpd == "undefined")
+            {
+                console.log("    require refresh: true (first time)");
+                callback({
+                    result: true,
+                    lastUpdate: lastUpdate
+                });
+            }else
+            {
+                var dUrl = new Date(result.urlLstUpd.dateLastUpdate);
+                var dDb =  new Date(result.dbLstUpd);
+                var result = dUrl > dDb;
+                console.log("    require refresh: " + result);
+                callback({
+                    result: result,
+                    lastUpdate: lastUpdate
+                });
+            }
+        }
+    );
+};
 
-        //localStorage.clear();
+DataCtrl.getFromUrl = function(field, callback)
+{
+    console.log("CALL: DataCtrl.getFromUrl\n" +
+        "      url: " + field.URL + " key: " + field.KEY );
 
-        console.log("CALL: getField - key:" + field.KEY);
+    $.ajax({
+        type: "get",
+        url: field.URL,
+        timeout: 1000 * 60, //1m
 
-        var data = null;
-        var req = this.requireRefresh();
+        success: function(data){
+            //console.log("    success");
+            callback(data);
 
-        if(req.result == true)
+        },
+
+        error:function(error){
+            console.error("error getFromUrl:\n", error);
+            callback(null);
+        }
+
+    });
+};
+
+DataCtrl.getField = function(callback, field, limit){
+
+    //controllo che sia inizializzato
+    if( !DataCtrl.storageIsReady)
+    {
+        console.log("wait storage...");
+        setTimeout( function() {
+            DataCtrl.getField(callback, field, limit);
+        }, 200);
+        return;
+    }
+
+    console.log("CALL: getField - key:" + field.KEY);
+
+    DataCtrl.requireRefresh( field, function(result){
+
+        if(result.result == true)
         {
             console.log("set new data");
 
-            data = this.getFromUrl(field);
-            localStorage.setItem( field.KEY, JSON.stringify(data));
-            localStorage.setItem( DataCtrl.FIELD.LAST_UPDATE.KEY, req.lastUpdate);
+            async.waterfall([
+
+                //prendo i dati
+                function(next){
+                    DataCtrl.getFromUrl(field, function(data) {
+                        next(null, data);
+                    });
+                },
+
+                //salvo i dati ricevuti
+                function(data, next){
+
+                    DataCtrl.storage.setContents(
+                        field.KEY, JSON.stringify(data)).then(function()
+                        {
+                            var lenght = JSON.stringify(data).length;
+                            lenght = lenght /  1024 / 1024;
+                            lenght = parseFloat(lenght).toFixed(2);
+                            console.log("Scritti: " + lenght + " MB - " + field.KEY);
+                            next(null, data);
+                        }
+                    );
+                },
+
+                //salvo la data di lettura
+                function(data, next){
+
+                    DataCtrl.storage.setContents(
+                        field.LASTUPDATE, result.lastUpdate).then(function()
+                        {
+                            console.log("    set lastupdate at " + result.lastUpdate);
+                            next(null, data);
+                        }
+                    );
+                }
+
+            ], function(err, data){
+                callback(data);
+            })
         }
         else
         {
-            data = JSON.parse(localStorage.getItem( field.KEY ));
+            //leggo il contenuto memorizzato
+            DataCtrl.storage.getContents(
+                field.KEY).then(function(contents)
+                {
+                    var lenght = parseFloat(contents.length / 1024 / 1024).toFixed(2);
+                    console.log("Letti: " + lenght + " MB - " + field.KEY);
+                    callback(JSON.parse(contents));
+                }
+            );
         }
-
-        return data;
-
-    };
-
+    });
 };
+
+/**
+ *
+ * @param field - {KEY:string, URL:string}
+ */
+

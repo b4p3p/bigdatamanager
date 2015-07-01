@@ -61,8 +61,6 @@ module.exports = function (app) {
 
     });
 
-
-
 };
 
 //function sendProjectError(request, response, message, status)

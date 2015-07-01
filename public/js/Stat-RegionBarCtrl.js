@@ -14,7 +14,7 @@ RegionBarCtrl.cmbRegions = null;
 RegionBarCtrl.cmbFilter = null;
 RegionBarCtrl.cmbRestore = null;
 RegionBarCtrl.container = null;
-RegionBarCtrl.sliderTimer = null;
+RegionBarCtrl.$sliderTimer = null;
 RegionBarCtrl.contFn = 3;
 RegionBarCtrl.formRegions = null;
 RegionBarCtrl.formNations = null;
@@ -34,7 +34,7 @@ RegionBarCtrl.init = function()
     RegionBarCtrl.cmbNations = $("#cmbNations");
 
     RegionBarCtrl.container = $('#regionsBar');
-    RegionBarCtrl.sliderTimer = $("#slider-regionsbar");
+    RegionBarCtrl.$sliderTimer = $("#slider-regionsbar");
 
     RegionBarCtrl.formRegions = $('#formRegions');
     RegionBarCtrl.formNations = $('#formNations');
@@ -47,7 +47,7 @@ RegionBarCtrl.initSlider = function()
 {
     console.log("CALL: initSlider");
 
-    RegionBarCtrl.sliderTimer.dateRangeSlider(
+    RegionBarCtrl.$sliderTimer.dateRangeSlider(
     {
         enabled : true,
         bounds: {
@@ -67,7 +67,7 @@ RegionBarCtrl.setSlider = function()
 
     if( RegionBarCtrl.minData != null && RegionBarCtrl.maxData != null  )
     {
-        RegionBarCtrl.sliderTimer.dateRangeSlider(
+        RegionBarCtrl.$sliderTimer.dateRangeSlider(
             {
                 enabled : true,
                 bounds:{
@@ -78,7 +78,7 @@ RegionBarCtrl.setSlider = function()
         );
     }
     else
-        RegionBarCtrl.sliderTimer.dateRangeSlider({
+        RegionBarCtrl.$sliderTimer.dateRangeSlider({
             enabled: false
         });
 };

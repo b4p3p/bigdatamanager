@@ -32,11 +32,11 @@
                    id="password" placeholder="Password" required>
         </div>
 
-        <% if (status) { %>
+        <% if (status && status.error > 0 ) { %>
         <div class="alert alert-danger" role="alert">
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
             <span class="sr-only">Error:</span>
-            <%= message %>
+            <%= status.message %>
         </div>
          <% } %>
 

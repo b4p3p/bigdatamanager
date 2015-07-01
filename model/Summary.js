@@ -39,6 +39,8 @@ Summary.SCHEMA = new Schema(
         username: {type: String, required: true},
         lastUpdate: Date,
         data: {
+            minDate: Date,
+            maxDate: Date,
             syncTags: [String],
             allTags: [String],
             counter: [Summary.SCHEMA_COUNTER],
@@ -76,6 +78,8 @@ Summary.sync = function(project, username,  callback)
         username: username,
         lastUpdate: null,
         data: {
+            minDate : null,
+            maxDate : null,
             syncTags: [],
             allTags: [],
             countSync : 0,
@@ -305,23 +309,28 @@ Summary.sync = function(project, username,  callback)
                 });
             },
 
-            //prendo il last update
-            function(next)
-            {
-                projects.findOne(
-                    {projectName: project, userProject: username},
-                    {dateLastUpdate: 1},
-                    function(err, doc){
-                        var d = new Date(doc.dateLastUpdate);
-                        docSync.lastUpdate = d;
+            //prendo il min e max della data
+            function(next) {
+                datas.aggregate(
+                    {
+                        "$group": {
+                            "_id": null,
+                            "min": {$min: "$date"},
+                            "max": {$max: "$date"}
+                        }
+                    }, function(err, result){
+                        docSync.data.minDate = result[0].min;
+                        docSync.data.maxDate = result[0].max;
                         next(null);
                     }
-                )
+                );
             },
 
             //salvo il nuovo docSync
             function(next)
             {
+                docSync.lastUpdate = new Date();
+
                 summaries.update(
                     { project : project, username: username } ,
                     docSync,
@@ -330,6 +339,18 @@ Summary.sync = function(project, username,  callback)
                         next(null);
                     }
                 );
+            },
+
+            //aggiorno il lastUpdate del progetto
+            function (next) {
+                projects.update(
+                    {projectName: project},
+                    {$set: { dateLastUpdate: docSync.lastUpdate } }, 
+                    { w:1 },
+                    function (err, result) {
+                        next(null);
+                    }
+                )
             }
         ],
 
@@ -343,13 +364,13 @@ Summary.sync = function(project, username,  callback)
 };
 
 
-Summary.getStat = function (username, project, callback) {
+Summary.getStat = function (project, callback) {
 
     var connection  = mongoose.createConnection('mongodb://localhost/oim');
     var summaries   = connection.model( Summary.MODEL_NAME, Summary.SCHEMA);
 
     summaries.findOne(
-        {project: project, username: username},
+        {project: project},
         function(err, doc){
             callback(err, doc);
         }

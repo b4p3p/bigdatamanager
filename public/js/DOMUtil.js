@@ -20,19 +20,18 @@ var DomUtil = {
 
     },
 
-    addOptionValue : function( combo , value, isSpecial ) {
-        var o = new Option(value, value);
-        var jqo = $(o);
-        jqo.html(value);
-        combo.append(o);
+    addOptionValue : function( combo , value, subtext ) {
 
-        if (isSpecial) {
-            var line = new Option();
-            var jqline = $(line);
-            jqline.attr("data-divider", true);
-            jqo.attr("data-subtext", "No tag");
-            combo.append(line);
+        var o = new Option(value, value);
+        var $o = $(o);
+
+        $o.html(value);
+
+        if (subtext) {
+            $o.attr("data-subtext", subtext);
         }
+
+        combo.append(o);
     },
 
     /**

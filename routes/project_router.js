@@ -11,6 +11,26 @@ var fs = require("fs");
 
 module.exports = function (router, app) {
 
+    router.get('/*', function (req, res, next)
+    {
+        if( !req.session.user && !req.session.isGuest )
+        {
+            res.redirect("/view/login");
+        }
+        else
+            next(null);
+
+    });
+
+    router.all(/new*|del*|edit*|uploaddata|synchronize/, function (req, res, next)
+    {
+        console.log("router projects all");
+        if( req.session.isGuest )
+            res.redirect("/view/register");
+        else
+            next(null);
+    });
+
     router.post('/newproject', function (req, res, next)
     {
         console.log("PAGE: /newproject");
@@ -198,7 +218,7 @@ module.exports = function (router, app) {
     router.get('/stat', function (req, res)
     {
         if(req.session.project)
-            Summary.getStat( req.session.user, req.session.project, function(err, data)
+            Summary.getStat( req.session.project, function(err, data)
             {
                 res.json(data);
             });
@@ -209,15 +229,14 @@ module.exports = function (router, app) {
     router.get('/lastupdate', function (req, res)
     {
         var project = req.session.project || req.query.project;
-        var user = req.session.user || req.query.user;
 
-        if(!project || !user)
+        if(!project)
         {
             res.redirect("/view/login");
             return;
         }
 
-        Project.getLastUpdate( project, user, function(err, data){
+        Project.getLastUpdate( project, function(err, data){
             res.json(data);
         })
     });

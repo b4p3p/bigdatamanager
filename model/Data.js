@@ -187,26 +187,31 @@ Data.importFromFile = function (type, file, projectName, cb_ris)
 
 };
 
-/**
- * Get data from datas.
- * @param {String} projectName - project name.
- * @param {function(ERROR, Array)} callback - The callback that handles the response.
- */
-Data.loadData = function (projectName, callback) {
+Data.getDatas = function (projectName, callback)
+{
+    //var connection = mongoose.createConnection('mongodb://localhost/oim');
+    //var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
+    //
+    //datas.find(
+    //    {projectName: projectName},
+    //    function (err, docs) {
+    //        callback(err, docs);
+    //        connection.close();
+    //    }
+    //);
 
-    var connection = mongoose.createConnection('mongodb://localhost/oim');
-    var DataModel = connection.model(Data.MODEL_NAME, Data.SCHEMA);
+    MongoClient.connect(url, function (err, db) {
 
-    DataModel.find({projectName: projectName})
-        .lean()
-        .exec(function (err, docs) {
-            if (err) {
-                callback(err, {});
-            } else {
-                callback(null, docs);
+        var datas = db.collection('datas');
+        datas.find({projectName: projectName})
+            .toArray( function (err, docs)
+            {
+                callback(err, docs);
+                db.close();
             }
-            connection.close();
-        });
+        );
+    });
+
 };
 
 /**

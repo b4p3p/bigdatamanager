@@ -20,5 +20,15 @@ module.exports = function (router, app) {
         });
     });
 
+    router.get('/datas', function (req, res)
+    {
+        var project = req.session.project || req.query.project;
+
+        Data.getDatas( project , function(err, docs){
+            res.json(docs);
+        });
+
+    });
+
 };
 

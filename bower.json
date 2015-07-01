@@ -11,6 +11,7 @@
     "d3-cloud" : ">=1.0.5",
     "jquery-form": ">=3.46.0",
     "bootstrap-fileinput" : ">=4.2.2",
-    "socket.io-client":">=1.3.5"
+    "socket.io-client":">=1.3.5",
+    "lls": ">=0.1.3"
   }
 }

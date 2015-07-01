@@ -1,6 +1,6 @@
 "use strict";
 
-function ShowmapCtrl() {};
+var ShowmapCtrl = function(){};
 
 var cfg =
 {
@@ -22,25 +22,24 @@ var cfg =
     valueField: 'count'
 };
 
+//map
 ShowmapCtrl.mainMap = null;
-ShowmapCtrl.mapContainer = '';
-ShowmapCtrl.datas = null;
-ShowmapCtrl.regions = null;
-ShowmapCtrl.filteredData = null;
 
 //layer
 ShowmapCtrl.layerHeatmap = null;
 ShowmapCtrl.layerMakerCluster = null;
 ShowmapCtrl.layerBoundaries = null;
-ShowmapCtrl.tagsLegend = null;
+ShowmapCtrl.layerLegend = null;
 
 //controls
+ShowmapCtrl.IDmapContainer = '';
+ShowmapCtrl.$cmbSelectTags = null;
+ShowmapCtrl.$cmbSelectNations = null;
+ShowmapCtrl.$cmbSelectUsers = null;
+ShowmapCtrl.$cmbSelectTerms = null;
+ShowmapCtrl.$sliderTimer = null;
+
 ShowmapCtrl.legendControl = null;
-ShowmapCtrl.sliderTimer = null;
-ShowmapCtrl.cmbSelectTags = null;
-ShowmapCtrl.cmbSelectNations = null;
-ShowmapCtrl.cmbSelectUsers = null;
-ShowmapCtrl.cmbSelectTerms = null;
 ShowmapCtrl.chkMarkercluster = null;
 ShowmapCtrl.chkHeatmap = null;
 ShowmapCtrl.chkBoudaries = null;
@@ -49,24 +48,57 @@ ShowmapCtrl.showInfoActiveLayer = false;
 
 //data variable
 ShowmapCtrl.stat = null;
+ShowmapCtrl.nations = null;
+ShowmapCtrl.datas = null;
+ShowmapCtrl.users = null;
+ShowmapCtrl.filteredData = null;
+
 ShowmapCtrl.nationsProject = null;
 ShowmapCtrl.tagsProject = null;
 ShowmapCtrl.minData = new Date();
 ShowmapCtrl.maxData = new Date();
 ShowmapCtrl.tags = null;
 ShowmapCtrl.otherTag = null;
-ShowmapCtrl.nations = null;
-
-ShowmapCtrl.sliderTimer = $("#slider");
-
-ShowmapCtrl.isDatasReady = function()
-{
-    return this.datas != null;
-};
 
 ShowmapCtrl.initMap = function(mapContainer)
 {
-    ShowmapCtrl.mapContainer = mapContainer;
+    ShowmapCtrl.IDmapContainer = mapContainer;
+
+    function createMap()
+    {
+        var lat = 42.22;
+        var long = 12.986;
+
+        // set up the map
+        ShowmapCtrl.mainMap = new L.Map( ShowmapCtrl.IDmapContainer);
+
+        // create the tile layer with correct attribution
+        var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+
+        var osm = new L.TileLayer( osmUrl, {
+            minZoom: 2,
+            maxZoom: 13,
+            attribution: osmAttrib
+        });
+
+        // start the map in Italy
+        ShowmapCtrl.mainMap.setView( new L.LatLng(lat, long), 6 );
+        ShowmapCtrl.mainMap.addLayer(osm);
+    };
+
+    function resizeMap()
+    {
+        var deltaHeight = 200;
+        //var deltaWidth = -100;
+
+        var map = $('#' + ShowmapCtrl.IDmapContainer);
+        //var width = $(window).width();
+        var height = $(window).height();
+
+        map.css("height", $(window).height() - deltaHeight);
+        map.css("margin-top",50);
+    }
 
     createMap();
     resizeMap();
@@ -81,55 +113,20 @@ ShowmapCtrl.initMap = function(mapContainer)
 
 };
 
-function createMap()
-{
-    var lat = 42.22;
-    var long = 12.986;
-
-    // set up the map
-    ShowmapCtrl.mainMap = new L.Map( ShowmapCtrl.mapContainer);
-
-    // create the tile layer with correct attribution
-    var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-    var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
-
-    var osm = new L.TileLayer( osmUrl, {
-        minZoom: 2,
-        maxZoom: 13,
-        attribution: osmAttrib
-    });
-
-    // start the map in Italy
-    ShowmapCtrl.mainMap.setView( new L.LatLng(lat, long), 6 );
-    ShowmapCtrl.mainMap.addLayer(osm);
-};
-
-function resizeMap()
-{
-    var deltaHeight = 200;
-    //var deltaWidth = -100;
-
-    var map = $('#' + ShowmapCtrl.mapContainer);
-    //var width = $(window).width();
-    var height = $(window).height();
-
-    map.css("height", $(window).height() - deltaHeight);
-    map.css("margin-top",50);
-}
-
 ShowmapCtrl.initGui = function()
 {
-    ShowmapCtrl.cmbSelectTags = $('#cmbTags');
-    ShowmapCtrl.cmbSelectNations = $('#cmbNations');
-    ShowmapCtrl.cmbSelectUsers = $('#cmbUsers');
-    ShowmapCtrl.cmbSelectTerms = $('#cmbTerms');
+    ShowmapCtrl.$cmbSelectTags =    $('#cmbTags');
+    ShowmapCtrl.$cmbSelectNations = $('#cmbNations');
+    ShowmapCtrl.$cmbSelectUsers =   $('#cmbUsers');
+    ShowmapCtrl.$cmbSelectTerms =   $('#cmbTerms');
 
     ShowmapCtrl.chkMarkercluster = $('#chk_markerCluster')[0];
     ShowmapCtrl.chkHeatmap = $('#chk_heatmap')[0];
     ShowmapCtrl.chkBoudaries = $('#chk_boundaries')[0];
 
-    ShowmapCtrl.sliderTimer = $("#slider");
-    ShowmapCtrl.sliderTimer.dateRangeSlider(
+    ShowmapCtrl.$sliderTimer = $("#slider");
+
+    ShowmapCtrl.$sliderTimer.dateRangeSlider(
         {
             enabled : true,
             bounds: {
@@ -148,96 +145,148 @@ ShowmapCtrl.getData = function ()
 {
     console.log("CALL: getData");
 
-    var imgRestore = $("#img-restore");
-    var cmdRestore = $("#cmdRestore");
-    if(!cmdRestore.is(':disabled'))
-    {
-        cmdRestore.prop("disabled", true);
-        imgRestore.removeClass("glyphicon glyphicon-remove");
-        imgRestore.addClass("fa fa-spinner fa-spin");
-    }
+    async.parallel(
+        {
+            data: function(next){
+                DataCtrl.getField( function(doc){
+                    ShowmapCtrl.datas = doc;
+                    next(null);
+                }, DataCtrl.FIELD.DATA);
+            },
+            stat: function(next){
+                DataCtrl.getField( function(doc){
+                    ShowmapCtrl.stat = doc;
+                    next(null);
+                }, DataCtrl.FIELD.STAT );
+            },
+            regions: function (next) {
 
-    $.ajax({
-        type: "get",
-        crossDomain: true,
-        dataType: "json",
-        url: "/getdata",
-        success: function (data) {
+                DataCtrl.getField(
 
-            ShowmapCtrl.datas = data.data;
-            ShowmapCtrl.filteredData = data.data;
+                    function(doc){
+                        ShowmapCtrl.regions = doc;
+                        next(null);
+                    },
 
-            ShowmapCtrl.minData = new Date(data.dateMin);
-            ShowmapCtrl.maxData = new Date(data.dateMax);
-            ShowmapCtrl.tags = data.tags;
-            ShowmapCtrl.otherTag = data.otherTag;
-            ShowmapCtrl.nations = data.nations;
+                    DataCtrl.FIELD.REGIONSJSON
 
-            ShowmapCtrl.nationsProject = data.nations;
-            ShowmapCtrl.tagsProject = data.tags;
+                );
+            },
 
-            ShowmapCtrl.getRegions();
-
-            $(".spinner-datas").hide();
-
-            $('#chk_markerCluster').removeAttr("disabled");
-            $('#chk_heatmap').removeAttr("disabled");
-
-            $("#count-container").removeClass("hidden");
-            $("#count").text(data.data.length);
-            if(imgRestore.hasClass('fa fa-spinner fa-spin')) {
-                imgRestore.removeClass("fa fa-spinner fa-spin");
-                imgRestore.addClass("glyphicon glyphicon-remove");
-                DomUtil.clearSelectpicker(ShowmapCtrl.cmbSelectTags);
-                DomUtil.clearSelectpicker(ShowmapCtrl.cmbSelectNations);
-                DomUtil.clearSelectpicker(ShowmapCtrl.cmbSelectUsers);
-                DomUtil.clearSelectpicker(ShowmapCtrl.cmbSelectTerms);
-                refreshData();
+            users: function (next) {
+                DataCtrl.getField( function(doc){
+                    ShowmapCtrl.users = doc;
+                    next(null);
+                }, DataCtrl.FIELD.USERS, 50);
             }
-            ShowmapCtrl.loadData();
         },
-        error: function (xhr, status, error) {
-            console.error("ERR: ShowmapCtrl.loadData " + status + " " + xhr.status);
-            console.error("     Status: " + status + " " + xhr.status);
-            console.error("     Error: " + error);
+        function(err, results) {
+            ShowmapCtrl.setInitialData();
         }
-    });
+    );
+
+    //var imgRestore = $("#img-restore");
+    //var cmdRestore = $("#cmdRestore");
+    //if(!cmdRestore.is(':disabled'))
+    //{
+    //    cmdRestore.prop("disabled", true);
+    //    imgRestore.removeClass("glyphicon glyphicon-remove");
+    //    imgRestore.addClass("fa fa-spinner fa-spin");
+    //}
+
+    //$.ajax({
+    //    type: "get",
+    //    crossDomain: true,
+    //    dataType: "json",
+    //    url: "/getdata",
+    //    success: function (data) {
+    //
+    //        ShowmapCtrl.datas = data.data;
+    //        ShowmapCtrl.filteredData = data.data;
+    //
+    //        ShowmapCtrl.minData = new Date(data.dateMin);
+    //        ShowmapCtrl.maxData = new Date(data.dateMax);
+    //        ShowmapCtrl.tags = data.tags;
+    //        ShowmapCtrl.otherTag = data.otherTag;
+    //        ShowmapCtrl.nations = data.nations;
+    //
+    //        ShowmapCtrl.nationsProject = data.nations;
+    //        ShowmapCtrl.tagsProject = data.tags;
+    //
+    //        ShowmapCtrl.getRegions();
+    //
+    //        $(".spinner-datas").hide();
+    //
+    //        $('#chk_markerCluster').removeAttr("disabled");
+    //        $('#chk_heatmap').removeAttr("disabled");
+    //
+    //        $("#count-container").removeClass("hidden");
+    //        $("#count").text(data.data.length);
+    //        if(imgRestore.hasClass('fa fa-spinner fa-spin')) {
+    //            imgRestore.removeClass("fa fa-spinner fa-spin");
+    //            imgRestore.addClass("glyphicon glyphicon-remove");
+    //            DomUtil.clearSelectpicker(ShowmapCtrl.$cmbSelectTags);
+    //            DomUtil.clearSelectpicker(ShowmapCtrl.$cmbSelectNations);
+    //            DomUtil.clearSelectpicker(ShowmapCtrl.$cmbSelectUsers);
+    //            DomUtil.clearSelectpicker(ShowmapCtrl.$cmbSelectTerms);
+    //            refreshData();
+    //        }
+    //        ShowmapCtrl.loadData();
+    //    },
+    //    error: function (xhr, status, error) {
+    //        console.error("ERR: ShowmapCtrl.loadData " + status + " " + xhr.status);
+    //        console.error("     Status: " + status + " " + xhr.status);
+    //        console.error("     Error: " + error);
+    //    }
+    //});
 };
 
-ShowmapCtrl.loadData = function()
+ShowmapCtrl.setInitialData = function()
 {
-    console.log("CALL: loadData");
-    ShowmapCtrl.sliderTimer.dateRangeSlider(
+    console.log("CALL: setData");
+
+    var min = new Date( ShowmapCtrl.stat.data.minDate );
+    var max = new Date( ShowmapCtrl.stat.data.maxDate );
+
+    ShowmapCtrl.$sliderTimer.dateRangeSlider(
         {
             enabled : true ,
             bounds:{
-                min: new Date( ShowmapCtrl.minData ),
-                max: new Date( ShowmapCtrl.maxData )
+                min: min,
+                max: max
+            },
+            defaultValues:{
+                min: min,
+                max: max
             }
         });
 
-    ShowmapCtrl.sliderTimer.dateRangeSlider("min", ShowmapCtrl.minData);
-    ShowmapCtrl.sliderTimer.dateRangeSlider("max", ShowmapCtrl.maxData);
+    ShowmapCtrl.$sliderTimer.dateRangeSlider("min", min);
+    ShowmapCtrl.$sliderTimer.dateRangeSlider("max", max);
 
-    ShowmapCtrl.cmbSelectTags.attr("title", "Select Tags");
-    ShowmapCtrl.cmbSelectNations.attr("title", "Select Nations");
-    ShowmapCtrl.cmbSelectUsers.attr("title", "Select Users");
-    ShowmapCtrl.cmbSelectTerms.attr("title", "Select Terms");
+    ShowmapCtrl.$cmbSelectTags.attr("title", "Select Tags");
+    ShowmapCtrl.$cmbSelectNations.attr("title", "Select Nations");
+    ShowmapCtrl.$cmbSelectUsers.attr("title", "Select Users");
+    ShowmapCtrl.$cmbSelectTerms.attr("title", "Select Terms");
 
-    if(ShowmapCtrl.otherTag)
-    {
-        DomUtil.addOptionValue(ShowmapCtrl.cmbSelectTags, "Other", true);
+    _.each(ShowmapCtrl.stat.data.nations, function(obj){
+        DomUtil.addOptionValue(ShowmapCtrl.$cmbSelectNations, obj.name);
+    });
+
+    _.each(ShowmapCtrl.stat.data.allTags, function(obj){
+        DomUtil.addOptionValue(ShowmapCtrl.$cmbSelectTags, obj);
+    });
+
+    for (var i = 0; i < 50 && i < ShowmapCtrl.users.length; i++ ){
+        var obj = ShowmapCtrl.users[i];
+        DomUtil.addOptionValue(ShowmapCtrl.$cmbSelectUsers, obj.user, obj.sum);
     }
-    ShowmapCtrl.tags.forEach(function(tag) {
-        DomUtil.addOptionValue(ShowmapCtrl.cmbSelectTags, tag);
-    });
-
-    ShowmapCtrl.nations.forEach(function(nation) {
-        DomUtil.addOptionValue(ShowmapCtrl.cmbSelectNations, nation);
-    });
 
     $('.selectpicker').selectpicker('refresh');
 };
+
+
+
 
 ShowmapCtrl.cmdFilter_click = function()
 {
@@ -262,7 +311,7 @@ ShowmapCtrl.cmdFilter_click = function()
 
             $("#count").text(data.data.length);
 
-            ShowmapCtrl.nations = getSelectedCombo(ShowmapCtrl.cmbSelectNations);
+            ShowmapCtrl.nations = getSelectedCombo(ShowmapCtrl.$cmbSelectNations);
             ShowmapCtrl.getRegions();
             refreshData();
             //disableOption();
@@ -281,27 +330,27 @@ ShowmapCtrl.cmdFilter_click = function()
 
 //function disableOption()
 //{
-//    var tags = getSelectedCombo(ShowmapCtrl.cmbSelectTags);
+//    var tags = getSelectedCombo(ShowmapCtrl.$cmbSelectTags);
 //    if( tags.length > 0 ) {
 //        var nationsToDeselect = _.difference(ShowmapCtrl.nationsProject, ShowmapCtrl.nations);
 //        for (var i = 0; i < nationsToDeselect.length; i += 1) {
-//            var optionNation = ShowmapCtrl.cmbSelectNations.find('option[value="' + nationsToDeselect[i] + '"]');
+//            var optionNation = ShowmapCtrl.$cmbSelectNations.find('option[value="' + nationsToDeselect[i] + '"]');
 //            $(optionNation).attr("disabled", "disabled");
 //        }
 //    }
 //
-//    var nations = getSelectedCombo(ShowmapCtrl.cmbSelectNations);
+//    var nations = getSelectedCombo(ShowmapCtrl.$cmbSelectNations);
 //    if( nations.length > 0 ) {
 //        var tagsToDeselect = _.difference(ShowmapCtrl.tagsProject, ShowmapCtrl.tags);
 //        for (i = 0; i < tagsToDeselect.length; i += 1) {
-//            var optionTag = ShowmapCtrl.cmbSelectTags.find('option[value="' + tagsToDeselect[i] + '"]');
+//            var optionTag = ShowmapCtrl.$cmbSelectTags.find('option[value="' + tagsToDeselect[i] + '"]');
 //            $(optionTag).attr("disabled", "disabled");
 //        }
 //    }
 //    //var value = $('#cmbNations').find('option');
 //
-//    ShowmapCtrl.cmbSelectNations.selectpicker('refresh');
-//    ShowmapCtrl.cmbSelectTags.selectpicker('refresh');
+//    ShowmapCtrl.$cmbSelectNations.selectpicker('refresh');
+//    ShowmapCtrl.$cmbSelectTags.selectpicker('refresh');
 //};
 
 
@@ -309,9 +358,9 @@ ShowmapCtrl.createUrl = function()
 {
     var url = "/getdata";
     var conditions = [];
-    var selectedNations = getSelectedCombo(ShowmapCtrl.cmbSelectNations);
-    var selectedTags = getSelectedCombo(ShowmapCtrl.cmbSelectTags);
-    var values = ShowmapCtrl.sliderTimer.dateRangeSlider("values");
+    var selectedNations = getSelectedCombo(ShowmapCtrl.$cmbSelectNations);
+    var selectedTags = getSelectedCombo(ShowmapCtrl.$cmbSelectTags);
+    var values = ShowmapCtrl.$sliderTimer.dateRangeSlider("values");
 
     console.log("CONDIZIONI: ");
     console.log(" Nazioni: " + selectedNations);
@@ -620,8 +669,8 @@ var hideHeatmap = function()
     console.log("CALL: hideHeatmap");
 
     ShowmapCtrl.mainMap.removeLayer( ShowmapCtrl.layerHeatmap );
-    if ( ShowmapCtrl.mainMap.tagsLegend != null )
-        ShowmapCtrl.mainMap.removeControl( ShowmapCtrl.mainMap.tagsLegend );
+    if ( ShowmapCtrl.mainMap.layerLegend != null )
+        ShowmapCtrl.mainMap.removeControl( ShowmapCtrl.mainMap.layerLegend );
 };
 
 var hideMarkerCluster = function()
@@ -629,8 +678,8 @@ var hideMarkerCluster = function()
     console.log("CALL: hideMarkerCluster");
 
     ShowmapCtrl.mainMap.removeLayer( ShowmapCtrl.layerMakerCluster );
-    if ( ShowmapCtrl.tagsLegend != null )
-        ShowmapCtrl.mainMap.removeControl( ShowmapCtrl.tagsLegend );
+    if ( ShowmapCtrl.layerLegend != null )
+        ShowmapCtrl.mainMap.removeControl( ShowmapCtrl.layerLegend );
 };
 
 var hideBoundaries = function()

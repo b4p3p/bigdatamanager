@@ -214,23 +214,12 @@ Project.addData = function (projectData, sync,  callback){
 
 };
 
-//Project.synchronize = function(url, projectName,  callback)
-//{
-//    request({
-//        uri: "http://" + url + "/synchronize?projectName=" + projectName,
-//    }, function(error, response, body)
-//    {
-//        console.log("SINCRONIZZAZIONE EFFETTUATA: " + body );
-//        callback(null);
-//    });
-//}
-
-Project.getLastUpdate = function(project , user, callback){
+Project.getLastUpdate = function(project , callback){
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var projects = connection.model( Project.MODEL_NAME, Project.PROJECT_SCHEMA);
 
     projects.findOne(
-        {projectName: project, userProject: user },
+        {projectName: project },
         {dateLastUpdate: 1, _id:0},
         function (err, doc)
         {
