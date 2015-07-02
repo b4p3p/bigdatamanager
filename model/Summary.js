@@ -377,5 +377,23 @@ Summary.getStat = function (project, callback) {
     );
 };
 
+Summary.getStatFilter = function (project, query,  callback) {
+
+    var connection  = mongoose.createConnection('mongodb://localhost/oim');
+    var datas   = connection.model( Datas.MODEL_NAME, Datas.SCHEMA);
+
+    datas.aggregate({
+
+        $match: {
+            project: project ,
+            date : {$and: [{$lt: query}]}
+        }
+
+    }, function (err, result) {
+        connection.close();
+        callback(err, result);
+    });
+};
+
 
 module.exports = Summary;

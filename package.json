@@ -43,6 +43,7 @@
     "request":">=2.58.0",
     "underscore": ">=1.8.3",
     "iconv-lite":">=0.4.10",
-    "bootstrap-multiselect" : ">=0.9.13"
+    "bootstrap-multiselect" : ">=0.9.13",
+    "snowball": ">=0.3.1"
   }
 }

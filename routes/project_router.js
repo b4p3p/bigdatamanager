@@ -6,6 +6,7 @@ var Data = require("../model/Data");
 var Summary = require("../model/Summary");
 var async = require('async');
 var requestJson = require('request-json');
+var _ = require("underscore");
 //var urlencode = require('urlencode');
 var fs = require("fs");
 
@@ -215,10 +216,31 @@ module.exports = function (router, app) {
             });
     });
 
-    router.get('/stat', function (req, res)
+    router.get('/stat', function (req, res, next)
     {
+        if ( _.keys(req.query).length > 0 )
+        {
+            next(null);
+            return;
+        }
+
+        console.log("CALL: simple stat");
+
         if(req.session.project)
             Summary.getStat( req.session.project, function(err, data)
+            {
+                res.json(data);
+            });
+        else
+            res.redirect("/view/project/openproject");
+    });
+
+    router.get('/stat', function (req, res)
+    {
+        console.log("CALL: filter stat");
+
+        if(req.session.project)
+            Summary.getStatFilter( req.session.project, req.query, function(err, data)
             {
                 res.json(data);
             });

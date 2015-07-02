@@ -51,6 +51,7 @@ ShowmapCtrl.stat = null;
 ShowmapCtrl.nations = null;
 ShowmapCtrl.datas = null;
 ShowmapCtrl.users = null;
+ShowmapCtrl.terms = null;
 ShowmapCtrl.filteredData = null;
 
 ShowmapCtrl.nationsProject = null;
@@ -141,6 +142,7 @@ ShowmapCtrl.initGui = function()
     );
 };
 
+/* Viene richiamata al refresh della pagina */
 ShowmapCtrl.getData = function ()
 {
     console.log("CALL: getData");
@@ -178,10 +180,17 @@ ShowmapCtrl.getData = function ()
                     ShowmapCtrl.users = doc;
                     next(null);
                 }, DataCtrl.FIELD.USERS, 50);
+            },
+
+            wordcount: function (next) {
+                DataCtrl.getField( function(doc){
+                    ShowmapCtrl.terms = doc;
+                    next(null);
+                }, DataCtrl.FIELD.WORDCOUNT);
             }
         },
         function(err, results) {
-            ShowmapCtrl.setInitialData();
+            ShowmapCtrl.loadForm();
         }
     );
 
@@ -241,7 +250,8 @@ ShowmapCtrl.getData = function ()
     //});
 };
 
-ShowmapCtrl.setInitialData = function()
+/* Dopo che i dati sono stati scaricati riempio la form */
+ShowmapCtrl.loadForm = function()
 {
     console.log("CALL: setData");
 
@@ -277,10 +287,25 @@ ShowmapCtrl.setInitialData = function()
         DomUtil.addOptionValue(ShowmapCtrl.$cmbSelectTags, obj);
     });
 
+    var obj = null;
     for (var i = 0; i < 50 && i < ShowmapCtrl.users.length; i++ ){
-        var obj = ShowmapCtrl.users[i];
+        obj = ShowmapCtrl.users[i];
         DomUtil.addOptionValue(ShowmapCtrl.$cmbSelectUsers, obj.user, obj.sum);
     }
+
+    _.each(ShowmapCtrl.terms , function(obj, key){
+
+        var terms = [];
+        var count = [];
+
+        _.each(obj , function(row, key){
+            terms.push( row.word );
+            count.push( row.count );
+        });
+
+        DomUtil.addOptionGroup(ShowmapCtrl.$cmbSelectTerms, key, terms, count );
+    });
+
 
     $('.selectpicker').selectpicker('refresh');
 };

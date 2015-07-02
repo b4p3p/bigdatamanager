@@ -1,22 +1,67 @@
 "use strict";
+
+var ConstantsRouter = require('./constants_router');
+var Vocabulary = require("../model/Vocabulary");
+
 module.exports = function (router) {
+
+    router.get('/synchronize', function (req, res){
+
+        var project = req.session.project || req.query.project;
+        var user = req.session.user || req.query.user;
+
+        if( !user || !project )
+        {
+            res.json({error:1});
+            return;
+        }
+
+        Vocabulary.sync(project, user, function(err, doc){
+            res.json(doc);
+        })
+
+    });
+
+    router.get('/syncwordcount', function (req, res)
+    {
+        var project = req.session.project || req.query.project;
+        var user = req.session.user || req.query.user;
+
+        if( !user || !project )
+        {
+            res.json({error:1});
+            return;
+        }
+
+        Vocabulary.syncWordCount(project, user, function(err, doc){
+            res.json(doc);
+        });
+
+    });
+
 
     router.get('/vocabulary', function (req, res)
     {
         console.log("GET /vocabulary");
 
-        if(req.session.project == null)
-        {
-            //TODO debug
-            console.error("req.session.project is null: set 'oim'");
-            req.session.project = "oim";
-        }
+        var project = req.session.project || req.query.project;
 
-        var Vocabulary = require("../model/Vocabulary");
-        Vocabulary.getTags(req.session.project, function(err, docs){
+        Vocabulary.getVocabulary( project, function(err, docs){
             res.json(docs);
-        })
+        });
     });
+
+    router.get('/wordcount', function (req, res)
+    {
+        console.log("GET /vocabulary");
+
+        var project = req.session.project || req.query.project;
+
+        Vocabulary.getWordCount( project, {}, function(err, docs){
+            res.json(docs);
+        });
+    });
+
 
     /**
      *  req.body - {tag:{String}, words: [{String}]
@@ -37,7 +82,8 @@ module.exports = function (router) {
     /**
      *  req.body: {newTag:{String}, oldTag: {String}}
      */
-    router.move('/tag', function (req, res){
+    router.move('/tag', function (req, res)
+    {
 
         var Vocabulary = require("../model/Vocabulary");
         Vocabulary.renameTag(req.session.project, req.body, function(err){
@@ -50,7 +96,8 @@ module.exports = function (router) {
     });
 
     /* req.body: {tag:{String}} */
-    router.delete('/tag', function (req, res){
+    router.delete('/tag', function (req, res)
+    {
 
         var Vocabulary = require("../model/Vocabulary");
         Vocabulary.deleteTag(req.session.project, req.body.tag, function(err){
@@ -65,7 +112,8 @@ module.exports = function (router) {
     /**
      *  req.body - {tag:{String}, words: [{String}]
      */
-    router.put('/words', function (req, res){
+    router.put('/words', function (req, res)
+    {
 
         var Vocabulary = require("../model/Vocabulary");
         Vocabulary.renameWords(req.session.project, req.body, function(err){
@@ -76,7 +124,8 @@ module.exports = function (router) {
         });
     });
 
-    router.get('/refresh', function (req, res){
+    router.get('/refresh', function (req, res)
+    {
 
         if(req.session.project == null)
         {
@@ -93,7 +142,5 @@ module.exports = function (router) {
                 res.json({status:"error", error:err});
         });
     });
-
-
 
 };

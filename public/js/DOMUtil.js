@@ -39,12 +39,13 @@ var DomUtil = {
      * @param combo
      * @param group - {String}
      * @param options - {[String]}
+     * @param subtext - {[String]}
      */
-    addOptionGroup : function( combo , group, options ) {
+    addOptionGroup : function( combo , group, options, subtext ) {
         var group = $('<optgroup label="' + group + '"></optgroup>');
         for( var i = 0; i < options.length; i++)
         {
-            group.append($('<option value="' + options[i].toLowerCase() + '" >' + options[i] + '</option>'))
+            group.append( $('<option value="' + options[i].toLowerCase() + '" >' + options[i] + '</option>'))
         }
         combo.append(group);
     }
