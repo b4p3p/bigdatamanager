@@ -6,6 +6,7 @@ var Data = require("../model/Data");
 var Summary = require("../model/Summary");
 var async = require('async');
 var requestJson = require('request-json');
+var request = require('request');
 var _ = require("underscore");
 //var urlencode = require('urlencode');
 var fs = require("fs");
@@ -139,14 +140,14 @@ module.exports = function (router, app) {
 
     router.get('/getproject', function (req, res)
     {
-        var project = req.query.pn;
-
+        var project = req.query.project;
+        var username = req.session.user || req.query.user;
         if(project==null)
             res.json({});
         else
         {
             var Project = require("../model/Project");
-            Project.getProject(project, function(data){
+            Project.getProject(project, username, function(data){
                 res.json(data);
             });
         }
@@ -169,7 +170,7 @@ module.exports = function (router, app) {
         var username = req.session.user;
         var project = req.session.project;
         var type = req.body.type;
-        var ris = {}
+        var ris = {};
 
         async.each(files, function(f, next){
 
@@ -181,8 +182,6 @@ module.exports = function (router, app) {
                 serverUrl: req.headers.host
             };
 
-            var Project = require("../model/Project");
-
             Project.addData(projectData, false, function(err, result)
             {
                 ris[f.originalname] = result;
@@ -192,10 +191,13 @@ module.exports = function (router, app) {
 
         }, function(err){
 
-            var url = req.headers.host;
-            Project.synchronize(url, project, function(err){
-                res.json(ris);
-            });
+            var url = req.headers.origin + '/project/synchronize';
+            request( url , function (error, response, body) {
+                if (!error && response.statusCode == 200) {
+                    res.json(body); // Show the HTML for the Google homepage.
+                }else
+                    res.json({});
+            })
 
         });
 
@@ -211,7 +213,7 @@ module.exports = function (router, app) {
         if( !project || !username )
             res.json({});
         else
-            Summary.sync(project, username,  function(err, result){
+            Summary.sync(project, username, function(err, result){
                 res.json(result);
             });
     });

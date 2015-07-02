@@ -48,5 +48,28 @@ var DomUtil = {
             group.append( $('<option value="' + options[i].toLowerCase() + '" >' + options[i] + '</option>'))
         }
         combo.append(group);
+    },
+
+    getSelectedCombo: function( $combo )
+    {
+        var tags = [];
+        var options = $combo.find(":selected");
+
+        for ( var i = 0; i < options.length; i++)
+            tags.push ( options[i].text );
+
+        return tags;
+    },
+
+    selectAll: function( $combo ) {
+        var options = $combo.find('option');
+
+        for (var i = 0; i < options.length; i++)
+            $(options[i]).prop('selected', true);
+    },
+
+    getParent: function( $combo, option ) {
+        return $combo.find('option[label="'+option+'"]').closest("optgroup").attr('label');
     }
+
 };

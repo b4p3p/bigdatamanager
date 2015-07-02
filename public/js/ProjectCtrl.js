@@ -276,10 +276,10 @@ var ProjectCtrl =
      */
     getProject: function(callback)
     {
-        console.log("CALL: getProject - pn=" + ProjectCtrl.project);
+        console.log("CALL: getProject - project=" + ProjectCtrl.project);
         jQuery.ajax({
             type: "GET",
-            url: '/project/getproject?pn=' + ProjectCtrl.project,
+            url: '/project/getproject?project=' + ProjectCtrl.project,
             dataType: 'json',
             async: true,
             success: function (data) {

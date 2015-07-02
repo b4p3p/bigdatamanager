@@ -63,7 +63,7 @@ Array.prototype.indexOfObject = function(key, value)
     return -1;
 };
 
-Summary.sync = function(project, username,  callback)
+Summary.sync = function(project, username, callback)
 {
     var connection  = mongoose.createConnection('mongodb://localhost/oim');
     var regions     = connection.model( Regions.MODEL_NAME, Regions.SCHEMA);
@@ -149,6 +149,7 @@ Summary.sync = function(project, username,  callback)
             //prendo le regioni
             function(next)
             {
+                console.log("    get regions");
                 regions.find({},
                     function(err, data) {
                         next(err, data);
@@ -159,6 +160,7 @@ Summary.sync = function(project, username,  callback)
             //costruisco il docSync
             function(regions, next)
             {
+                console.log("    build docsync");
                 async.each( regions,
 
                     function(region, next)
@@ -234,6 +236,7 @@ Summary.sync = function(project, username,  callback)
             //cancello la precedente sincronizzazione
             function(regions, next)
             {
+                console.log("    delete old sync");
                 datas.update(
                     { projectName: project } ,
                     { $unset: { region:'', nation:'' } },

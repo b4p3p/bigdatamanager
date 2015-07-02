@@ -52,7 +52,7 @@
 <div id="container" class="hidden">
 
     <div id="slider-container" class="row" >
-        <div id="slider-regionsbar"></div>
+        <div id="slider-bar"></div>
     </div>
 
     <div class="row">
@@ -126,7 +126,7 @@
         Project's data not are geolocalized.
     </div>
 
-    <div id="regionsBar" ></div>
+    <div id="barChart" style="margin-top: 50px"></div>
 
 </div>
 
@@ -135,8 +135,6 @@
 
         RegionBarCtrl.init();
         RegionBarCtrl.getData();
-        RegionBarCtrl.getTags();
-        RegionBarCtrl.getRegions();
 
         $('#cmbRegions').multiselect(
                 {
