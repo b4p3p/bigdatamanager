@@ -65,7 +65,7 @@
                     <label><input id="radioByNumber" type="radio" name="optmode" checked=""> By number</label>
                 </div><br>
                 <div class="radio">
-                    <label><input id="radioByDensity" type="radio" name="optmode"> By density</label>
+                    <label><input id="radioByPercent" type="radio" name="optmode"> By percentage</label>
                 </div>
             </div>
 
@@ -124,6 +124,37 @@
         <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
         <span class="sr-only">Error:</span>
         Project's data not are geolocalized.
+    </div>
+
+    <div class="row">
+
+        <form class="form-inline" id="formType" role="form">
+
+            <div class="form-group">
+                <label class="fix-label">Sort by: </label><br>
+                <div class="radio">
+                    <label><input id="radioByName" type="radio" name="optorder"
+                                  onclick="RegionBarCtrl.orderClick(this);" value="byname" checked="" disabled> By name</label>
+                </div><br>
+                <div class="radio">
+                    <label><input id="radioByNum" type="radio" name="optorder"
+                                  onclick="RegionBarCtrl.orderClick(this);" value="bynum" disabled> By number</label>
+                    <br><div class="radioSortType hidden" style="margin-left: 20px">
+                        <label><input id="radioDesc" type="radio" name="optsort" value="desc" checked=""
+                                      onclick="RegionBarCtrl.orderType();"> Decreasing</label>
+                    </div>
+                    <div class="radioSortType hidden" style="margin-left: 20px">
+                        <label><input id="radioIncr" type="radio" name="optsort" value="incr"
+                                      onclick="RegionBarCtrl.orderType();"> Increasing</label>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="btn-group" role="group" aria-label="...">
+        <button type="button" class="btn btn-default">Left</button>
+        <button type="button" class="btn btn-default">Middle</button>
+        <button type="button" class="btn btn-default">Right</button>
     </div>
 
     <div id="barChart" style="margin-top: 50px"></div>

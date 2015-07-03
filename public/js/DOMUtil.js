@@ -61,15 +61,25 @@ var DomUtil = {
         return tags;
     },
 
-    selectAll: function( $combo ) {
+    selectAll: function( $combo )
+    {
         var options = $combo.find('option');
 
         for (var i = 0; i < options.length; i++)
             $(options[i]).prop('selected', true);
     },
 
-    getParent: function( $combo, option ) {
+    getParent: function( $combo, option )
+    {
         return $combo.find('option[label="'+option+'"]').closest("optgroup").attr('label');
+    },
+
+    deselectAll: function( $combo )
+    {
+        var options = $combo.find('option');
+
+        for (var i = 0; i < options.length; i++)
+            $(options[i]).prop('selected', false);
     }
 
 };

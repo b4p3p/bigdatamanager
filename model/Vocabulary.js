@@ -11,7 +11,7 @@ var _ = require("underscore");
 var async = require("async");
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var textMiner = require( 'text-miner' );
+//var textMiner = require( 'text-miner' );
 var Data = require("../model/Data");
 
 var connection = null;

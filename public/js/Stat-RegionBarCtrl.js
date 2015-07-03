@@ -24,14 +24,25 @@ RegionBarCtrl.$sliderTimer = null;
 RegionBarCtrl.$formRegions = null;
 RegionBarCtrl.$formNations = null;
 RegionBarCtrl.$radioByNumber = null;
-RegionBarCtrl.$radioByDensity = null;
+RegionBarCtrl.$radioByPercent = null;
+RegionBarCtrl.$radioByName = null;
+RegionBarCtrl.$radioByNum = null;
+RegionBarCtrl.$radioDesc = null;
+RegionBarCtrl.$radioIncr = null;
+
+RegionBarCtrl.data = null;
+RegionBarCtrl.type = "Nations";
+
 
 RegionBarCtrl.init = function()
 {
     console.log("CALL: init");
 
+    RegionBarCtrl.$radioByName = $('#radioByName');
+    RegionBarCtrl.$radioByNum = $('#radioByNum');
+
     RegionBarCtrl.$radioByNumber = $('#radioByNumber');
-    RegionBarCtrl.$radioByDensity = $('#radioByDensity');
+    RegionBarCtrl.$radioByPercent = $('#radioByPercent');
 
     RegionBarCtrl.$formRegions = $('#formRegions');
     RegionBarCtrl.$formNations = $('#formNations');
@@ -48,6 +59,9 @@ RegionBarCtrl.init = function()
 
     RegionBarCtrl.$filterButton = $('#cmbFilter');
     RegionBarCtrl.$restoreButton = $('#cmbRestore');
+
+    RegionBarCtrl.$radioDesc = $('#radioDesc');
+    RegionBarCtrl.$radioIncr = $('#radioIncr');
 };
 
 RegionBarCtrl.initSlider = function()
@@ -98,8 +112,12 @@ RegionBarCtrl.clickFilter = function()
     $imgFilter.removeClass("glyphicon glyphicon-filter");
     $imgFilter.addClass("fa fa-spinner fa-spin");
 
+    if(RegionBarCtrl.$radioByNum.is(':checked'))
+        $(".radioSortType").removeClass("hidden");
+
     if(RegionBarCtrl.$radioRegions.is(':checked'))
     {
+        RegionBarCtrl.type = "Regions";
         RegionBarCtrl.selectedRegions = DomUtil.getSelectedCombo(RegionBarCtrl.$cmbRegions);
         if(RegionBarCtrl.selectedRegions.length == 0)
         {
@@ -107,10 +125,11 @@ RegionBarCtrl.clickFilter = function()
             RegionBarCtrl.$cmbRegions.multiselect('refresh');
             RegionBarCtrl.selectedRegions = DomUtil.getSelectedCombo(RegionBarCtrl.$cmbRegions);
         }
-        RegionBarCtrl.drawRegionsBar(RegionBarCtrl.selectedRegions, "Region");
+        RegionBarCtrl.buildData(RegionBarCtrl.selectedRegions);
     }
     else
     {
+        RegionBarCtrl.type = "Nations";
         RegionBarCtrl.selectedNations = DomUtil.getSelectedCombo(RegionBarCtrl.$cmbNations);
         if(RegionBarCtrl.selectedNations.length == 0)
         {
@@ -118,7 +137,7 @@ RegionBarCtrl.clickFilter = function()
             RegionBarCtrl.$cmbNations.selectpicker('refresh');
             RegionBarCtrl.selectedNations = DomUtil.getSelectedCombo(RegionBarCtrl.$cmbNations);
         }
-        RegionBarCtrl.drawRegionsBar(RegionBarCtrl.selectedNations, "Nation");
+        RegionBarCtrl.buildData(RegionBarCtrl.selectedNations);
     }
 
     $imgFilter.removeClass("fa fa-spinner fa-spin");
@@ -136,13 +155,23 @@ RegionBarCtrl.clickRestore = function()
     $imgRestore.removeClass("glyphicon glyphicon-remove");
     $imgRestore.addClass("fa fa-spinner fa-spin");
 
-    //TODO deleteChart
+    RegionBarCtrl.$barChart.replaceWith('<div id="barChart" style="margin-top: 50px"></div>');
+    RegionBarCtrl.$barChart = $('#barChart');
+
+    DomUtil.deselectAll(RegionBarCtrl.$cmbRegions);
+    RegionBarCtrl.$cmbRegions.multiselect('refresh');
+    DomUtil.deselectAll(RegionBarCtrl.$cmbNations);
+    RegionBarCtrl.$cmbNations.selectpicker('refresh');
 
     $imgRestore.removeClass("fa fa-spinner fa-spin");
     $imgRestore.addClass("glyphicon glyphicon-remove");
 
     RegionBarCtrl.$filterButton.removeAttr("disabled");
     RegionBarCtrl.$restoreButton.prop("disabled", true);
+
+    RegionBarCtrl.$radioByName.prop("disabled", true);
+    RegionBarCtrl.$radioByNum.prop("disabled", true);
+    $(".radioSortType").addClass("hidden");
 };
 
 /**
@@ -158,6 +187,7 @@ RegionBarCtrl.createRow = function(obj)
     else
         newRow[0] = obj.nation + " - " + obj.name;
 
+    var cont = 0;
     _.each(RegionBarCtrl.stat.data.allTags, function (tag) {
         {
             var index = obj.counter.indexOfObject("tag", tag);
@@ -167,36 +197,39 @@ RegionBarCtrl.createRow = function(obj)
             }
             else {
                 newRow.push(obj.counter[index].count);
+                cont += obj.counter[index].count;
                 newRow.push("");
             }
         }
     });
+    newRow[newRow.length-1] = cont;
     return newRow;
 
 };
 
-RegionBarCtrl.drawRegionsBar = function(dataSelected, type)
+RegionBarCtrl.buildData = function(dataSelected)
 {
-    console.log("CALL: drawRegionsBar");
+    console.log("CALL: buildData");
 
-    var heightBar = 60;
+    RegionBarCtrl.$radioByName.prop("disabled", false);
+    RegionBarCtrl.$radioByNum.prop("disabled", false);
+
     var data = [];
     var i_r = 1;    //indice riga
 
-    data[0] = RegionBarCtrl.getHeader(type);
+    data[0] = RegionBarCtrl.getHeader();
 
 
-    _.each(RegionBarCtrl.stat.data.nations, function(obj) {
+    _.each(RegionBarCtrl.stat.data.nations, function (obj) {
 
         var row = null;
 
-        if (type == "Nation") {
+        if (RegionBarCtrl.type == "Nations") {
             row = obj;
             if (dataSelected.indexOf(obj.name) >= 0)
                 data.push(RegionBarCtrl.createRow(row));
         }
-        else
-        {
+        else {
             _.each(obj.regions, function (region) {
                 if (dataSelected.indexOf(region.name) >= 0) {
                     row = region;
@@ -208,11 +241,26 @@ RegionBarCtrl.drawRegionsBar = function(dataSelected, type)
         }
     });
 
+    RegionBarCtrl.data = data;
+    RegionBarCtrl.drawBar();
+};
 
-    var dataTable = google.visualization.arrayToDataTable(data);
+RegionBarCtrl.drawBar = function()
+{
+    var dataTable = google.visualization.arrayToDataTable(RegionBarCtrl.data);
+    if(RegionBarCtrl.$radioByName.is(':checked'))
+        dataTable.sort([{column: 0, desc: true}]);
+    else
+    {
+        if(RegionBarCtrl.$radioDesc.is(':checked'))
+            dataTable.sort([{column: RegionBarCtrl.data[0].length - 1, desc: true}]);
+        else
+            dataTable.sort([{column: RegionBarCtrl.data[0].length - 1, desc: false}]);
+    }
 
     var chartAreaHeight = dataTable.getNumberOfRows() * 30;
     var chartHeight = chartAreaHeight + 80;
+    var heightBar = 60;
 
     var options = {
         width: "100%",
@@ -220,15 +268,14 @@ RegionBarCtrl.drawRegionsBar = function(dataSelected, type)
         legend: { position: 'top',  maxLines: 3, textStyle: {fontSize: 13}},
         bar:    { groupWidth: heightBar + "%" },
         annotations: {
-            alwaysOutside: true,
-            textStyle:  { color: "black" },
-            isHtml: true
+            alwaysOutside: false,
+            textStyle:  { color: "black"}
         },
         chartArea: {'height': chartAreaHeight, 'right':0},
         isStacked: true,
         backgroundColor: 'transparent',
-        hAxis: { textStyle: { fontSize: 13 }},
-        vAxis: { textStyle: { fontSize: 13 }}
+        hAxis: { title: "Data by tags", textStyle: { fontSize: 13 }},
+        vAxis: { title: RegionBarCtrl.type, textStyle: { fontSize: 13 }}
     };
 
     var view = new google.visualization.DataView(dataTable);
@@ -264,10 +311,10 @@ RegionBarCtrl.getHeader = function(type)
     var ris = [];
     var cont = 1;
 
-    ris[0] = type;
+    ris[0] = RegionBarCtrl.type;
     _.each(RegionBarCtrl.stat.data.allTags, function (tag) {
         ris[cont] = tag;
-        ris[cont+1] = {role: 'annotation'};
+        ris[cont+1] = {role: 'annotation', type: 'number'};
         //ris[cont+1] = {type: 'string', role: 'annotation', p: {html: true}};
         cont+=2;
     });
@@ -275,15 +322,15 @@ RegionBarCtrl.getHeader = function(type)
     return ris;
 };
 
-RegionBarCtrl.getSelectedID = function()
-{
-    console.log("CALL: getSelectedID");
-
-    if(RegionBarCtrl.$radioByNumber.is(':checked'))
-        return 0;
-    else
-        return 1;
-};
+//RegionBarCtrl.getSelectedID = function()
+//{
+//    console.log("CALL: getSelectedID");
+//
+//    if(RegionBarCtrl.$radioByNumber.is(':checked'))
+//        return 0;
+//    else
+//        return 1;
+//};
 
 RegionBarCtrl.removeWait = function ()
 {
@@ -381,5 +428,19 @@ RegionBarCtrl.handleClick = function (radio)
     RegionBarCtrl.$filterButton.attr('disabled', false);
 };
 
+RegionBarCtrl.orderClick = function ($radio)
+{
+    console.log("CALL: orderClick");
+    if($radio.value == "bynum")
+        $(".radioSortType").removeClass("hidden");
+    else
+        $(".radioSortType").addClass("hidden");
+    RegionBarCtrl.drawBar();
+};
+
+RegionBarCtrl.orderType = function ($radio)
+{
+    RegionBarCtrl.drawBar();
+};
 
 
