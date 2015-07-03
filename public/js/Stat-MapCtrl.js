@@ -303,6 +303,7 @@ ShowmapCtrl.loadForm = function()
             count.push( row.count );
         });
 
+
         DomUtil.addOptionGroup(ShowmapCtrl.$cmbSelectTerms, key, terms, count );
     });
 

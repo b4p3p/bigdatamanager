@@ -13,12 +13,12 @@ var ConstantsRouter = {};
  */
 ConstantsRouter.argIndex = function(req, page)
 {
-    ////TODO DEBUG
-    //if ( req && req.session )
-    //{
-    //    req.session.project = req.session.project ? req.session.project : "oim";
-    //    req.session.user = req.session.user ? req.session.user : "oim";
-    //}
+    //TODO DEBUG
+    if ( req && req.session )
+    {
+        req.session.project = req.session.project ? req.session.project : "oim";
+        req.session.user = req.session.user ? req.session.user : "oim";
+    }
 
     var ris = {};
 

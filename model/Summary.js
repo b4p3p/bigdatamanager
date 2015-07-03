@@ -380,23 +380,357 @@ Summary.getStat = function (project, callback) {
     );
 };
 
-Summary.getStatFilter = function (project, query,  callback) {
+Summary.getStatFilter_bak = function (project, username, query,  callback)
+{
+    console.log("CALL Summary.getStatFilter of " + project);
+
+    var docSync = {
+        project : project,
+        username: username,
+        lastUpdate: new Date(),
+        data: {
+            minDate : null,
+            maxDate : null,
+            syncTags: [],
+            allTags: [],
+            countSync : 0,
+            countTot: 0,
+            counter: [],
+            nations: []
+        }
+    };
 
     var connection  = mongoose.createConnection('mongodb://localhost/oim');
     var datas   = connection.model( Datas.MODEL_NAME, Datas.SCHEMA);
 
-    datas.aggregate({
+    var minDate = new Date(query.start);
+    var maxDate = new Date(query.end);
 
-        $match: {
-            project: project ,
-            date : {$and: [{$lt: query}]}
+    //itemsSold: { $addToSet: "$item" }
+
+    async.waterfall([
+
+        //prendo i primi campi
+        function(next) {
+
+            datas.aggregate([
+
+                {$match: {
+                    projectName: project ,
+                    $and: [
+                        {date: {$gte: minDate}},
+                        {date: {$lte: maxDate}}
+                    ]
+                }},
+
+                {$group: {
+                    _id: null,
+                    "minDate": {$min: "$date"},
+                    "maxDate": {$max: "$date"},
+                    "syncTags" :{ $addToSet: "$tag" },
+                    countTot: {$sum:1},
+                    data: { $push: { nation: "$nation", region: "$region", tag: "$tag" } }
+                }}
+
+            ] , function (err, result) {
+
+                if(result[0])
+                {
+                    docSync.data.minDate = result[0].minDate;
+                    docSync.data.maxDate = result[0].maxDate;
+                    docSync.data.syncTags = result[0].syncTags;
+                    docSync.data.countTot = result[0].countTot
+                }
+                next(null)
+            });
+        },
+
+        //prendo il counter totale
+        function(next){
+
+            datas.aggregate([
+
+                {$match: {
+                    projectName: project ,
+                    $and: [
+                        {date: {$gte: minDate}},
+                        {date: {$lte: maxDate}}
+                    ]
+                }},
+
+                {$group: {
+                    _id: "$tag",
+                    count: {$sum:1}
+                }},
+
+                {$project:{
+                    _id: 0,
+                    tag: "$_id",
+                    count: 1
+                }}
+
+            ] , function (err, result) {
+
+                docSync.data.counter.push(result);
+
+                next(null)
+
+            });
+        },
+
+        //prendo il counter delle nazioni
+        function(next){
+
+            datas.aggregate([
+
+                {$match: {
+                    projectName: project ,
+                    $and: [
+                        {date: {$gte: minDate}},
+                        {date: {$lte: maxDate}}
+                    ]
+                }},
+
+                {$group: {
+                    _id: {nation: "$nation", region: "$region", tag : "$tag" },
+                    count: {$sum:1}
+                }}
+
+            ] , function (err, result) {
+
+                var ris = {},
+                    nation = "",
+                    region = "",
+                    countSync = 0;
+
+                async.each( result,
+                    function (itemregion, next) {
+
+                        nation = itemregion._id.nation;
+                        region = itemregion._id.region;
+
+                        if(!nation)
+                        {
+                            next(null);
+                            return;
+                        }
+
+                        if(!ris[nation])
+                        {
+                            ris[nation] = {
+                                name: nation,
+                                count:0,
+                                regions: [],
+                                counter: []
+                            }
+                        }
+
+                        if(!ris[nation].regions[region])
+                        {
+                            ris[nation].regions[region] = {
+                                name: region,
+                                count: 0,
+                                counter: []
+                            }
+                        }
+
+                        countSync += itemregion.count;
+                        ris[nation].count += itemregion.count;
+
+                        next(null);
+                    },
+
+                    function(err)
+                    {
+                        docSync.data.countSync = countSync;
+                        _.each(_.keys(ris), function(nation){
+                            docSync.data.nations.push(ris[nation]);
+                        });
+                        next(null)
+                    }
+                );
+            });
         }
 
-    }, function (err, result) {
+    ], function(err){
+
         connection.close();
-        callback(err, result);
+        callback(err, docSync);
+
     });
+
+
+};
+
+Summary.getStatFilter = function (project, username, query,  callback)
+{
+    console.log("CALL Summary.getStatFilter of " + project);
+
+    var docSync = {
+        project : project,
+        username: username,
+        lastUpdate: new Date(),
+        data: {
+            minDate : null,
+            maxDate : null,
+            countSync : 0,
+            countTot: 0,
+            syncTags: {},
+            allTags: {},
+            counter: {},
+            nations: {}
+        }
+    };
+
+    function _setDate(date)
+    {
+        if( !docSync.data.minDate )
+            docSync.data.minDate = date;
+        if( !docSync.data.maxDate )
+            docSync.data.maxDate = date;
+
+        if( date < docSync.data.minDate )
+            docSync.data.minDate = date;
+        if( date > docSync.data.maxDate )
+            docSync.data.maxDate = date;
+    }
+
+    function setDate(minDate, maxDate)
+    {
+        _setDate(minDate);
+        _setDate(maxDate);
+    }
+
+    var connection  = mongoose.createConnection('mongodb://localhost/oim');
+    var datas   = connection.model( Datas.MODEL_NAME, Datas.SCHEMA);
+
+    var minDate = new Date(query.start);
+    var maxDate = new Date(query.end);
+
+    //itemsSold: { $addToSet: "$item" }
+
+    datas.aggregate(
+        [
+            {$match: {
+                projectName: project ,
+                $and: [
+                    {date: {$gte: minDate}},
+                    {date: {$lte: maxDate}}
+                ]
+            }},
+
+            {$group: {
+                _id: {nation: "$nation", region: "$region", tag : "$tag" },
+                count: {$sum:1},
+                minDate: {$min: "$date"},
+                maxDate: {$max: "$date" }
+            }}
+
+        ] ,
+
+        function (err, result)
+        {
+            var nation = "",
+                region = "",
+                tag = "",
+                count = 0
+
+            async.each( result,
+
+                function (item, next) {
+
+                    nation = item._id.nation;
+                    region = item._id.region;
+                    tag = item._id.tag;
+                    count = item.count;
+
+                    //min e max date
+                    setDate(item.minDate, item.maxDate);
+
+                    //count tot
+                    docSync.data.countTot += item.count;
+
+                    if(!docSync.data.allTags[tag])
+                        docSync.data.allTags[tag] = true;
+
+                    if(!nation)
+                    {
+                        next(null);
+                        return;
+                    }
+
+                    //count tot
+                    docSync.data.countSync += item.count;
+
+                    if(!docSync.data.syncTags[tag])
+                        docSync.data.syncTags[tag] = true;
+
+                    //counter
+                    if(!docSync.data.counter[tag]) {
+                        docSync.data.counter[tag] = {
+                            tag: tag,
+                            count : 0
+                        }
+                    }
+                    docSync.data.counter[tag].count += count;
+
+                    //nations
+                    if(!docSync.data.nations[nation])
+                    {
+                        docSync.data.nations[nation] = {
+                            name: nation,
+                            regions: {},
+                            count : 0,
+                            counter: {}
+                        }
+                    }
+
+                    docSync.data.nations[nation].count += count;
+
+                    //regions
+                    if(!docSync.data.nations[nation].regions[region])
+                    {
+                        docSync.data.nations[nation].regions[region] = {
+                            name: region,
+                            count : 0,
+                            counter: {}
+                        }
+                    }
+                    docSync.data.nations[nation].regions[region].count += count;
+
+                    //counter
+                    if(!docSync.data.nations[nation].regions[region].counter[tag]) {
+                        docSync.data.nations[nation].regions[region].counter[tag] = {
+                            tag: tag,
+                            count : 0
+                        }
+                    }
+                    docSync.data.nations[nation].regions[region].counter[tag].count += count;
+
+                    next(null);
+                },
+
+                function(err)
+                {
+                    docSync.data.allTags = _.keys(docSync.data.allTags);
+                    docSync.data.syncTags= _.keys(docSync.data.syncTags);
+
+                    //docSync.data.countSync = countSync;
+                    //_.each(_.keys(ris), function(nation){
+                    //    docSync.data.nations.push(ris[nation]);
+                    //});
+
+                    connection.close();
+
+                    callback(err, docSync);
+
+                }
+            );
+        }
+    );
 };
 
 
+
 module.exports = Summary;
+

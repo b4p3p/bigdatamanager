@@ -241,8 +241,11 @@ module.exports = function (router, app) {
     {
         console.log("CALL: filter stat");
 
+        var project =   req.session.project || req.query.project;
+        var username =  req.session.user;
+
         if(req.session.project)
-            Summary.getStatFilter( req.session.project, req.query, function(err, data)
+            Summary.getStatFilter( project, username , req.query, function(err, data)
             {
                 res.json(data);
             });
