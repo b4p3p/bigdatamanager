@@ -9,7 +9,7 @@
 ```
 db.users.createIndex( { username: 1 }, { unique: true } )
 
-db.datas.createIndex( {sprojectName: 1, id: 1 }, { unique: true } )
+db.datas.createIndex( {projectName: 1, id: 1 }, { unique: true } )
 
 db.datas.createIndex(
    { text : "text" },
@@ -18,6 +18,8 @@ db.datas.createIndex(
 )
 
 db.datas.createIndex( {projectName: 1} );
+
+db.summaries.createIndex( {project: 1} );
 
 db.projects.createIndex( { projectNames: 1, userProject: 1 }, { unique: true } )
 

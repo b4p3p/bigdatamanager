@@ -314,12 +314,13 @@ Project.sync = function(project, username, callback)
             //per ogni regione sincronizzo i dati
             function(regions, next){
 
-                console.log("     set regions/nations data");
+                console.log("     set regions/nations data - #" + regions.length);
+                var cont=0;
+                var len = regions.length;
 
                 //uso i driver nativi (bug mongoose)
                 MongoClient.connect( url, function (err, db)
                 {
-
                     var datas = db.collection('datas');
 
                     async.each(regions,
@@ -340,6 +341,8 @@ Project.sync = function(project, username, callback)
                                 },
                                 {multi: true, w: 1},
                                 function (err, result) {
+                                    console.log("   fatto " + cont + "/" + len + " - " + region._doc.properties.NAME_0 + ":" + region._doc.properties.NAME_1);
+                                    cont++;
                                     next(null);
                                 }
                             );
@@ -402,7 +405,8 @@ Project.sync = function(project, username, callback)
             }
         ],
         function(err, doc){
-            connection.close();
+            connection
+                .close();
             if(err){
                 console.error(JSON.stringify(err));
                 callback(err, {});

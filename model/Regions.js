@@ -170,6 +170,7 @@ Regions.getLightNations = function (callback) {
                 {"geometry": 1, "properties.NAME_0": 1, "properties.NAME_1": 1}
             ).each(
                 function (err, region) {
+
                     if (!region && cont == 0 && first)  //non ci sono regioni
                     {
                         callback(null, {});

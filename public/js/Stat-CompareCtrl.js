@@ -529,12 +529,11 @@ CompareCtrl.createRadarRow = function(obj, color)
 
     _.each(CompareCtrl.stat.data.allTags, function (tag) {
         {
-            var index = obj.counter.indexOfObject("tag", tag);
-            if (index == -1) {
+            if( obj.counter[tag] == null){
                 newRow.push(0);
             }
             else {
-                newRow.push(obj.counter[index].count);
+                newRow.push(obj.counter[tag].count);
             }
         }
     });
@@ -671,7 +670,7 @@ CompareCtrl.insertLegend = function(data)
 
 CompareCtrl.generateColor = function(count)
 {
-    return randomColor({hue: 'blue', count: count}); //return randomColor({hue: 'blue', count: count});
+    return randomColor({count: count}); //return randomColor({hue: 'blue', count: count});
 };
 
 CompareCtrl.ColorLuminance = function(hex, lum)

@@ -214,7 +214,7 @@ Summary.getStatFilter = function (project, username, query, callback)
                                 if (!docSync.data.syncTags[tag])
                                     docSync.data.syncTags[tag] = true;
 
-                                //counter
+                                //counter TOT
                                 if (!docSync.data.counter[tag]) {
                                     docSync.data.counter[tag] = {
                                         tag: tag,
@@ -235,7 +235,16 @@ Summary.getStatFilter = function (project, username, query, callback)
 
                                 docSync.data.nations[nation].count += count;
 
-                                //regions
+                                //COUNTER NATION
+                                if (!docSync.data.nations[nation].counter[tag]) {
+                                    docSync.data.nations[nation].counter[tag] = {
+                                        tag: tag,
+                                        count: 0
+                                    }
+                                }
+                                docSync.data.nations[nation].counter[tag].count += count;
+
+                                //REGIONS
                                 if (!docSync.data.nations[nation].regions[region]) {
                                     docSync.data.nations[nation].regions[region] = {
                                         name: region,
@@ -245,7 +254,7 @@ Summary.getStatFilter = function (project, username, query, callback)
                                 }
                                 docSync.data.nations[nation].regions[region].count += count;
 
-                                //counter
+                                //COUNTER REGIONS
                                 if (!docSync.data.nations[nation].regions[region].counter[tag]) {
                                     docSync.data.nations[nation].regions[region].counter[tag] = {
                                         tag: tag,
@@ -297,7 +306,13 @@ Summary.getStatFilter = function (project, username, query, callback)
 
                     function (err, result) {
 
-                        callback(null, result[0].count);
+                        if(result.length == 0 )
+                        {
+                            callback(null, 0);
+                        }else
+                        {
+                            callback(null, result[0].count);
+                        }
 
                     }
                 );

@@ -50,16 +50,16 @@
         position: relative;
         left: 25%;
         right: 25%;
-        padding-bottom: 20px;
+        /*padding-bottom: 20px;*/
     }
 
-    .radarLegend
+    #radarLegend
     {
-        position: relative;
-        max-width: 200px;
-        right: 25%;
-        left: calc(25% + (50%/2));
-        z-index: 10;
+        /*position: relative;*/
+        /*max-width: 200px;*/
+        /*right: 25%;*/
+        /*left: calc(25% + (50%/2));*/
+        /*z-index: 10;*/
     }
 </style>
 
@@ -188,8 +188,8 @@
 
     <div id="barChart" style="margin-top: 20px"></div>
     <div>
-        <div id="radarLegend" style="margin-left: 20%"></div>
-        <canvas class="radar" id="radarChart" width="400" height="400"></canvas>
+        <div class="col-md-3" id="radarLegend"></div>
+        <canvas class="radar col-md-9" id="radarChart" width="400" height="400"></canvas>
     </div>
 </div>
 

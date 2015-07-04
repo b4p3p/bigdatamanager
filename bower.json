@@ -4,6 +4,7 @@
   "main": "app.js",
   "dependencies": {
     "bootstrap-table": ">=1.7.0",
+    "leaflet": ">=0.7.3",
     "leaflet.markercluster": ">=0.4.0",
     "Leaflet.awesome-markers": ">=2.0.2",
     "jquery-ui": ">=1.11.4",
