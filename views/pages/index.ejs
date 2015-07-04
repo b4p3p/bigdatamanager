@@ -26,7 +26,7 @@
         }
         .content
         {
-            margin-top: 30px;
+            /*margin-top: 30px;*/
             margin-bottom: 15px;
             padding-right: 60px;
             padding-left: 60px;
@@ -194,12 +194,9 @@
                                 <img src="/public/img/icon-osm.png" class="subMenu-ico"/>
                                 Show map
                             </a></li>
-                        <li><a href="/view/stat/showregionsbar">
-                                <img src="/public/img/icon-bar.png" class="subMenu-ico"/>
-                                Show bar chart</a></li>
-                        <li><a href="/view/stat/showregionsradar">
-                                <img src="/public/img/icon-radar.png" class="subMenu-ico"/>
-                                Show radar chart</a></li>
+                        <li><a href="/view/stat/compare">
+                                <img src="/public/img/icon-compare.png" class="subMenu-ico"/>
+                                Compare</a></li>
                         <li><a href="/view/stat/showtimeline">
                                 <img src="/public/img/icon-line.png" class="subMenu-ico"/>
                                 Time line</a></li>
@@ -231,10 +228,8 @@
             <!-- STAT -->
             <% }else if (page == "stat-map") { %>
                 <% include ../partials/stat-map.ejs %>
-            <% }else if (page == "stat-regions-bar") { %>
-                <% include ../partials/stat-regionsbar.ejs %>
-            <% }else if (page == "stat-regions-radar") { %>
-                <% include ../partials/stat-regionsradar.ejs %>
+            <% }else if (page == "stat-compare") { %>
+                <% include ../partials/stat-compare.ejs %>
             <% }else if (page == "stat-timeline") { %>
                 <% include ../partials/stat-timeline.ejs %>
             <% }else if (page == "stat-tag") { %>

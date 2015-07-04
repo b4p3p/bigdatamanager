@@ -87,15 +87,9 @@ module.exports = function (router) {
         res.render('../views/pages/index.ejs', arg );
     });
 
-    router.get('/stat/showregionsbar', function (req, res)
+    router.get('/stat/compare', function (req, res)
     {
-        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.STAT_REGIONS_BAR);
-        res.render('../views/pages/index.ejs', arg );
-    });
-
-    router.get('/stat/showregionsradar', function (req, res)
-    {
-        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.STAT_REGIONS_RADAR);
+        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.STAT_COMPARE);
         res.render('../views/pages/index.ejs', arg );
     });
 

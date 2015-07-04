@@ -62,10 +62,10 @@
             <div class="form-group form-option">
                 <label class="fix-label">Visualization mode:</label><br>
                 <div class="radio">
-                    <label><input id="radioByNumber" type="radio" name="optmode" checked=""> By number</label>
+                    <label><input id="radioByNumber" type="radio" name="optmode" checked="" disabled> By number</label>
                 </div><br>
                 <div class="radio">
-                    <label><input id="radioByPercent" type="radio" name="optmode"> By percentage</label>
+                    <label><input id="radioByDensity" type="radio" name="optmode" disabled> By density</label>
                 </div>
             </div>
 
@@ -73,11 +73,11 @@
                 <label class="fix-label">View by:</label><br>
                 <div class="radio">
                     <label><input id="radioNations" type="radio" name="optview"
-                                  onclick="RegionBarCtrl.handleClick(this);" value="nations" checked=""> Nations</label>
+                                  onclick="CompareCtrl.handleClick(this);" value="nations" checked=""> Nations</label>
                 </div><br>
                 <div class="radio">
                     <label><input id="radioRegions" type="radio" name="optview"
-                                  onclick="RegionBarCtrl.handleClick(this);" value="regions" > Regions</label>
+                                  onclick="CompareCtrl.handleClick(this);" value="regions" > Regions</label>
                 </div>
             </div>
             <div id="formRegions" class="form-group hidden" style="position: absolute">
@@ -108,14 +108,14 @@
         <button type="button" class="btn btn-success"
                 id="cmbFilter"
                 style="float: right; margin-top: 15px; margin-left: 10px;"
-                onclick="RegionBarCtrl.clickFilter()"
+                onclick="CompareCtrl.clickFilter()"
                 disabled>
             <span id="img-filter" class="glyphicon glyphicon-filter" aria-hidden="true"></span> Apply filter</button>
 
         <button type="button" class="btn btn-danger"
                 id="cmbRestore"
                 style="float: right; margin-top: 15px; margin-left: 10px;"
-                onclick="RegionBarCtrl.clickRestore()"
+                onclick="CompareCtrl.clickRestore()"
                 disabled>
             <span id="img-restore" class="glyphicon glyphicon-remove" aria-hidden="true"></span> Restore</button>
     </div>
@@ -131,41 +131,39 @@
         <form class="form-inline" id="formType" role="form">
 
             <div class="form-group">
-                <label class="fix-label">Sort by: </label><br>
-                <div class="radio">
-                    <label><input id="radioByName" type="radio" name="optorder"
-                                  onclick="RegionBarCtrl.orderClick(this);" value="byname" checked="" disabled> By name</label>
-                </div><br>
-                <div class="radio">
-                    <label><input id="radioByNum" type="radio" name="optorder"
-                                  onclick="RegionBarCtrl.orderClick(this);" value="bynum" disabled> By number</label>
-                    <br><div class="radioSortType hidden" style="margin-left: 20px">
-                        <label><input id="radioDesc" type="radio" name="optsort" value="desc" checked=""
-                                      onclick="RegionBarCtrl.orderType();"> Decreasing</label>
-                    </div>
-                    <div class="radioSortType hidden" style="margin-left: 20px">
-                        <label><input id="radioIncr" type="radio" name="optsort" value="incr"
-                                      onclick="RegionBarCtrl.orderType();"> Increasing</label>
-                    </div>
+                <label class="fix-label" style="margin-left: 3px">Order by</label><br>
+                <div class="btn-group" role="group" aria-label="...">
+                    <button id="NameButton" type="button" class="btn btn-default active"
+                            onclick="CompareCtrl.NameButtonClick();" disabled> Name</button>
+
+                    <button id="NumButton" type="button" class="btn btn-default"
+                            onclick="CompareCtrl.NumButtonClick();" disabled> Number</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="fix-label" style="margin-left: 3px">Sort</label><br>
+                <div class="btn-group" role="group" aria-label="...">
+                    <button id="AZbutton" type="button" class="btn btn-default active"
+                            onclick="CompareCtrl.AZbuttonClick();" disabled>
+                        <span id="img-filter" class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span> A - Z </button>
+
+                    <button id="ZAbutton" type="button" class="btn btn-default"
+                            onclick="CompareCtrl.ZAbuttonClick();" disabled>
+                        <span id="img-filter" class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span> Z - A </button>
                 </div>
             </div>
         </form>
     </div>
-    <div class="btn-group" role="group" aria-label="...">
-        <button type="button" class="btn btn-default">Left</button>
-        <button type="button" class="btn btn-default">Middle</button>
-        <button type="button" class="btn btn-default">Right</button>
-    </div>
 
-    <div id="barChart" style="margin-top: 50px"></div>
+    <div id="barChart" style="margin-top: 20px"></div>
 
 </div>
 
 <script>
     $(document).ready(function() {
 
-        RegionBarCtrl.init();
-        RegionBarCtrl.getData();
+        CompareCtrl.init();
+        CompareCtrl.getData();
 
         $('#cmbRegions').multiselect(
                 {
