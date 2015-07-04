@@ -1,0 +1,214 @@
+<script src="/public/js/Stat-CompareCtrl.js"></script>
+
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script src="/public/lib/chartjs/Chart.js"></script>
+
+<script src="/public/lib/jquery-ui/jquery-ui.js"></script>
+<script src="/public/js/DOMUtil.js"></script>
+
+<script type="text/javascript" src="/node_modules/bootstrap-multiselect/dist/js/bootstrap-multiselect.js"></script>
+<script type="text/javascript" src="/node_modules/randomcolor/randomColor.js"></script>
+<link rel="stylesheet" href="/node_modules/bootstrap-multiselect/dist/css/bootstrap-multiselect.css" type="text/css"/>
+
+<script>
+    google.load("visualization", "1.1", {packages:[ 'bar', 'corechart' ] });
+</script>
+
+<style>
+
+    #formType {
+        margin-left: 20px;
+        /*width: 100%;*/
+        margin-bottom: 10px;
+    }
+    #lblVisualizationMode{
+        /*float: left;*/
+        /*margin-right: 5px*/
+    }
+    #regionsBar
+    {
+        margin-top: -100px;
+        width: 100%;
+    }
+
+    #slider-container
+    {
+        position: relative;
+        /*left: 25%;*/
+        /*width: 50%;*/
+        margin-top: 40px;
+        margin-bottom: 20px;
+    }
+
+    .form-option
+    {
+        margin-right: 50px;
+    }
+
+    .radar
+    {
+        position: relative;
+        left: 25%;
+        right: 25%;
+        padding-bottom: 20px;
+    }
+
+    .radarLegend
+    {
+        position: relative;
+        max-width: 200px;
+        right: 25%;
+        left: calc(25% + (50%/2));
+        z-index: 10;
+    }
+</style>
+
+<div id="spinner" style="text-align: center">
+    <img src="/public/img/ajax-loader.gif" alt="Loading" class="spinnerImage"/>
+    <p>Loading data...</p>
+</div>
+
+<div id="container" class="hidden">
+
+    <div id="slider-container" class="row" >
+        <div id="slider-bar"></div>
+    </div>
+
+    <div class="row">
+
+        <form class="form-inline" id="formType" role="form">
+
+            <div class="form-group form-option">
+                <label class="fix-label">Charts:</label><br>
+                <div class="radio">
+                    <label><input id="radioBar" type="radio" name="optchart"
+                                  onclick="CompareCtrl.handleChartClick();" checked=""> Bar</label>
+                </div><br>
+                <div class="radio">
+                    <label><input id="radioRadar" type="radio" name="optchart"
+                                  onclick="CompareCtrl.handleChartClick();"> Radar</label>
+                </div>
+            </div>
+
+            <div class="form-group form-option">
+                <label class="fix-label">Visualization mode:</label><br>
+                <div class="radio">
+                    <label><input id="radioByNumber" type="radio" name="optmode" checked="" disabled> By number</label>
+                </div><br>
+                <div class="radio">
+                    <label><input id="radioByDensity" type="radio" name="optmode" disabled> By density</label>
+                </div>
+            </div>
+
+            <div class="form-group form-option">
+                <label class="fix-label">View by:</label><br>
+                <div class="radio">
+                    <label><input id="radioNations" type="radio" name="optview"
+                                  onclick="CompareCtrl.handleClick(this);" value="nations" checked=""> Nations</label>
+                </div><br>
+                <div class="radio">
+                    <label><input id="radioRegions" type="radio" name="optview"
+                                  onclick="CompareCtrl.handleClick(this);" value="regions" > Regions</label>
+                </div>
+            </div>
+            <div id="formRegions" class="form-group hidden" style="position: absolute">
+                <div class="form-group form-combo">
+                    <label class="fix-label" for="cmbRegions">Regions</label><br>
+                    <select id="cmbRegions"
+                            multiple="multiple">
+                    </select>
+                </div>
+            </div>
+
+            <div id="formNations"class="form-group" style="position: absolute">
+                <div class="form-group form-combo">
+                    <label class="fix-label" for="cmbNations">Nations</label><br>
+                    <select class="selectpicker" id="cmbNations"
+                            data-live-search="true" title="Select nations"
+                            multiple>
+                    </select>
+                </div>
+            </div>
+
+        </form>
+
+
+    </div>
+
+    <div class="row">
+        <button type="button" class="btn btn-success"
+                id="cmbFilter"
+                style="float: right; margin-top: 15px; margin-left: 10px;"
+                onclick="CompareCtrl.clickFilter()"
+                disabled>
+            <span id="img-filter" class="glyphicon glyphicon-filter" aria-hidden="true"></span> Apply filter</button>
+
+        <button type="button" class="btn btn-danger"
+                id="cmbRestore"
+                style="float: right; margin-top: 15px; margin-left: 10px;"
+                onclick="CompareCtrl.clickRestore()"
+                disabled>
+            <span id="img-restore" class="glyphicon glyphicon-remove" aria-hidden="true"></span> Restore</button>
+    </div>
+
+    <div class="alert alert-warning hidden" role="alert" id="warning" style="margin-top: 20px">
+        <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
+        <span class="sr-only">Error:</span>
+        Project's data not are geolocalized.
+    </div>
+
+    <div class="row">
+
+        <form class="form-inline hidden" id="formSort" role="form">
+
+            <div class="form-group">
+                <label class="fix-label" style="margin-left: 3px">Order by</label><br>
+                <div class="btn-group" role="group" aria-label="...">
+                    <button id="NameButton" type="button" class="btn btn-default active"
+                            onclick="CompareCtrl.NameButtonClick();" disabled> Name</button>
+
+                    <button id="NumButton" type="button" class="btn btn-default"
+                            onclick="CompareCtrl.NumButtonClick();" disabled> Number</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="fix-label" style="margin-left: 3px">Sort</label><br>
+                <div class="btn-group" role="group" aria-label="...">
+                    <button id="AZbutton" type="button" class="btn btn-default active"
+                            onclick="CompareCtrl.AZbuttonClick();" disabled>
+                        <span id="img-filter" class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span> A - Z </button>
+
+                    <button id="ZAbutton" type="button" class="btn btn-default"
+                            onclick="CompareCtrl.ZAbuttonClick();" disabled>
+                        <span id="img-filter" class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span> Z - A </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div id="barChart" style="margin-top: 20px"></div>
+    <div>
+        <div id="radarLegend" style="margin-left: 20%"></div>
+        <canvas class="radar" id="radarChart" width="400" height="400"></canvas>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function() {
+
+        CompareCtrl.init();
+        CompareCtrl.getData();
+
+        $('#cmbRegions').multiselect(
+                {
+                    nonSelectedText:"Select regions",
+                    enableFiltering: true,
+                    enableClickableOptGroups: true
+                }
+        );
+
+        $('.selectpicker').selectpicker();
+
+    });
+</script>

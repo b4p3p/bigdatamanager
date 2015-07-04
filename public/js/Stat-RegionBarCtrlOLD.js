@@ -2,14 +2,12 @@
 
 function RegionBarCtrl() {};
 
-//RegionBarCtrl.datas = null;
-//RegionBarCtrl.filteredData = null;
-//RegionBarCtrl.minData = null;
-
 RegionBarCtrl.selectedRegions = null;
 RegionBarCtrl.selectedNations = null;
 
 RegionBarCtrl.stat = null;
+RegionBarCtrl.minData = null;
+RegionBarCtrl.maxData = null;
 
 RegionBarCtrl.$radioNations = null;
 RegionBarCtrl.$radioRegions = null;
@@ -24,11 +22,12 @@ RegionBarCtrl.$sliderTimer = null;
 RegionBarCtrl.$formRegions = null;
 RegionBarCtrl.$formNations = null;
 RegionBarCtrl.$radioByNumber = null;
-RegionBarCtrl.$radioByPercent = null;
-RegionBarCtrl.$radioByName = null;
-RegionBarCtrl.$radioByNum = null;
-RegionBarCtrl.$radioDesc = null;
-RegionBarCtrl.$radioIncr = null;
+RegionBarCtrl.$radioByDensity = null;
+
+RegionBarCtrl.$NameButton = null;
+RegionBarCtrl.$NumButton = null;
+RegionBarCtrl.$AZbutton = null;
+RegionBarCtrl.$ZAbutton = null;
 
 RegionBarCtrl.data = null;
 RegionBarCtrl.type = "Nations";
@@ -38,11 +37,8 @@ RegionBarCtrl.init = function()
 {
     console.log("CALL: init");
 
-    RegionBarCtrl.$radioByName = $('#radioByName');
-    RegionBarCtrl.$radioByNum = $('#radioByNum');
-
     RegionBarCtrl.$radioByNumber = $('#radioByNumber');
-    RegionBarCtrl.$radioByPercent = $('#radioByPercent');
+    RegionBarCtrl.$radioByDensity = $('#radioByDensity');
 
     RegionBarCtrl.$formRegions = $('#formRegions');
     RegionBarCtrl.$formNations = $('#formNations');
@@ -60,8 +56,10 @@ RegionBarCtrl.init = function()
     RegionBarCtrl.$filterButton = $('#cmbFilter');
     RegionBarCtrl.$restoreButton = $('#cmbRestore');
 
-    RegionBarCtrl.$radioDesc = $('#radioDesc');
-    RegionBarCtrl.$radioIncr = $('#radioIncr');
+    RegionBarCtrl.$NameButton = $('#NameButton');
+    RegionBarCtrl.$NumButton = $('#NumButton');
+    RegionBarCtrl.$AZbutton = $('#AZbutton');
+    RegionBarCtrl.$ZAbutton = $('#ZAbutton');
 };
 
 RegionBarCtrl.initSlider = function()
@@ -112,8 +110,10 @@ RegionBarCtrl.clickFilter = function()
     $imgFilter.removeClass("glyphicon glyphicon-filter");
     $imgFilter.addClass("fa fa-spinner fa-spin");
 
-    if(RegionBarCtrl.$radioByNum.is(':checked'))
-        $(".radioSortType").removeClass("hidden");
+    RegionBarCtrl.$NameButton.removeAttr("disabled");
+    RegionBarCtrl.$NumButton.removeAttr("disabled");
+    RegionBarCtrl.$AZbutton.removeAttr("disabled");
+    RegionBarCtrl.$ZAbutton.removeAttr("disabled");
 
     if(RegionBarCtrl.$radioRegions.is(':checked'))
     {
@@ -169,9 +169,10 @@ RegionBarCtrl.clickRestore = function()
     RegionBarCtrl.$filterButton.removeAttr("disabled");
     RegionBarCtrl.$restoreButton.prop("disabled", true);
 
-    RegionBarCtrl.$radioByName.prop("disabled", true);
-    RegionBarCtrl.$radioByNum.prop("disabled", true);
-    $(".radioSortType").addClass("hidden");
+    RegionBarCtrl.$NameButton.prop("disabled", true);
+    RegionBarCtrl.$NumButton.prop("disabled", true);
+    RegionBarCtrl.$AZbutton.prop("disabled", true);
+    RegionBarCtrl.$ZAbutton.prop("disabled", true);
 };
 
 /**
@@ -179,40 +180,10 @@ RegionBarCtrl.clickRestore = function()
  * @param obj
  * @returns {Array} - eg. ['obj.name', 0, "", 5, "", 0, "", 10, ""];
  */
-RegionBarCtrl.createRow = function(obj)
-{
-    var newRow = [];
-    if(obj["nation"] == null)
-        newRow[0] = obj.name;
-    else
-        newRow[0] = obj.nation + " - " + obj.name;
-
-    var cont = 0;
-    _.each(RegionBarCtrl.stat.data.allTags, function (tag) {
-        {
-            var index = obj.counter.indexOfObject("tag", tag);
-            if (index == -1) {
-                newRow.push(0);
-                newRow.push("");
-            }
-            else {
-                newRow.push(obj.counter[index].count);
-                cont += obj.counter[index].count;
-                newRow.push("");
-            }
-        }
-    });
-    newRow[newRow.length-1] = cont;
-    return newRow;
-
-};
 
 RegionBarCtrl.buildData = function(dataSelected)
 {
     console.log("CALL: buildData");
-
-    RegionBarCtrl.$radioByName.prop("disabled", false);
-    RegionBarCtrl.$radioByNum.prop("disabled", false);
 
     var data = [];
     var i_r = 1;    //indice riga
@@ -245,18 +216,46 @@ RegionBarCtrl.buildData = function(dataSelected)
     RegionBarCtrl.drawBar();
 };
 
+RegionBarCtrl.createRow = function(obj)
+{
+    var newRow = [];
+    if(obj["nation"] == null)
+        newRow[0] = obj.name;
+    else
+        newRow[0] = obj.nation + " - " + obj.name;
+
+    var cont = 0;
+    _.each(RegionBarCtrl.stat.data.allTags, function (tag) {
+        {
+            var index = obj.counter.indexOfObject("tag", tag);
+            if (index == -1) {
+                newRow.push(0);
+                newRow.push("");
+            }
+            else {
+                newRow.push(obj.counter[index].count);
+                cont += obj.counter[index].count;
+                newRow.push("");
+            }
+        }
+    });
+    newRow[newRow.length-1] = cont;
+    return newRow;
+
+};
+
 RegionBarCtrl.drawBar = function()
 {
     var dataTable = google.visualization.arrayToDataTable(RegionBarCtrl.data);
-    if(RegionBarCtrl.$radioByName.is(':checked'))
-        dataTable.sort([{column: 0, desc: true}]);
-    else
-    {
-        if(RegionBarCtrl.$radioDesc.is(':checked'))
-            dataTable.sort([{column: RegionBarCtrl.data[0].length - 1, desc: true}]);
-        else
-            dataTable.sort([{column: RegionBarCtrl.data[0].length - 1, desc: false}]);
-    }
+
+    var desc = true;
+
+    if(RegionBarCtrl.$AZbutton.hasClass("active"))
+        desc = false;
+    if(RegionBarCtrl.$NameButton.hasClass("active"))
+        dataTable.sort([{column: 0, desc: desc}]);
+    if(RegionBarCtrl.$NumButton.hasClass("active"))
+        dataTable.sort([{column: RegionBarCtrl.data[0].length - 1, desc: desc}]);
 
     var chartAreaHeight = dataTable.getNumberOfRows() * 30;
     var chartHeight = chartAreaHeight + 80;
@@ -322,17 +321,7 @@ RegionBarCtrl.getHeader = function(type)
     return ris;
 };
 
-//RegionBarCtrl.getSelectedID = function()
-//{
-//    console.log("CALL: getSelectedID");
-//
-//    if(RegionBarCtrl.$radioByNumber.is(':checked'))
-//        return 0;
-//    else
-//        return 1;
-//};
-
-RegionBarCtrl.removeWait = function ()
+RegionBarCtrl.removeWait = function()
 {
     console.log("CALL: removeWait");
 
@@ -351,7 +340,7 @@ RegionBarCtrl.enableCombo = function()
 
     if (RegionBarCtrl.stat.data.nations.length == 0) {
         RegionBarCtrl.$cmbNations.attr('disabled', true);
-        //RegionBarCtrl.$cmbNations.selectpicker('refresh');
+        //CompareCtrl.$cmbNations.selectpicker('refresh');
         RegionBarCtrl.$cmbRegions.multiselect('disable');
         $('#warning').removeClass('hidden');
     }
@@ -413,7 +402,7 @@ RegionBarCtrl.setComboRegionsData = function()
     return ris;
 };
 
-RegionBarCtrl.handleClick = function (radio)
+RegionBarCtrl.handleClick = function(radio)
 {
     console.log("CALL: handleClick");
 
@@ -428,19 +417,41 @@ RegionBarCtrl.handleClick = function (radio)
     RegionBarCtrl.$filterButton.attr('disabled', false);
 };
 
-RegionBarCtrl.orderClick = function ($radio)
+RegionBarCtrl.NameButtonClick = function()
 {
-    console.log("CALL: orderClick");
-    if($radio.value == "bynum")
-        $(".radioSortType").removeClass("hidden");
-    else
-        $(".radioSortType").addClass("hidden");
+    console.log("CALL: NameButtonClick");
+
+    RegionBarCtrl.$NameButton.addClass("active");
+    RegionBarCtrl.$NumButton.removeClass("active");
     RegionBarCtrl.drawBar();
 };
 
-RegionBarCtrl.orderType = function ($radio)
+RegionBarCtrl.NumButtonClick = function()
 {
+    console.log("CALL: NumButtonClick");
+
+    RegionBarCtrl.$NumButton.addClass("active");
+    RegionBarCtrl.$NameButton.removeClass("active");
     RegionBarCtrl.drawBar();
 };
+
+RegionBarCtrl.AZbuttonClick = function()
+{
+    console.log("CALL: AZbuttonClick");
+
+    RegionBarCtrl.$AZbutton.addClass("active");
+    RegionBarCtrl.$ZAbutton.removeClass("active");
+    RegionBarCtrl.drawBar();
+};
+
+RegionBarCtrl.ZAbuttonClick = function()
+{
+    console.log("CALL: ZAbuttonClick");
+
+    RegionBarCtrl.$ZAbutton.addClass("active");
+    RegionBarCtrl.$AZbutton.removeClass("active");
+    RegionBarCtrl.drawBar();
+};
+
 
 
