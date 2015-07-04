@@ -200,9 +200,14 @@ module.exports = function (router, app) {
         if (!project || !username)
             res.json({});
         else
+        {
             Project.sync(project, username, function (err, result) {
-                res.json(result);
+                console.log("### SINCRONIZZAZIONE EFFETTUATA");
             });
+
+            res.json({status:0, message: "wait"});
+
+        }
     });
 
     router.get('/stat', function (req, res, next) {

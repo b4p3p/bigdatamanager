@@ -39,6 +39,9 @@ ShowmapCtrl.$cmbSelectUsers = null;
 ShowmapCtrl.$cmbSelectTerms = null;
 ShowmapCtrl.$sliderTimer = null;
 
+ShowmapCtrl.$cmdFilter = null;
+ShowmapCtrl.$cmdRestore = null;
+
 ShowmapCtrl.legendControl = null;
 ShowmapCtrl.chkMarkercluster = null;
 ShowmapCtrl.chkHeatmap = null;
@@ -48,18 +51,16 @@ ShowmapCtrl.showInfoActiveLayer = false;
 
 //data variable
 ShowmapCtrl.stat = null;
-ShowmapCtrl.nations = null;
+ShowmapCtrl.filteredStat = null;
+
+ShowmapCtrl.regions = null;
+ShowmapCtrl.filteredRegions = null;
+
 ShowmapCtrl.datas = null;
+ShowmapCtrl.filteredDatas = null;
+
 ShowmapCtrl.users = null;
 ShowmapCtrl.terms = null;
-ShowmapCtrl.filteredData = null;
-
-ShowmapCtrl.nationsProject = null;
-ShowmapCtrl.tagsProject = null;
-ShowmapCtrl.minData = new Date();
-ShowmapCtrl.maxData = new Date();
-ShowmapCtrl.tags = null;
-ShowmapCtrl.otherTag = null;
 
 ShowmapCtrl.initMap = function(mapContainer)
 {
@@ -121,6 +122,9 @@ ShowmapCtrl.initGui = function()
     ShowmapCtrl.$cmbSelectUsers =   $('#cmbUsers');
     ShowmapCtrl.$cmbSelectTerms =   $('#cmbTerms');
 
+    ShowmapCtrl.$cmdFilter =        $('#cmdFilter');
+    ShowmapCtrl.$cmdRestore =       $('#cmdRestore');
+
     ShowmapCtrl.chkMarkercluster = $('#chk_markerCluster')[0];
     ShowmapCtrl.chkHeatmap = $('#chk_heatmap')[0];
     ShowmapCtrl.chkBoudaries = $('#chk_boundaries')[0];
@@ -149,41 +153,50 @@ ShowmapCtrl.getData = function ()
 
     async.parallel(
         {
-            data: function(next){
+            data: function(next)
+            {
                 DataCtrl.getField( function(doc){
+
                     ShowmapCtrl.datas = doc;
+                    ShowmapCtrl.filteredDatas = doc;
+
                     next(null);
                 }, DataCtrl.FIELD.DATA);
             },
-            stat: function(next){
+
+            stat: function(next)
+            {
                 DataCtrl.getField( function(doc){
                     ShowmapCtrl.stat = doc;
                     next(null);
                 }, DataCtrl.FIELD.STAT );
             },
-            regions: function (next) {
 
+            regions: function (next)
+            {
                 DataCtrl.getField(
-
-                    function(doc){
+                    function(doc)
+                    {
                         ShowmapCtrl.regions = doc;
+                        ShowmapCtrl.filteredRegions = doc;
                         next(null);
                     },
-
                     DataCtrl.FIELD.REGIONSJSON
-
                 );
             },
 
-            users: function (next) {
+            users: function (next)
+            {
                 DataCtrl.getField( function(doc){
                     ShowmapCtrl.users = doc;
                     next(null);
                 }, DataCtrl.FIELD.USERS, 50);
             },
 
-            wordcount: function (next) {
-                DataCtrl.getField( function(doc){
+            wordcount: function (next)
+            {
+                DataCtrl.getField( function(doc)
+                {
                     ShowmapCtrl.terms = doc;
                     next(null);
                 }, DataCtrl.FIELD.WORDCOUNT);
@@ -194,66 +207,12 @@ ShowmapCtrl.getData = function ()
         }
     );
 
-    //var imgRestore = $("#img-restore");
-    //var cmdRestore = $("#cmdRestore");
-    //if(!cmdRestore.is(':disabled'))
-    //{
-    //    cmdRestore.prop("disabled", true);
-    //    imgRestore.removeClass("glyphicon glyphicon-remove");
-    //    imgRestore.addClass("fa fa-spinner fa-spin");
-    //}
-
-    //$.ajax({
-    //    type: "get",
-    //    crossDomain: true,
-    //    dataType: "json",
-    //    url: "/getdata",
-    //    success: function (data) {
-    //
-    //        ShowmapCtrl.datas = data.data;
-    //        ShowmapCtrl.filteredData = data.data;
-    //
-    //        ShowmapCtrl.minData = new Date(data.dateMin);
-    //        ShowmapCtrl.maxData = new Date(data.dateMax);
-    //        ShowmapCtrl.tags = data.tags;
-    //        ShowmapCtrl.otherTag = data.otherTag;
-    //        ShowmapCtrl.nations = data.nations;
-    //
-    //        ShowmapCtrl.nationsProject = data.nations;
-    //        ShowmapCtrl.tagsProject = data.tags;
-    //
-    //        ShowmapCtrl.getRegions();
-    //
-    //        $(".spinner-datas").hide();
-    //
-    //        $('#chk_markerCluster').removeAttr("disabled");
-    //        $('#chk_heatmap').removeAttr("disabled");
-    //
-    //        $("#count-container").removeClass("hidden");
-    //        $("#count").text(data.data.length);
-    //        if(imgRestore.hasClass('fa fa-spinner fa-spin')) {
-    //            imgRestore.removeClass("fa fa-spinner fa-spin");
-    //            imgRestore.addClass("glyphicon glyphicon-remove");
-    //            DomUtil.clearSelectpicker(ShowmapCtrl.$cmbSelectTags);
-    //            DomUtil.clearSelectpicker(ShowmapCtrl.$cmbSelectNations);
-    //            DomUtil.clearSelectpicker(ShowmapCtrl.$cmbSelectUsers);
-    //            DomUtil.clearSelectpicker(ShowmapCtrl.$cmbSelectTerms);
-    //            refreshData();
-    //        }
-    //        ShowmapCtrl.loadData();
-    //    },
-    //    error: function (xhr, status, error) {
-    //        console.error("ERR: ShowmapCtrl.loadData " + status + " " + xhr.status);
-    //        console.error("     Status: " + status + " " + xhr.status);
-    //        console.error("     Error: " + error);
-    //    }
-    //});
 };
 
 /* Dopo che i dati sono stati scaricati riempio la form */
 ShowmapCtrl.loadForm = function()
 {
-    console.log("CALL: setData");
+    console.log("CALL: loadForm");
 
     var min = new Date( ShowmapCtrl.stat.data.minDate );
     var max = new Date( ShowmapCtrl.stat.data.maxDate );
@@ -279,45 +238,76 @@ ShowmapCtrl.loadForm = function()
     ShowmapCtrl.$cmbSelectUsers.attr("title", "Select Users");
     ShowmapCtrl.$cmbSelectTerms.attr("title", "Select Terms");
 
+    //nations
     _.each(ShowmapCtrl.stat.data.nations, function(obj){
         DomUtil.addOptionValue(ShowmapCtrl.$cmbSelectNations, obj.name);
     });
 
+    //tags
     _.each(ShowmapCtrl.stat.data.allTags, function(obj){
         DomUtil.addOptionValue(ShowmapCtrl.$cmbSelectTags, obj);
     });
 
+    //users
     var obj = null;
     for (var i = 0; i < 50 && i < ShowmapCtrl.users.length; i++ ){
         obj = ShowmapCtrl.users[i];
         DomUtil.addOptionValue(ShowmapCtrl.$cmbSelectUsers, obj.user, obj.sum);
     }
 
-    _.each(ShowmapCtrl.terms , function(obj, key){
-
+    //terms
+    _.each(ShowmapCtrl.terms , function(obj, key)
+    {
         var terms = [];
         var count = [];
 
-        _.each(obj , function(row, key){
+        _.each(obj , function(row, key)
+        {
             terms.push( row.word );
             count.push( row.count );
         });
 
-
         DomUtil.addOptionGroup(ShowmapCtrl.$cmbSelectTerms, key, terms, count );
     });
 
-
     $('.selectpicker').selectpicker('refresh');
+
+    ShowmapCtrl.enableForm();
+
 };
 
+ShowmapCtrl.enableForm = function()
+{
+    ShowmapCtrl.removeWaitFromCheck();
+    ShowmapCtrl.enableFilterButton();
+    ShowmapCtrl.enableAllCheck();
+};
 
+ShowmapCtrl.removeWaitFromCheck = function()
+{
+    $(".spinner-wait").addClass("hidden");
+};
 
+ShowmapCtrl.enableAllCheck = function()
+{
+    $(".check-filter").removeAttr("disabled");
+};
+
+ShowmapCtrl.enableFilterButton = function()
+{
+    ShowmapCtrl.$cmdFilter.removeAttr("disabled");
+};
+
+ShowmapCtrl.enableRestoreButton = function()
+{
+
+};
 
 ShowmapCtrl.cmdFilter_click = function()
 {
     console.log("CALL: cmdFilter_click");
 
+    //visualizzo l'attesa
     var cmdFilter = $("#cmdFilter");
     cmdFilter.prop("disabled", true);
 
@@ -325,64 +315,46 @@ ShowmapCtrl.cmdFilter_click = function()
     imgFilter.removeClass("glyphicon glyphicon-filter");
     imgFilter.addClass("fa fa-spinner fa-spin");
 
-    $.ajax({
-        type: "get",
-        crossDomain: true,
-        dataType: "json",
-        url: ShowmapCtrl.createUrl(),
-        success: function (data) {
-            ShowmapCtrl.filteredData = data.data;
-            ShowmapCtrl.nations = data.nations;
-            ShowmapCtrl.tags = data.tags;
+    /* filtro i dati con le condizioni selezionate */
+    var queryString = ShowmapCtrl.getQueryString();
 
-            $("#count").text(data.data.length);
+    DataCtrl.getFromUrl(DataCtrl.FIELD.STAT, queryString, function(docStat){
 
-            ShowmapCtrl.nations = getSelectedCombo(ShowmapCtrl.$cmbSelectNations);
-            ShowmapCtrl.getRegions();
-            refreshData();
-            //disableOption();
-
-            var cmdRestore = $("#cmdRestore");
-            cmdRestore.removeAttr("disabled");
-
-        },
-        error: function (xhr, status, error) {
-            console.error("ERR: ShowmapCtrl.cmdFilter_click " + status + " " + xhr.status);
-            console.error("     Status: " + status + " " + xhr.status);
-            console.error("     Error: " + error);
-        }
     });
+
+    //$.ajax({
+    //    type: "get",
+    //    crossDomain: true,
+    //    dataType: "json",
+    //    url: ShowmapCtrl.createUrl(),
+    //    success: function (data)
+    //    {
+    //        ShowmapCtrl.filteredDatas = data.data;
+    //        ShowmapCtrl.nations = data.nations;
+    //
+    //        $("#count").text(data.data.length);
+    //
+    //        ShowmapCtrl.nations = getSelectedCombo(ShowmapCtrl.$cmbSelectNations);
+    //        ShowmapCtrl.getRegions();
+    //        refreshData();
+    //        //disableOption();
+    //
+    //        var cmdRestore = $("#cmdRestore");
+    //        cmdRestore.removeAttr("disabled");
+    //
+    //    },
+    //    error: function (xhr, status, error)
+    //    {
+    //        console.error("ERR: ShowmapCtrl.cmdFilter_click " + status + " " + xhr.status);
+    //        console.error("     Status: " + status + " " + xhr.status);
+    //        console.error("     Error: " + error);
+    //    }
+    //});
 };
 
-//function disableOption()
-//{
-//    var tags = getSelectedCombo(ShowmapCtrl.$cmbSelectTags);
-//    if( tags.length > 0 ) {
-//        var nationsToDeselect = _.difference(ShowmapCtrl.nationsProject, ShowmapCtrl.nations);
-//        for (var i = 0; i < nationsToDeselect.length; i += 1) {
-//            var optionNation = ShowmapCtrl.$cmbSelectNations.find('option[value="' + nationsToDeselect[i] + '"]');
-//            $(optionNation).attr("disabled", "disabled");
-//        }
-//    }
-//
-//    var nations = getSelectedCombo(ShowmapCtrl.$cmbSelectNations);
-//    if( nations.length > 0 ) {
-//        var tagsToDeselect = _.difference(ShowmapCtrl.tagsProject, ShowmapCtrl.tags);
-//        for (i = 0; i < tagsToDeselect.length; i += 1) {
-//            var optionTag = ShowmapCtrl.$cmbSelectTags.find('option[value="' + tagsToDeselect[i] + '"]');
-//            $(optionTag).attr("disabled", "disabled");
-//        }
-//    }
-//    //var value = $('#cmbNations').find('option');
-//
-//    ShowmapCtrl.$cmbSelectNations.selectpicker('refresh');
-//    ShowmapCtrl.$cmbSelectTags.selectpicker('refresh');
-//};
-
-
-ShowmapCtrl.createUrl = function()
+ShowmapCtrl.getQueryString = function()
 {
-    var url = "/getdata";
+    var ris = "";
     var conditions = [];
     var selectedNations = getSelectedCombo(ShowmapCtrl.$cmbSelectNations);
     var selectedTags = getSelectedCombo(ShowmapCtrl.$cmbSelectTags);
@@ -400,45 +372,15 @@ ShowmapCtrl.createUrl = function()
     if(selectedTags.length > 0)
         conditions.push("tags=" + selectedTags.join(","));
 
-    conditions.push("min=" + values.min.yyyymmdd());
-    conditions.push("max=" + values.max.yyyymmdd());
+    conditions.push("start=" + values.min.yyyymmdd());
+    conditions.push("end=" + values.max.yyyymmdd());
 
     if( conditions != [] )
-        url += "?" + conditions.join("&");
-    console.log("CALL: cmdFilter_click - url: " + url);
-    return url;
-};
+        ris = "?" + conditions.join("&");
 
-ShowmapCtrl.getRegions = function()
-{
-    console.log("CALL: getRegions");
+    console.log("     getQueryString = " + ris);
 
-    var imgFilter = $("#img-filter");
-    var cmdFilter = $("#cmdFilter");
-
-    $.ajax({
-        type: "get",
-        crossDomain: true,
-        dataType: "json",
-        url: "/regions/regions?nations=" + ShowmapCtrl.nations.join(",") + "&tags=" + ShowmapCtrl.tags.join(","),
-        success: function (data) {
-            ShowmapCtrl.regions = data;
-            ShowmapCtrl.tags = data.tags;
-            refreshBoundaries();
-            $(".spinner-regions").hide();
-            $('#chk_boundaries').removeAttr("disabled");
-
-            cmdFilter.removeAttr('disabled');
-
-            imgFilter.removeClass("fa fa-spinner fa-spin");
-            imgFilter.addClass("glyphicon glyphicon-filter");
-        },
-        error: function (xhr, status, error) {
-            console.error("ERR: ShowmapCtrl.getRegions " + status + " " + xhr.status);
-            console.error("     Status: " + status + " " + xhr.status);
-            console.error("     Error: " + error);
-        }
-    });
+    return ris;
 };
 
 ShowmapCtrl.heatmap_click = function()
@@ -475,13 +417,12 @@ var showHeatmap = function ()
     spinnerHeatmap.addClass("fa fa-refresh fa-spin");
     spinnerHeatmap.show();
 
-    if ( !ShowmapCtrl.isDatasReady() ) return;
-
     if (ShowmapCtrl.layerHeatmap == null)
     {
         ShowmapCtrl.layerHeatmap = new HeatmapOverlay(cfg);
         ShowmapCtrl.mainMap.addLayer( ShowmapCtrl.layerHeatmap );
     }
+
     setData_Heatmap();
 
     //rimuovo lo spinner di attesa
@@ -496,29 +437,98 @@ function showMarkerCluster()
 
     //visualizzo lo spinner di attesa
     var spinnerCluster = $("#spinner-cluster");
-    spinnerCluster.removeClass("fa fa-spinner fa-spin spinner-datas");
+    spinnerCluster.removeClass("fa fa-spinner fa-spin spinner-datas hidden");
     spinnerCluster.addClass("fa fa-refresh fa-spin");
-    spinnerCluster.show();
 
-    setTimeout(_showMarkerCluster, 10);
+    //spinnerCluster.show();
+
+    setTimeout(showMarkerClusterAsync, 100);
+}
+
+function updateProgressBar (processed, total, elapsed, layersArray)
+{
+    console.log("processed: " + processed);
 };
 
-function _showMarkerCluster()
+function showMarkerClusterAsync()
 {
-    console.log("CALL: _showMarkerCluster");
+    console.log("CALL: showMarkerClusterAsync");
 
     if ( ShowmapCtrl.layerMakerCluster == null )
-        ShowmapCtrl.layerMakerCluster = new L.MarkerClusterGroup();
+    {
+        console.log("     creo il MarkerClusterGroup");
+        createNewLayerMarkerCluster();
+    }
 
-    ShowmapCtrl.mainMap.addLayer( ShowmapCtrl.layerMakerCluster );
     setData_MarkerCluster();
 
     //rimuovo lo spinner di attesa
     var spinnerCluster = $("#spinner-cluster");
     spinnerCluster.removeClass("fa fa-refresh fa-spin");
-    spinnerCluster.addClass("fa fa-spinner fa-spin spinner-datas");
-    spinnerCluster.hide();
-};
+    spinnerCluster.addClass("fa fa-spinner fa-spin spinner-datas hidden");
+}
+
+function createNewLayerMarkerCluster()
+{
+    ShowmapCtrl.layerMakerCluster = new L.markerClusterGroup(
+        {
+            animateAddingMarkers: true,
+            chunkedLoading: true,
+            chunkProgress: updateProgressBar
+        }
+    );
+}
+
+var markerList = [];
+
+function setData_MarkerCluster()
+{
+    console.log("CALL: setData_MarkerCluster");
+
+    if(!ShowmapCtrl.layerMakerCluster) return;
+
+    ShowmapCtrl.layerMakerCluster.clearLayers();
+
+    createNewLayerMarkerCluster();
+
+    markerList = [];
+
+    async.each( ShowmapCtrl.filteredDatas,
+        function(d, next)
+        {
+            var etichetta = d.tag;
+            var text = d.text;
+            var id = d.id;
+            var lat = d.latitude;
+            var lng = d.longitude;
+            var icon = getIcon(etichetta);
+
+            var marker = new L.Marker(
+                new L.LatLng(lat, lng),
+                {
+                    icon: icon,
+                    title: text
+                });
+            marker.bindPopup(text +
+                "<br><b>Tag: </b>" + etichetta +
+                "<br><b>ID: </b>" + id +
+                "<br><b>Lon: </b>" + lng +
+                "<br><b>Lat: </b>" + lat);
+
+            markerList.push(marker);
+
+            next(null);
+
+        } ,
+
+        function()
+        {
+            ShowmapCtrl.layerMakerCluster.addLayers( markerList );
+            ShowmapCtrl.mainMap.addLayer( ShowmapCtrl.layerMakerCluster );
+            console.log("marker cluster costruito!");
+        }
+    );
+}
 
 function showBoundaries()
 {
@@ -535,7 +545,7 @@ function showBoundaries()
     if (ShowmapCtrl.layerBoundaries != null)
         hideBoundaries();
     ShowmapCtrl.layerBoundaries = L.geoJson(
-        ShowmapCtrl.regions,
+        ShowmapCtrl.filteredRegions,
         {
             style: _style,
             onEachFeature: _onEachFeature
@@ -549,7 +559,7 @@ function showBoundaries()
     spinnerBoundaries.removeClass("fa fa-refresh fa-spin");
     spinnerBoundaries.addClass("fa fa-spinner fa-spin spinner-regions");
     spinnerBoundaries.hide();
-};
+}
 
 function insertLegend()
 {
@@ -579,8 +589,7 @@ function insertLegend()
         };
     }
     ShowmapCtrl.legendControl.addTo(ShowmapCtrl.mainMap);
-};
-
+}
 
 function _style(feature)
 {
@@ -738,7 +747,7 @@ function setData_Heatmap()
 
     var tmpData = {
         max: 1,
-        data: ShowmapCtrl.filteredData
+        data: ShowmapCtrl.filteredDatas
     };
 
     console.log("CALL: SetDataLayerHeatmap data.lenght=" + tmpData.data.length);
@@ -754,44 +763,6 @@ function setData_Heatmap()
         }
         else
             hideHeatmap();
-    }
-}
-
-function setData_MarkerCluster()
-{
-    console.log("CALL: setData_MarkerCluster");
-
-    if(!ShowmapCtrl.layerMakerCluster) return;
-
-    ShowmapCtrl.layerMakerCluster.clearLayers();
-
-    for ( var i = 0 ; i < ShowmapCtrl.filteredData.length; i++ )
-    {
-        var d = ShowmapCtrl.filteredData[i];
-        var etichetta = d.tag;
-        var text = d.text;
-        var id = d.id;
-        //var date = d.date;
-        var lat = d.latitude;
-        var lng = d.longitude;
-        var icon = getIcon(etichetta);
-        var loc = d.loc;
-
-        var marker = new L.Marker(
-            new L.LatLng(lat, lng),
-            {
-                icon: icon,
-                title: text
-            });
-        marker.bindPopup(text +
-            "<br><b>Tag: </b>" + etichetta +
-            "<br><b>ID: </b>" + id +
-            "<br><b>Lon: </b>" + loc.coordinates[0] +
-            "<br><b>Lat: </b>" + loc.coordinates[1] +
-            "<br><b>Lon: </b>" + lng +
-            "<br><b>Lat: </b>" + lat);
-
-        ShowmapCtrl.layerMakerCluster.addLayer( marker );
     }
 }
 

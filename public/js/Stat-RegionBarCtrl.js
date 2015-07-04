@@ -3,7 +3,7 @@
 function RegionBarCtrl() {};
 
 //RegionBarCtrl.datas = null;
-//RegionBarCtrl.filteredData = null;
+//RegionBarCtrl.filteredDatas = null;
 //RegionBarCtrl.minData = null;
 
 RegionBarCtrl.selectedRegions = null;

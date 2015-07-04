@@ -20,34 +20,36 @@ var DomUtil = {
 
     },
 
-    addOptionValue : function( combo , value, subtext ) {
+    addOptionValue : function( combo , option, subtext ) {
 
-        var o = new Option(value, value);
-        var $o = $(o);
-
-        $o.html(value);
-
+        var $o = $('<option value="' + option.toLowerCase() + '" >' + option + '</option>')
         if (subtext) {
             $o.attr("data-subtext", subtext);
         }
-
-        combo.append(o);
+        combo.append($o);
     },
 
     /**
      *
      * @param combo
-     * @param group - {String}
+     * @param title - {String}
      * @param options - {[String]}
      * @param subtext - {[String]}
      */
-    addOptionGroup : function( combo , group, options, subtext ) {
-        var group = $('<optgroup label="' + group + '"></optgroup>');
+    addOptionGroup : function( combo , title, options, subtext ) {
+
+        var $group = $('<optgroup label="' + title + '"></optgroup>');
+
         for( var i = 0; i < options.length; i++)
         {
-            group.append( $('<option value="' + options[i].toLowerCase() + '" >' + options[i] + '</option>'))
+            var $o = $('<option value="' + options[i].toLowerCase() + '" >' + options[i] + '</option>');
+            if(subtext)
+                $o.attr("data-subtext", subtext[i]);
+
+            $group.append($o);
         }
-        combo.append(group);
+
+        combo.append($group);
     },
 
     getSelectedCombo: function( $combo )

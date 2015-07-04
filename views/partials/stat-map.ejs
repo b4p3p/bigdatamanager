@@ -132,7 +132,6 @@
     </div>
 </div>
 
-
 <div class="row">
 
     <form class="form-inline" id="form-combos">
@@ -196,33 +195,34 @@
     <form class="form-inline form-map" id="form">
 
         <div class="spinner-container">
-            <i id="spinner-heatmap" class="fa fa-spinner fa-spin spinner-datas"></i>
+            <i id="spinner-heatmap" class="fa fa-spinner fa-spin spinner-wait"></i>
         </div>
 
         <div class="checkbox" style="margin-right: 10px;">
             <img src="/public/img/icon-heatmap.png" class="img-chk">
             <label>
                 <input type="checkbox" onclick="ShowmapCtrl.heatmap_click()"
-                       id="chk_heatmap" disabled="disabled">
+                       id="chk_heatmap" disabled="disabled" class="check-filter">
                 Show Heatmap
             </label>
         </div>
 
         <div class="spinner-container">
-            <i id="spinner-cluster" class="fa fa-spinner fa-spin spinner-datas"></i>
+            <i id="spinner-cluster" class="fa fa-spinner fa-spin spinner-datas spinner-wait"></i>
         </div>
 
         <div class="checkbox" style="margin-right: 10px;">
             <img src="/public/img/icon-marker-cluster.png" class="img-chk">
             <label>
                 <input type="checkbox" onclick="ShowmapCtrl.markerCluster_click()"
-                       id="chk_markerCluster" disabled="disabled">
+                       id="chk_markerCluster" disabled="disabled"
+                       class="check-filter">
                 Show Cluster
             </label>
         </div>
 
         <div class="spinner-container">
-            <i id="spinner-boundaries" class="fa fa-spinner fa-spin spinner-regions"></i>
+            <i id="spinner-boundaries" class="fa fa-spinner fa-spin spinner-wait"></i>
         </div>
 
         <div class="checkbox" style="margin-right: 10px;">
@@ -230,7 +230,7 @@
             <img src="/public/img/boundaries-ico.png" class="img-chk">
             <label>
                 <input type="checkbox" onclick="ShowmapCtrl.showBoundaries_click()"
-                       id="chk_boundaries" disabled="disabled">
+                       id="chk_boundaries" class="check-filter" disabled="disabled">
                 Show boundaries
             </label>
         </div>
@@ -241,6 +241,7 @@
 
 <div class="row row-map">
     <div id="map"></div>
+    <div id="count"></div>
 </div>
 
 <div id="count-container" class="hidden" style="margin-left: -15px">Points found: <span id="count">15000</span></div>

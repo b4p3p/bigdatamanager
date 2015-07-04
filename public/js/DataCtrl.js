@@ -73,7 +73,7 @@ DataCtrl.requireRefresh = function(field, callback)
             },
 
             urlLstUpd: function (next) {
-                DataCtrl.getFromUrl( DataCtrl.FIELD.LASTUPDATE, function(data)
+                DataCtrl.getFromUrl( DataCtrl.FIELD.LASTUPDATE, null, function(data)
                 {
                     next(null, data);
                 });
@@ -108,7 +108,7 @@ DataCtrl.requireRefresh = function(field, callback)
     );
 };
 
-DataCtrl.getFromUrl = function(field, callback)
+DataCtrl.getFromUrl = function(field, queryString,  callback)
 {
     console.log("CALL: DataCtrl.getFromUrl\n" +
         "      url: " + field.URL + " key: " + field.KEY );
@@ -156,7 +156,7 @@ DataCtrl.getField = function(callback, field, limit){
 
                 //prendo i dati
                 function(next){
-                    DataCtrl.getFromUrl(field, function(data) {
+                    DataCtrl.getFromUrl(field, null, function(data) {
                         next(null, data);
                     });
                 },

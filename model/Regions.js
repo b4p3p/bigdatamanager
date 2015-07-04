@@ -308,7 +308,7 @@ Regions.getRegions = function (projectName, arg_nations, arg_tags, isLight, call
             //prendo la maggior parte dei dati
             function (next)
             {
-                regions.find(queryNations, function (err, regions)
+                regions.find( queryNations, function (err, regions)
                 {
                     console.log("CALL: Region.getRegion - #regions %s", regions.length);
 
@@ -439,4 +439,6 @@ Regions.getRegions = function (projectName, arg_nations, arg_tags, isLight, call
 };
 
 module.exports = Regions;
+
+//Regions.getRegions_bak = function (projectName, arg_nations, arg_tags, isLight, callback)
 

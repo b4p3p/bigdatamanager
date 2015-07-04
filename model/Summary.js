@@ -129,6 +129,7 @@ Summary.getStatFilter = function (project, username, query, callback)
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var datas = connection.model(Datas.MODEL_NAME, Datas.SCHEMA);
     var regions = connection.model(Regions.MODEL_NAME, Regions.SCHEMA);
+    var maxRegionCount = 0;
 
     query = buildQuery(query);
 
@@ -162,6 +163,7 @@ Summary.getStatFilter = function (project, username, query, callback)
                         {
                             $match: {
                                 projectName: project,
+                                nation: {$exists: true},
                                 $and: query
                             }
                         },
@@ -259,24 +261,69 @@ Summary.getStatFilter = function (project, username, query, callback)
                                 docSync.data.allTags = _.keys(docSync.data.allTags);
                                 docSync.data.syncTags = _.keys(docSync.data.syncTags);
 
-                                //docSync.data.countSync = countSync;
-                                //_.each(_.keys(ris), function(nation){
-                                //    docSync.data.nations.push(ris[nation]);
-                                //});
-
                                 callback(err, true);
-
                             }
                         );
                     }
                 );
+            },
+
+            max: function(callback) {
+
+                datas.aggregate(
+                    [
+                        {
+                            $match: {
+                                projectName: project,
+                                nation: {$exists: true},
+                                $and: query
+                            }
+                        },
+
+                        {
+                            $group: {
+                                _id: {nation: "$nation", region: "$region"},
+                                count: {$sum: 1}
+                            }
+                        },
+
+                        {
+                            $sort: { count: -1 }
+                        },
+
+                        { $limit: 1 }
+
+                    ],
+
+                    function (err, result) {
+
+                        callback(null, result[0].count);
+
+                    }
+                );
+
+            },
+            
+            allTags: function(callback){
+                datas.distinct("tag", {projectName: project}, function (err, result) {
+                    callback(err, result);
+                })
+            },
+
+            count: function(callback){
+                datas.find( {projectName: project}).count( function (err, result) {
+                    callback(err, result);
+                })
             }
         },
 
-        //add missing region
+        //add missing region - add avg
         function (err, results) {
 
             connection.close();
+
+            docSync.data.allTags = results.allTags;
+            docSync.data.countTot = results.count;
 
             async.each(results.regions, function(obj, next){
 
@@ -298,6 +345,10 @@ Summary.getStatFilter = function (project, username, query, callback)
                             counter: {}
                         };
                     }
+
+                    docSync.data.nations[obj.nation].regions[region].avg =
+                        docSync.data.nations[obj.nation].regions[region].count / results.max;
+
                     next(null);
 
                 }, function(err){
