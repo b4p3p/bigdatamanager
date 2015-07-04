@@ -108,6 +108,7 @@ Data.importFromFiles = function (type, fileNames, projectName, cb_ris) {
 Data.importFromFile = function (type, file, projectName, cb_ris)
 {
     async.waterfall([
+
             // 1) leggo il file
             function (cb_wf) {
 
@@ -148,7 +149,8 @@ Data.importFromFile = function (type, file, projectName, cb_ris)
             },
 
             // 3) salvo il file json
-            function (jsonData, cb_wf) {
+            function (jsonData, cb_wf)
+            {
 
                 console.log("  3) salvo il json: length" + jsonData.length);
 
@@ -172,14 +174,16 @@ Data.importFromFile = function (type, file, projectName, cb_ris)
             var ris = {
                 success: result.success.length,
                 fail: result.fail.length
-            }
+            };
 
-            if (err) {
+            if (err)
+            {
                 console.log("ERROR WATERFALL Data");
                 console.log("   Err: " + err);
                 cb_ris(err, null);
             }
-            else {
+            else
+            {
                 cb_ris(null, ris);
             }
         }
@@ -289,7 +293,8 @@ function addDataArray(arrayData, projectName, callback) {
         //var DataModel = connection.model(Data.MODEL_NAME, Data.SCHEMA);
         var cont = 0;
         var url = 'mongodb://localhost:27017/oim';
-        MongoClient.connect(url, function (err, db) {
+        MongoClient.connect(url, function (err, db)
+        {
             if (err != null) {
                 callback(err);
                 return;

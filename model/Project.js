@@ -1,11 +1,13 @@
 "use strict";
 
 var mongoose = require('mongoose');
-//var connection = mongoose.createConnection('mongodb://localhost/oim');
 var url = 'mongodb://localhost:27017/oim';
 var MongoClient = require('mongodb').MongoClient;
 var async = require("async");
 var request = require("request");
+var Summary = require("../model/Summary");
+var Regions = require("../model/Regions");
+var Datas = require("../model/Data");
 
 var Project = function (data) {
     this.data = data;
@@ -13,12 +15,13 @@ var Project = function (data) {
 
 Project.MODEL_NAME = "project";
 
-Project.PROJECT_SCHEMA = new mongoose.Schema({
+Project.SCHEMA = new mongoose.Schema({
     projectName: {type : String, required : true },
     userProject: { type : String, required : true },
     dateCreation: {type: Date, default: Date.now()},
     dateLastUpdate: {type: Date, default: Date.now()},
-    description : {type : String, default:""}
+    description : {type : String, default:""} ,
+    size : Number
 });
 
 Project.prototype.data = {};    //json
@@ -31,7 +34,7 @@ Project.prototype.data = {};    //json
 Project.getProject = function (projectName, username, callback)
 {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
-    var Projects = connection.model(Project.MODEL_NAME, Project.PROJECT_SCHEMA);
+    var Projects = connection.model(Project.MODEL_NAME, Project.SCHEMA);
 
     Projects.findOne( {projectName: projectName, userProject: username },
         function (err, doc)
@@ -46,15 +49,21 @@ Project.getProject = function (projectName, username, callback)
 Project.getProjects = function(callback)
 {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
-    var projects = connection.model(Project.MODEL_NAME, Project.PROJECT_SCHEMA);
+    var projects = connection.model(Project.MODEL_NAME, Project.SCHEMA);
 
     projects.find(
         {},
         {
-            '_id': 0, projectName: 1, userProject:1,
-            "description" : 1, "dateLastUpdate" : 1, "dateCreation" : 1
+            '_id': 0,
+            projectName: 1,
+            userProject:1,
+            "description" : 1,
+            "dateLastUpdate" : 1,
+            "dateCreation" : 1,
+            "size" : 1
         },
-        function(err, docs){
+        function(err, docs)
+        {
             connection.close();
             callback(err, docs);
         }
@@ -71,7 +80,14 @@ Project.addProject = function(dataProject, callback)
     console.log("CALL Project.addProject");
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
-    var Model = connection.model( Project.MODEL_NAME, Project.PROJECT_SCHEMA);
+    var Model = connection.model( Project.MODEL_NAME, Project.SCHEMA);
+
+    dataProject = {
+        projectName: dataProject.project,
+        userProject: dataProject.username,
+        description: dataProject.description
+    };
+
     var newProject = new Model(dataProject);
 
     newProject.save(
@@ -90,43 +106,84 @@ Project.addProject = function(dataProject, callback)
  */
 Project.delProject = function(projectName, callback)
 {
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function(err, db)
+    {
         if(err!=null)
         {
-            callback({status:1, message:err.toString(), contDeleted: 0});
+            callback(
+                {
+                    status:1,
+                    message:err.toString(),
+                    contDeleted: 0
+                }
+            );
         }
         else
         {
             var datas = db.collection('datas');
             var projects = db.collection('projects');
+            var summaries = db.collection('summaries');
 
             async.parallel({
-                deletedCount: function(parallel){
-                    setTimeout(function(){
-                        datas.removeMany({projectName: projectName}, function(err, ris)
-                        {
-                            //{status:0, message:"", deletedCount:
-                            if ( err == null )
-                                parallel(null, ris.deletedCount);
-                            else
-                                parallel(err.toString());
-                        });
+
+                //rimuovo i dati
+                deletedCount: function(parallel)
+                {
+                    setTimeout(function()
+                    {
+                        datas.removeMany(
+                            {projectName: projectName},
+                            function(err, ris)
+                            {
+                                //{status:0, message:"", deletedCount:
+                                if ( err == null )
+                                    parallel(null, ris.deletedCount);
+                                else
+                                    parallel(err.toString());
+                            }
+                        );
                     }, 1);
                 },
-                project: function(parallel){
-                    setTimeout(function(){
-                        projects.removeOne({projectName: projectName}, function(err, ris)
-                        {
-                            if ( err == null )
-                                parallel(null, ris.deletedCount);
-                            else
-                                parallel(err.toString());
-                        });
+
+                //rimuovo il progetto
+                project: function(parallel)
+                {
+                    setTimeout(function()
+                    {
+                        projects.removeOne(
+                            {projectName: projectName},
+                            function(err, ris)
+                            {
+                                if ( err == null )
+                                    parallel(null, ris.deletedCount);
+                                else
+                                    parallel(err.toString());
+                            }
+                        );
+                    }, 1);
+                },
+
+                //rimuovo la sincronizzazione
+                sync: function(parallel)
+                {
+                    setTimeout(function()
+                    {
+                        summaries.removeOne(
+                            {project: projectName},
+                            function(err, ris)
+                            {
+                                if ( err == null )
+                                    parallel(null, ris.deletedCount);
+                                else
+                                    parallel(err.toString());
+                            }
+                        );
                     }, 1);
                 }
             },
 
-            function(err, results) {
+            function(err, results)
+            {
 
                 if(err == null)
                     callback(null, {status:0, message:"", deletedCount: results.deletedCount});
@@ -134,7 +191,8 @@ Project.delProject = function(projectName, callback)
                     callback(err, {status:1, message:err, deletedCount: 0});
 
                 db.close();
-            });
+            }
+            );
         }
     });
 };
@@ -150,7 +208,7 @@ Project.editProject = function (data, callback) {
     console.log("  data: " + JSON.stringify(data));
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
-    var Model = connection.model(Project.MODEL_NAME, Project.PROJECT_SCHEMA);
+    var Model = connection.model(Project.MODEL_NAME, Project.SCHEMA);
 
     var conditions = { projectName: data.projectName }
         , update = { $set: {
@@ -169,54 +227,28 @@ Project.editProject = function (data, callback) {
 };
 
 /**
- *
  * @param projectData - { file: {String} }
  * @param callback - fn({Error}, {Ris})
  */
-Project.addData = function (projectData, sync,  callback){
-
+Project.addData = function (projectData, callback)
+{
     var DataModel = require("../model/Data");
-    var _result = null;
 
-    async.waterfall( [
-
-        // 1) aggiungo i dati al progetto creato"
-        function(next) {
-
-            DataModel.importFromFile(projectData.type, projectData.filePath, projectData.projectName, function(err, result){
-
-                _result = result;
-                next(null);
-
-            });
-        },
-
-        // 2) sincronizzo i dati
-        function(next)
-        {
-            if(sync)
-            {
-                Project.synchronize(projectData.serverUrl, projectData.projectName, function(err){
-                    next(null);
-                });
-            }
-            else
-            {
-                next(null);
-            }
+    DataModel.importFromFile(
+        projectData.type,
+        projectData.filePath,
+        projectData.project,
+        function(err, result){
+            callback(err, result);
         }
-
-    ], function(err){
-
-        callback(null, _result);
-
-    });
+    );
 
 };
 
-Project.getLastUpdate = function(project , callback){
+Project.getLastUpdate = function(project , callback)
+{
     var connection = mongoose.createConnection('mongodb://localhost/oim');
-    var projects = connection.model( Project.MODEL_NAME, Project.PROJECT_SCHEMA);
+    var projects = connection.model( Project.MODEL_NAME, Project.SCHEMA);
 
     projects.findOne(
         {projectName: project },
@@ -230,142 +262,295 @@ Project.getLastUpdate = function(project , callback){
 };
 
 /**
- *
- * @param fileNames
- * @param dataProject
+ * Crea e salva il documento di stat in summaries
+ * @param project
+ * @param username
  * @param callback
  */
-function addNewProjectWithData(fileNames, dataProject, callback )
+Project.sync = function(project, username, callback)
 {
-    /**
-     *   async.waterfall
-     *    - con il primo parametro = null, passa all'esecuzione della prossima funzione
-     *    -                         !null  richiama la callback (con un parametro in questo caso)
-     */
 
-    async.waterfall( [
+    console.log("CALL: Project.sync");
 
-            // 1) cerco se il progetto esiste")
-            function(next) {
+    var connection  = mongoose.createConnection('mongodb://localhost/oim');
+    var summaries   = connection.model( Summary.MODEL_NAME, Summary.SCHEMA);
+    var regions   = connection.model( Regions.MODEL_NAME, Regions.SCHEMA);
+    var datas   = connection.model( Datas.MODEL_NAME, Datas.SCHEMA);
+    var projects   = connection.model( Project.MODEL_NAME, Project.SCHEMA);
+    var docSync = {};
 
-                console.log("1) cerco se il progetto esiste");
+    async.waterfall([
 
-                Project.getProject(dataProject.projectName,
-                    function(doc){
+            //cancello la precendente sincronizzazione
+            function(next)
+            {
 
-                        if ( doc == null)
-                            next(null);
-                        else
-                            next( {status:1,message: "project already exists"});
+                console.log("     cancello la precedente sincronizzazione");
+
+                datas.update(
+                    { projectName: project } ,
+                    { $unset: { region:'', nation:'' } },
+                    {multi:true} ,
+                    function(err, result){
+                        next(null);
                     }
                 );
 
             },
 
-            // 2) se non esiste lo creo")
-            function(next) {
+            //get regions
+            function(next){
 
-                console.log("2) se non esiste lo creo");
+                console.log("     get regions");
 
-                Project.addProject(dataProject,
-                    function(err)
-                    {
-                        if ( err == null )
+                regions.find( {},
+                    function(err, regions) {
+                        next(err, regions);
+                    }
+                );
+
+            },
+
+            //per ogni regione sincronizzo i dati
+            function(regions, next){
+
+                console.log("     set regions/nations data");
+
+                //uso i driver nativi (bug mongoose)
+                MongoClient.connect( url, function (err, db)
+                {
+
+                    var datas = db.collection('datas');
+
+                    async.each(regions,
+
+                        function (region, next) {
+
+                            datas.update(
+                                {
+                                    projectName: project,
+                                    loc: {$geoWithin: {$geometry: region._doc.geometry}}
+                                },
+                                {
+                                    $set:
+                                    {
+                                        nation: region._doc.properties.NAME_0,
+                                        region: region._doc.properties.NAME_1
+                                    }
+                                },
+                                {multi: true, w: 1},
+                                function (err, result) {
+                                    next(null);
+                                }
+                            );
+                        },
+
+                        function (err) {
+                            db.close();
                             next(null);
-                        else
-                        {
-                            for(var k in err.errors){
-                                err = projectError(3, err.errors[k].message);
-                                break;
-                            }
-                            next(err);
                         }
-
-                    }
-                );
+                    )
+                });
             },
 
-            // 3) aggiungo i dati al progetto creato"
-            function(next) {
+            //costruisco il docSync dai dati sincronizzati
+            function (next)
+            {
+                console.log("     get new stat filter");
+                Summary.getStatFilter( project, username, null, function(err, doc){
 
-                console.log("3) aggiungo i dati al progetto creato");
+                    next(null, doc)
 
-                Data.importFromFile(dataProject.cmbType, fileNames, dataProject.projectName,
+                });
+            },
+
+            //salvo il nuovo docSync
+            function(docSync, next)
+            {
+                console.log("     save docSync");
+
+                docSync.lastUpdate = new Date();
+
+                summaries.update(
+                    { project : project, username: username } ,
+                    docSync,
+                    { upsert:true, w:1 },
                     function (err)
                     {
-                        if ( err == null )
-                            next(null);
-                        else
-                        {
-                            for(var k in err.errors){
-                                err = projectError(3, err.errors[k].message);
-                                break;
-                            }
-                            next(err);
-                        }
-
+                        next(err, docSync);
                     }
                 );
-
             },
 
-            // modifico il progetto creato aggiungendo la dimensione
-            function(next) {
+            //aggiorno il lastUpdate e il size del progetto
+            function (docSync, next) {
 
-                var MongoClient = require('mongodb').MongoClient;
-                var url = 'mongodb://localhost:27017/oim';
+                console.log("     update project");
 
-                MongoClient.connect(url, function(err, db) {
-
-                    if ( err )
+                projects.update(
+                    {projectName: project},
+                    {$set: {
+                        dateLastUpdate: docSync.lastUpdate,
+                        size: docSync.data.countTot
+                    }},
+                    { w:1 },
+                    function (err, result)
                     {
-                        next(err);
-
-                    } else {
-
-                        db.collection('datas').count({projectName:dataProject.projectName},
-                            function(err, cont) {
-                                if ( err ) {
-                                    db.close();
-                                    next(err);
-
-                                }
-                                else {
-                                    db.collection('projects').update(
-                                        {projectName:dataProject.projectName},
-                                        {$set: {size:cont}}, function(err){
-
-                                            if ( err )  {
-                                                next(err);
-                                            }
-                                            else {
-                                                next(null);
-                                            }
-                                            db.close();
-                                        });
-                                }
-                            }
-                        );
+                        next(null, docSync);
                     }
-                });
+                )
             }
         ],
-
-        function (err) {
-
-            if (err)
-            {
-                console.error("ERROR newprojectCtrl: " + JSON.stringify(err));
-                callback(err);
+        function(err, doc){
+            connection.close();
+            if(err){
+                console.error(JSON.stringify(err));
+                callback(err, {});
             }
             else
-            {
-                callback(null);
-            }
-
+                callback(err, doc);
         }
-    );
-
+    )
 };
 
+
 module.exports = Project;
+
+///**
+// *
+// * @param fileNames
+// * @param dataProject
+// * @param callback
+// */
+//function addNewProjectWithData(fileNames, dataProject, callback )
+//{
+//    /**
+//     *   async.waterfall
+//     *    - con il primo parametro = null, passa all'esecuzione della prossima funzione
+//     *    -                         !null  richiama la callback (con un parametro in questo caso)
+//     */
+//
+//    async.waterfall( [
+//
+//            // 1) cerco se il progetto esiste")
+//            function(next) {
+//
+//                console.log("1) cerco se il progetto esiste");
+//
+//                Project.getProject(dataProject.projectName,
+//                    function(doc){
+//
+//                        if ( doc == null)
+//                            next(null);
+//                        else
+//                            next( {status:1,message: "project already exists"});
+//                    }
+//                );
+//
+//            },
+//
+//            // 2) se non esiste lo creo")
+//            function(next) {
+//
+//                console.log("2) se non esiste lo creo");
+//
+//                Project.addProject(dataProject,
+//                    function(err)
+//                    {
+//                        if ( err == null )
+//                            next(null);
+//                        else
+//                        {
+//                            for(var k in err.errors){
+//                                err = projectError(3, err.errors[k].message);
+//                                break;
+//                            }
+//                            next(err);
+//                        }
+//
+//                    }
+//                );
+//            },
+//
+//            // 3) aggiungo i dati al progetto creato"
+//            function(next) {
+//
+//                console.log("3) aggiungo i dati al progetto creato");
+//
+//                Data.importFromFile(dataProject.cmbType, fileNames, dataProject.projectName,
+//                    function (err)
+//                    {
+//                        if ( err == null )
+//                            next(null);
+//                        else
+//                        {
+//                            for(var k in err.errors){
+//                                err = projectError(3, err.errors[k].message);
+//                                break;
+//                            }
+//                            next(err);
+//                        }
+//
+//                    }
+//                );
+//
+//            },
+//
+//            // modifico il progetto creato aggiungendo la dimensione
+//            function(next) {
+//
+//                var MongoClient = require('mongodb').MongoClient;
+//                var url = 'mongodb://localhost:27017/oim';
+//
+//                MongoClient.connect(url, function(err, db) {
+//
+//                    if ( err )
+//                    {
+//                        next(err);
+//
+//                    } else {
+//
+//                        db.collection('datas').count({projectName:dataProject.projectName},
+//                            function(err, cont) {
+//                                if ( err ) {
+//                                    db.close();
+//                                    next(err);
+//
+//                                }
+//                                else {
+//                                    db.collection('projects').update(
+//                                        {projectName:dataProject.projectName},
+//                                        {$set: {size:cont}}, function(err){
+//
+//                                            if ( err )  {
+//                                                next(err);
+//                                            }
+//                                            else {
+//                                                next(null);
+//                                            }
+//                                            db.close();
+//                                        });
+//                                }
+//                            }
+//                        );
+//                    }
+//                });
+//            }
+//        ],
+//
+//        function (err) {
+//
+//            if (err)
+//            {
+//                console.error("ERROR newprojectCtrl: " + JSON.stringify(err));
+//                callback(err);
+//            }
+//            else
+//            {
+//                callback(null);
+//            }
+//
+//        }
+//    );
+//
+//};

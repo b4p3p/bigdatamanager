@@ -55,7 +55,7 @@ module.exports = function (router, app) {
                 if (err == null)
                 {
                     var Project = require("../model/Project");
-                    Project.synchronize( req.headers.host, project, function(err){
+                    Project.sync( req.headers.host, project, function(err){
                         res.json( {status:0, result:result } );
                     })
                 }

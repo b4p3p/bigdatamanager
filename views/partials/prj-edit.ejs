@@ -167,9 +167,10 @@
         <label for="cmbType" >Type data:</label>
 
         <div class="col_dx">
-            <select class="selectpicker" name="type" id="cmbType">
-                <option value="csv">CSV</option>
+            <select class="selectpicker" name="type" id="cmbType"
+                    change="ProjectCtrl.cmbTypeChange()">
                 <option value="json">JSON</option>
+                <option value="csv">CSV</option>
             </select>
         </div>
 
@@ -189,7 +190,8 @@
                name="files" id="upload_input"
                data-show-upload="false"
                data-show-caption="true"
-               data-show-preview="false" multiple>
+               data-show-preview="false"
+               multiple>
 
     </div>
 
@@ -251,6 +253,11 @@
     ProjectCtrl.getProject( ProjectCtrl.loadEditForm );
     ProjectCtrl.getTags();
     ProjectCtrl.showExample();
+
+    $("#upload_input").fileinput( {
+        previewFileType: "json",
+        allowedFileExtensions: ["json"]
+    });
 
     $('#cmbType').on('change', function () {
         ProjectCtrl.showExample();

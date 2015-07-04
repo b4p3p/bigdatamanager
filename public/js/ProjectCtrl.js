@@ -84,6 +84,7 @@ var ProjectCtrl =
         $(document).ready(function() {
 
             $('#uploadForm').submit(
+
                 function()
                 {
 
@@ -91,7 +92,7 @@ var ProjectCtrl =
 
                     beforeSend: function(event, files, altro)
                     {
-                        console.log("CALL: Before Send")
+                        console.log("CALL: Before Send");
                         var fileList = ProjectCtrl.$btnFiles[0].files;
                         ProjectCtrl.initProgress(fileList);
                     },
@@ -328,10 +329,11 @@ var ProjectCtrl =
     },
 
     deleteColumnFormatter : function (value, row) {
+
         return '<button type="button" class="btn btn-danger btn-delete">' +
             '<span class="glyphicon glyphicon-remove img-delete" aria-hidden="true" ' +
             'project="' + row.project + '"' +
-            'onclick="ProjectCtrl.deleteProject_Click(\'' + row.project + '\')"/>' +
+            'onclick="ProjectCtrl.deleteProject_Click(\'' + row.projectName + '\')"/>' +
             '</button>';
     },
 
@@ -346,7 +348,8 @@ var ProjectCtrl =
     },
 
     deleteProject_Click : function (project) {
-        bootbox.confirm("Are you sure?", function(result) {
+        bootbox.confirm("Are you sure you want to delete this project?<br><b>" + project + "</b>", function(result)
+        {
             if(result)
                 ProjectCtrl.deleteProject(project);
         });
@@ -479,7 +482,19 @@ var ProjectCtrl =
 
     },
 
-    sendFiles: function () { $('#uploadForm').submit(); },
+    sendFiles: function () {
+
+        var files = ProjectCtrl.$btnFiles[0].files;
+        for(var i = 0; i< files.length; i ++)
+        {
+            var f = files.length[0];
+        }
+
+        if ( files.length == 0)
+            bootbox.alert("No file selected");
+        else
+            $('#uploadForm').submit();
+    },
 
     getSelectedFiles: function() {
         console.log("CALL: getSelectedFiles");

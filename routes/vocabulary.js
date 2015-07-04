@@ -5,7 +5,7 @@ var Vocabulary = require("../model/Vocabulary");
 
 module.exports = function (router) {
 
-    router.get('/synchronize', function (req, res){
+    router.get('/sync', function (req, res){
 
         var project = req.session.project || req.query.project;
         var user = req.session.user || req.query.user;
