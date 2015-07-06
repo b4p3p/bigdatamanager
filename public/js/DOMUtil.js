@@ -82,6 +82,66 @@ var DomUtil = {
 
         for (var i = 0; i < options.length; i++)
             $(options[i]).prop('selected', false);
+    },
+
+    getIntervalFromRangeSlider: function( $slider )
+    {
+        return $slider.dateRangeSlider("values");
     }
+
+};
+
+var ObjConditions = function($cmbNations, $cmbTags, $sliderTimer) {
+
+    this.$cmbNations = $cmbNations;
+    this.$cmbTags = $cmbTags;
+    this.$sliderTimer = $sliderTimer;
+    this.queryString = "";
+    this.value = {};
+
+    this.create = function(){
+
+        var arrayQueryString = [];
+        var nations = DomUtil.getSelectedCombo(this.$cmbNations);
+        var tags = DomUtil.getSelectedCombo(this.$cmbTags);
+        var interval = DomUtil.getIntervalFromRangeSlider(this.$sliderTimer);
+
+        if(nations.length > 0)
+            arrayQueryString.push("nations=" + nations.join(","));
+
+        if(tags.length > 0)
+            arrayQueryString.push("tags=" + tags.join(","));
+
+        arrayQueryString.push("start=" + interval.min.yyyymmdd());
+        arrayQueryString.push("end=" + interval.max.yyyymmdd());
+
+        if( arrayQueryString != [] )
+            this.queryString = "?" + arrayQueryString.join("&");
+
+        this.value = {
+            queryString : this.queryString,
+            conditions: {
+                nations : nations,
+                tags: tags,
+                interval: {
+                    min: interval.min ,
+                    max: interval.max
+                }
+            }
+        };
+
+    };
+
+    this.create();
+
+    this.getQueryString = function()
+    {
+        return this.value.queryString;
+    };
+
+    this.getConditions = function()
+    {
+        return this.value.conditions;
+    };
 
 };

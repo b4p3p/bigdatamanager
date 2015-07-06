@@ -44,19 +44,10 @@ var BtnCtrl = function() {
 var FormCtrl = function(){
 
     this.enableForm = function(){
-
         btnCtrl.removeWaitFromAllCheck();
         btnCtrl.enableFilterButton();
         btnCtrl.enableAllCheck();
-
     }
-
-};
-
-var ObjCondictions = function() {
-
-
-
 };
 
 var btnCtrl = null;
@@ -217,58 +208,56 @@ ShowmapCtrl.getData = function ()
 {
     console.log("CALL: getData");
 
-    async.parallel(
+    async.parallel({
+        data: function(next)
         {
-            data: function(next)
-            {
-                DataCtrl.getField( function(doc){
+            DataCtrl.getField( function(doc){
 
-                    ShowmapCtrl.datas = doc;
-                    ShowmapCtrl.filteredDatas = doc;
+                ShowmapCtrl.datas = doc;
+                ShowmapCtrl.filteredDatas = doc;
 
-                    next(null);
-                }, DataCtrl.FIELD.DATA);
-            },
+                next(null);
 
-            stat: function(next)
-            {
-                DataCtrl.getField( function(doc){
-                    ShowmapCtrl.stat = doc;
-                    ShowmapCtrl.filteredStat = doc;
-                    next(null);
-                }, DataCtrl.FIELD.STAT );
-            },
-
-            regions: function (next)
-            {
-                DataCtrl.getField(
-                    function(doc)
-                    {
-                        ShowmapCtrl.regions = doc;
-                        ShowmapCtrl.filteredRegions = doc;
-                        next(null);
-                    },
-                    DataCtrl.FIELD.REGIONSJSON
-                );
-            },
-
-            users: function (next)
-            {
-                DataCtrl.getField( function(doc){
-                    ShowmapCtrl.users = doc;
-                    next(null);
-                }, DataCtrl.FIELD.USERS, 50);
-            },
-
-            wordcount: function (next)
-            {
-                DataCtrl.getField( function(doc)
-                {
-                    ShowmapCtrl.terms = doc;
-                    next(null);
-                }, DataCtrl.FIELD.WORDCOUNT);
-            }
+            }, DataCtrl.FIELD.DATA);
         },
+        stat: function(next)
+        {
+            DataCtrl.getField( function(doc){
+                ShowmapCtrl.stat = doc;
+                ShowmapCtrl.filteredStat = doc;
+                next(null);
+            }, DataCtrl.FIELD.STAT );
+        },
+
+        regions: function (next)
+        {
+            DataCtrl.getField(
+                function(doc)
+                {
+                    ShowmapCtrl.regions = doc;
+                    ShowmapCtrl.filteredRegions = doc;
+                    next(null);
+                },
+                DataCtrl.FIELD.REGIONSJSON
+            );
+        },
+
+        users: function (next)
+        {
+            DataCtrl.getField( function(doc){
+                ShowmapCtrl.users = doc;
+                next(null);
+            }, DataCtrl.FIELD.USERS, 50);
+        },
+
+        wordcount: function (next)
+        {
+            DataCtrl.getField( function(doc)
+            {
+                ShowmapCtrl.terms = doc;
+                next(null);
+            }, DataCtrl.FIELD.WORDCOUNT);
+        }},
         function(err, results) {
             ShowmapCtrl.loadForm();
         }
@@ -378,7 +367,13 @@ ShowmapCtrl.cmdFilter_click = function()
     btnCtrl.addImgWaitFilterButton();
 
     /* filtro i dati con le condizioni selezionate */
-    var queryString = ShowmapCtrl.getCondictions();
+
+    var conditions = new ObjConditions(
+        ShowmapCtrl.$cmbSelectNations,
+        ShowmapCtrl.$cmbSelectTags,
+        ShowmapCtrl.$sliderTimer);
+
+    var queryString = conditions.getQueryString();
 
     DataCtrl.getFromUrl(DataCtrl.FIELD.STAT, queryString, function(docStat){
 
@@ -431,42 +426,46 @@ ShowmapCtrl.cmdFilter_click = function()
     //});
 };
 
-ShowmapCtrl.getCondictions = function()
-{
-    var condictions = new ObjCondictions();
-
-    var ris = "";
-    var conditions = [];
-    var selectedNations = getSelectedCombo(ShowmapCtrl.$cmbSelectNations);
-    var selectedTags = getSelectedCombo(ShowmapCtrl.$cmbSelectTags);
-    var values = ShowmapCtrl.$sliderTimer.dateRangeSlider("values");
-
-    console.log("CONDIZIONI: ");
-    console.log(" Nazioni: " + selectedNations);
-    console.log(" Tags: " + selectedTags);
-    console.log(" Min data: " + values.min);
-    console.log(" Max data: " + values.max);
-
-    if(selectedNations.length > 0)
-        conditions.push("nations=" + selectedNations.join(","));
-
-    if(selectedTags.length > 0)
-        conditions.push("tags=" + selectedTags.join(","));
-
-    conditions.push("start=" + values.min.yyyymmdd());
-    conditions.push("end=" + values.max.yyyymmdd());
-
-    if( conditions != [] )
-        ris = "?" + conditions.join("&");
-
-    var objCondiction = {
-        queryString : ris
-    }
-
-    console.log("     getCondictions = " + ris);
-
-    return ris;
-};
+//ShowmapCtrl.getCondictions = function()
+//{
+//    var ris = "";
+//    var conditions = [];
+//
+//    //var selectedNations = getSelectedCombo(ShowmapCtrl.$cmbSelectNations);
+//    //var selectedTags = getSelectedCombo(ShowmapCtrl.$cmbSelectTags);
+//    //var values = ShowmapCtrl.$sliderTimer.dateRangeSlider("values");
+//
+//    //var condictions = new ObjCondictions(
+//    //    ShowmapCtrl.$cmbSelectNations,
+//    //    ShowmapCtrl.$cmbSelectTags,
+//    //    ShowmapCtrl.$sliderTimer);
+//
+//    //console.log("CONDIZIONI: ");
+//    //console.log(" Nazioni: " + selectedNations);
+//    //console.log(" Tags: " + selectedTags);
+//    //console.log(" Min data: " + values.min);
+//    //console.log(" Max data: " + values.max);
+//
+//    if(selectedNations.length > 0)
+//        conditions.push("nations=" + selectedNations.join(","));
+//
+//    if(selectedTags.length > 0)
+//        conditions.push("tags=" + selectedTags.join(","));
+//
+//    conditions.push("start=" + values.min.yyyymmdd());
+//    conditions.push("end=" + values.max.yyyymmdd());
+//
+//    if( conditions != [] )
+//        ris = "?" + conditions.join("&");
+//
+//    var objCondiction = {
+//        queryString : ris
+//    }
+//
+//    console.log("     getCondictions = " + ris);
+//
+//    return ris;
+//};
 
 ShowmapCtrl.heatmap_click = function()
 {
@@ -828,16 +827,16 @@ var hideBoundaries = function()
     }
 };
 
-function getSelectedCombo( combo )
-{
-    var tags = [];
-    var options = combo.find(":selected");
-
-    for ( var i = 0; i < options.length; i++)
-        tags.push ( options[i].text );
-
-    return tags;
-}
+//function getSelectedCombo( combo )
+//{
+//    var tags = [];
+//    var options = combo.find(":selected");
+//
+//    for ( var i = 0; i < options.length; i++)
+//        tags.push ( options[i].text );
+//
+//    return tags;
+//}
 
 function setData_Heatmap()
 {
