@@ -121,6 +121,16 @@ Summary.getStatFilter = function (project, username, query, callback)
         if (query) {
             if (query.start) ris.push({date: {$gte: new Date(query.start)}});
             if (query.end)   ris.push({date: {$lte: new Date(query.end)}});
+
+            if (query.tags) {
+                var tags = query.tags.split(',');
+                ris.push({tag: {$in: tags}});
+            }
+
+            if (query.nations) {
+                var nations = query.nations.split(',');
+                ris.push({nation: {$in: nations}});
+            }
         }
         if (ris.length > 0) return ris; else return [{}];
 

@@ -174,12 +174,15 @@
 </div>
 
 <div class="row">
+
     <button type="button" class="btn btn-success"
             id="cmdFilter"
             style="float: right; margin-top: 15px; margin-left: 10px;"
             onclick="ShowmapCtrl.cmdFilter_click()"
             disabled>
-        <span id="img-filter" class="glyphicon glyphicon-filter" aria-hidden="true"></span> Apply filter</button>
+        <span id="img-filter" class="glyphicon glyphicon-filter" aria-hidden="true"></span>
+            Apply filter
+    </button>
 
     <button type="button" class="btn btn-danger"
             id="cmdRestore"
@@ -248,6 +251,7 @@
 
 <script>
 
+    ShowmapCtrl.init();
     ShowmapCtrl.initMap('map');
     ShowmapCtrl.initGui();
     ShowmapCtrl.getData();

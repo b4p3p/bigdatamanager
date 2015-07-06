@@ -110,12 +110,15 @@ DataCtrl.requireRefresh = function(field, callback)
 
 DataCtrl.getFromUrl = function(field, queryString,  callback)
 {
+
+    if( !queryString ) queryString = "";
+
     console.log("CALL: DataCtrl.getFromUrl\n" +
-        "      url: " + field.URL + " key: " + field.KEY );
+        "      url: " + field.URL + queryString + " key: " + field.KEY );
 
     $.ajax({
         type: "get",
-        url: field.URL,
+        url: field.URL + queryString,
         timeout: 1000 * 60, //1m
 
         success: function(data){

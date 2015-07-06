@@ -288,155 +288,30 @@ Regions.removeNation = function (nation, callback) {
  *
  * @param callback
  */
-Regions.getRegions = function (projectName, arg_nations, arg_tags, isLight, callback) {
+Regions.getRegions = function (arg_nations, isLight, callback) {
+
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var regions = connection.model("regions", Regions.SCHEMA);
     var datas = connection.model("datas", Datas.SCHEMA);
 
     var queryNations = arg_nations.length > 0 ? {"properties.NAME_0": {$in: arg_nations}} : {};
-    var queryTags = arg_tags.length > 0 ? {"_id.t": {$in: arg_tags}} : {_id: {$exists: true}};
+    var projection = {_id:0};
 
-    var maxSum = 0;
-    var totRegions = 0;
-    var cont = 0;
-    var ris = [];
-    var dict = {};
-    var tags = [];
+    if(isLight) {
+        projection["geometry"] = 0;
+        projection["properties.ID_0"] = 0;
+        projection["properties.ISO"] = 0;
+        projection["properties.ISO2"] = 0;
+    }
 
-    async.waterfall(
-        [
-
-            //prendo la maggior parte dei dati
-            function (next)
-            {
-                regions.find( queryNations, function (err, regions)
-                {
-                    console.log("CALL: Region.getRegion - #regions %s", regions.length);
-
-                    if (regions.length == 0) {
-                        callback(null, {});
-                        return;
-                    }
-
-                    totRegions = regions.length;
-
-                    _.each(regions, function (region, i) {
-
-                        var nation = regions[i]._doc.properties.NAME_0;
-                        var region = regions[i]._doc.properties.NAME_1;
-                        var geometry = regions[i]._doc.geometry;
-                        var id = regions[i]._doc._id.id;
-
-                        delete regions[i]._doc._id;
-
-                        if (isLight) {
-                            //delete regions[i]._doc._id;
-                            delete regions[i]._doc.properties;
-                            delete regions[i]._doc.type;
-                            delete regions[i]._doc.geometry;
-                            regions[i]._doc.properties = {};
-                            regions[i]._doc.properties.NAME_0 = nation;
-                            regions[i]._doc.properties.NAME_1 = region;
-                        }
-
-                        ris.push(regions[i]._doc);
-                        dict[id] = i;
-
-                        datas.aggregate(
-                            {
-                                "$match": {
-                                    projectName: projectName,
-                                    loc: {$geoWithin: {$geometry: geometry}}
-                                }
-                            },
-
-                            {
-                                "$group": {
-                                    "_id": {t: "$tag", r: "$properties.NAME_0"},
-                                    "subtotal": {"$sum": 1}
-                                }
-                            },
-
-                            {"$match": queryTags},
-
-                            {
-                                $group: {
-                                    _id: "$_id.r",
-                                    counter: {$push: {tag: "$_id.t", subtotal: "$subtotal"}},
-                                    sum: {$sum: "$subtotal"}
-                                }
-                            },
-
-                            {
-                                "$project": {
-                                    _id: 1,
-                                    geometry: 1,
-                                    counter: 1,
-                                    nation: {$literal: nation},
-                                    region: {$literal: region},
-                                    IDregion: {$literal: id},
-                                    sum: "$sum"
-                                }
-                            },
-
-                            function (err, risGroup) {
-
-                                cont++;
-
-                                if (risGroup && risGroup[0]) {
-                                    //console.log("%d) %s - %s - %d",cont, risGroup[0].nation, risGroup[0].region, risGroup[0].sum);
-
-                                    var index = dict[risGroup[0].IDregion];
-                                    ris[index].properties.sum = risGroup[0].sum;
-
-                                    maxSum = Math.max(risGroup[0].sum, maxSum);
-
-                                    var counter = {};
-                                    _.each(risGroup[0].counter, function(obj, i){
-                                        counter[risGroup[0].counter[i].tag] = risGroup[0].counter[i].subtotal;
-                                    })
-
-                                    ris[index].properties.counter = counter;
-                                }
-                                else {
-                                    //console.log("%d) ND", cont);
-                                }
-
-
-                                if (cont == totRegions) {
-                                    //console.log("##(1)## end group by tag ####");
-                                    next(null);
-                                }
-                            }
-                        );
-                    });
-                });
-            },
-
-            //completo con i dati mancanti
-            function (next)
-            {
-                _.each(ris, function(obj, i){
-                    if (!ris[i].properties.counter)
-                        ris[i].properties.counter = {};
-                    if (!ris[i].properties.sum)
-                        ris[i].properties.sum = 0;
-                    ris[i].properties.avg = ris[i].properties.sum / maxSum;
-                });
-
-                next(null);
-
-            }
-
-        ],
-
-        function (err) {
-
-            connection.close();
-            callback(null, ris);
+    regions.find(
+        queryNations,
+        projection,
+        function (err, regions) {
+            console.log("CALL: Region.getRegion - #regions %s", regions.length);
+            callback(null, regions);
         }
     );
-
 };
 
 module.exports = Regions;

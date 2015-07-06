@@ -14,10 +14,9 @@ module.exports = function (router, app) {
     {
         var project = req.session.project;
         var nations = req.query.nations ? req.query.nations.split(',') : [];
-        var tags = req.query.tags ? req.query.tags.split(',') : [];
         var isLight = req.query.light ? true : false;
 
-        Regions.getRegions(project, nations, tags, isLight, function(err, data){
+        Regions.getRegions(nations , isLight, function(err, data){
             res.json(data);
         });
     });
