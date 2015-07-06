@@ -131,6 +131,11 @@ Summary.getStatFilter = function (project, username, query, callback)
                 var nations = query.nations.split(',');
                 ris.push({nation: {$in: nations}});
             }
+
+            if (query.regions) {
+                var regions = query.regions.split(',');
+                ris.push({region: {$in: regions}});
+            }
         }
         if (ris.length > 0) return ris; else return [{}];
 
@@ -350,7 +355,8 @@ Summary.getStatFilter = function (project, username, query, callback)
             docSync.data.allTags = results.allTags;
             docSync.data.countTot = results.count;
 
-            async.each(results.regions, function(obj, next){
+            async.each(results.regions,
+                function(obj, next){
 
                 //nation == null
                 if(!docSync.data.nations[obj.nation])
@@ -380,11 +386,13 @@ Summary.getStatFilter = function (project, username, query, callback)
                     next(err);
                 });
 
-            }, function(err){ //end
+            },
+                function(err){ //end
 
                 callback(err, docSync);
 
-            });
+            })
+            ;
         });
 
 

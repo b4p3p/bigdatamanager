@@ -103,13 +103,16 @@ var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer) {
     this.create = function()
     {
         var arrayQueryString = [];
-        var regions = DomUtil.getSelectedCombo(this.$cmbNations);
+        var regions = DomUtil.getSelectedCombo(this.$cmbRegions);
         var nations = DomUtil.getSelectedCombo(this.$cmbNations);
         var tags = DomUtil.getSelectedCombo(this.$cmbTags);
         var interval = DomUtil.getIntervalFromRangeSlider(this.$sliderTimer);
 
         if(nations.length > 0)
             arrayQueryString.push("nations=" + nations.join(","));
+
+        if(regions.length > 0)
+            arrayQueryString.push("regions=" + regions.join(","));
 
         if(tags.length > 0)
             arrayQueryString.push("tags=" + tags.join(","));
@@ -124,8 +127,8 @@ var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer) {
             queryString : this.queryString,
             conditions: {
                 nations : nations,
-                tags: tags,
                 regions: regions,
+                tags: tags,
                 interval: {
                     min: interval.min ,
                     max: interval.max
