@@ -332,9 +332,25 @@ ShowmapCtrl.loadForm = function()
 
 };
 
-ShowmapCtrl.filterData = function(callback)
+/**
+ *
+ * @param objCond : ObjConditions
+ * @param callback
+ */
+ShowmapCtrl.filterData = function(objCond, callback)
 {
-    callback();
+    async.filter(ShowmapCtrl.datas,
+        function(obj, next){
+
+            next( objCond.containNation(obj.nation) &&
+                  objCond.containTag(obj.tag) &&
+                  objCond.isInRange(obj.date));
+        },
+        function(results) {
+            ShowmapCtrl.filteredDatas = results;
+            callback();
+        }
+    );
 };
 
 ShowmapCtrl.refreshData = function(callback)
@@ -370,6 +386,7 @@ ShowmapCtrl.cmdFilter_click = function()
 
     var conditions = new ObjConditions(
         ShowmapCtrl.$cmbSelectNations,
+        null,
         ShowmapCtrl.$cmbSelectTags,
         ShowmapCtrl.$sliderTimer);
 
@@ -381,7 +398,7 @@ ShowmapCtrl.cmdFilter_click = function()
 
         async.waterfall([
             function (next) {
-                ShowmapCtrl.filterData(function(){
+                ShowmapCtrl.filterData(conditions, function(){
                     next();
                 })
             },

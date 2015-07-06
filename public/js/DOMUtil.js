@@ -149,12 +149,29 @@ var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer) {
 
     this.containRegion = function(region)
     {
-        return this.value.conditions.regions.indexOf(region) != -1;
+        return  this.value.conditions.regions.length == 0 ||
+                this.value.conditions.regions.indexOf(region) != -1;
     };
 
     this.containNation = function(nation)
     {
-        return this.value.conditions.nations.indexOf(nation) != -1;
+        return  this.value.conditions.nations.length == 0 ||
+                this.value.conditions.nations.indexOf(nation) != -1;
     };
+
+    this.containTag = function(tag)
+    {
+        return  this.value.conditions.tags.length == 0 ||
+                this.value.conditions.tags.indexOf(tag) != -1;
+    };
+
+    this.isInRange = function(date)
+    {
+        var d = new Date(date);
+        return  d >= this.value.conditions.interval.min &&
+                d <= this.value.conditions.interval.max
+    };
+
+
 
 };
