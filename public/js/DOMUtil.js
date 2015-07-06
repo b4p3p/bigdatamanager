@@ -91,17 +91,19 @@ var DomUtil = {
 
 };
 
-var ObjConditions = function($cmbNations, $cmbTags, $sliderTimer) {
+var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer) {
 
     this.$cmbNations = $cmbNations;
+    this.$cmbRegions = $cmbRegions;
     this.$cmbTags = $cmbTags;
     this.$sliderTimer = $sliderTimer;
     this.queryString = "";
     this.value = {};
 
-    this.create = function(){
-
+    this.create = function()
+    {
         var arrayQueryString = [];
+        var regions = DomUtil.getSelectedCombo(this.$cmbNations);
         var nations = DomUtil.getSelectedCombo(this.$cmbNations);
         var tags = DomUtil.getSelectedCombo(this.$cmbTags);
         var interval = DomUtil.getIntervalFromRangeSlider(this.$sliderTimer);
@@ -123,6 +125,7 @@ var ObjConditions = function($cmbNations, $cmbTags, $sliderTimer) {
             conditions: {
                 nations : nations,
                 tags: tags,
+                regions: regions,
                 interval: {
                     min: interval.min ,
                     max: interval.max
@@ -142,6 +145,16 @@ var ObjConditions = function($cmbNations, $cmbTags, $sliderTimer) {
     this.getConditions = function()
     {
         return this.value.conditions;
+    };
+
+    this.containRegion = function(region)
+    {
+        return this.value.conditions.regions.indexOf(region) != -1;
+    };
+
+    this.containNation = function(nation)
+    {
+        return this.value.conditions.nations.indexOf(nation) != -1;
     };
 
 };
