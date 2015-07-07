@@ -16,7 +16,7 @@ ConstantsRouter.argIndex = function(req, page)
     //TODO DEBUG
     if ( req && req.session )
     {
-        req.session.project = req.session.project ? req.session.project : "oim";
+        req.session.project = req.session.project ? req.session.project : "crowdpulse";
         req.session.user = req.session.user ? req.session.user : "oim";
     }
 

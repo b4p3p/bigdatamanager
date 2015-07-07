@@ -21,7 +21,7 @@ db.datas.createIndex( {projectName: 1} );
 
 db.summaries.createIndex( {project: 1} );
 
-db.projects.createIndex( { projectNames: 1, userProject: 1 }, { unique: true } )
+db.projects.createIndex( {projectName: 1 }, { unique: true } )
 
 db.nations.createIndex( { name: 1 }, { unique: true } )
 

@@ -17,6 +17,14 @@ DataCtrl.storage.initialized.then(function(grantedCapacity) {
     }
 });
 
+DataCtrl.clearAll = function()
+{
+    console.log("CALL: DataCtrl.clearAll");
+    DataCtrl.storage.clear( function(result){
+        console.log("db pulito");
+    });
+};
+
 DataCtrl.FIELD = {
     LASTUPDATE : {
         KEY: "lastUpdate",

@@ -70,10 +70,8 @@ module.exports = function (router, app) {
             var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.NEW_PROJECT);
 
             if (err != null) {
-                arg.error = {
-                    status: 1,
-                    message: err.toString()
-                };
+                console.error(err.toString());
+                arg.error =  ConstantsRouter.argError(1, err.toString());
                 res.render('../views/pages/index.ejs', arg);
             }
             else {
@@ -143,6 +141,7 @@ module.exports = function (router, app) {
     });
 
     router.post('/uploaddata', function (req, res) {
+
         if (!app.isUploadDone()) {
             console.log("UPLOADING....");
             return;
@@ -166,7 +165,7 @@ module.exports = function (router, app) {
                     serverUrl: req.headers.host
                 };
 
-                Project.addData(projectData, function (err, result) {
+                Project.addData( projectData, function (err, result) {
                     ris[f.originalname] = result;
                     fs.unlinkSync(f.path);
                     next(err);

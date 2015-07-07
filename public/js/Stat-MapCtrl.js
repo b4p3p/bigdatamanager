@@ -216,7 +216,7 @@ ShowmapCtrl.getData = function ()
                 ShowmapCtrl.datas = doc;
                 ShowmapCtrl.filteredDatas = doc;
 
-                next(null);
+                next(null, doc);
 
             }, DataCtrl.FIELD.DATA);
         },
@@ -225,7 +225,7 @@ ShowmapCtrl.getData = function ()
             DataCtrl.getField( function(doc){
                 ShowmapCtrl.stat = doc;
                 ShowmapCtrl.filteredStat = doc;
-                next(null);
+                next(null, doc);
             }, DataCtrl.FIELD.STAT );
         },
 
@@ -236,7 +236,7 @@ ShowmapCtrl.getData = function ()
                 {
                     ShowmapCtrl.regions = doc;
                     ShowmapCtrl.filteredRegions = doc;
-                    next(null);
+                    next(null, doc);
                 },
                 DataCtrl.FIELD.REGIONSJSON
             );
@@ -246,7 +246,7 @@ ShowmapCtrl.getData = function ()
         {
             DataCtrl.getField( function(doc){
                 ShowmapCtrl.users = doc;
-                next(null);
+                next(null, doc);
             }, DataCtrl.FIELD.USERS, 50);
         },
 
@@ -255,7 +255,7 @@ ShowmapCtrl.getData = function ()
             DataCtrl.getField( function(doc)
             {
                 ShowmapCtrl.terms = doc;
-                next(null);
+                next(null, doc);
             }, DataCtrl.FIELD.WORDCOUNT);
         }},
         function(err, results) {

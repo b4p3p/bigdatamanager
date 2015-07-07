@@ -8,6 +8,7 @@ var request = require("request");
 var Summary = require("../model/Summary");
 var Regions = require("../model/Regions");
 var Datas = require("../model/Data");
+var CrowdPulse = require("../model/CrowdPulse");
 
 var Project = function (data) {
     this.data = data;
@@ -232,16 +233,28 @@ Project.editProject = function (data, callback) {
  */
 Project.addData = function (projectData, callback)
 {
-    var DataModel = require("../model/Data");
+    var Data = require("../model/Data");
 
-    DataModel.importFromFile(
-        projectData.type,
-        projectData.filePath,
-        projectData.project,
-        function(err, result){
-            callback(err, result);
-        }
-    );
+    if( projectData.type == "json-crowdpulse" )
+    {
+        CrowdPulse.importFromFile(
+            projectData.filePath,
+            projectData.project,
+            function(err, result){
+                callback(err, result);
+            }
+        )
+    }else
+    {
+        Data.importFromFile(
+            projectData.type,
+            projectData.filePath,
+            projectData.project,
+            function(err, result){
+                callback(err, result);
+            }
+        );
+    }
 
 };
 

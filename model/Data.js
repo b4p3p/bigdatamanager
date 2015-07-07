@@ -24,6 +24,11 @@ var Data = function (data) {
     this.data = data;
 };
 
+Data.ResultFile = {
+    success: 0,
+    fail: 0
+};
+
 Data.MODEL_NAME = "datas";
 
 Data.SCHEMA = new Schema(
@@ -59,49 +64,7 @@ Data.prototype.data = {};
 /**
  *
  * @param type {String} - "csv" || "json"
- * @param fileNames {Array} - names array
- * @param projectName {String}
- * @param cb_ris - callback({Error},{Result})
- */
-Data.importFromFiles = function (type, fileNames, projectName, cb_ris) {
-    console.log("### START each ### ");
-
-    var Result = {
-        success: [],
-        fail: []
-    };
-
-    async.each(fileNames, function (file, cb_each) {
-
-            Data.importFromFile(type, file, projectName, function (err, result) {
-
-                cb_each(err);
-
-            });
-        },
-
-        //Funzione di errore each
-        function (err) {
-            console.log("### END each ### ");
-
-            if (err) {
-                console.log("    Status: ERROR ### ");
-                console.log("    Error : " + err);
-            }
-            else {
-                console.log("    Status: OK");
-                console.log("###############");
-            }
-            cb_ris(err, Result);
-
-        });
-
-};
-
-/**
- *
- * @param type {String} - "csv" || "json"
- * @param fileName - name
+ * @param file - name
  * @param projectName {String}
  * @param cb_ris - callback({Error},{Result})
  */
@@ -375,5 +338,49 @@ function addDataArray(arrayData, projectName, callback) {
     }
 }
 
-
 module.exports = Data;
+
+
+
+///**
+// *
+// * @param type {String} - "csv" || "json"
+// * @param fileNames {Array} - names array
+// * @param projectName {String}
+// * @param cb_ris - callback({Error},{Result})
+// */
+//Data.importFromFiles = function (type, fileNames, projectName, cb_ris)
+//{
+//    console.log("### START each ### ");
+//
+//    var Result = {
+//        success: [],
+//        fail: []
+//    };
+//
+//    async.each(fileNames, function (file, cb_each) {
+//
+//            Data.importFromFile(type, file, projectName, function (err, result) {
+//
+//                cb_each(err);
+//
+//            });
+//        },
+//
+//        //Funzione di errore each
+//        function (err) {
+//            console.log("### END each ### ");
+//
+//            if (err) {
+//                console.log("    Status: ERROR ### ");
+//                console.log("    Error : " + err);
+//            }
+//            else {
+//                console.log("    Status: OK");
+//                console.log("###############");
+//            }
+//            cb_ris(err, Result);
+//
+//        });
+//
+//};
