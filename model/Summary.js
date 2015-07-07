@@ -145,6 +145,7 @@ Summary.getStatFilter = function (project, username, query, callback)
     var datas = connection.model(Datas.MODEL_NAME, Datas.SCHEMA);
     var regions = connection.model(Regions.MODEL_NAME, Regions.SCHEMA);
     var maxRegionCount = 0;
+    var maxNationCount = 0;
 
     query = buildQuery(query);
 
@@ -306,28 +307,48 @@ Summary.getStatFilter = function (project, username, query, callback)
 
                         {
                             $group: {
-                                _id: {nation: "$nation", region: "$region"},
-                                count: {$sum: 1}
+                                _id: {nation: "$nation", region: "$region" },
+                                sum: {$sum: 1}
                             }
                         },
 
                         {
-                            $sort: { count: -1 }
+                            $group: {
+                                _id: "$_id.nation" ,
+                                sum: {$sum: "$sum" },
+                                regions: {$push: {region: "$_id.region", sum:"$sum" } }
+                            }
                         },
 
-                        { $limit: 1 }
+                        {
+                            $project: { _id: 0, nation: "$_id", sum: 1, regions:1 }
+                        },
+
+                        {
+                            $sort: { count: -1 }
+                        }
 
                     ],
 
                     function (err, result) {
 
-                        if(result.length == 0 )
-                        {
+                        if (result.length == 0){
                             callback(null, 0);
-                        }else
-                        {
-                            callback(null, result[0].count);
+                            return;
                         }
+
+                        var ris = {nation : 0, region : 0};
+
+                        _.each(result, function(nation) {
+
+                            ris.nation = Math.max( ris.nation, nation.sum);
+                            _.each(nation.regions, function(region) {
+                                ris.region = Math.max( ris.region, region.sum);
+                            });
+                        });
+
+
+                        callback(null, ris);
 
                     }
                 );
@@ -341,7 +362,8 @@ Summary.getStatFilter = function (project, username, query, callback)
             },
 
             count: function(callback){
-                datas.find( {projectName: project}).count( function (err, result) {
+                datas.find( {projectName: project}).count( function (err, result)
+                {
                     callback(err, result);
                 })
             }
@@ -356,38 +378,42 @@ Summary.getStatFilter = function (project, username, query, callback)
             docSync.data.countTot = results.count;
 
             async.each(results.regions,
+
                 function(obj, next){
 
-                //nation == null
-                if(!docSync.data.nations[obj.nation])
-                {
-                    next(null);
-                    return;
-                }
-
-                async.each(obj.regions, function(region, next){
-
-                    //add empty region
-                    if(!docSync.data.nations[obj.nation].regions[region])
+                    //nation == null
+                    if(!docSync.data.nations[obj.nation])
                     {
-                        docSync.data.nations[obj.nation].regions[region] = {
-                            name: region,
-                            count: 0,
-                            counter: {}
-                        };
+                        next(null);
+                        return;
                     }
 
-                    docSync.data.nations[obj.nation].regions[region].avg =
-                        docSync.data.nations[obj.nation].regions[region].count / results.max;
+                    docSync.data.nations[obj.nation].avg = docSync.data.nations[obj.nation].count / results.max.nation;
 
-                    next(null);
+                    async.each(obj.regions, function(region, next)
+                    {
 
-                }, function(err){
-                    next(err);
-                });
+                        //add empty region
+                        if(!docSync.data.nations[obj.nation].regions[region])
+                        {
+                            docSync.data.nations[obj.nation].regions[region] = {
+                                name: region,
+                                count: 0,
+                                counter: {}
+                            };
+                        }
 
-            },
-                function(err){ //end
+                        docSync.data.nations[obj.nation].regions[region].avg =
+                            docSync.data.nations[obj.nation].regions[region].count / results.max.region;
+
+                        next(null);
+
+                    }, function(err){
+                        next(err);
+                    })
+                }
+
+                , function(err){ //end
 
                 callback(err, docSync);
 
