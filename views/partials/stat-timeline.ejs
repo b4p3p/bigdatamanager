@@ -1,18 +1,9 @@
 <style>
+
     #timeLine {
-        /*width:2000px;*/
-        /*height:400px;*/
-        /*margin-top:3%;*/
-        /*margin-right:25%*/
-
-        /*position: relative;*/
-        /*bottom: 0;*/
-
-        /*height: calc(100% - 5px);*/
         height: 500px;
-        /*width: 2000px;*/
-        border: 2px solid black;
-        padding:20px;
+        margin-top: 0;
+        padding-left: 0;
     }
 
     #timeLineContainer {
@@ -22,6 +13,8 @@
         width:100%;
         /*height: 50%;*/
         overflow-x: scroll;
+        padding-left: 0;
+        margin-top: 0;
     }
 
     #cmbTypeBisualization {
@@ -29,53 +22,125 @@
         margin-right: 5px
     }
 
-    #form {
-        /*margin-top: -25px;*/
-        /*margin-bottom: -25px;*/
+    #formType {
+        margin-left: 20px;
+        /*width: 100%;*/
+        margin-bottom: 10px;
     }
 
     #container{
-
-
+        margin-top: 20px;;
+        padding-left: 10px;
+        padding-right: 0;
     }
 
+    .form-option {
+        margin-right: 50px;
+    }
+
+    #formType {
+        margin-left: 20px;
+        /*width: 100%;*/
+        margin-bottom: 10px;
+        margin-bottom: 0;
+    }
+
+    .form-inline > .form-group {
+        vertical-align: top;
+    }
 </style>
 
-<script src="/public/js/Stat-RegionTimeLineCtrl.js"></script>
+<script src="/public/js/Stat-timeLineCtrl.js"></script>
 <script src="/public/lib/chartjs/Chart.js"></script>
+<script src="/public/js/DOMUtil.js"></script>
 
 
 <div id="spinner" style="text-align: center">
     <img src="/public/img/ajax-loader.gif" alt="Loading" class="spinnerImage"/>
-    <p>Loading time line graph...</p>
+    <p>Loading data...</p>
 </div>
 
-<!--style="margin-left: 30%;margin-top: 2%; width: 100%;"-->
 
-<!---->
 <div class="content hidden" id="container">
 
-    <form id="form" class="form-inline" role="form">
-        <div class="control-group">
-            <label class="control-label" for="cmbTypeVisualization">
-                Visualization mode:
-            </label>
-            <select class="selectpicker"
-                    id="cmbTypeVisualization">
-                <option value=0 >Day</option>
-                <option value=1 >Week</option>
-                <option value=2 >Month</option>
-            </select>
-        </div>
-    </form>
+    <div class="row">
 
+        <form id="formType" class="form-inline" role="form">
+
+            <div class="form-group form-option">
+                <label class="fix-label">Visualization mode:</label><br>
+
+                <div class="radio">
+                    <label><input id="radioDays" type="radio" name="optmode" value="days" checked=""
+                                  onclick="timeLineCtrl.handleModeClick(this);"> Days</label>
+                </div><br>
+                <div class="radio">
+                    <label>
+                        <input id="radioWeeks" type="radio" name="optmode" value="weeks"
+                               onclick="timeLineCtrl.handleModeClick(this);"> Weeks</label>
+                </div><br>
+                <div class="radio">
+                    <label><input id="radioMonths" type="radio" name="optmode" value="months"
+                                  onclick="timeLineCtrl.handleModeClick(this);"> Months</label>
+                </div>
+            </div>
+
+            <div id="formTags" class="form-group form-option">
+                    <label class="fix-label" for="cmbTags">Tags</label><br>
+                    <select class="selectpicker" id="cmbTags"
+                            data-live-search="true" title="Select tags"
+                            multiple>
+                    </select>
+                </div>
+
+            <div id="formUsers" class="form-group form-option">
+                    <label class="fix-label" for="cmbUsers">Users</label><br>
+                    <select class="selectpicker" id="cmbUsers"
+                            data-live-search="true" title="Select users"
+                            multiple>
+                    </select>
+                </div>
+        </form>
+    </div>
+    <div class="row">
+        <button type="button" class="btn btn-success"
+                id="cmbFilter"
+                style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"
+                onclick="timeLineCtrl.clickFilter()"
+                disabled>
+            <span id="img-filter" class="glyphicon glyphicon-filter" aria-hidden="true"></span> Apply filter
+        </button>
+
+        <button type="button" class="btn btn-danger"
+                id="cmbRestore"
+                style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"
+                onclick="timeLineCtrl.clickRestore()"
+                disabled>
+            <span id="img-restore" class="glyphicon glyphicon-remove" aria-hidden="true"></span> Restore
+        </button>
+    </div>
 </div>
 
-<div id="timeLineContainer">
+
+
+<div id="timeLineContainer" class="content hidden">
     <canvas class="content hidden" id="timeLine"></canvas>
 </div>
 
 <script>
-    RegionTimeLineCtrl.initGUI();
-    RegionTimeLineCtrl.loadData();
+
+    $(document).ready(function ()
+    {
+        $('.selectpicker').selectpicker();
+    });
+
+    timeLineCtrl.initGUI();
+    timeLineCtrl.getData();
+
+    $('.selectpicker').on('change', function(){
+        timeLineCtrl.$filterButton.removeAttr("disabled");
+        timeLineCtrl.$restoreButton.prop("disabled", true);
+    });
+
+//    timeLineCtrl.loadData();
 </script>

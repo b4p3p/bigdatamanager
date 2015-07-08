@@ -6,6 +6,7 @@ CompareCtrl.selectedRegions = null;
 CompareCtrl.selectedNations = null;
 
 CompareCtrl.stat = null;
+CompareCtrl.filteredStat = null;
 CompareCtrl.minData = null;
 CompareCtrl.maxData = null;
 
@@ -18,11 +19,13 @@ CompareCtrl.$restoreButton = null;
 CompareCtrl.$container = null;
 CompareCtrl.$barChart = null;
 CompareCtrl.$sliderTimer = null;
+CompareCtrl.$radarLegend = null;
+CompareCtrl.$radarChart = null;
 
 CompareCtrl.$formRegions = null;
 CompareCtrl.$formNations = null;
 CompareCtrl.$radioByNumber = null;
-CompareCtrl.$radioByDensity = null;
+CompareCtrl.$radioByPercentage = null;
 
 CompareCtrl.$radioBar = null;
 CompareCtrl.$radioRadar = null;
@@ -31,7 +34,6 @@ CompareCtrl.$NameButton = null;
 CompareCtrl.$NumButton = null;
 CompareCtrl.$AZbutton = null;
 CompareCtrl.$ZAbutton = null;
-CompareCtrl.$radarChart = null;
 CompareCtrl.radarChartID = null;
 
 CompareCtrl.BarData = null;
@@ -46,7 +48,7 @@ CompareCtrl.init = function()
     CompareCtrl.$radioRadar = $('#radioRadar');
 
     CompareCtrl.$radioByNumber = $('#radioByNumber');
-    CompareCtrl.$radioByDensity = $('#radioByDensity');
+    CompareCtrl.$radioByPercentage = $('#radioByPercentage');
 
     CompareCtrl.$formRegions = $('#formRegions');
     CompareCtrl.$formNations = $('#formNations');
@@ -60,6 +62,7 @@ CompareCtrl.init = function()
     CompareCtrl.$container = $('#container');
     CompareCtrl.$barChart = $('#barChart');
     CompareCtrl.radarChartID = 'radarChart';
+    CompareCtrl.$radarLegend = $('#radarLegend');
     CompareCtrl.$radarChart = $('#radarChart');
     CompareCtrl.$sliderTimer = $("#slider-bar");
 
@@ -112,81 +115,118 @@ CompareCtrl.setSlider = function()
         });
 };
 
+CompareCtrl.getFilteredStat = function(callback)
+{
+    var conditions = new ObjConditions(
+        CompareCtrl.$cmbNations,
+        CompareCtrl.$cmbRegions,
+        null,
+        CompareCtrl.$sliderTimer);
+
+    DataCtrl.getFromUrl(DataCtrl.FIELD.STAT, conditions.getQueryString(), function(docStat){
+        if(docStat.data.syncTags.length == 0)
+        {
+            $('#error').removeClass('hidden');
+            CompareCtrl.$restoreButton.removeAttr("disabled");
+            CompareCtrl.$filterButton.prop("disabled", true);
+        }
+        else
+        {
+            CompareCtrl.filteredStat = docStat;
+            callback();
+        }
+
+    });
+};
+
 CompareCtrl.clickFilter = function()
 {
     console.log("CALL: clickFilter");
+    $('#error').addClass('hidden');
 
-    var $imgFilter = $("#img-filter");
-    $imgFilter.removeClass("glyphicon glyphicon-filter");
-    $imgFilter.addClass("fa fa-spinner fa-spin");
+    CompareCtrl.getFilteredStat(function () {
 
-    if(CompareCtrl.$radioBar.is(':checked'))
-        $('#formSort').removeClass('hidden');
-    else
-        $('#formSort').addClass('hidden');
+        var $imgFilter = $("#img-filter");
+        $imgFilter.removeClass("glyphicon glyphicon-filter");
+        $imgFilter.addClass("fa fa-spinner fa-spin");
 
-    CompareCtrl.$NameButton.removeAttr("disabled");
-    CompareCtrl.$NumButton.removeAttr("disabled");
-    CompareCtrl.$AZbutton.removeAttr("disabled");
-    CompareCtrl.$ZAbutton.removeAttr("disabled");
+        if(CompareCtrl.$radioBar.is(':checked'))
+            $('#formSort').removeClass('hidden');
+        else
+            $('#formSort').addClass('hidden');
 
-    CompareCtrl.$barChart.replaceWith('<div id="barChart" style="margin-top: 50px"></div>');
-    CompareCtrl.$barChart = $('#barChart');
-    CompareCtrl.$radarChart.replaceWith('<canvas class="radar "id="radarChart" width="400" height="400"></canvas>');
-    CompareCtrl.$radarChart = $('#radarChart');
+        CompareCtrl.$NameButton.removeAttr("disabled");
+        CompareCtrl.$NumButton.removeAttr("disabled");
+        CompareCtrl.$AZbutton.removeAttr("disabled");
+        CompareCtrl.$ZAbutton.removeAttr("disabled");
 
-    if(CompareCtrl.$radioRegions.is(':checked'))
-    {
-        CompareCtrl.type = "Regions";
-        CompareCtrl.selectedRegions = DomUtil.getSelectedCombo(CompareCtrl.$cmbRegions);
-        if(CompareCtrl.selectedRegions.length == 0)
+        CompareCtrl.$barChart.replaceWith('<div id="barChart" style="margin-top: 50px"></div>');
+        CompareCtrl.$barChart = $('#barChart');
+        CompareCtrl.$radarLegend.replaceWith('<div class="col-md-3" id="radarLegend"></div>');
+        CompareCtrl.$radarLegend = $('#radarLegend');
+        CompareCtrl.$radarChart.replaceWith('<canvas class="radar "id="radarChart" width="400" height="400"></canvas>');
+        CompareCtrl.$radarChart = $('#radarChart');
+
+        if(CompareCtrl.$radioRegions.is(':checked'))
         {
-            DomUtil.selectAll(CompareCtrl.$cmbRegions);
-            CompareCtrl.$cmbRegions.multiselect('refresh');
+            CompareCtrl.type = "Regions";
             CompareCtrl.selectedRegions = DomUtil.getSelectedCombo(CompareCtrl.$cmbRegions);
+            if(CompareCtrl.selectedRegions.length == 0)
+            {
+                DomUtil.selectAll(CompareCtrl.$cmbRegions);
+                CompareCtrl.$cmbRegions.multiselect('refresh');
+                CompareCtrl.selectedRegions = DomUtil.getSelectedCombo(CompareCtrl.$cmbRegions);
+            }
+            if(CompareCtrl.$radioBar.is(':checked'))
+                CompareCtrl.buildBarData(CompareCtrl.selectedRegions);
+            if(CompareCtrl.$radioRadar.is(':checked'))
+            {
+                CompareCtrl.buildRadarData(CompareCtrl.selectedRegions);
+            }
         }
-        if(CompareCtrl.$radioBar.is(':checked'))
-            CompareCtrl.buildBarData(CompareCtrl.selectedRegions);
-        if(CompareCtrl.$radioRadar.is(':checked'))
+        else
         {
-            CompareCtrl.buildRadarData(CompareCtrl.selectedRegions);
-        }
-    }
-    else
-    {
-        CompareCtrl.type = "Nations";
-        CompareCtrl.selectedNations = DomUtil.getSelectedCombo(CompareCtrl.$cmbNations);
-        if(CompareCtrl.selectedNations.length == 0)
-        {
-            DomUtil.selectAll(CompareCtrl.$cmbNations);
-            CompareCtrl.$cmbNations.selectpicker('refresh');
+            CompareCtrl.type = "Nations";
             CompareCtrl.selectedNations = DomUtil.getSelectedCombo(CompareCtrl.$cmbNations);
+            if(CompareCtrl.selectedNations.length == 0)
+            {
+                DomUtil.selectAll(CompareCtrl.$cmbNations);
+                CompareCtrl.$cmbNations.selectpicker('refresh');
+                CompareCtrl.selectedNations = DomUtil.getSelectedCombo(CompareCtrl.$cmbNations);
+            }
+            if(CompareCtrl.$radioBar.is(':checked'))
+                CompareCtrl.buildBarData(CompareCtrl.selectedNations);
+            if(CompareCtrl.$radioRadar.is(':checked'))
+            {
+                CompareCtrl.buildRadarData(CompareCtrl.selectedNations);
+            }
         }
-        if(CompareCtrl.$radioBar.is(':checked'))
-            CompareCtrl.buildBarData(CompareCtrl.selectedNations);
-        if(CompareCtrl.$radioRadar.is(':checked'))
-        {
-            CompareCtrl.buildRadarData(CompareCtrl.selectedNations);
-        }
-    }
 
-    $imgFilter.removeClass("fa fa-spinner fa-spin");
-    $imgFilter.addClass("glyphicon glyphicon-filter");
+        $imgFilter.removeClass("fa fa-spinner fa-spin");
+        $imgFilter.addClass("glyphicon glyphicon-filter");
 
-    CompareCtrl.$restoreButton.removeAttr("disabled");
-    CompareCtrl.$filterButton.prop("disabled", true);
+        CompareCtrl.$restoreButton.removeAttr("disabled");
+        CompareCtrl.$filterButton.prop("disabled", true);
+    });
 };
 
 CompareCtrl.clickRestore = function()
 {
     console.log("CALL: clickRestore");
+    $('#error').addClass('hidden');
 
     var $imgRestore = $("#img-restore");
     $imgRestore.removeClass("glyphicon glyphicon-remove");
     $imgRestore.addClass("fa fa-spinner fa-spin");
 
+    CompareCtrl.filteredStat = CompareCtrl.stat;
+    CompareCtrl.$sliderTimer.dateRangeSlider("min", CompareCtrl.minData);
+    CompareCtrl.$sliderTimer.dateRangeSlider("max",  CompareCtrl.maxData);
+
     CompareCtrl.$barChart.replaceWith('<div id="barChart" style="margin-top: 50px"></div>');
     CompareCtrl.$barChart = $('#barChart');
+    CompareCtrl.$radarLegend.replaceWith('<div class="col-md-3" id="radarLegend"></div>');
+    CompareCtrl.$radarLegend = $('#radarLegend');
     CompareCtrl.$radarChart.replaceWith('<canvas class="radar "id="radarChart" width="400" height="400"></canvas>');
     CompareCtrl.$radarChart = $('#radarChart');
 
@@ -221,7 +261,7 @@ CompareCtrl.buildBarData = function(dataSelected)
     var data = [];
     data[0] = CompareCtrl.getHeader();
 
-    _.each(CompareCtrl.stat.data.nations, function (obj) {
+    _.each(CompareCtrl.filteredStat.data.nations, function (obj) {
 
         var row = null;
 
@@ -255,22 +295,25 @@ CompareCtrl.createBarRow = function(obj)
     else
         newRow[0] = obj.nation + " - " + obj.name;
 
-    var cont = 0;
-    _.each(CompareCtrl.stat.data.allTags, function (tag) {
+    //var cont = 0;
+    _.each(CompareCtrl.filteredStat.data.allTags, function (tag) {
         {
-            var index = obj.counter.indexOfObject("tag", tag);
-            if (index == -1) {
+            if(obj.counter[tag] == null)
+            {
                 newRow.push(0);
                 newRow.push("");
             }
             else {
-                newRow.push(obj.counter[index].count);
-                cont += obj.counter[index].count;
+                if(CompareCtrl.$radioByNumber.is(':checked'))
+                    newRow.push(obj.counter[tag].count);
+                else
+                    newRow.push((obj.avg*obj.counter[tag].count)/obj.count);
+                //cont += obj.counter[tag].count;
                 newRow.push("");
             }
         }
     });
-    newRow[newRow.length-1] = cont;
+    //newRow[newRow.length-1] = cont;
     return newRow;
 };
 
@@ -303,7 +346,8 @@ CompareCtrl.drawBar = function()
         chartArea: {'height': chartAreaHeight, 'right':0},
         isStacked: true,
         backgroundColor: 'transparent',
-        hAxis: { title: "Data by tags", textStyle: { fontSize: 13 }},
+        hAxis: { title: CompareCtrl.$radioByNumber.is(':checked')? "Data by tags": "Percentage of data than the maximum",
+            textStyle: { fontSize: 13 }},
         vAxis: { title: CompareCtrl.type, textStyle: { fontSize: 13 }}
     };
 
@@ -317,8 +361,8 @@ CompareCtrl.setInitialData = function()
 {
     console.log("CALL: setInitialData");
 
-    CompareCtrl.minData = new Date( CompareCtrl.stat.data.minDate );
-    CompareCtrl.maxData = new Date( CompareCtrl.stat.data.maxDate );
+    CompareCtrl.minData = new Date( CompareCtrl.filteredStat.data.minDate );
+    CompareCtrl.maxData = new Date( CompareCtrl.filteredStat.data.maxDate );
 
     CompareCtrl.removeWait();
 };
@@ -329,6 +373,7 @@ CompareCtrl.getData = function()
 
     DataCtrl.getField( function(doc){
         CompareCtrl.stat = doc;
+        CompareCtrl.filteredStat = doc;
         CompareCtrl.setInitialData();
     }, DataCtrl.FIELD.STAT );
 };
@@ -341,7 +386,7 @@ CompareCtrl.getHeader = function(type)
     var cont = 1;
 
     ris[0] = CompareCtrl.type;
-    _.each(CompareCtrl.stat.data.allTags, function (tag) {
+    _.each(CompareCtrl.filteredStat.data.allTags, function (tag) {
         ris[cont] = tag;
         ris[cont+1] = {role: 'annotation', type: 'number'};
         //ris[cont+1] = {type: 'string', role: 'annotation', p: {html: true}};
@@ -358,7 +403,6 @@ CompareCtrl.removeWait = function()
     $("#spinner").addClass("hidden");
     CompareCtrl.$container.removeClass("hidden");
 
-    //solo dopo che ho reso visibile lo slider posso inizializzarlo
     CompareCtrl.initSlider();
     CompareCtrl.setSlider();
     CompareCtrl.enableCombo();
@@ -368,7 +412,7 @@ CompareCtrl.enableCombo = function()
 {
     console.log("CALL: enableCombo");
 
-    if (CompareCtrl.stat.data.nations.length == 0) {
+    if (CompareCtrl.filteredStat.data.nations.length == 0) {
         CompareCtrl.$cmbNations.attr('disabled', true);
         //CompareCtrl.$cmbNations.selectpicker('refresh');
         CompareCtrl.$cmbRegions.multiselect('disable');
@@ -388,7 +432,7 @@ CompareCtrl.initComboNations = function()
 {
     console.log("CALL: initComboNations");
 
-    _.each(CompareCtrl.stat.data.nations, function(obj){
+    _.each(CompareCtrl.filteredStat.data.nations, function(obj){
         if(obj.count > 0)
             DomUtil.addOptionValue(CompareCtrl.$cmbNations, obj.name);
     });
@@ -409,7 +453,7 @@ CompareCtrl.setComboRegionsData = function()
 
     var ris = [];
     var cont = 0;
-    _.each(CompareCtrl.stat.data.nations, function(obj){
+    _.each(CompareCtrl.filteredStat.data.nations, function(obj){
         if(obj.count > 0) {
             var nation = {
                 label: obj.name,
@@ -490,7 +534,7 @@ CompareCtrl.buildRadarData = function(dataSelected)
     var data = [];
     var color = CompareCtrl.generateColor(dataSelected.length);
     var cont = -1;
-    _.each(CompareCtrl.stat.data.nations, function (obj) {
+    _.each(CompareCtrl.filteredStat.data.nations, function (obj) {
 
         var row = null;
 
@@ -527,7 +571,7 @@ CompareCtrl.createRadarRow = function(obj, color)
     else
         label = obj.nation + " - " + obj.name;
 
-    _.each(CompareCtrl.stat.data.allTags, function (tag) {
+    _.each(CompareCtrl.filteredStat.data.allTags, function (tag) {
         {
             if( obj.counter[tag] == null){
                 newRow.push(0);
@@ -613,7 +657,7 @@ CompareCtrl.getLabelsRadar = function()
     console.log("CALL: getLabelsRadar");
 
     var ris = [];
-    var tags = CompareCtrl.stat.data.allTags;
+    var tags = CompareCtrl.filteredStat.data.allTags;
     for ( var t = 0; t < tags.length; t++)
         ris.push( tags[t] );
     return ris;
@@ -626,7 +670,7 @@ CompareCtrl.getDataRadar = function(index)
     var ris = [];
 
     var obj = CompareCtrl.regions[index];
-    _.each(CompareCtrl.stat.data.allTags, function (tag) {
+    _.each(CompareCtrl.filteredStat.data.allTags, function (tag) {
         {
             var index = obj.counter.indexOfObject("tag", tag);
             if (index == -1)
@@ -639,6 +683,11 @@ CompareCtrl.getDataRadar = function(index)
 };
 
 CompareCtrl.handleChartClick = function()
+{
+    CompareCtrl.$filterButton.attr('disabled', false);
+};
+
+CompareCtrl.handleModeClick = function()
 {
     CompareCtrl.$filterButton.attr('disabled', false);
 };
@@ -670,7 +719,7 @@ CompareCtrl.insertLegend = function(data)
 
 CompareCtrl.generateColor = function(count)
 {
-    return randomColor({count: count}); //return randomColor({hue: 'blue', count: count});
+    return randomColor({luminosity: 'dark', count: count}); //return randomColor({hue: 'blue', count: count});
 };
 
 CompareCtrl.ColorLuminance = function(hex, lum)

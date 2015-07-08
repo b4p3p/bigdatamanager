@@ -28,7 +28,7 @@ DataCtrl.clearAll = function()
 DataCtrl.FIELD = {
     LASTUPDATE : {
         KEY: "lastUpdate",
-        URL: "/project/lastUpdate",
+        URL: "/project/lastUpdate"
     },
     STAT: {
         KEY: "stat",

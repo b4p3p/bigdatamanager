@@ -55,6 +55,7 @@ var DomUtil = {
     getSelectedCombo: function( $combo )
     {
         var tags = [];
+        if(!$combo) return tags;
         var options = $combo.find(":selected");
 
         for ( var i = 0; i < options.length; i++)
@@ -91,12 +92,13 @@ var DomUtil = {
 
 };
 
-var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer) {
+var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer, $cmbUsers) {
 
     this.$cmbNations = $cmbNations;
     this.$cmbRegions = $cmbRegions;
     this.$cmbTags = $cmbTags;
     this.$sliderTimer = $sliderTimer;
+    this.$sliderTimer = $cmbUsers;
     this.queryString = "";
     this.value = {};
 
@@ -106,6 +108,7 @@ var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer) {
         var regions = DomUtil.getSelectedCombo(this.$cmbRegions);
         var nations = DomUtil.getSelectedCombo(this.$cmbNations);
         var tags = DomUtil.getSelectedCombo(this.$cmbTags);
+        var users = DomUtil.getSelectedCombo(this.$cmbUsers);
         var interval = DomUtil.getIntervalFromRangeSlider(this.$sliderTimer);
 
         if(nations.length > 0)
@@ -116,6 +119,9 @@ var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer) {
 
         if(tags.length > 0)
             arrayQueryString.push("tags=" + tags.join(","));
+
+        if(users.length > 0)
+            arrayQueryString.push("users=" + users.join(","));
 
         arrayQueryString.push("start=" + interval.min.yyyymmdd());
         arrayQueryString.push("end=" + interval.max.yyyymmdd());
@@ -132,7 +138,8 @@ var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer) {
                 interval: {
                     min: interval.min ,
                     max: interval.max
-                }
+                },
+                users: users
             }
         };
 
@@ -154,6 +161,12 @@ var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer) {
     {
         return  this.value.conditions.regions.length == 0 ||
                 this.value.conditions.regions.indexOf(region) != -1;
+    };
+
+    this.containUser = function(user)
+    {
+        return  this.value.conditions.users.length == 0 ||
+            this.value.conditions.users.indexOf(user) != -1;
     };
 
     this.containNation = function(nation)
