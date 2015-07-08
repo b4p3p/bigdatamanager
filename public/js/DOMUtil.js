@@ -87,6 +87,7 @@ var DomUtil = {
 
     getIntervalFromRangeSlider: function( $slider )
     {
+        if(!$slider) return {};
         return $slider.dateRangeSlider("values");
     }
 
@@ -98,7 +99,7 @@ var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer, $
     this.$cmbRegions = $cmbRegions;
     this.$cmbTags = $cmbTags;
     this.$sliderTimer = $sliderTimer;
-    this.$sliderTimer = $cmbUsers;
+    this.$cmbUsers = $cmbUsers;
     this.queryString = "";
     this.value = {};
 
@@ -123,8 +124,15 @@ var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer, $
         if(users.length > 0)
             arrayQueryString.push("users=" + users.join(","));
 
-        arrayQueryString.push("start=" + interval.min.yyyymmdd());
-        arrayQueryString.push("end=" + interval.max.yyyymmdd());
+        if(this.$sliderTimer)
+        {
+            arrayQueryString.push("start=" + interval.min.yyyymmdd());
+            arrayQueryString.push("end=" + interval.max.yyyymmdd());
+            interval = {
+                min: interval.min,
+                max: interval.max
+            };
+        }
 
         if( arrayQueryString != [] )
             this.queryString = "?" + arrayQueryString.join("&");
@@ -135,10 +143,7 @@ var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer, $
                 nations : nations,
                 regions: regions,
                 tags: tags,
-                interval: {
-                    min: interval.min ,
-                    max: interval.max
-                },
+                interval: interval,
                 users: users
             }
         };

@@ -1,33 +1,6 @@
-Date.prototype.nextDay = function () {
-    var d = new Date();
-    d.setTime(this.getTime() + 1000 * 60 * 60 * 24 * 1);
-    return d;
-};
+"use strict";
 
-Date.prototype.toShortDate = function () {
-
-    var month = '' + (this.getMonth() + 1),
-        day = '' + this.getDate(),
-        year = this.getFullYear();
-
-    if (month.length < 2) month = '0' + month;
-    if (day.length < 2) day = '0' + day;
-
-    return [month, day].join('/');
-
-};
-
-Date.prototype.toDBDate = function () {
-
-    var month = '' + (this.getMonth() + 1),
-        day = '' + this.getDate(),
-        year = this.getFullYear();
-
-    return [year, month, day].join('-');
-
-};
-
-timeLineCtrl = {};
+function timeLineCtrl() {};
 
 timeLineCtrl.timeLineID = "";
 timeLineCtrl.$timeLine = null;
@@ -48,9 +21,12 @@ timeLineCtrl.$cmbTags = null;
 timeLineCtrl.tags = null;
 timeLineCtrl.selectedTags = null;
 timeLineCtrl.data = null;
-timeLineCtrl.filteredDatas = null;
+timeLineCtrl.filteredData = null;
 timeLineCtrl.users = null;
 timeLineCtrl.selectedUsers = null;
+
+timeLineCtrl.maxDate = null;
+timeLineCtrl.minDate = null;
 
 timeLineCtrl.lineOptions = {
     barValueSpacing: 1,
@@ -84,7 +60,7 @@ timeLineCtrl.lineOptions = {
     //Boolean - Whether to fill the dataset with a colour
     datasetFill: true,
     //String - A legend template
-    legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
+    legendTemplate: ""
 };
 
 
@@ -116,7 +92,7 @@ timeLineCtrl.getData = function()
             DataCtrl.getField( function(doc){
                 timeLineCtrl.data = doc;
                 timeLineCtrl.data_day = doc;
-                timeLineCtrl.filteredDatas = doc;
+                timeLineCtrl.filteredData = doc;
                 next(null, doc);
             }, DataCtrl.FIELD.DATA);
         },
@@ -138,6 +114,7 @@ timeLineCtrl.getData = function()
         function(err, results) {
             timeLineCtrl.initComboTags();
             timeLineCtrl.initComboUsers();
+            timeLineCtrl.removeWait();
         }
     );
 };
@@ -190,27 +167,25 @@ timeLineCtrl.drawTimeLine = function ()
 {
     console.log("CALL: drawTimeLine");
 
-    timeLineCtrl.removeWait();
+    var dataset = timeLineCtrl.lineData();
+    var scale = 20;
 
-    //if (timeLineCtrl.timeLineChart != null)
-    //    $("#" + timeLineCtrl.timeLineID).replaceWith('<canvas id="TimeLine"></canvas>');
+    timeLineCtrl.$timeLineContainer.removeClass('hidden');
 
-    var difference = timeLineCtrl.getDifference(new Date(timeLineCtrl.data.properties.first),
-        new Date(timeLineCtrl.data.properties.last));
-    $("#" + timeLineCtrl.timeLineID).width(20 * difference);
+    if(timeLineCtrl.$radioWeeks.is(':checked'))
+        scale = 50;
+    if(timeLineCtrl.$radioMonths.is(':checked'))
+        scale = 100;
+
+    $("#" + timeLineCtrl.timeLineID).width(scale * dataset.datasets[0].data.length);
 
     var ctx = document.getElementById(timeLineCtrl.timeLineID).getContext("2d");
     timeLineCtrl.timeLineChart = new Chart(ctx);
-    timeLineCtrl.timeLineLine = timeLineCtrl.timeLineChart.Line(timeLineCtrl.lineData(), timeLineCtrl.lineOptions);
+    timeLineCtrl.timeLineLine = timeLineCtrl.timeLineChart.Line(
+        dataset,
+        timeLineCtrl.lineOptions
+    );
 
-};
-
-timeLineCtrl.getDifference = function (dateA, dateB)
-{
-    console.log("CALL: getDifference");
-
-    var oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
-    return Math.round(Math.abs((dateA.getTime() - dateB.getTime()) / (oneDay)));
 };
 
 timeLineCtrl.lineData = function ()
@@ -222,6 +197,30 @@ timeLineCtrl.lineData = function ()
     };
 };
 
+//Dichiaro funzioni vuote
+timeLineCtrl.selectLabelDate = function (date) {};
+timeLineCtrl.selectStepDate = function(date) {};
+
+timeLineCtrl.setFuncNextDate = function ()
+{
+    if(timeLineCtrl.$radioDays.is(':checked'))
+    {
+        timeLineCtrl.selectLabelDate = function (date) { return date.toShortDate();};
+        timeLineCtrl.selectStepDate = function(date) { return date.nextDay();};
+    }
+    if(timeLineCtrl.$radioWeeks.is(':checked'))
+    {
+        timeLineCtrl.selectLabelDate = function (date) { return date.toShortWeek();};
+        timeLineCtrl.selectStepDate = function(date) { return date.nextWeek();};
+    }
+    if(timeLineCtrl.$radioMonths.is(':checked'))
+    {
+        timeLineCtrl.selectLabelDate = function (date) { return  date.getMonthString() + "-" + date.getFullYear()};
+        timeLineCtrl.selectStepDate = function(date) { return date.nextMonth()};
+    }
+
+};
+
 /**
  * Usa la prima regione per vedere i tag disponibili
  * @returns {Array}
@@ -230,16 +229,24 @@ timeLineCtrl.getLabels = function ()
 {
     console.log("CALL: getLabels");
 
-    if (timeLineCtrl.data == null || timeLineCtrl.data.length == 0) return [];
+    if (timeLineCtrl.filteredData == null || timeLineCtrl.filteredData.length == 0) return [];
 
     var ris = [];
-    var d_ctrl = new Date(timeLineCtrl.data.properties.first);
-    var last = new Date(timeLineCtrl.data.properties.last);
+    var min = timeLineCtrl.minDate;
 
-    while (d_ctrl < last) {
-        ris.push(d_ctrl.toShortDate());
-        d_ctrl = d_ctrl.nextDay();
+    while (min < timeLineCtrl.maxDate) {
+        ris.push( timeLineCtrl.selectLabelDate(min) );
+        min = timeLineCtrl.selectStepDate(min);
     }
+
+    //GVE
+    ris.push( timeLineCtrl.selectLabelDate(min) );
+    min = timeLineCtrl.selectStepDate(min);
+    if(timeLineCtrl.$radioDays.is(':checked')){
+        ris.push( timeLineCtrl.selectLabelDate(min) );
+        min = timeLineCtrl.selectStepDate(min);}
+
+
     return ris;
 };
 
@@ -247,18 +254,20 @@ timeLineCtrl.getDataset = function ()
 {
     console.log("CALL: getDataset");
 
+    var dataset= timeLineCtrl.getDatasetValue();
+
     var ris = [];
     ris[0] = {
-        width: 2000,
         label: "Tweets time line",
-        fillColor: "rgba(220,220,220,0.2)",
-        strokeColor: "rgba(220,220,220,1)",
-        pointColor: "rgba(220,220,220,1)",
+        fillColor: "rgba(151,187,205,0.2)",
+        strokeColor: "rgba(151,187,205,1)",
+        pointColor: "rgba(151,187,205,1)",
         pointStrokeColor: "#fff",
         pointHighlightFill: "#fff",
-        pointHighlightStroke: "rgba(220,220,220,1)",
-        data: timeLineCtrl.getDatasetValue()
+        pointHighlightStroke: "rgba(151,187,205,1)",
+        data: dataset
     };
+
     return ris;
 };
 
@@ -266,19 +275,27 @@ timeLineCtrl.getDatasetValue = function ()
 {
     console.log("CALL: getDatasetValue");
 
-    if (timeLineCtrl.data == null || timeLineCtrl.data.length == 0) return [];
+    if (timeLineCtrl.filteredData == null || timeLineCtrl.filteredData.length == 0) return [];
 
     var ris = [];
-    var d_ctrl = new Date(timeLineCtrl.data.properties.first);
-    var last = new Date(timeLineCtrl.data.properties.last);
 
-    while (d_ctrl < last) {
-        if (timeLineCtrl.data.data[d_ctrl.toDBDate()] == null)
+    var dataset = _.groupBy(timeLineCtrl.filteredData, function(obj){
+        return timeLineCtrl.selectLabelDate( new Date(obj.date));
+    });
+    var min = timeLineCtrl.minDate;
+
+    //Inserisco le date mancanti
+    while (min <= timeLineCtrl.maxDate) {
+        var key = timeLineCtrl.selectLabelDate(min);
+        if (dataset[key] == null)
             ris.push(0);
         else
-            ris.push(timeLineCtrl.data.data[d_ctrl.toDBDate()]);
-        d_ctrl = d_ctrl.nextDay();
+            ris.push(dataset[key].length);
+        min = timeLineCtrl.selectStepDate(min);
     }
+    //GVE
+    ris.push(0);
+    if(timeLineCtrl.$radioDays.is(':checked')) ris.push(0);
     return ris;
 };
 
@@ -287,7 +304,7 @@ timeLineCtrl.removeWait = function ()
     console.log("remove wait");
 
     $("#spinner").addClass("hidden");
-    $(".content").removeClass("hidden");
+    $(".timecontent").removeClass("hidden");
 };
 
 timeLineCtrl.handleModeClick = function(radio)
@@ -296,15 +313,17 @@ timeLineCtrl.handleModeClick = function(radio)
 
     timeLineCtrl.$filterButton.removeAttr("disabled");
     timeLineCtrl.$restoreButton.prop("disabled", true);
-    if(radio.value == "days"){
-        timeLineCtrl.drawTimeLine();
-    }
-    if(radio.value == "weeks"){
-        timeLineCtrl.drawTimeLine();
-    }
-    if(radio.value == "months"){
-        timeLineCtrl.drawTimeLine();
-    }
+};
+
+timeLineCtrl.clearCanvas = function()
+{
+    timeLineCtrl.$timeLineContainer.replaceWith(
+        '<div id="timeLineContainer" class="timecontent hidden">' +
+        '<canvas id="timeLine"></canvas>' +
+        '</div>');
+
+    timeLineCtrl.$timeLineContainer = $('#timeLineContainer');
+    timeLineCtrl.$timeLine = $('#timeLine');
 };
 
 timeLineCtrl.clickFilter = function()
@@ -315,24 +334,63 @@ timeLineCtrl.clickFilter = function()
     $imgFilter.removeClass("glyphicon glyphicon-filter");
     $imgFilter.addClass("fa fa-spinner fa-spin");
 
-    var conditions = new ObjConditions(
-        null,
-        null,
-        timeLineCtrl.$cmbTags,
-        null,
-        timeLineCtrl.$cmbUsers);
+    setTimeout( function(){
 
-    var queryString = conditions.getQueryString();
+        timeLineCtrl.setFuncNextDate();
+        timeLineCtrl.clearCanvas();
 
-    timeLineCtrl.selectedTags = DomUtil.getSelectedCombo(timeLineCtrl.$cmbTags);
-    timeLineCtrl.selectedUsers = DomUtil.getSelectedCombo(timeLineCtrl.$cmbUsers);
-    timeLineCtrl.drawTimeLine();
+        timeLineCtrl.selectedTags = DomUtil.getSelectedCombo(timeLineCtrl.$cmbTags);
+        timeLineCtrl.selectedUsers = DomUtil.getSelectedCombo(timeLineCtrl.$cmbUsers);
 
-    $imgFilter.removeClass("fa fa-spinner fa-spin");
-    $imgFilter.addClass("glyphicon glyphicon-filter");
+        if(timeLineCtrl.selectedTags.length == 0)
+            DomUtil.selectAll(timeLineCtrl.$cmbTags);
 
-    timeLineCtrl.$restoreButton.removeAttr("disabled");
-    timeLineCtrl.$filterButton.prop("disabled", true);
+        if(timeLineCtrl.selectedUsers.length == 0)
+            DomUtil.selectAll(timeLineCtrl.$cmbUsers);
+
+        $('.selectpicker').selectpicker('refresh');
+
+        var conditions = new ObjConditions(
+            null,
+            null,
+            timeLineCtrl.$cmbTags,
+            null,
+            timeLineCtrl.$cmbUsers);
+
+        timeLineCtrl.filterData(conditions);
+
+        $imgFilter.removeClass("fa fa-spinner fa-spin");
+        $imgFilter.addClass("glyphicon glyphicon-filter");
+
+        timeLineCtrl.$restoreButton.removeAttr("disabled");
+        timeLineCtrl.$filterButton.prop("disabled", true);
+        timeLineCtrl.drawTimeLine();
+    }, 50);
+};
+
+timeLineCtrl.filterData = function(objCond)
+{
+    timeLineCtrl.maxDate = null;
+    timeLineCtrl.minDate = null;
+
+    async.filter(timeLineCtrl.data,
+        function(obj, next){
+            var cond = objCond.containUser(obj.user) &&
+                objCond.containTag(obj.tag);
+            if(cond)
+            {
+                var date = new Date(obj.date);
+                if(!timeLineCtrl.maxDate) timeLineCtrl.maxDate = date;
+                if(!timeLineCtrl.minDate) timeLineCtrl.minDate = date;
+                timeLineCtrl.maxDate = timeLineCtrl.maxDate > date ? timeLineCtrl.maxDate : date;
+                timeLineCtrl.minDate = timeLineCtrl.minDate < date ? timeLineCtrl.minDate : date;
+            }
+            next(cond);
+        },
+        function(results) {
+            timeLineCtrl.filteredData = results;
+        }
+    );
 };
 
 timeLineCtrl.clickRestore = function()
@@ -346,9 +404,9 @@ timeLineCtrl.clickRestore = function()
     $imgRestore.removeClass("fa fa-spinner fa-spin");
     $imgRestore.addClass("glyphicon glyphicon-remove");
 
-    timeLineCtrl.$timeLineContainer.replaceWith('<div id="timeLineContainer" class="content hidden">');
-    timeLineCtrl.$timeLine.replaceWith('<canvas class="content hidden" id="timeLine"></canvas>');
-    timeLineCtrl.$timeLine = $('#timeLine');
+    timeLineCtrl.clearCanvas();
+
+    timeLineCtrl.filteredData = timeLineCtrl.data;
 
     DomUtil.deselectAll(timeLineCtrl.$cmbTags);
     DomUtil.deselectAll(timeLineCtrl.$cmbUsers);
