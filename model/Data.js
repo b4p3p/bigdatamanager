@@ -157,29 +157,18 @@ Data.importFromFile = function (type, file, projectName, cb_ris)
 
 Data.getDatas = function (projectName, query, callback)
 {
-    //var connection = mongoose.createConnection('mongodb://localhost/oim');
-    //var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
-    //
-    //datas.find(
-    //    {projectName: projectName},
-    //    function (err, docs) {
-    //        callback(err, docs);
-    //        connection.close();
-    //    }
-    //);
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+    var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
 
-    MongoClient.connect(url, function (err, db) {
+    var exec = datas.find({projectName: projectName});
 
-        var datas = db.collection('datas');
-        datas.find({projectName: projectName})
-            .toArray( function (err, docs)
-            {
-                callback(err, docs);
-                db.close();
-            }
-        );
+    if(query.limit)
+        exec.limit(query.limit);
+
+    exec.exec(function (err, docs) {
+        callback(err, docs);
+        connection.close();
     });
-
 };
 
 /**
