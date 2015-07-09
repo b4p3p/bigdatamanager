@@ -47,7 +47,8 @@ Data.SCHEMA = new Schema(
         user: String,
         tag: String,
         nation : String,
-        region: String
+        region: String,
+        tokens: [String]
     },
     { strict: false }
 );
@@ -154,7 +155,7 @@ Data.importFromFile = function (type, file, projectName, cb_ris)
 
 };
 
-Data.getDatas = function (projectName, callback)
+Data.getDatas = function (projectName, query, callback)
 {
     //var connection = mongoose.createConnection('mongodb://localhost/oim');
     //var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);

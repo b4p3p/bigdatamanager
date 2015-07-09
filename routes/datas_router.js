@@ -40,8 +40,9 @@ module.exports = function (router, app) {
     router.get('/datas', function (req, res)
     {
         var project = req.session.project || req.query.project;
+        var query = req.query;
 
-        Data.getDatas( project , function(err, docs){
+        Data.getDatas( project , query, function(err, docs){
             res.json(docs);
         });
 
