@@ -245,13 +245,16 @@
            data-cache="false" data-pagination="true">
         <thead>
         <tr>
-            <th data-sortable="true" data-field="tag">
+            <th data-sortable="true" data-field="tag"
+                data-formatter="prjEditFormatterTag.tag">
                 Tag
             </th>
-            <th data-sortable="false" data-field="tokens">
+            <th data-sortable="false" data-field="tokens"
+                data-formatter="prjEditFormatterTag.vocabulary">
                 Vocabulary
             </th>
-            <th data-formatter="" data-width="50">
+            <th data-width="50"
+                data-formatter="prjEditFormatterTag.delete">
                 Delete tag
             </th>
         </tr>

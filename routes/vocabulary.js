@@ -109,9 +109,7 @@ module.exports = function (router) {
      */
     router.put('/vocabulary', function (req, res)
     {
-
-        var Vocabulary = require("../model/Vocabulary");
-        Vocabulary.insertTags(req.session.project, req.body, function(err)
+        Vocabulary.insertTags( req.session.project, req.body, function(err)
         {
             if(err==null)
                 res.json({status:"ok", error:""});
@@ -125,29 +123,27 @@ module.exports = function (router) {
      */
     router.move('/tag', function (req, res)
     {
-
         var Vocabulary = require("../model/Vocabulary");
-        Vocabulary.renameTag(req.session.project, req.body, function(err){
+        Vocabulary.renameTag(req.session.project, req.body, function(err)
+        {
             if(err==null)
-                res.json({status:"ok", error:""});
+                res.json({status:0, error:""});
             else
-                res.json({status:"error", error:err});
+                res.end(res.writeHead(400, err));
+            //res.status(400).send(err);
         });
-
     });
 
     /* req.body: {tag:{String}} */
     router.delete('/tag', function (req, res)
     {
-
-        var Vocabulary = require("../model/Vocabulary");
-        Vocabulary.deleteTag(req.session.project, req.body.tag, function(err){
+        Vocabulary.deleteTag(req.session.project, req.body.tag, function(err)
+        {
             if(err==null)
                 res.json({status:"ok", error:""});
             else
-                res.json({status:"error", error:err});
+                res.end(res.writeHead(400, err));
         });
-
     });
 
     /**
@@ -155,33 +151,13 @@ module.exports = function (router) {
      */
     router.put('/words', function (req, res)
     {
-
         var Vocabulary = require("../model/Vocabulary");
         Vocabulary.renameWords(req.session.project, req.body, function(err){
             if(err==null)
                 res.json({status:"ok", error:""});
             else
-                res.json({status:"error", error:err});
+                res.end(res.writeHead(400, err));
         });
     });
-
-    //router.get('/refresh', function (req, res)
-    //{
-    //
-    //    if(req.session.project == null)
-    //    {
-    //        //TODO debug
-    //        console.error("req.session.project is null: set 'oim'");
-    //        req.session.project = "oim";
-    //    }
-    //
-    //    var Vocabulary = require("../model/Vocabulary");
-    //    Vocabulary.refreshCounter(req.session.project, function(err, data){
-    //        if(err==null)
-    //            res.json(data);
-    //        else
-    //            res.json({status:"error", error:err});
-    //    });
-    //});
 
 };

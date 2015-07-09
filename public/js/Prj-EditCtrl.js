@@ -1,20 +1,172 @@
 "use strict";
 
-var PrjEditFormCtrl = new ( function() {
+var PrjEditFormatterTag = function(){
 
-    this.$tableForm = $("#tagsTable");
+    function addElement(value, row, index, suffix, event, isDelete)
+    {
+        var $div = $("<div></div>");
+        var $a = $("<a></a>").addClass( suffix + index );
+        var icon = isDelete ? "glyphicon-remove" : "glyphicon-pencil";
 
-});
+        $div.append(
+            $("<div>")
+                .text(value)
+                .css("float", "left")
+                .css("margin-right", "10px")
+        ).append(
+            $a.append(
+                $('<i>')
+                    .addClass("glyphicon")
+                    .addClass(icon)
+                    .css("cursor", "pointer")
+            )
+        );
+
+        if(isDelete)
+        {
+            $div.find("i")
+                .css("left", "39%")
+                .css("right", "40%");
+        }
+
+        $(".tag-" + index).off();
+        PrjEditFormCtrl.$tableTags
+            .off('click', 'a.' + suffix + index)
+            .on('click', 'a.' + suffix + index, function(){
+                event(row);
+            });
+
+        return $div.html();
+    };
+
+    this.tag = function(value, row, index){
+        return addElement(value, row, index, "tag", PrjEditTableTagAction.tag_click );
+    };
+
+    this.vocabulary = function(value, row, index) {
+        return addElement(value.join(', '), row, index, "voc", PrjEditTableTagAction.tokens_click );
+    };
+
+    this.delete = function(value, row, index)
+    {
+        return addElement("", row, index, "del", PrjEditTableTagAction.delete_click, true );
+    };
+
+};
+var prjEditFormatterTag = new PrjEditFormatterTag();
+
+var PrjEditTableTagAction = {
+
+    tag_click : function(row)  {
+        bootbox.prompt({
+            title: "Edit tag: " + JSON.stringify(row.tag),
+            value: row.tag,
+            callback: function (result) {
+                if (result === null) {
+                    console.log("Prompt edit tag dismissed");
+                } else {
+                    console.log("New tag: " + result);
+                    var data = {
+                        newTag: result,
+                        oldTag: row.tag
+                    };
+                    $.ajax({
+                        url: '/vocabulary/tag',
+                        contentType: "application/json; charset=utf-8",
+                        type: 'move',
+                        async: true,
+                        data: JSON.stringify(data),
+                        dataType: "json",
+                        success: function(html) {
+                            PrjEditFormCtrl.updateTableTag();
+                        },
+                        error: function(xhr, status, error){
+                            alert("Error: " + error);
+                        }
+                    });
+                }
+            }
+        });
+    },
+
+    tokens_click: function(row){
+        bootbox.prompt({
+            title: "Edit vocabulary of tag: " + JSON.stringify(row.tag),
+            value: row.tokens,
+            callback: function (result) {
+                if (result === null) {
+                    console.log("Prompt edit vocabulary dismissed");
+                } else {
+                    console.log("New words: " + result);
+                    var data = {
+                        tag: row.tag,
+                        words: result
+                    };
+                    $.ajax({
+                        url: '/vocabulary/words',
+                        contentType: "application/json; charset=utf-8",
+                        type: 'PUT',
+                        async: false,
+                        data: JSON.stringify(data),
+                        dataType: "json",
+                        success: function(html) {
+                            PrjEditFormCtrl.updateTableTag();
+                        },
+                        error: function(xhr, status, error){
+                            alert("Error: " + error);
+                        }
+                    });
+                }
+            }
+        });
+    },
+
+    delete_click: function(row){
+        bootbox.confirm("<h4>Are you sure to delete tag: "
+        + JSON.stringify(row.tag)
+        + "?</h4>",
+        function (result) {
+            if (result) {
+                console.log("User confirmed delete dialog");
+                $.ajax({
+                    url: '/vocabulary/tag',
+                    contentType: "application/json; charset=utf-8",
+                    type: 'DELETE',
+                    async: false,
+                    data: JSON.stringify({tag:row.tag}),
+                    dataType: "json",
+                    success: function(html) {
+                        PrjEditFormCtrl.updateTableTag();
+                    },
+                    error: function(xhr, status, error){
+                        alert("Error: " + error);
+                    }
+                });
+            } else {
+                console.log("User declined delete dialog");
+            }
+        });
+    }
+};
+
+var PrjEditFormCtrl = {
+
+    $tableTags : $("#tagsTable") ,
+
+    updateTableTag : function()
+    {
+        this.$tableTags.bootstrapTable('refresh', {silent: true});
+    }
+
+};
 
 var PrjEditCtrl = {
-
-    tags : {},
 
     showInsertTag: function () {
 
         var str;
         $.ajax({
-            url: 'views/content/dialogNewTag.html',
+            url: '/views/content/dialogNewTag.html',
             type: 'get',
             async: false,
             success: function(html) {
@@ -28,15 +180,18 @@ var PrjEditCtrl = {
                 OK: {
                     label: 'OK',
                     callback: function () {
+
                         var tag = $('#newTag').val().trim();
                         var strwords = $('#vocabulary').val();
                         var words = strwords.split(",");
-                        for(var w in words)
-                            words[w] = words[w].trim();
+
+                        _.each(words, function(item, i){
+                            words[i] = words[i].trim();
+                        });
 
                         var data = {
                             tag: tag,
-                            words: words
+                            tokens: words
                         };
                         $.ajax({
                             url: '/vocabulary/vocabulary',
@@ -46,8 +201,7 @@ var PrjEditCtrl = {
                             data: JSON.stringify(data),
                             dataType: "json",
                             success: function(html) {
-                                console.log("CALL: getEditTagsAsync");
-                                DatabaseCtrl.loadTags();
+                                PrjEditFormCtrl.updateTableTag();
                             },
                             error: function(xhr, status, error){
                                 alert("Error: " + error);
@@ -66,8 +220,7 @@ var PrjEditCtrl = {
 
     },
 
-    setTableTag: function()
-    {
+    setTableTag: function() {
         $('#tagsTable').bootstrapTable('destroy');
         $('#tagsTable').bootstrapTable({
             columns: [
@@ -212,8 +365,7 @@ var PrjEditCtrl = {
 
     },
     
-    loadTags: function ()
-    {
+    loadTags: function () {
 
         jQuery.ajax({
             type: "GET",
@@ -232,8 +384,7 @@ var PrjEditCtrl = {
         });
     },
 
-    refreshCounter: function()
-    {
+    refreshCounter: function() {
         jQuery.ajax({
             type: "GET",
             url: '/vocabulary/refresh',
@@ -249,29 +400,3 @@ var PrjEditCtrl = {
         });
     }
 };
-
-function operateFormatterTag(value, row, index) {
-    return [
-        value +
-        '<a class="editT ml10" href="javascript:void(0)" title="Edit tag">',
-        '<i class="glyphicon glyphicon-pencil"></i>',
-        '</a>'
-    ].join(' ');
-}
-
-function operateFormatterVocabulary(value, row, index) {
-    return [
-        value +
-        '<a class="editV ml10" href="javascript:void(0)" title="Edit vocabulary">',
-        '<i class="glyphicon glyphicon-pencil"></i>',
-        '</a>'
-    ].join(' ');
-}
-
-function operateFormatterDelete(value, row, index) {
-    return [
-        '<a class="remove ml10" href="javascript:void(0)" title="Delete">',
-        '<i class="glyphicon glyphicon-remove"></i>',
-        '</a>'
-    ].join(' ');
-}
