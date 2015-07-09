@@ -20,12 +20,15 @@ var DomUtil = {
 
     },
 
-    addOptionValue : function( combo , option, subtext ) {
+    addOptionValue : function( combo , option, subtext, isDisable ) {
 
         var $o = $('<option value="' + option.toLowerCase() + '" >' + option + '</option>')
-        if (subtext) {
+        if (subtext)
             $o.attr("data-subtext", subtext);
-        }
+
+        if(isDisable)
+            $o.attr("disabled", "disabled");
+
         combo.append($o);
     },
 
@@ -92,13 +95,13 @@ var DomUtil = {
 
 };
 
-var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer, $cmbUsers) {
-
+var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer, $cmbUsers)
+{
     this.$cmbNations = $cmbNations;
     this.$cmbRegions = $cmbRegions;
     this.$cmbTags = $cmbTags;
     this.$sliderTimer = $sliderTimer;
-    this.$sliderTimer = $cmbUsers;
+    this.$cmbUsers = $cmbUsers;
     this.queryString = "";
     this.value = {};
 

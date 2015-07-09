@@ -23,7 +23,8 @@ module.exports = function (router, app) {
 
     router.get('/nations', function (req, res)
     {
-        Regions.getLightNations( function(err, data) {
+        var project = req.session.project || req.query.project;
+        Regions.getNations( project, function(err, data) {
             res.json(data);
         });
     });

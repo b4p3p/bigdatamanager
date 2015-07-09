@@ -411,8 +411,6 @@ var ProjectCtrl =
             {
                 if(msg.status == 200)
                 {
-                    DataCtrl.clearAll();
-
                     location.replace("/view/home");
                 }
             },

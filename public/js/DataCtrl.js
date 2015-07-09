@@ -12,20 +12,21 @@ DataCtrl.storage.initialized.then(function(grantedCapacity) {
     // Some browsers don't indicate how much space was granted in which case
     // grantedCapacity will be 1.
     if (grantedCapacity != -1 && grantedCapacity != desiredCapacity) {
-        console.log("storage inizializzato");
+        console.log("storage inizializzato per l'utente " + USERNAME);
         DataCtrl.storageIsReady = true;
     }
 });
 
-DataCtrl.clearAll = function()
-{
-    console.log("CALL: DataCtrl.clearAll");
-    DataCtrl.storage.clear( function(result){
-        console.log("db pulito");
-    });
-};
+//DataCtrl.clearAll = function()
+//{
+//    console.log("CALL: DataCtrl.clearAll");
+//    DataCtrl.storage.clear( function(result){
+//        console.log("db pulito");
+//    });
+//};
 
 DataCtrl.FIELD = {
+    USERNAME: "username",
     LASTUPDATE : {
         KEY: "lastUpdate",
         URL: "/project/lastUpdate"
@@ -85,6 +86,20 @@ DataCtrl.requireRefresh = function(field, callback)
                 {
                     next(null, data);
                 });
+            },
+
+            sameUser: function (next) {
+                DataCtrl.storage
+                    .getContents(field.USERNAME)
+                    .then( function(value){
+                        if(!value) {
+                            next(null, false);
+                        }else
+                        {
+                            next(null, USERNAME == value);
+                        }
+                    }
+                );
             }
 
         },
@@ -93,6 +108,14 @@ DataCtrl.requireRefresh = function(field, callback)
         {
 
             var lastUpdate = result.urlLstUpd.dateLastUpdate;
+
+            if(!result.sameUser) {
+                console.log("    require refresh: true (userChange)");
+                callback({
+                    result: true,
+                    lastUpdate: lastUpdate
+                });
+            }
 
             if(result.dbLstUpd == null || result.dbLstUpd == "undefined")
             {
@@ -143,8 +166,8 @@ DataCtrl.getFromUrl = function(field, queryString,  callback)
     });
 };
 
-DataCtrl.getField = function(callback, field, limit){
-
+DataCtrl.getField = function(callback, field, limit)
+{
     //controllo che sia inizializzato
     if( !DataCtrl.storageIsReady)
     {
@@ -157,7 +180,7 @@ DataCtrl.getField = function(callback, field, limit){
 
     console.log("CALL: getField - key:" + field.KEY);
 
-    DataCtrl.requireRefresh( field, function(result){
+    DataCtrl.requireRefresh( field, function(result) {
 
         if(result.result == true)
         {
@@ -194,6 +217,17 @@ DataCtrl.getField = function(callback, field, limit){
                         field.LASTUPDATE, result.lastUpdate).then(function()
                         {
                             console.log("    set lastupdate at " + result.lastUpdate);
+                            next(null, data);
+                        }
+                    );
+                },
+
+                //salvo l'utente
+                function(data, next){
+                    DataCtrl.storage.setContents(
+                        field.USERNAME, USERNAME).then(function()
+                        {
+                            console.log("    set user to " + USERNAME);
                             next(null, data);
                         }
                     );

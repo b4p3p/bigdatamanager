@@ -113,6 +113,8 @@ ShowmapCtrl.filteredDatas = null;
 ShowmapCtrl.users = null;
 ShowmapCtrl.terms = null;
 
+ShowmapCtrl.contNonGeo = 0;
+
 ShowmapCtrl.init = function()
 {
     btnCtrl = new BtnCtrl();
@@ -214,9 +216,11 @@ ShowmapCtrl.getData = function ()
             DataCtrl.getField( function(doc){
 
                 ShowmapCtrl.datas = doc;
-                ShowmapCtrl.filteredDatas = doc;
 
-                next(null, doc);
+                ShowmapCtrl.filterData(null, doc, function(result){
+                    ShowmapCtrl.filteredDatas = result;
+                    next(null, doc);
+                });
 
             }, DataCtrl.FIELD.DATA);
         },
@@ -304,11 +308,16 @@ ShowmapCtrl.loadForm = function()
         DomUtil.addOptionValue(ShowmapCtrl.$cmbSelectTags, obj);
     });
 
-    //users
+    //users - attivo solo gli utenti che hanno tweet geolocalizzati
     var obj = null;
+    var isDisable = true;
     for (var i = 0; i < 50 && i < ShowmapCtrl.users.length; i++ ){
+        isDisable = true;
         obj = ShowmapCtrl.users[i];
-        DomUtil.addOptionValue(ShowmapCtrl.$cmbSelectUsers, obj.user, obj.sum);
+        for(var j = 0; j < obj.counter.length; j++)
+            if(obj.counter[j].isGeo)
+                isDisable = false;
+        DomUtil.addOptionValue(ShowmapCtrl.$cmbSelectUsers, obj.user, obj.sum, isDisable);
     }
 
     //terms
@@ -332,23 +341,30 @@ ShowmapCtrl.loadForm = function()
 
 };
 
-/**
- *
- * @param objCond : ObjConditions
- * @param callback
- */
-ShowmapCtrl.filterData = function(objCond, callback)
+ShowmapCtrl.filterData = function(objCond, data, callback)
 {
-    async.filter(ShowmapCtrl.datas,
-        function(obj, next){
+    ShowmapCtrl.contNonGeo = 0;
+    async.filter( data,
+        function(obj, next)
+        {
+            if(!obj["latitude"] || !obj["longitude"] )
+            {
+                ShowmapCtrl.contNonGeo ++;
+                next(false);
+                return;
+            }
 
-            next( objCond.containNation(obj.nation) &&
-                  objCond.containTag(obj.tag) &&
-                  objCond.isInRange(obj.date));
+            if(objCond)
+                next( objCond.containNation(obj.nation) &&
+                      objCond.containTag(obj.tag) &&
+                      objCond.isInRange(obj.date) &&
+                      objCond.containUser(obj.user) );
+            else
+                next(true);
         },
-        function(results) {
-            ShowmapCtrl.filteredDatas = results;
-            callback();
+        function(results)
+        {
+            callback(results);
         }
     );
 };
@@ -364,13 +380,15 @@ ShowmapCtrl.refreshData = function(callback)
                 setData_Heatmap();
             next();
         },
-        function (next) {
+        function (next)
+        {
             if ( ShowmapCtrl.chkMarkercluster &&
                 ShowmapCtrl.chkMarkercluster.checked )
                 setData_MarkerCluster();
             next();
         }
-    ], function(){
+    ], function()
+    {
         callback();
     });
 };
@@ -388,7 +406,9 @@ ShowmapCtrl.cmdFilter_click = function()
         ShowmapCtrl.$cmbSelectNations,
         null,
         ShowmapCtrl.$cmbSelectTags,
-        ShowmapCtrl.$sliderTimer);
+        ShowmapCtrl.$sliderTimer,
+        ShowmapCtrl.$cmbSelectUsers
+    );
 
     var queryString = conditions.getQueryString();
 
@@ -398,14 +418,13 @@ ShowmapCtrl.cmdFilter_click = function()
 
         async.waterfall([
             function (next) {
-                ShowmapCtrl.filterData(conditions, function(){
+                ShowmapCtrl.filterData(conditions, ShowmapCtrl.datas , function(result){
+                    ShowmapCtrl.filteredDatas = result;
                     next();
                 })
             },
             function (next) {
-                ShowmapCtrl.refreshData(function(){
-                    next();
-                });
+                ShowmapCtrl.refreshData(function(){next()});
             }
         ], function () {
             btnCtrl.enableFilterButton();
@@ -442,47 +461,6 @@ ShowmapCtrl.cmdFilter_click = function()
     //    }
     //});
 };
-
-//ShowmapCtrl.getCondictions = function()
-//{
-//    var ris = "";
-//    var conditions = [];
-//
-//    //var selectedNations = getSelectedCombo(ShowmapCtrl.$cmbSelectNations);
-//    //var selectedTags = getSelectedCombo(ShowmapCtrl.$cmbSelectTags);
-//    //var values = ShowmapCtrl.$sliderTimer.dateRangeSlider("values");
-//
-//    //var condictions = new ObjCondictions(
-//    //    ShowmapCtrl.$cmbSelectNations,
-//    //    ShowmapCtrl.$cmbSelectTags,
-//    //    ShowmapCtrl.$sliderTimer);
-//
-//    //console.log("CONDIZIONI: ");
-//    //console.log(" Nazioni: " + selectedNations);
-//    //console.log(" Tags: " + selectedTags);
-//    //console.log(" Min data: " + values.min);
-//    //console.log(" Max data: " + values.max);
-//
-//    if(selectedNations.length > 0)
-//        conditions.push("nations=" + selectedNations.join(","));
-//
-//    if(selectedTags.length > 0)
-//        conditions.push("tags=" + selectedTags.join(","));
-//
-//    conditions.push("start=" + values.min.yyyymmdd());
-//    conditions.push("end=" + values.max.yyyymmdd());
-//
-//    if( conditions != [] )
-//        ris = "?" + conditions.join("&");
-//
-//    var objCondiction = {
-//        queryString : ris
-//    }
-//
-//    console.log("     getCondictions = " + ris);
-//
-//    return ris;
-//};
 
 ShowmapCtrl.heatmap_click = function()
 {
@@ -549,7 +527,7 @@ function showMarkerCluster()
 function updateProgressBar (processed, total, elapsed, layersArray)
 {
     console.log("processed: " + processed);
-};
+}
 
 function showMarkerClusterAsync()
 {
@@ -599,7 +577,6 @@ function setData_MarkerCluster()
         {
             var etichetta = d.tag;
             var text = d.text;
-            var id = d.id;
             var lat = d.latitude;
             var lng = d.longitude;
             var icon = getIcon(etichetta);
@@ -611,8 +588,8 @@ function setData_MarkerCluster()
                     title: text
                 });
             marker.bindPopup(text +
+                "<br><b>User: </b>" + d.user +
                 "<br><b>Tag: </b>" + etichetta +
-                "<br><b>ID: </b>" + id +
                 "<br><b>Lon: </b>" + lng +
                 "<br><b>Lat: </b>" + lat);
 
@@ -908,7 +885,6 @@ function refreshBoundaries()
     if ( ShowmapCtrl.chkBoudaries && ShowmapCtrl.chkBoudaries.checked)
         showBoundaries();
 }
-
 
 
 

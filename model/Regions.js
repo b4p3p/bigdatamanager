@@ -152,88 +152,109 @@ Regions.importFromFile = function (fileNames, callback) {
 
 };
 
+//MongoClient.connect(url, function (err, db) {
+//        var regions = db.collection('regions');
+//        var datas = db.collection('datas');
+//        var cont = 0;
+//        var ris = {};
+//        var first = true;
+//
+//        regions.find(
+//            {},
+//            {"geometry": 1, "properties.NAME_0": 1, "properties.NAME_1": 1}
+//        ).each(
+//            function (err, region) {
+//
+//                if (!region && cont == 0 && first)  //non ci sono regioni
+//                {
+//                    callback(null, {});
+//                    return;
+//                }
+//
+//                first = false;
+//
+//                if (!region) return;
+//
+//                cont++;
+//
+//                datas.aggregate(
+//                    {"$match": {loc: {$geoWithin: {$geometry: region.geometry}}}},
+//                    {"$group": {"_id": "$nation", "sum": {"$sum": 1}}},
+//                    {
+//                        "$project": {
+//                            _id: 0,
+//                            nation: {$literal: region.properties.NAME_0},
+//                            region: {$literal: region.properties.NAME_1},
+//                            sum: "$sum"
+//                        }
+//                    },
+//                    function (err, doc) {
+//                        if (!doc || doc.length == 0) {
+//
+//                            cont--;
+//
+//                            if (cont == 0) {
+//                                var keys = _.keys(ris);
+//                                ris = _.map(keys, function (k) {
+//                                    return {nation: ris[k].nation, sum: ris[k].sum}
+//                                });
+//                                db.close();
+//                                callback(null, ris);
+//                            }
+//
+//                            return;
+//                        }
+//
+//                        cont--;
+//                        //console.log(doc[0].nation + " " + doc[0].nation + " " + doc[0].sum);
+//
+//                        if (!ris[doc[0].nation])
+//                            ris[doc[0].nation] = {nation: doc[0].nation, sum: doc[0].sum};
+//                        else
+//                            ris[doc[0].nation].sum += doc[0].sum;
+//
+//                        if (cont == 0) {
+//                            console.log("FINE");
+//                            var keys = _.keys(ris);
+//                            ris = _.map(keys, function (k) {
+//                                return {nation: ris[k].nation, sum: ris[k].sum}
+//                            });
+//                            db.close();
+//                            callback(null, ris);
+//                        }
+//                    }
+//                )
+//            }
+//        )
+//    }
+//);
+
+
 /**
  * @param callback  - fn({Err},{Data[]})
  */
-Regions.getLightNations = function (callback) {
+Regions.getNations = function (project, callback) {
+
     console.log("CALL: Regions.getLightNations");
 
-    MongoClient.connect(url, function (err, db) {
-            var regions = db.collection('regions');
-            var datas = db.collection('datas');
-            var cont = 0;
-            var ris = {};
-            var first = true;
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+    var datas = connection.model("datas", SchemaData);
 
-            regions.find(
-                {},
-                {"geometry": 1, "properties.NAME_0": 1, "properties.NAME_1": 1}
-            ).each(
-                function (err, region) {
+    datas.aggregate([
+        {$match: { projectName: project }},
+        {$group:{
+            _id : "$nation",
+            sum: {$sum:1}
+        }},
+        {$project:{
+            _id : 0,
+            nation: { $ifNull: [ "$_id", "undefined" ] },
+            sum: 1
+        }}
+    ], function(err, doc){
+        callback(err, doc)
+    });
 
-                    if (!region && cont == 0 && first)  //non ci sono regioni
-                    {
-                        callback(null, {});
-                        return;
-                    }
-
-                    first = false;
-
-                    if (!region) return;
-
-                    cont++;
-
-                    datas.aggregate(
-                        {"$match": {loc: {$geoWithin: {$geometry: region.geometry}}}},
-                        {"$group": {"_id": "$nation", "sum": {"$sum": 1}}},
-                        {
-                            "$project": {
-                                _id: 0,
-                                nation: {$literal: region.properties.NAME_0},
-                                region: {$literal: region.properties.NAME_1},
-                                sum: "$sum"
-                            }
-                        },
-                        function (err, doc) {
-                            if (!doc || doc.length == 0) {
-
-                                cont--;
-
-                                if (cont == 0) {
-                                    var keys = _.keys(ris);
-                                    ris = _.map(keys, function (k) {
-                                        return {nation: ris[k].nation, sum: ris[k].sum}
-                                    });
-                                    db.close();
-                                    callback(null, ris);
-                                }
-
-                                return;
-                            }
-
-                            cont--;
-                            //console.log(doc[0].nation + " " + doc[0].nation + " " + doc[0].sum);
-
-                            if (!ris[doc[0].nation])
-                                ris[doc[0].nation] = {nation: doc[0].nation, sum: doc[0].sum};
-                            else
-                                ris[doc[0].nation].sum += doc[0].sum;
-
-                            if (cont == 0) {
-                                console.log("FINE");
-                                var keys = _.keys(ris);
-                                ris = _.map(keys, function (k) {
-                                    return {nation: ris[k].nation, sum: ris[k].sum}
-                                });
-                                db.close();
-                                callback(null, ris);
-                            }
-                        }
-                    )
-                }
-            )
-        }
-    );
 };
 
 /**

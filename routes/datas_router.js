@@ -10,6 +10,23 @@ var urlencode = require('urlencode');
 
 module.exports = function (router, app) {
 
+    router.get('/*', function (req, res, next)
+    {
+        if(!req.session.user)
+        {
+            res.redirect("/view/login");
+            return;
+        }
+
+        if(!req.session.project)
+        {
+            res.redirect("/view/project/openproject");
+            return;
+        }
+
+        next(null);
+    });
+
     router.get('/users', function (req, res)
     {
         var project = req.session.project || req.query.project;

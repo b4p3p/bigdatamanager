@@ -9,8 +9,6 @@
 ```
 db.users.createIndex( { username: 1 }, { unique: true } )
 
-db.datas.createIndex( {projectName: 1, id: 1 }, { unique: true } )
-
 db.datas.createIndex(
    { text : "text" },
    { default_language: "italian" },

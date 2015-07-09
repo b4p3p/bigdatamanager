@@ -202,27 +202,51 @@ Data.loadTags = function (projectName, callback)
 
 Data.getUsers = function(projectName, par, callback)
 {
-
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
     if(!par) par = {};
 
     //sort=name&order=desc&limit=10&offset=0&_=1435244766146
 
+    //
+
     var query = datas.aggregate()
-        .match({ projectName: projectName})
+        .match({
+            projectName: projectName
+        })
         .group({
-            "_id": {  u:"$user", t:"$tag" } ,
-            "subtotal": {"$sum": 1} })
+            "_id": {
+                u:"$user",
+                t:"$tag",
+                isGeo: {$gt:["$latitude", null] }
+            },
+            "sum": {"$sum": 1}
+        })
         .group({
-            _id:"$_id.u",
-            counter:{ $push:{tag:"$_id.t", subtotal:"$subtotal"} },
-            sum:{ $sum:"$subtotal"}})
+            _id: { u:"$_id.u", t:"$_id.t" },
+            sum: { $sum:"$sum"},
+            counter: { $push:{ isGeo: "$_id.isGeo", sum: "$sum" }}
+        })
         .project({
             _id:0,
-            "user":"$_id",
+            user:"$_id.u",
             counter:1,
-            sum: 1});
+            sum: 1
+        });
+
+    //.group({
+    //    _id:"$_id.u",
+    //    counter:{ $push:{
+    //        tag:"$_id.t",
+    //        subtotal:"$subtotal",
+    //        isGeo:"$isGeo"}
+    //    },
+    //    sum:{ $sum:"$subtotal"}})
+    //.project({
+    //    _id:0,
+    //    "user":"$_id",
+    //    counter:1,
+    //    sum: 1}
 
 
     // ordinamento di default
@@ -231,14 +255,15 @@ Data.getUsers = function(projectName, par, callback)
     var sort = par.sort;
     if(par.order)
         sort = par.order == "desc" ? "-" + sort : sort;
+
     query.sort(sort);
 
     if( par.limit )
         query.limit( parseInt(par.limit) );
 
     query.exec( function(err, docs){
-            connection.close();
-            callback(err, docs);
+        connection.close();
+        callback(err, docs);
     });
 };
 
