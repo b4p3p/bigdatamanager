@@ -157,6 +157,8 @@ Data.importFromFile = function (type, file, projectName, cb_ris)
 
 Data.getDatas = function (projectName, query, callback)
 {
+    query.limit = 5;
+
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
 

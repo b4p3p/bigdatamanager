@@ -171,6 +171,7 @@ timeLineCtrl.drawTimeLine = function ()
     var scale = 20;
 
     timeLineCtrl.$timeLineContainer.removeClass('hidden');
+    timeLineCtrl.$timeLineContainer.css("overflow-x", "auto");
 
     if(timeLineCtrl.$radioWeeks.is(':checked'))
         scale = 50;
@@ -179,13 +180,17 @@ timeLineCtrl.drawTimeLine = function ()
 
     $("#" + timeLineCtrl.timeLineID).width(scale * dataset.datasets[0].data.length);
 
+    var hc = $('body > .container').height();
+    var htop = $('#formType').height();
+    var hmin = hc - htop;
+    $("#" + timeLineCtrl.timeLineID).css('max-height', hmin);
+
     var ctx = document.getElementById(timeLineCtrl.timeLineID).getContext("2d");
     timeLineCtrl.timeLineChart = new Chart(ctx);
     timeLineCtrl.timeLineLine = timeLineCtrl.timeLineChart.Line(
         dataset,
         timeLineCtrl.lineOptions
     );
-
 };
 
 timeLineCtrl.lineData = function ()

@@ -16,8 +16,8 @@ ConstantsRouter.argIndex = function(req, page)
     //TODO DEBUG
     if ( req && req.session )
     {
-        req.session.project = req.session.project ? req.session.project : "crowdpulse";
-        req.session.user = req.session.user ? req.session.user : "crowdpulse";
+        req.session.project = req.session.project ? req.session.project : "oim";//"crowdpulse";
+        req.session.user = req.session.user ? req.session.user : "oim";//"crowdpulse";
     }
 
     var ris = {};
@@ -72,6 +72,7 @@ ConstantsRouter.PAGE =
     DB_NATIONS: "db-nations",
 
     //STAT
+    STAT_DATA: "stat-data",
     STAT_MAP: "stat-map",
     STAT_COMPARE: "stat-compare",
     STAT_TIMELINE: "stat-timeline",

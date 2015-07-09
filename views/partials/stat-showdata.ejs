@@ -1,0 +1,191 @@
+<script src="/bower_components/jquery-form/jquery.form.js"></script>
+<script src="/node_modules/underscore/underscore.js"></script>
+<script src="/public/js/JQueryUtil.js"></script>
+<script src="/public/js/Stat-DataCtrl.js"></script>
+<script type="text/javascript" src="/node_modules/bootstrap-multiselect/dist/js/bootstrap-multiselect.js"></script>
+
+<style>
+
+    #formType {
+        /*margin-left: 20px;*/
+        /*width: 100%;*/
+        /*margin-top: 15px;*/
+    }
+
+    .form-option {
+        margin-right: 50px;
+    }
+
+    #slider-container {
+        position: relative;
+        /*left: 25%;*/
+        /*width: 50%;*/
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    .form-inline > .form-group {
+        vertical-align: top;
+    }
+
+</style>
+
+<div id="container" style="margin-top: 0px">
+
+    <div id="slider-container" class="row">
+        <div id="slider-bar"></div>
+    </div>
+
+    <div class="row" style="margin-bottom: 20px">
+        <form class="form-inline" id="formType" role="form">
+            <div id="formTags" class="form-group form-option">
+                <label class="fix-label" for="cmbTags">Tags</label><br>
+                <select class="selectpicker" id="cmbTags"
+                        data-live-search="true" title="Select tags"
+                        multiple>
+                </select>
+            </div>
+
+            <div id="formUsers" class="form-group form-option">
+                <label class="fix-label" for="cmbUsers">Users</label><br>
+                <select class="selectpicker" id="cmbUsers"
+                        data-live-search="true" title="Select users"
+                        multiple>
+                </select>
+            </div>
+
+            <div id="formTerms" class="form-group form-option">
+                <label class="fix-label" for="cmbUsers">Terms</label><br>
+                <select class="selectpicker" id="cmbTerms"
+                        data-live-search="true" title="Select terms"
+                        multiple>
+                </select>
+            </div>
+        </form>
+    </div>
+    <div class="row">
+
+        <form class="form-inline" id="formType" role="form">
+
+            <div class="form-group form-option">
+                <label class="fix-label">Visualization:</label><br>
+
+                <div class="radio">
+                    <label><input id="radioBar" type="radio" name="optchart"
+                                  onclick="ShowDataCtrl.handleClick();" checked=""> Only geolocated</label>
+                </div>
+                <br>
+                <div class="radio">
+                    <label><input id="radioRadar" type="radio" name="optchart"
+                                  onclick="ShowDataCtrl.handleClick();"> Only geolocated</label>
+                </div>
+                <br>
+                <div class="radio">
+                    <label><input id="radioRadar" type="radio" name="optchart"
+                                  onclick="ShowDataCtrl.handleClick();"> All data</label>
+                </div>
+            </div>
+
+            <div id="formRegions" class="form-group form-option">
+                <div class="form-group form-combo">
+                    <label class="fix-label" for="cmbRegions">Regions</label><br>
+                    <select id="cmbRegions"
+                            multiple="multiple">
+                    </select>
+                </div>
+            </div>
+
+            <div id="formNations" class="form-group form-option">
+                <div class="form-group form-combo">
+                    <label class="fix-label" for="cmbNations">Nations</label><br>
+                    <select class="selectpicker" id="cmbNations"
+                            data-live-search="true" title="Select nations"
+                            multiple>
+                    </select>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+
+    <div class="row">
+        <button type="button" class="btn btn-success"
+                id="cmbFilter"
+                style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"
+                onclick="timeLineCtrl.clickFilter()">
+            <span id="img-filter" class="glyphicon glyphicon-filter" aria-hidden="true"></span> Apply filter
+        </button>
+
+        <button type="button" class="btn btn-danger"
+                id="cmbRestore"
+                style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"
+                onclick="timeLineCtrl.clickRestore()"
+                disabled>
+            <span id="img-restore" class="glyphicon glyphicon-remove" aria-hidden="true"></span> Restore
+        </button>
+    </div>
+</div>
+
+
+
+<table id="data-table" data-toggle="table"
+       data-url="/datas/datas"
+       data-cache="false" data-pagination="true"
+       data-sort-name="name" data-sort-order="desc"
+       data-search="true" data-query-params-type="10"
+       data-show-columns="true">
+    <thead>
+    <tr>
+        <th data-sortable="true" data-field="user">
+            User
+        </th>
+        <th data-field="text"
+            class="col-md-5">
+            Text
+        </th>
+        <th data-sortable="true" data-field="date"
+            data-formatter="formatterData.date">
+            Date
+        </th>
+        <th data-sortable="true" data-field="nation">
+            Nation
+        </th>
+        <th data-sortable="true" data-field="region" data-visible="false">
+            Region
+        </th>
+        <th data-field="tag">
+            Tags
+        </th>
+        <th data-field="tokens"
+            data-formatter="formatterData.tokens">
+            Tokens
+        </th>
+    </tr>
+    </thead>
+</table>
+
+<script>
+
+    $(document).ready(function () {
+
+        ShowDataCtrl.initGui();
+        ShowDataCtrl.init();
+
+        $('.selectpicker').selectpicker();
+        $('#cmbRegions').multiselect(
+                {
+                    nonSelectedText: "Select regions",
+                    enableFiltering: true,
+                    enableClickableOptGroups: true
+                }
+        );
+    });
+
+    $('#slider-bar').on("valuesChanging", function () {
+//        CompareCtrl.$filterButton.removeAttr("disabled");
+    });
+
+</script>
+
+

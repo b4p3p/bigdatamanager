@@ -150,64 +150,67 @@ CompareCtrl.clickFilter = function()
         $imgFilter.removeClass("glyphicon glyphicon-filter");
         $imgFilter.addClass("fa fa-spinner fa-spin");
 
-        if(CompareCtrl.$radioBar.is(':checked'))
-            $('#formSort').removeClass('hidden');
-        else
-            $('#formSort').addClass('hidden');
+        setTimeout( function(){
 
-        CompareCtrl.$NameButton.removeAttr("disabled");
-        CompareCtrl.$NumButton.removeAttr("disabled");
-        CompareCtrl.$AZbutton.removeAttr("disabled");
-        CompareCtrl.$ZAbutton.removeAttr("disabled");
+            if(CompareCtrl.$radioBar.is(':checked'))
+                $('#formSort').removeClass('hidden');
+            else
+                $('#formSort').addClass('hidden');
 
-        CompareCtrl.$barChart.replaceWith('<div id="barChart" style="margin-top: 50px"></div>');
-        CompareCtrl.$barChart = $('#barChart');
-        CompareCtrl.$radarLegend.replaceWith('<div class="col-md-3" id="radarLegend"></div>');
-        CompareCtrl.$radarLegend = $('#radarLegend');
-        CompareCtrl.$radarChart.replaceWith('<canvas class="radar "id="radarChart" width="400" height="400"></canvas>');
-        CompareCtrl.$radarChart = $('#radarChart');
+            CompareCtrl.$NameButton.removeAttr("disabled");
+            CompareCtrl.$NumButton.removeAttr("disabled");
+            CompareCtrl.$AZbutton.removeAttr("disabled");
+            CompareCtrl.$ZAbutton.removeAttr("disabled");
 
-        if(CompareCtrl.$radioRegions.is(':checked'))
-        {
-            CompareCtrl.type = "Regions";
-            CompareCtrl.selectedRegions = DomUtil.getSelectedCombo(CompareCtrl.$cmbRegions);
-            if(CompareCtrl.selectedRegions.length == 0)
+            CompareCtrl.$barChart.replaceWith('<div id="barChart" style="margin-top: 50px"></div>');
+            CompareCtrl.$barChart = $('#barChart');
+            CompareCtrl.$radarLegend.replaceWith('<div class="col-md-3" id="radarLegend"></div>');
+            CompareCtrl.$radarLegend = $('#radarLegend');
+            CompareCtrl.$radarChart.replaceWith('<canvas class="radar "id="radarChart" width="400" height="400"></canvas>');
+            CompareCtrl.$radarChart = $('#radarChart');
+
+            if(CompareCtrl.$radioRegions.is(':checked'))
             {
-                DomUtil.selectAll(CompareCtrl.$cmbRegions);
-                CompareCtrl.$cmbRegions.multiselect('refresh');
+                CompareCtrl.type = "Regions";
                 CompareCtrl.selectedRegions = DomUtil.getSelectedCombo(CompareCtrl.$cmbRegions);
+                if(CompareCtrl.selectedRegions.length == 0)
+                {
+                    DomUtil.selectAll(CompareCtrl.$cmbRegions);
+                    CompareCtrl.$cmbRegions.multiselect('refresh');
+                    CompareCtrl.selectedRegions = DomUtil.getSelectedCombo(CompareCtrl.$cmbRegions);
+                }
+                if(CompareCtrl.$radioBar.is(':checked'))
+                    CompareCtrl.buildBarData(CompareCtrl.selectedRegions);
+                if(CompareCtrl.$radioRadar.is(':checked'))
+                {
+                    CompareCtrl.buildRadarData(CompareCtrl.selectedRegions);
+                }
             }
-            if(CompareCtrl.$radioBar.is(':checked'))
-                CompareCtrl.buildBarData(CompareCtrl.selectedRegions);
-            if(CompareCtrl.$radioRadar.is(':checked'))
+            else
             {
-                CompareCtrl.buildRadarData(CompareCtrl.selectedRegions);
-            }
-        }
-        else
-        {
-            CompareCtrl.type = "Nations";
-            CompareCtrl.selectedNations = DomUtil.getSelectedCombo(CompareCtrl.$cmbNations);
-            if(CompareCtrl.selectedNations.length == 0)
-            {
-                DomUtil.selectAll(CompareCtrl.$cmbNations);
-                CompareCtrl.$cmbNations.selectpicker('refresh');
+                CompareCtrl.type = "Nations";
                 CompareCtrl.selectedNations = DomUtil.getSelectedCombo(CompareCtrl.$cmbNations);
+                if(CompareCtrl.selectedNations.length == 0)
+                {
+                    DomUtil.selectAll(CompareCtrl.$cmbNations);
+                    CompareCtrl.$cmbNations.selectpicker('refresh');
+                    CompareCtrl.selectedNations = DomUtil.getSelectedCombo(CompareCtrl.$cmbNations);
+                }
+                if(CompareCtrl.$radioBar.is(':checked'))
+                    CompareCtrl.buildBarData(CompareCtrl.selectedNations);
+                if(CompareCtrl.$radioRadar.is(':checked'))
+                {
+                    CompareCtrl.buildRadarData(CompareCtrl.selectedNations);
+                }
             }
-            if(CompareCtrl.$radioBar.is(':checked'))
-                CompareCtrl.buildBarData(CompareCtrl.selectedNations);
-            if(CompareCtrl.$radioRadar.is(':checked'))
-            {
-                CompareCtrl.buildRadarData(CompareCtrl.selectedNations);
-            }
-        }
 
-        $imgFilter.removeClass("fa fa-spinner fa-spin");
-        $imgFilter.addClass("glyphicon glyphicon-filter");
+            $imgFilter.removeClass("fa fa-spinner fa-spin");
+            $imgFilter.addClass("glyphicon glyphicon-filter");
 
-        CompareCtrl.$restoreButton.removeAttr("disabled");
-        CompareCtrl.$filterButton.prop("disabled", true);
-    });
+            CompareCtrl.$restoreButton.removeAttr("disabled");
+            CompareCtrl.$filterButton.prop("disabled", true);
+        });
+    }, 50);
 };
 
 CompareCtrl.clickRestore = function()
@@ -287,7 +290,7 @@ CompareCtrl.buildBarData = function(dataSelected)
 
 CompareCtrl.createBarRow = function(obj)
 {
-    console.log("CALL: createBarRow");
+    //console.log("CALL: createBarRow");
 
     var newRow = [];
     if(obj["nation"] == null)
@@ -561,7 +564,7 @@ CompareCtrl.buildRadarData = function(dataSelected)
 
 CompareCtrl.createRadarRow = function(obj, color)
 {
-    console.log("CALL: createRadarRow");
+    //console.log("CALL: createRadarRow");
 
     var radarObj = {};
     var newRow = [];
