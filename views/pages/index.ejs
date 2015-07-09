@@ -196,6 +196,10 @@
                         <i class="fa fa-sort-down"></i>
                     </a>
                     <ul class="nav collapse" id="subStat">
+                        <li><a href="/view/stat/showdata">
+                                <img src="/public/img/icon-table.png" class="subMenu-ico"/>
+                                Show data
+                            </a></li>
                         <li><a href="/view/stat/showmap">
                                 <img src="/public/img/icon-osm.png" class="subMenu-ico"/>
                                 Show map
@@ -232,6 +236,8 @@
                 <% include ../partials/db-nations.ejs%>
 
             <!-- STAT -->
+            <% }else if (page == "stat-data") { %>
+                <% include ../partials/stat-showdata.ejs %>
             <% }else if (page == "stat-map") { %>
                 <% include ../partials/stat-map.ejs %>
             <% }else if (page == "stat-compare") { %>

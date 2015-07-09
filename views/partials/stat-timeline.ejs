@@ -1,7 +1,7 @@
 <style>
 
     #timeLine {
-        height: 500px;
+        /*height: 500px;*/
         margin-top: 0;
         padding-left: 0;
     }
@@ -12,7 +12,6 @@
         bottom:0; !important;
         width:100%;
         /*height: 50%;*/
-        overflow-x: scroll;
         padding-left: 0;
         margin-top: 0;
     }
@@ -23,7 +22,7 @@
     }
 
     #formType {
-        margin-left: 20px;
+        /*margin-left: 20px;*/
         /*width: 100%;*/
         margin-bottom: 10px;
     }
@@ -39,18 +38,19 @@
     }
 
     #formType {
-        margin-left: 20px;
+        margin-left: 10px;
         /*width: 100%;*/
         margin-bottom: 10px;
-        margin-bottom: 0;
+        margin-top: 20px;
     }
 
     .form-inline > .form-group {
         vertical-align: top;
     }
+
 </style>
 
-<script src="/public/js/Stat-timeLineCtrl.js"></script>
+<script src="/public/js/Stat-TimeLineCtrl.js"></script>
 <script src="/public/lib/chartjs/Chart.js"></script>
 <script src="/public/js/DOMUtil.js"></script>
 
@@ -62,8 +62,6 @@
 
 
 <div class="timecontent hidden" id="container">
-
-    <div class="row">
 
         <form id="formType" class="form-inline" role="form">
 
@@ -100,24 +98,26 @@
                             multiple>
                     </select>
                 </div>
-        </form>
-    </div>
-    <div class="row">
-        <button type="button" class="btn btn-success"
-                id="cmbFilter"
-                style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"
-                onclick="timeLineCtrl.clickFilter()">
-            <span id="img-filter" class="glyphicon glyphicon-filter" aria-hidden="true"></span> Apply filter
-        </button>
 
-        <button type="button" class="btn btn-danger"
-                id="cmbRestore"
-                style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"
-                onclick="timeLineCtrl.clickRestore()"
-                disabled>
-            <span id="img-restore" class="glyphicon glyphicon-remove" aria-hidden="true"></span> Restore
-        </button>
-    </div>
+            <div id="formButton" class="form-group" style="margin-top: 25px; margin-left: 25px">
+
+                <button type="button" class="btn btn-success"
+                        id="cmbFilter"
+                        style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"
+                        onclick="timeLineCtrl.clickFilter()">
+                    <span id="img-filter" class="glyphicon glyphicon-filter" aria-hidden="true"></span> Apply filter
+                </button>
+
+                <button type="button" class="btn btn-danger"
+                        id="cmbRestore"
+                        style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"
+                        onclick="timeLineCtrl.clickRestore()"
+                        disabled>
+                    <span id="img-restore" class="glyphicon glyphicon-remove" aria-hidden="true"></span> Restore
+                </button>
+            </div>
+        </form>
+
 </div>
 
 <div id="timeLineContainer" class="timecontent hidden">

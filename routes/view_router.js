@@ -81,6 +81,12 @@ module.exports = function (router) {
     });
 
     ///STAT
+    router.get('/stat/showdata', function (req, res)
+    {
+        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.STAT_DATA);
+        res.render('../views/pages/index.ejs', arg );
+    });
+
     router.get('/stat/showmap', function (req, res)
     {
         var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.STAT_MAP);
