@@ -28,11 +28,11 @@
         margin-bottom: 10px;
     }
 
-    #container{
-        margin-top: 20px;;
-        padding-left: 10px;
-        padding-right: 0;
-    }
+    /*#container{*/
+        /*margin-top: 20px;;*/
+        /*padding-left: 10px;*/
+        /*padding-right: 0;*/
+    /*}*/
 
     .form-option {
         margin-right: 50px;
@@ -61,7 +61,7 @@
 </div>
 
 
-<div class="content hidden" id="container">
+<div class="timecontent hidden" id="container">
 
     <div class="row">
 
@@ -106,8 +106,7 @@
         <button type="button" class="btn btn-success"
                 id="cmbFilter"
                 style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"
-                onclick="timeLineCtrl.clickFilter()"
-                disabled>
+                onclick="timeLineCtrl.clickFilter()">
             <span id="img-filter" class="glyphicon glyphicon-filter" aria-hidden="true"></span> Apply filter
         </button>
 
@@ -121,10 +120,8 @@
     </div>
 </div>
 
-
-
-<div id="timeLineContainer" class="content hidden">
-    <canvas class="content hidden" id="timeLine"></canvas>
+<div id="timeLineContainer" class="timecontent hidden">
+    <canvas id="timeLine"></canvas>
 </div>
 
 <script>
