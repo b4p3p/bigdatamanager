@@ -1,6 +1,12 @@
 "use strict";
 
-var DatabaseCtrl = {
+var PrjEditFormCtrl = new ( function() {
+
+    this.$tableForm = $("#tagsTable");
+
+});
+
+var PrjEditCtrl = {
 
     tags : {},
 
@@ -206,7 +212,8 @@ var DatabaseCtrl = {
 
     },
     
-    loadTags: function () {
+    loadTags: function ()
+    {
 
         jQuery.ajax({
             type: "GET",

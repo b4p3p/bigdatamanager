@@ -24,11 +24,16 @@
 
     .row-form{
         width: 100%;
-        margin-right: -15px;
-        margin-left: -15px;
+        margin-left: 0;
 
+        /*margin-right: -15px;*/
         /*padding-right: 15px;*/
         /*padding-left: 0;*/
+    }
+
+    .form-horizontal .form-group {
+        margin-right: 0;
+        margin-left: 0;
     }
 
     .button{
@@ -76,9 +81,9 @@
         margin-right: 0;
     }
 
-    h3{
-        margin-left: -20px;
-    }
+    /*h3{*/
+        /*margin-left: -20px;*/
+    /*}*/
 
     /*.col_sx{*/
     /*min-width: 100px;*/
@@ -91,7 +96,6 @@
 <script src="/public/js/DOMUtil.js"></script>
 <script src="/public/js/DateUtil.js"></script>
 <script src="/public/js/ProjectCtrl.js"></script>
-
 
 <!--<script src="/node_modules/socketio-file-upload/client.js"></script>-->
 <!--<script src="/bower_components/socket.io-client/socket.io.js"></script>-->
@@ -234,25 +238,43 @@
 
 <h3>Tag</h3>
 
-<div class="" id="tableTagsContainer">
+<div id="tableTagsContainer">
 
-    <table id="tagsTable"></table>
+    <table id="tagsTable" data-toggle="table"
+           data-url="/vocabulary/getUserTags"
+           data-cache="false" data-pagination="true">
+        <thead>
+        <tr>
+            <th data-sortable="true" data-field="tag">
+                Tag
+            </th>
+            <th data-sortable="false" data-field="tokens">
+                Vocabulary
+            </th>
+            <th data-formatter="" data-width="50">
+                Delete tag
+            </th>
+        </tr>
+        </thead>
+    </table>
 
-    <a class="btn btn-default" id= "addButton" style="margin-top: 8px; margin-left: 15px; float: right;"
-       onclick="DatabaseCtrl.showInsertTag()">Add tag
+    <a class="btn btn-default" id= "addButton"
+       style="margin-top: 8px; margin-left: 15px; float: right;"
+       onclick="PrjEditCtrl.showInsertTag()">Add tag
     </a>
 
     <a class="btn btn-default" id= "addButton" style="margin-top: 8px; float: right;"
-       onclick="DatabaseCtrl.refreshCounter()">Refresh counter
+       onclick="PrjEditCtrl.refreshCounter()">Refresh counter
     </a>
 </div>
+
+<script src="/public/js/Prj-EditCtrl.js"></script>
 
 <script>
 
     ProjectCtrl.init('<%= user %>', '<%= project %>');
 
     ProjectCtrl.getProject( ProjectCtrl.loadEditForm );
-    ProjectCtrl.getTags();
     ProjectCtrl.showExample();
 
     $("#upload_input").fileinput( {

@@ -13,6 +13,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 //var textMiner = require( 'text-miner' );
 var Data = require("../model/Data");
+var Project = require("../model/Project");
 
 var connection = null;
 var Model = null;
@@ -193,8 +194,8 @@ var Vocabulary = {
 Vocabulary.MODEL_NAME = "vocabularies";
 
 Vocabulary.SCHEMA_COUNT = new Schema({
-    w:String,
-    c:Number
+    token:String,
+    count:Number
 });
 
 Vocabulary.SCHEMA_TAGS = new Schema({
@@ -203,14 +204,18 @@ Vocabulary.SCHEMA_TAGS = new Schema({
     data: [Vocabulary.SCHEMA_COUNT]         //risultati dell'indice text
 });
 
+Vocabulary.SCHEMA_RISSYNC = new Schema({
+    tag:String,
+    counter:[Vocabulary.SCHEMA_COUNT]
+});
+
 //tags: [Vocabulary.SCHEMA_TAGS],
 
 Vocabulary.SCHEMA = new mongoose.Schema({
     project: String,
-    username: String,
-    userTags: [Vocabulary.SCHEMA_TAGS],     //tags custom inseriti dall'utente
-    syncCustomTags: Object,
-    syncTokensData: Object
+    userTags: [Vocabulary.SCHEMA_TAGS],             //tags custom inseriti dall'utente
+    syncCustomTags: [Vocabulary.SCHEMA_RISSYNC],
+    syncTokensData: [Vocabulary.SCHEMA_RISSYNC]
 });
 
 /**
@@ -483,9 +488,38 @@ Vocabulary.syncCustomTags = function (project, username,  callback)
  */
 Vocabulary.syncTokensData = function (project, query,  callback)
 {
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+    var vocabularies = connection.model(Vocabulary.MODEL_NAME, Vocabulary.SCHEMA);
+    var projects = connection.model(Project.MODEL_NAME, Project.SCHEMA);
+
+    function updateProjects(docs){
+        projects.update(
+            { projectName: project },
+            { $set: {dateLastUpdate: new Date()} },
+            { w:1 }, function (err, result) {
+                callback(err, docs);
+            }
+        );
+    }
+
     Vocabulary.getTokensData(project, query, function(err, docs){
-        callback(null, {});
-    })
+
+        vocabularies.update(
+            { project: project },
+            { $set: {
+                project: project,
+
+                syncTokensData: docs }
+            } ,
+            { w:1, upsert: true },
+            function (err, result) {
+                if(!err)
+                    updateProjects(docs);
+                else
+                    callback(err, {message:err.message} );
+            }
+        )
+    });
 };
 
 /**
@@ -495,7 +529,6 @@ Vocabulary.syncTokensData = function (project, query,  callback)
 Vocabulary.getTokensData = function(project, query, callback){
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
-    var vocabularies = connection.model(Vocabulary.MODEL_NAME, Vocabulary.SCHEMA);
     var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
 
     var fn =
@@ -537,18 +570,23 @@ Vocabulary.getTokensData = function(project, query, callback){
             {$limit:50},
             {$group:{
                 _id:"$key.tag",
-                count: {$push: { token: "$key.token", count: "$count" }}
+                counter: {$push: { token: "$key.token", count: "$count" }}
             }},
             {$project:{
                 _id:0,
                 tag:"$_id",
-                count:1
+                counter:1
             }}
         ], function(err, docs){
             connection.close();
             callback(null, docs);
         });
     } )
+};
+
+
+Vocabulary.getUserTags = function (project, callback) {
+    callback(null, {});
 };
 
 module.exports = Vocabulary;
