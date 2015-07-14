@@ -3,189 +3,276 @@
 <script src="/public/js/JQueryUtil.js"></script>
 <script src="/public/js/Stat-DataCtrl.js"></script>
 <script type="text/javascript" src="/node_modules/bootstrap-multiselect/dist/js/bootstrap-multiselect.js"></script>
+<script src="/node_modules/bootstrap-table/src/extensions/filter/bootstrap-table-filter.js"></script>
+<script src="/bower_components/bootstrap-table-filter/src/bootstrap-table-filter.js"></script>
+<script src="/bower_components/bootstrap-table-filter/src/ext/bs-table.js"></script>
 
 <style>
 
     #formType {
         /*margin-left: 20px;*/
         /*width: 100%;*/
-        /*margin-top: 15px;*/
+        /*margin-top: 0px;*/
     }
 
     .form-option {
-        margin-right: 50px;
+        /*margin-right: 50px;*/
     }
 
     #slider-container {
         position: relative;
         /*left: 25%;*/
-        /*width: 50%;*/
-        margin-top: 20px;
+        /*width: 100%;*/
+        margin-top: 10px;
         margin-bottom: 20px;
+        margin-left: 30px;
+        margin-right: 30px;
     }
 
     .form-inline > .form-group {
         vertical-align: top;
     }
 
+    .panel-heading div:after {
+        font-family: 'Glyphicons Halflings';
+        content: "\e114";
+        float: right;
+        color: grey;
+    }
+
+    .panel-heading div.collapsed:after {
+        content: "\e080";
+    }
+
+    .panel-heading div {
+        cursor: pointer;
+        cursor: hand;
+    }
+
 </style>
 
 <div id="container" style="margin-top: 0px">
 
-    <div id="slider-container" class="row">
-        <div id="slider-bar"></div>
-    </div>
+    <!--<div id="slider-container">-->
+        <!--<div id="slider-bar"></div>-->
+    <!--</div>-->
 
-    <div class="row" style="margin-bottom: 20px">
-        <form class="form-inline" id="formType" role="form">
-            <div id="formTags" class="form-group form-option">
-                <label class="fix-label" for="cmbTags">Tags</label><br>
-                <select class="selectpicker" id="cmbTags"
-                        data-live-search="true" title="Select tags"
-                        multiple>
-                </select>
-            </div>
+    <!--<div class="panel-group" id="accordion">-->
+        <!--<div class="panel panel-default" id="panel">-->
+            <!--<div class="panel-heading">-->
+                <!--<h4 class="panel-title">-->
+                    <!--<div data-toggle="collapse" data-target="#collapse" class="collapsed"-->
+                         <!--style="text-align: center; font-size: 14px;">-->
+                        <!--Generic filters-->
+                    <!--</div>-->
+                <!--</h4>-->
+            <!--</div>-->
+            <!--<div id="collapse" class="panel-collapse collapse">-->
+                <!--<div class="panel-body" style="padding: 0; padding-top: 10px">-->
 
-            <div id="formUsers" class="form-group form-option">
-                <label class="fix-label" for="cmbUsers">Users</label><br>
-                <select class="selectpicker" id="cmbUsers"
-                        data-live-search="true" title="Select users"
-                        multiple>
-                </select>
-            </div>
+                        <!--<div id="formUsers" class="form-group form-option col-md-4">-->
+                            <!--<label class="fix-label" for="cmbUsers">Users</label><br>-->
+                            <!--<select class="selectpicker" id="cmbUsers"-->
+                                    <!--data-live-search="true" title="Select users"-->
+                                    <!--multiple>-->
+                            <!--</select>-->
+                        <!--</div>-->
+                        <!--<div id="formTags" class="form-group form-option col-md-4">-->
+                            <!--<label class="fix-label" for="cmbTags">Tags</label><br>-->
+                            <!--<select class="selectpicker" id="cmbTags"-->
+                                    <!--data-live-search="true" title="Select tags"-->
+                                    <!--multiple>-->
+                            <!--</select>-->
+                        <!--</div>-->
+                        <!--<div id="formTerms" class="form-group form-option col-md-4">-->
+                            <!--<label class="fix-label" for="cmbUsers">Terms</label><br>-->
+                            <!--<select class="selectpicker" id="cmbTerms"-->
+                                    <!--data-live-search="true" title="Select terms"-->
+                                    <!--multiple>-->
+                            <!--</select>-->
+                        <!--</div>-->
 
-            <div id="formTerms" class="form-group form-option">
-                <label class="fix-label" for="cmbUsers">Terms</label><br>
-                <select class="selectpicker" id="cmbTerms"
-                        data-live-search="true" title="Select terms"
-                        multiple>
-                </select>
-            </div>
-        </form>
-    </div>
-    <div class="row">
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
 
-        <form class="form-inline" id="formType" role="form">
+        <!--<div class="panel panel-default" id="panelGeo">-->
+            <!--<div class="panel-heading">-->
+                <!--<h4 class="panel-title">-->
+                    <!--<div data-toggle="collapse" data-target="#collapseGeo" class="collapsed"-->
+                         <!--style="text-align: center; font-size: 14px;">-->
+                        <!--Filters geolocation-->
+                    <!--</div>-->
+                <!--</h4>-->
 
-            <div class="form-group form-option">
-                <label class="fix-label">Visualization:</label><br>
+            <!--</div>-->
+            <!--<div id="collapseGeo" class="panel-collapse collapse">-->
+                <!--<div class="panel-body" style="padding: 0; padding-top: 10px">-->
 
-                <div class="radio">
-                    <label><input id="radioBar" type="radio" name="optchart"
-                                  onclick="ShowDataCtrl.handleClick();" checked=""> Only geolocated</label>
-                </div>
-                <br>
-                <div class="radio">
-                    <label><input id="radioRadar" type="radio" name="optchart"
-                                  onclick="ShowDataCtrl.handleClick();"> Only geolocated</label>
-                </div>
-                <br>
-                <div class="radio">
-                    <label><input id="radioRadar" type="radio" name="optchart"
-                                  onclick="ShowDataCtrl.handleClick();"> All data</label>
-                </div>
-            </div>
+                        <!--<div class="form-group form-option col-md-4">-->
+                            <!--<label class="fix-label">Visualization:</label><br>-->
+                            <!--<div class="radio">-->
+                                <!--<label><input id="radioBar" type="radio" name="optchart"-->
+                                              <!--onclick="ShowDataCtrl.handleClick();" checked=""> Only geolocated</label>-->
+                            <!--</div>-->
+                            <!--<div class="radio">-->
+                                <!--<label><input id="radioRadar" type="radio" name="optchart"-->
+                                              <!--onclick="ShowDataCtrl.handleClick();"> Only geolocated</label>-->
+                            <!--</div>-->
+                            <!--<div class="radio">-->
+                                <!--<label><input id="radioRadar" type="radio" name="optchart"-->
+                                              <!--onclick="ShowDataCtrl.handleClick();"> All data</label>-->
+                            <!--</div>-->
+                        <!--</div>-->
 
-            <div id="formRegions" class="form-group form-option">
-                <div class="form-group form-combo">
-                    <label class="fix-label" for="cmbRegions">Regions</label><br>
-                    <select id="cmbRegions"
-                            multiple="multiple">
-                    </select>
-                </div>
-            </div>
+                        <!--<div id="formRegions" class="form-group form-option col-md-4">-->
+                            <!--<div class="form-group form-combo">-->
+                                <!--<label class="fix-label" for="cmbRegions">Regions</label><br>-->
+                                <!--<select id="cmbRegions"-->
+                                        <!--multiple="multiple">-->
+                                <!--</select>-->
+                            <!--</div>-->
+                        <!--</div>-->
 
-            <div id="formNations" class="form-group form-option">
-                <div class="form-group form-combo">
-                    <label class="fix-label" for="cmbNations">Nations</label><br>
-                    <select class="selectpicker" id="cmbNations"
-                            data-live-search="true" title="Select nations"
-                            multiple>
-                    </select>
-                </div>
-            </div>
+                        <!--<div id="formNations" class="form-group form-option col-md-4">-->
+                            <!--<div class="form-group form-combo">-->
+                                <!--<label class="fix-label" for="cmbNations">Nations</label><br>-->
+                                <!--<select class="selectpicker" id="cmbNations"-->
+                                        <!--data-live-search="true" title="Select nations"-->
+                                        <!--multiple>-->
+                                <!--</select>-->
+                            <!--</div>-->
+                        <!--</div>-->
 
-        </form>
-    </div>
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--<div>-->
+
+    <!--</div>-->
+    <!--</div>-->
 
 
-    <div class="row">
-        <button type="button" class="btn btn-success"
-                id="cmbFilter"
-                style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"
-                onclick="timeLineCtrl.clickFilter()">
-            <span id="img-filter" class="glyphicon glyphicon-filter" aria-hidden="true"></span> Apply filter
-        </button>
+        <!--<div style="margin-top: 20px">-->
+            <!--<button type="button" class="btn btn-success"-->
+                    <!--id="cmbFilter"-->
+                    <!--style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"-->
+                    <!--onclick="timeLineCtrl.clickFilter()">-->
+                <!--<span id="img-filter" class="glyphicon glyphicon-filter" aria-hidden="true"></span> Apply filter-->
+            <!--</button>-->
 
-        <button type="button" class="btn btn-danger"
-                id="cmbRestore"
-                style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"
-                onclick="timeLineCtrl.clickRestore()"
-                disabled>
-            <span id="img-restore" class="glyphicon glyphicon-remove" aria-hidden="true"></span> Restore
-        </button>
-    </div>
+            <!--<button type="button" class="btn btn-danger"-->
+                    <!--id="cmbRestore"-->
+                    <!--style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"-->
+                    <!--onclick="timeLineCtrl.clickRestore()"-->
+                    <!--disabled>-->
+                <!--<span id="img-restore" class="glyphicon glyphicon-remove" aria-hidden="true"></span> Restore-->
+            <!--</button>-->
+        <!--</div>-->
+
+<!--</div>-->
+    <div id="filter-bar"></div>
+    <button id="load" type="button" class="btn btn-default dropdown-toggle btn-filter"
+            data-toggle="dropdown" aria-expanded="false">
+        <span class="fa fa-spinner fa-spin"></span></button>
+
+    <table id="data-table" data-toggle="table"
+           data-cache="true" data-pagination="true"
+           data-sort-name="name" data-sort-order="desc"
+           data-search="true"
+           data-url="/datas/datas"
+           data-show-columns="true"
+           data-show-filter="true">
+           <!--data-toolbar="#filter-bar"-->
+
+        <thead>
+        <tr>
+            <th data-sortable="true" data-field="user">
+                User
+            </th>
+            <th data-field="text"
+                class="col-md-5">
+                Text
+            </th>
+            <th data-sortable="true" data-field="date"
+                data-formatter="formatterData.date">
+                Date
+            </th>
+            <th data-sortable="true" data-field="nation">
+                Nation
+            </th>
+            <th data-sortable="true" data-field="region" data-visible="false">
+                Region
+            </th>
+            <th data-field="tag">
+                Tag
+            </th>
+            <th data-field="tokens"
+                data-formatter="formatterData.tokens">
+                Tokens
+            </th>
+        </tr>
+        </thead>
+    </table>
 </div>
 
+<script type="text/javascript">
 
+    ShowDataCtrl.getData(function(){
+        $('#load').addClass("hidden");
+        $('#data-table').prop("data-toolbar","#filter-bar");
 
-<table id="data-table" data-toggle="table"
-       data-url="/datas/datas"
-       data-cache="false" data-pagination="true"
-       data-sort-name="name" data-sort-order="desc"
-       data-search="true" data-query-params-type="10"
-       data-show-columns="true">
-    <thead>
-    <tr>
-        <th data-sortable="true" data-field="user">
-            User
-        </th>
-        <th data-field="text"
-            class="col-md-5">
-            Text
-        </th>
-        <th data-sortable="true" data-field="date"
-            data-formatter="formatterData.date">
-            Date
-        </th>
-        <th data-sortable="true" data-field="nation">
-            Nation
-        </th>
-        <th data-sortable="true" data-field="region" data-visible="false">
-            Region
-        </th>
-        <th data-field="tag">
-            Tags
-        </th>
-        <th data-field="tokens"
-            data-formatter="formatterData.tokens">
-            Tokens
-        </th>
-    </tr>
-    </thead>
-</table>
+        $(function() {
 
-<script>
-
-    $(document).ready(function () {
-
-        ShowDataCtrl.initGui();
-        ShowDataCtrl.init();
-
-        $('.selectpicker').selectpicker();
-        $('#cmbRegions').multiselect(
-                {
-                    nonSelectedText: "Select regions",
-                    enableFiltering: true,
-                    enableClickableOptGroups: true
+            $('#filter-bar').bootstrapTableFilter({
+                connectTo: '#data-table',
+                filters:[
+                        {
+                            field: 'user',
+                            label: 'User',
+                            type: 'select',
+                            values: ShowDataCtrl.getUsersFilter()
+                        },
+                        {
+                            field: 'date',
+                            label: 'Date',
+                            type: 'range'
+                        },
+                        {
+                            field: 'nation',
+                            label: 'Nation',
+                            type: 'select',
+                            values: ShowDataCtrl.getNationsFilter()
+                        },
+                        {
+                            field: 'region',
+                            label: 'Region',
+                            type: 'select'
+//                            values: ShowDataCtrl.getRegionsFilter()
+                        },
+                        {
+                            field: 'tag',
+                            label: 'Tag',
+                            type: 'select',
+                            values: ShowDataCtrl.getTagsFilter()
+                        },
+                        {
+                            field: 'tokens',
+                            label: 'Tokens',
+                            type: 'search'
+                        }
+                    ],
+                onAll: function (name, args) {
+                    var d = new Date();
+                    $('#log').prepend(d.toLocaleString() + ': ' + name + "\n");
+                },
+                onSubmit: function (data) {
+                    var data = $('#filter-bar').bootstrapTableFilter('getData');
+                    var d = new Date();
+                    $('#log').prepend(d.toLocaleString() + ': ' + JSON.stringify(data) + "\n");
                 }
-        );
-    });
-
-    $('#slider-bar').on("valuesChanging", function () {
-//        CompareCtrl.$filterButton.removeAttr("disabled");
+            });
+        });
     });
 
 </script>
-
-

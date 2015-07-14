@@ -171,8 +171,8 @@ Data.getDatas = function (projectName, query, callback)
 
     exec.project({
         _id:0, id:1, date:1, projectName:1, source:1, text:1, user:1, tokens:1,
-        nation:{$ifNull:["$nation", null]},
-        region:{$ifNull:["$region", null]}
+        nation:{$ifNull:["$nation", "null"]},
+        region:{$ifNull:["$region", "null"]}
     });
 
     exec.exec(function (err, docs) {

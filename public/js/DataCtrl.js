@@ -55,6 +55,11 @@ DataCtrl.FIELD = {
         KEY: "wordcount",
         URL: "/vocabulary/wordcount",
         LASTUPDATE: "wordcount-lastupdate"
+    },
+    NATIONS: {
+        KEY: "nations",
+        URL: "/regions/nations",
+        LASTUPDATE: "nations-lastupdate"
     }
 };
 
