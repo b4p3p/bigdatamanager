@@ -16,11 +16,11 @@ ConstantsRouter.argIndex = function(req, page)
     //TODO DEBUG
     if ( req && req.session )
     {
-        //req.session.project = req.session.project ? req.session.project : "oim";
-        //req.session.user = req.session.user ? req.session.user : "oim";
+        req.session.project = req.session.project ? req.session.project : "oim";
+        req.session.user = req.session.user ? req.session.user : "oim";
 
-        req.session.project = req.session.project ? req.session.project : "crowdpulse";
-        req.session.user = req.session.user ? req.session.user : "crowdpulse";
+        //req.session.project = req.session.project ? req.session.project : "crowdpulse";
+        //req.session.user = req.session.user ? req.session.user : "crowdpulse";
     }
 
     var ris = {};

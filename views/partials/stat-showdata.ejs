@@ -3,9 +3,8 @@
 <script src="/public/js/JQueryUtil.js"></script>
 <script src="/public/js/Stat-DataCtrl.js"></script>
 <script type="text/javascript" src="/node_modules/bootstrap-multiselect/dist/js/bootstrap-multiselect.js"></script>
-<script src="/node_modules/bootstrap-table/src/extensions/filter/bootstrap-table-filter.js"></script>
-<script src="/bower_components/bootstrap-table-filter/src/bootstrap-table-filter.js"></script>
-<script src="/bower_components/bootstrap-table-filter/src/ext/bs-table.js"></script>
+
+
 
 <style>
 
@@ -229,7 +228,7 @@
                 filters:[
                         {
                             field: 'user',
-                            label: 'User',
+                            label: 'Users',
                             type: 'select',
                             values: ShowDataCtrl.getUsersFilter()
                         },
@@ -240,19 +239,19 @@
                         },
                         {
                             field: 'nation',
-                            label: 'Nation',
+                            label: 'Nations',
                             type: 'select',
                             values: ShowDataCtrl.getNationsFilter()
                         },
                         {
                             field: 'region',
-                            label: 'Region',
-                            type: 'select'
-//                            values: ShowDataCtrl.getRegionsFilter()
+                            label: 'Regions',
+                            type: 'select',
+                            values: ShowDataCtrl.getRegionsFilter()
                         },
                         {
                             field: 'tag',
-                            label: 'Tag',
+                            label: 'Tags',
                             type: 'select',
                             values: ShowDataCtrl.getTagsFilter()
                         },

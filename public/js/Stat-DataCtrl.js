@@ -14,8 +14,6 @@ var formatterData = {
     nation: function(value, row, index){
         if(value)
             return value;
-        else
-            return "-";
     }
 };
 
@@ -41,16 +39,21 @@ ShowDataCtrl.regions = null;
 ShowDataCtrl.filteredRegions = null;
 ShowDataCtrl.users = null;
 ShowDataCtrl.terms = null;
-ShowDataCtrl.bt = null;
+ShowDataCtrl.nations = null;
 
 ShowDataCtrl.getNationsFilter = function()
 {
     var result = [];
-    _.each(ShowDataCtrl.stat.data.allTags, function (tag) {
+    var nation;
+    _.each(ShowDataCtrl.nations, function (nationObj) {
         {
+            if(nationObj.nation == "undefined")
+                nation = "Not geolocated";
+            else
+                nation = nationObj.nation;
             var obj = {
-                id: tag,
-                label: tag
+                id: nation,
+                label: nation.charAt(0).toUpperCase() + nation.slice(1)
             };
             result.push(obj);
         }
@@ -60,7 +63,23 @@ ShowDataCtrl.getNationsFilter = function()
 
 ShowDataCtrl.getRegionsFilter = function()
 {
-    return [{id: 'Spain', label: 'Spain'}, {id: 'United Kingdom', label: 'United Kingdom'}, {id: null, label: "nongeo"}];
+    var result = [];
+    var region;
+    _.each(ShowDataCtrl.stat.data.nations, function(nationObj)
+    {
+        _.each(nationObj.regions, function (regionObj) {
+            {
+                region = regionObj.name;
+                var obj = {
+                    id: region,
+                    label: region.charAt(0).toUpperCase() + region.slice(1)
+                };
+                result.push(obj);
+            }
+        });
+    });
+
+    return result;
 };
 
 ShowDataCtrl.getTagsFilter = function()
@@ -70,7 +89,7 @@ ShowDataCtrl.getTagsFilter = function()
         {
             var obj = {
                 id: tag,
-                label: tag
+                label: tag.charAt(0).toUpperCase() + tag.slice(1)
             };
             result.push(obj);
         }
@@ -81,54 +100,59 @@ ShowDataCtrl.getTagsFilter = function()
 ShowDataCtrl.getUsersFilter = function()
 {
     var result = [];
+    var count = 1;
     _.each(ShowDataCtrl.users, function (userObj) {
         {
-            var obj = {
-                id: userObj.user,
-                label: userObj.user
-            };
-            result.push(obj);
+            if(count <= 50)
+            {
+                var obj = {
+                    id: userObj.user,
+                    label: userObj.user
+                };
+                count++;
+                result.push(obj);
+            }
         }
     });
     return result;
 };
 
-ShowDataCtrl.initGui = function ()
-{
-    ShowDataCtrl.$sliderTimer = $('#slider-bar');
-    ShowDataCtrl.$cmbTags = $('#cmbTags');
-    ShowDataCtrl.$cmbUsers = $('#cmbUsers');
-    ShowDataCtrl.$cmbTerms = $('#cmbTerms');
-    ShowDataCtrl.$filterButton = $('#cmbFilter');
-    ShowDataCtrl.$restoreButton = $('#cmbRestore');
-    ShowDataCtrl.$cmbRegions = $('#cmbRegions');
-    ShowDataCtrl.$cmbNations = $("#cmbNations");
-    ShowDataCtrl.initSlider();
-
-};
-
-ShowDataCtrl.initSlider = function()
-{
-    console.log("CALL: initSlider");
-
-    ShowDataCtrl.$sliderTimer.dateRangeSlider(
-        {
-            enabled : true,
-            bounds: {
-                min: new Date(1950, 1, 1 ) ,
-                max: new Date(2050, 1, 1 )
-            } ,
-            defaultValues:{
-                min: new Date(1950, 1, 1 ),
-                max: new Date(2050, 1, 1 )
-            }
-        });
-};
-
-ShowDataCtrl.handleClick = function ()
-{
-    ShowDataCtrl.$filterButton.removeAttr("disabled");
-};
+//ShowDataCtrl.initGui = function ()
+//{
+//    ShowDataCtrl.$sliderTimer = $('#slider-bar');
+//    ShowDataCtrl.$cmbTags = $('#cmbTags');
+//    ShowDataCtrl.$cmbUsers = $('#cmbUsers');
+//    ShowDataCtrl.$cmbTerms = $('#cmbTerms');
+//    ShowDataCtrl.$filterButton = $('#cmbFilter');
+//    ShowDataCtrl.$restoreButton = $('#cmbRestore');
+//    ShowDataCtrl.$cmbRegions = $('#cmbRegions');
+//    ShowDataCtrl.$cmbNations = $("#cmbNations");
+//    ShowDataCtrl.initSlider();
+//
+//};
+//
+//ShowDataCtrl.initSlider = function()
+//{
+//    console.log("CALL: initSlider");
+//
+//    ShowDataCtrl.$sliderTimer.dateRangeSlider(
+//        {
+//            enabled : true,
+//            bounds: {
+//                min: new Date(1950, 1, 1 ) ,
+//                max: new Date(2050, 1, 1 )
+//            } ,
+//            defaultValues:{
+//                min: new Date(1950, 1, 1 ),
+//                max: new Date(2050, 1, 1 )
+//            }
+//        });
+//};
+//
+//ShowDataCtrl.handleClick = function ()
+//{
+//    ShowDataCtrl.$filterButton.removeAttr("disabled");
+//};
 
 ShowDataCtrl.updateTable = function ()
 {
@@ -140,15 +164,6 @@ ShowDataCtrl.getData = function (callback)
     console.log("CALL: getData");
 
     async.parallel({
-            //data: function(next)
-            //{
-            //    DataCtrl.getField( function(doc){
-            //
-            //        ShowDataCtrl.data = doc;
-            //        ShowDataCtrl.filteredData = doc;
-            //        next(null, doc);
-            //    }, DataCtrl.FIELD.DATA);
-            //},
             stat: function(next)
             {
                 DataCtrl.getField( function(doc){
@@ -156,35 +171,19 @@ ShowDataCtrl.getData = function (callback)
                     next(null, doc);
                 }, DataCtrl.FIELD.STAT );
             },
-            //
-            //regions: function (next)
-            //{
-            //    DataCtrl.getField(
-            //        function(doc)
-            //        {
-            //            ShowDataCtrl.regions = doc;
-            //            ShowDataCtrl.filteredRegions = doc;
-            //            next(null, doc);
-            //        },
-            //        DataCtrl.FIELD.REGIONSJSON
-            //    );
-            //},
-            //
+            nations: function(next)
+            {
+                DataCtrl.getField( function(doc){
+                    ShowDataCtrl.nations = doc;
+                    next(null, doc);
+                }, DataCtrl.FIELD.NATIONS );
+            },
             users: function (next)
             {
                 DataCtrl.getField( function(doc){
                     ShowDataCtrl.users = doc;
                     next(null, doc);
-                }, DataCtrl.FIELD.USERS, 50);
-            //},
-            //
-            //wordcount: function (next)
-            //{
-            //    DataCtrl.getField( function(doc)
-            //    {
-            //        ShowDataCtrl.terms = doc;
-            //        next(null, doc);
-            //    }, DataCtrl.FIELD.WORDCOUNT);
+                }, DataCtrl.FIELD.USERS );
             }},
         function(err, results) {
            callback();
