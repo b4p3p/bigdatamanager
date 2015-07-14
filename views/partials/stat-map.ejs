@@ -1,4 +1,4 @@
-<script src="/public/js/Stat-MapCtrl.js"></script>
+
 
 <% include ../partials/leaflet.ejs %>
 
@@ -9,6 +9,8 @@
 <link href="/public/lib/bootstrap-select/css/bootstrap-select.css" rel="stylesheet" type="text/css">
 <script src="/public/lib/bootstrap-select/js/bootstrap-select.js"></script>
 <script src="/public/lib/bootstrap-select/js/i18n/defaults-eu.js"></script>
+
+<script src="/public/js/Stat-MapCtrl.js"></script>
 
 <style>
 
@@ -160,7 +162,14 @@
         </div>
 
         <div class="form-group form-combo">
-            <label class="fix-label" for="cmbTerms">Terms</label><br>
+
+            <!--<label class="fix-label" for="cmbTerms">Terms</label>-->
+
+            <label class="radio-inline"><input type="radio" name="radiodata" checked>From Data</label>
+            <label class="radio-inline"><input type="radio" name="radiovoc">From Vocabulary</label>
+
+            <br>
+
             <select class="selectpicker" id="cmbTerms" title="Loading..."
                     data-live-search="true" multiple>
             </select>

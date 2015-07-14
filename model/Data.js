@@ -157,15 +157,23 @@ Data.importFromFile = function (type, file, projectName, cb_ris)
 
 Data.getDatas = function (projectName, query, callback)
 {
-    query.limit = 5;
+    query.limit = 50;
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
 
-    var exec = datas.find({projectName: projectName});
+    var exec = datas.aggregate();
+
+    exec.match({projectName: projectName});
 
     if(query.limit)
         exec.limit(query.limit);
+
+    exec.project({
+        _id:0, id:1, date:1, projectName:1, source:1, text:1, user:1, tokens:1,
+        nation:{$ifNull:["$nation", null]},
+        region:{$ifNull:["$region", null]}
+    });
 
     exec.exec(function (err, docs) {
         callback(err, docs);

@@ -4,14 +4,11 @@ String.prototype.startsWith = function (str){
     return this.indexOf(str) === 0;
 };
 
-var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://localhost:27017/oim';
-
 var _ = require("underscore");
 var async = require("async");
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-//var textMiner = require( 'text-miner' );
 var Data = require("../model/Data");
 var Project = require("../model/Project");
 
@@ -37,8 +34,9 @@ Vocabulary.SCHEMA_RISSYNC = new Schema({
 Vocabulary.SCHEMA = new mongoose.Schema({
     project: String,
     userTags: [Vocabulary.SCHEMA_TAGS],             //tags custom inseriti dall'utente
-    syncCustomTags: [Vocabulary.SCHEMA_RISSYNC],
-    syncTokensData: [Vocabulary.SCHEMA_RISSYNC]
+    dataTags: [Vocabulary.SCHEMA_TAGS],             //tags inseriti all'interno dei dati
+    syncUserTags: [Vocabulary.SCHEMA_RISSYNC],
+    syncDataTags: [Vocabulary.SCHEMA_RISSYNC]
 });
 
 Vocabulary.insertTags =  function(project, data, callback) {
@@ -50,7 +48,6 @@ Vocabulary.insertTags =  function(project, data, callback) {
 
     vocabularies.findOne( {project: project} , function (err, doc)
     {
-
         var i = _.findIndex( doc.userTags, function(item){
             return item.tag == data.tag
         });
@@ -62,6 +59,8 @@ Vocabulary.insertTags =  function(project, data, callback) {
                 doc.userTags = [data];
         else
             doc.userTags[i].tokens = data.tokens;
+
+        if(data.tag == "" ) data.tag = null;
 
         doc.save(function(err, result){
             connection.close();
@@ -94,7 +93,7 @@ Vocabulary.renameTag = function(project, data, callback) {
 
         doc.userTags[i_old].tag = data.newTag;
 
-        doc.save(function (err, result) { callback(err); });
+        doc.save(function (err) { callback(err); });
 
     });
 };
@@ -112,7 +111,7 @@ Vocabulary.deleteTag = function(project, tag, callback) {
 
         doc.userTags.splice(i, 1);
 
-        doc.save(function(err, result){
+        doc.save(function(err){
             callback(err)
         });
     });
@@ -139,98 +138,6 @@ Vocabulary.renameWords = function(project, data, callback) {
     });
 };
 
-Vocabulary.refreshCounter = function(projectName, callback) {
-
-    /**
-     *
-     * @param projectName
-     * @param callback - fn({Error}, {tags})
-     */
-
-    var connection = mongoose.createConnection('mongodb://localhost/oim');
-    var Data = require("../model/Data");
-    var ModelVocabulary = connection.model(MODEL_NAME, VOCABULARY_SCHEMA);
-    var ModelData = connection.model(Data.MODEL_NAME, Data.SCHEMA);
-    var _ = require('underscore');
-
-    async.waterfall([
-
-            //prendo il vocabolario formattato come un dizionario
-            function(next){
-                ModelVocabulary.find({projectName:projectName},{"words":1, "tag":1}
-                ).lean().exec( function(err, tags)
-                    {
-                        tags = formatTag(tags);
-
-                        //doc = doc.map( function(doc) { return doc.doc; });
-                        //console.log("CALL refreshCounter: doc is " + JSON.stringify(doc));
-                        if(err != null)
-                            next(err);
-                        else
-                            next(null, tags, projectName)
-                    });
-            },
-
-            //prendo i dati del progetto
-            function(tags, projectName, next){
-
-                ModelData.find( { projectName: projectName } , {text:1},
-                    function(err, doc)
-                    {
-                        next(null, doc, projectName, tags);
-                    });
-            },
-
-            //conto le occorrenze dei tag
-            function(datas, projectName, tags, next){
-
-                //var ris = tags;
-                async.each(datas,
-                    function(row, each) {
-                        tags = updateTags( row.text , tags );
-                        each(null);
-                    },
-                    function(err) {
-                        next(err, tags);
-                    });
-            },
-
-            //salvo i dati ottenuti nella collection vocabulary
-            function(tags, next){
-
-                var arrayTag = [];
-                for(var t in tags) arrayTag.push(t);
-
-                MongoClient.connect(url, function (err, db) {
-                    var vocabularies = db.collection('vocabularies');
-                    async.each(arrayTag,
-                        function(tag, each)
-                        {
-                            var updateData = _.clone(tags[tag]);
-                            vocabularies.update(
-                                {tag: tag},
-                                {$set: {counter: updateData}},
-                                function (err) {
-                                    each(err);
-                                }
-                            );
-                        },
-                        function(err)
-                        {
-                            db.close();
-                            next(err, tags);
-                        }
-                    );
-                });
-            }
-        ],
-        function(err, ris){
-            connection.close();
-            callback(err, ris);
-        }
-    );
-};
-
 Vocabulary.getVocabulary = function(project, callback) {
 
     /**
@@ -248,6 +155,9 @@ Vocabulary.getVocabulary = function(project, callback) {
         }
     )
 };
+
+
+// CHIAMA syncCustomTags E syncTokensData
 
 Vocabulary.syncVocabulary = function (project, username,  callback) {
 
@@ -386,7 +296,21 @@ Vocabulary.syncVocabulary = function (project, username,  callback) {
 
 };
 
-Vocabulary.syncCustomTags = function (project, username,  callback) {
+
+/// EFFETTUA LA SINSCRONIZZAZIONE INSERENDO I COUNTER
+
+function updateProjects(docs, connection, project, next){
+    var projects = connection.model(Project.MODEL_NAME, Project.SCHEMA);
+    projects.update(
+        { projectName: project },
+        { $set: {dateLastUpdate: new Date()} },
+        { w:1 }, function (err) {
+            next(err, docs);
+        }
+    );
+}
+
+Vocabulary.syncUserTags = function (project,  callback) {
 
     /**
      * Sincronizzo SOLO i tokens presenti nella collections data
@@ -396,145 +320,157 @@ Vocabulary.syncCustomTags = function (project, username,  callback) {
     var vocabularies = connection.model(Vocabulary.MODEL_NAME, Vocabulary.SCHEMA);
     var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
 
-    var counter = {};
+    vocabularies.findOne({project: project}, {userTags:1, _id:0}, function(err, doc){
+        var dict = {};
 
-    async.waterfall( [
+        _.each(doc.userTags, function(item){
+            var tag = item.tag == "" || item.tag == null ? null : item.tag;
+            dict[tag] = { tag: tag, tokens: item.tokens };
+        });
 
-        //calcolo il counter
-        function(next)
+        var fn =
         {
-            vocabularies.find(
-                {username:username, project:project},
-                function(err, doc)
+            map: function () {
+
+                for(var tag in dict)
                 {
-                    var tags = doc[0].tags;
-
-                    //ogni tag
-                    async.each( tags ,
-
-                        function(tagObj, nextTag)
-                        {
-                            counter[tagObj.tag] = [];
-
-                            async.each( tagObj.tags,
-
-                                function(word, nextWord)
-                                {
-
-                                    datas.find(
-                                        { $text: {
-                                            $search: word, $language: "it" }
-                                        }
-                                    ).count(
-                                        function(err, result){
-
-                                            if( result > 0)
-                                            {
-                                                counter[tagObj.tag].push( { w:word, c: result });
-                                            }
-
-                                            nextWord(null);
-
-                                        }
-                                    );
-
-                                },
-
-                                function(err)
-                                {
-                                    nextTag(null);
-                                }
-                            )
-                        },
-                        function(err)
-                        {
-                            next(null)
-                        }
-                    );
+                    var tokens = dict[tag].tokens;
+                    var arr = this.text.split(' ');
+                    tokens.forEach( function(token){
+                        var filter = arr.filter( function(item){
+                            return item.toLowerCase() == token.toLowerCase();
+                        });
+                        var len = filter.length;
+                        if( len > 0 ) emit( { tag: tag, token:token }, len );
+                    })
                 }
-            );
-        },
+            },
+            reduce: function(key, values) {
+                var count = 0;
+                values.forEach( function(v) {
+                    count += v;
+                });
+                return count;
+            },
+            query: {
+                projectName: project
+            },
+            out: {
+                replace: 'word_count'
+            },
+            scope: { dict: dict },
+            verbose: true
+        };
 
-        //aggiorno il documento
-        function(next)
-        {
-            var keys = _.keys(counter);
-            async.each(keys,
+        datas.mapReduce( fn , function (err, model, stats) {
+            console.log('map reduce took %d ms', stats.processtime);
+            model.aggregate([
+                {$project:{
+                    _id:0,
+                    key:"$_id",
+                    count: "$value"
+                }},
+                {$sort:{count:-1}},
+                {$limit:50},
+                {$group:{
+                    _id:"$key.tag",
+                    counter: {$push: { token: "$key.token", count: "$count" }}
+                }},
+                {$project:{
+                    _id:0,
+                    counter:1,
+                    tag:"$_id"
+                }}
+            ], function(err, docs){
 
-                function(key, next){
-
-                    vocabularies.update(
-                        {
-                            username:username,
-                            project: project,
-                            'tags.tag': key
-                        },
-
-                        {$set: { 'tags.$.count': counter[key] } } ,
-
-                        { w:1 },
-
-                        function (err, result) {
-                            next(null);
-                        }
-                    )
-                },
-
-                function(err){
-                    next(null);
-                }
-            );
-        }
-
-    ], function(err){
-
-        connection.close();
-        callback(null, counter);
-
-    });
+                vocabularies.update(
+                    { project: project },
+                    { $set: {
+                        project: project,
+                        syncUserTags: docs }
+                    } ,
+                    { w:1, upsert: true },
+                    function (err) {
+                        if(!err)
+                            updateProjects(docs, connection , project,  callback);
+                        else
+                            callback(err, {} );
+                    }
+                );
+            })
+        });
+    })
 
 };
 
-Vocabulary.syncTokensData = function (project, query,  callback) {
+Vocabulary.syncDataTags = function (project, query,  callback) {
+
     /**
      * Sincronizzo SOLO i tokens presenti in user tags in vocabularies
      */
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var vocabularies = connection.model(Vocabulary.MODEL_NAME, Vocabulary.SCHEMA);
-    var projects = connection.model(Project.MODEL_NAME, Project.SCHEMA);
 
-    function updateProjects(docs){
-        projects.update(
-            { projectName: project },
-            { $set: {dateLastUpdate: new Date()} },
-            { w:1 }, function (err, result) {
-                callback(err, docs);
+    Vocabulary.prepareDataTags(project, query, function(err, docs){
+
+        async.parallel( [
+
+            //salvo il documento in vocabulary
+            function(next){
+                vocabularies.update(
+                    { project: project },
+                    { $set: {
+                        project: project,
+                        syncDataTags: docs }
+                    } ,
+                    { w:1, upsert: true },
+                    function (err) {
+                        if(!err)
+                            updateProjects(docs, connection , project,  next);
+                        else
+                            next(err);
+                    }
+                )
+            },
+
+            //salvo solo i data tokens
+            function(next){
+                var dataTags = _.map(docs, function(item){
+
+                    var tokens = _.map(item.counter, function(item){
+                        return item.token;
+                    });
+
+                    return {
+                        tag: item.tag,
+                        tokens: tokens
+                    }
+                });
+
+                vocabularies.update(
+                    { project: project },
+                    { $set: {
+                        dataTags: dataTags
+                    }},
+                    { w:1, upsert: true },
+                    function (err) {
+                        next(err);
+                    }
+                )
             }
-        );
-    }
 
-    Vocabulary.getTokensData(project, query, function(err, docs){
+        ], function (err, result) {
+            callback(err, docs)
+        });
 
-        vocabularies.update(
-            { project: project },
-            { $set: {
-                project: project,
-
-                syncTokensData: docs }
-            } ,
-            { w:1, upsert: true },
-            function (err, result) {
-                if(!err)
-                    updateProjects(docs);
-                else
-                    callback(err, {message:err.message} );
-            }
-        )
     });
 };
 
-Vocabulary.getTokensData = function(project, query, callback){
+
+/// LEGGE I TOKENS DA DATAS E COSRUISCE I DATA TAGS IN VOCABULARY
+
+Vocabulary.prepareDataTags = function(project, query, callback){
 
     /**
      * Costruisco il documento per la sincronizzazione dei token presenti
@@ -547,14 +483,17 @@ Vocabulary.getTokensData = function(project, query, callback){
     var fn =
     {
         map: function () {
-            for(var i = 0; i < this.tokens.length; i++)
-            {
+            var arr = this.text.split(' ');
+            this.tokens.forEach( function(token){
                 var tag = this.tag ? this.tag : null;
-                emit( { tag: tag, token:this.tokens[i] }, 1);
-            }
+                var filter = arr.filter( function(item){
+                    return item.toLowerCase() == token.toLowerCase();
+                });
+                var len = filter.length;
+                if( len > 0 ) emit( { tag: tag, token:token }, len);
+            })
         },
-        reduce: function(key, values)
-        {
+        reduce: function(key, values) {
             var count = 0;
             values.forEach( function(v) {
                 count += v;
@@ -572,7 +511,6 @@ Vocabulary.getTokensData = function(project, query, callback){
 
     datas.mapReduce( fn , function (err, model, stats) {
         console.log('map reduce took %d ms', stats.processtime);
-
         model.aggregate([
             {$project:{
                 _id:0,
@@ -597,6 +535,9 @@ Vocabulary.getTokensData = function(project, query, callback){
     } )
 };
 
+
+/// SOLO VISUALIZZAZIONE ///
+
 Vocabulary.getUserTags = function (project, callback) {
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
@@ -607,15 +548,63 @@ Vocabulary.getUserTags = function (project, callback) {
         var ris = [];
 
         if(doc!=null)
-        _.each(doc.userTags, function(item, index){
+        _.each(doc.userTags, function(item){
             ris.push({
                 tag: item.tag,
                 tokens: item.tokens
             });
         });
+
         callback(null, ris);
     });
 };
+
+Vocabulary.getDataTags = function (project, callback) {
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+    var vocabularies = connection.model(Vocabulary.MODEL_NAME, Vocabulary.SCHEMA);
+
+    vocabularies.findOne({project:project},{dataTags:1, _id:0 },  function(err, doc){
+
+        var ris = [];
+
+        if(doc!=null)
+            _.each(doc.dataTags, function(item){
+                ris.push({
+                    tag: item.tag,
+                    tokens: item.tokens
+                });
+            });
+
+        callback(null, ris);
+    });
+};
+
+Vocabulary.getWordCount = function(project, callback){
+
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+    var vocabularies = connection.model(Vocabulary.MODEL_NAME, Vocabulary.SCHEMA);
+
+    vocabularies.findOne(
+        {project:project},
+        {_id:0, syncUserTags:1, syncDataTags:1 },
+        function(err, doc) {
+
+            var ris = {};
+            ris = appendxxxxTags(doc.syncDataTags, "syncDataTags", ris);
+            ris = appendxxxxTags(doc.syncUserTags, "syncUserTags", ris);
+            connection.close();
+            callback(err, ris);
+        }
+    );
+};
+
+function appendxxxxTags(tags , section, ris){
+    ris[section] = {};
+    _.each(tags, function(item, key){
+        ris[section][item.tag] = [];
+    });
+    return ris;
+}
 
 module.exports = Vocabulary;
 

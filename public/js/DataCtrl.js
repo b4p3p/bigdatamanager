@@ -110,7 +110,7 @@ DataCtrl.requireRefresh = function(field, callback)
             var lastUpdate = result.urlLstUpd.dateLastUpdate;
 
             if(!result.sameUser) {
-                console.log("    require refresh: true (userChange)");
+                //console.log("    require refresh: true (userChange)");
                 callback({
                     result: true,
                     lastUpdate: lastUpdate
@@ -119,7 +119,7 @@ DataCtrl.requireRefresh = function(field, callback)
 
             if(result.dbLstUpd == null || result.dbLstUpd == "undefined")
             {
-                console.log("    require refresh: true (first time)");
+                //console.log("    require refresh: true (first time)");
                 callback({
                     result: true,
                     lastUpdate: lastUpdate
@@ -129,7 +129,7 @@ DataCtrl.requireRefresh = function(field, callback)
                 var dUrl = new Date(result.urlLstUpd.dateLastUpdate);
                 var dDb =  new Date(result.dbLstUpd);
                 var result = dUrl > dDb;
-                console.log("    require refresh: " + result);
+                //console.log("    require refresh: " + result);
                 callback({
                     result: result,
                     lastUpdate: lastUpdate
@@ -150,7 +150,7 @@ DataCtrl.getFromUrl = function(field, queryString,  callback)
     $.ajax({
         type: "get",
         url: field.URL + queryString,
-        timeout: 1000 * 60, //1m
+        timeout: 2000 * 60, //2m
 
         success: function(data){
             //console.log("    success");
@@ -159,7 +159,7 @@ DataCtrl.getFromUrl = function(field, queryString,  callback)
         },
 
         error:function(error){
-            console.error("error getFromUrl:\n", error);
+            console.error("error getFromUrl:\n", error, field.URL + queryString);
             callback(null);
         }
 
