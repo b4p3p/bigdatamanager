@@ -61,32 +61,32 @@ module.exports = function (app) {
 
     });
 
-};
+    var cont = 0;
 
-//function sendProjectError(request, response, message, status)
-//{
-//    console.log("CALL: sendProjectError");
-//
-//    //restituisco errore
-//    var err = extend({}, ERROR);
-//    err.message = message;
-//    err.status = status;
-//
-//    var arg = extend({}, ARG_INDEX);
-//    arg.error = err;
-//    arg.tab = TAB.NEWPROJECT;
-//    arg.page = PAGE.PROJECT;
-//
-//    request.session.arg = arg;
-//    response.redirect("/project");
-//}
-//
-//function getError(status, msg)
-//{
-//    var err = extend({}, ERROR);
-//}
-//
-//function getArgProject()
-//{
-//    return extend({}, ARG_PROJECT);
-//}
+    function writeLine(res){
+        res.write("test -" + cont + "<br>");
+    }
+
+    function loop(res){
+        setTimeout(function(){
+            cont++;
+            if(cont<15) {
+                writeLine(res);
+                loop(res)
+            }
+            else
+                res.end("fine");
+
+        },400);
+    }
+
+    app.get('/test', function (req, res){
+
+        res.setHeader('Connection', 'Transfer-Encoding');
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Transfer-Encoding', 'chunked');
+        cont = 0;
+        loop(res);
+    });
+
+};

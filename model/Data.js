@@ -1,6 +1,7 @@
 "use strict";
 
 var async = require('async');
+var _ = require('underscore');
 var fs = require('fs');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
@@ -157,25 +158,27 @@ Data.importFromFile = function (type, file, projectName, cb_ris)
 
 Data.getDatas = function (projectName, query, callback)
 {
-    query.limit = 50;
-
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
 
-    var exec = datas.aggregate();
+    var exec = datas.find({projectName: projectName});
 
-    exec.match({projectName: projectName});
+    if(query.isGeo)
+        exec.where("nation").exists();
 
     if(query.limit)
         exec.limit(query.limit);
-
-    exec.project({
-        _id:0, id:1, date:1, projectName:1, source:1, text:1, user:1, tokens:1,
-        nation:{$ifNull:["$nation", "null"]},
-        region:{$ifNull:["$region", "null"]}
-    });
+    else
+        exec.limit(30000);      //resolve crash chrome
 
     exec.exec(function (err, docs) {
+        _.each(docs, function(doc){
+            if(doc["nation"] == null) {
+                doc["nation"] = "-";
+                doc["region"] = "-";
+            }
+            delete doc._doc["_id"];
+        });
         callback(err, docs);
         connection.close();
     });

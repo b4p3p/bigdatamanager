@@ -118,6 +118,14 @@
         margin-right: 10px;
     }
 
+    #countData{
+        float: right;
+        margin-top: 22px;
+        margin-right: -50px;
+        text-align: right;
+        width: auto;
+    }
+
 </style>
 
 <div class="row">
@@ -157,8 +165,8 @@
 
             <!--<label class="fix-label" for="cmbTerms">Terms</label>-->
 
-            <label class="radio-inline"><input type="radio" name="radiodata" checked>From Data</label>
-            <label class="radio-inline"><input type="radio" name="radiovoc">From Vocabulary</label>
+            <label class="radio-inline"><input type="radio" id="radioData"       name="typeVoc" checked>Data</label>
+            <label class="radio-inline"><input type="radio" id="radioVocabulary" name="typeVoc">vocabulary</label>
 
             <br>
 
@@ -167,32 +175,33 @@
             </select>
         </div>
 
+        <div class="form-group" style="margin-top: 24px">
+
+            <button type="button" class="btn btn-success"
+                    id="cmdFilter"
+                    style="float: right; margin-top: 15px; margin-left: 10px;"
+                    onclick="ShowmapCtrl.cmdFilter_click()"
+                    disabled>
+                <span id="img-filter" class="glyphicon glyphicon-filter" aria-hidden="true"></span>
+                Apply filter
+            </button>
+
+            <button type="button" class="btn btn-danger"
+                    id="cmdRestore"
+                    style="float: right; margin-top: 15px; margin-left: 10px;"
+                    onclick="ShowmapCtrl.getData()"
+                    disabled>
+                <span id="img-restore" class="glyphicon glyphicon-remove" aria-hidden="true"></span> Restore
+            </button>
+
+        </div>
+
         <script>
             $('.selectpicker').selectpicker();
         </script>
 
     </form>
 </div>
-
-<div class="row">
-
-    <button type="button" class="btn btn-success"
-            id="cmdFilter"
-            style="float: right; margin-top: 15px; margin-left: 10px;"
-            onclick="ShowmapCtrl.cmdFilter_click()"
-            disabled>
-        <span id="img-filter" class="glyphicon glyphicon-filter" aria-hidden="true"></span>
-            Apply filter
-    </button>
-
-    <button type="button" class="btn btn-danger"
-            id="cmdRestore"
-            style="float: right; margin-top: 15px; margin-left: 10px;"
-            onclick="ShowmapCtrl.getData()"
-            disabled>
-        <span id="img-restore" class="glyphicon glyphicon-remove" aria-hidden="true"></span> Restore</button>
-</div>
-
 
 <div class="row">
 
@@ -238,6 +247,8 @@
                 Show boundaries
             </label>
         </div>
+
+        <div id="countData">Loading...</div>
 
     </form>
 

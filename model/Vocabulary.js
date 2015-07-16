@@ -147,7 +147,7 @@ Vocabulary.getVocabulary = function(project, callback) {
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var vocabularies = connection.model(Vocabulary.MODEL_NAME, Vocabulary.SCHEMA);
-    vocabularies.find(
+    vocabularies.findOne(
         {project: project} ,
         function (err, doc) {
             connection.close();
@@ -299,7 +299,7 @@ Vocabulary.syncVocabulary = function (project, username,  callback) {
 
 /// EFFETTUA LA SINSCRONIZZAZIONE INSERENDO I COUNTER
 
-function updateProjects(docs, connection, project, next){
+function updateProjects(docs, connection, project, next) {
     var projects = connection.model(Project.MODEL_NAME, Project.SCHEMA);
     projects.update(
         { projectName: project },
@@ -601,7 +601,11 @@ Vocabulary.getWordCount = function(project, callback){
 function appendxxxxTags(tags , section, ris){
     ris[section] = {};
     _.each(tags, function(item, key){
-        ris[section][item.tag] = [];
+        var tag = item.tag;
+        ris[section][tag] = [];
+        _.each(item.counter, function(item, key){
+            ris[section][tag].push({token:item.token, count:item.count});
+        });
     });
     return ris;
 }

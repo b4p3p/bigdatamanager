@@ -81,6 +81,14 @@
         margin-right: 0;
     }
 
+    .terminal{
+        height: 200px;
+        width: 100%;
+        border: 2px;
+        background: #003580;
+        margin-bottom: 50px;
+    }
+
     /*h3{*/
         /*margin-left: -20px;*/
     /*}*/
@@ -90,12 +98,6 @@
     /*}*/
 
 </style>
-
-<script src="/node_modules/underscore/underscore.js"></script>
-<script src="/bower_components/jquery-form/jquery.form.js"></script>
-<script src="/public/js/DOMUtil.js"></script>
-<script src="/public/js/DateUtil.js"></script>
-<script src="/public/js/ProjectCtrl.js"></script>
 
 <!--<script src="/node_modules/socketio-file-upload/client.js"></script>-->
 <!--<script src="/bower_components/socket.io-client/socket.io.js"></script>-->
@@ -261,16 +263,36 @@
         </thead>
     </table>
 
-    <a class="btn btn-default" id= "addButton"
-       style="margin-top: 8px; margin-left: 15px; float: right;"
-       onclick="PrjEditCtrl.showInsertTag()">Add tag
-    </a>
+    <div style="height: 65px">
 
-    <a class="btn btn-default" id= "addButton" style="margin-top: 8px; float: right;"
-       onclick="PrjEditCtrl.refreshCounter()">Refresh counter
-    </a>
+        <a class="btn btn-default" id= "addButton"
+           style="margin-top: 8px; margin-left: 15px; float: right;"
+           onclick="PrjEditCtrl.showInsertTag()">Add tag
+        </a>
+
+        <a class="btn btn-default" id= "synUserTag"
+           style="margin-top: 8px; margin-left: 15px; float: right;">
+            Sync User Vocabulary
+        </a>
+
+        <a class="btn btn-default" id= "synDataTag"
+           style="margin-top: 8px; float: right;">
+            Sync Data Vocabulary
+        </a>
+
+    </div>
+
 </div>
 
+<iframe class="terminal" id="terminal">
+
+</iframe>
+
+<script src="/node_modules/underscore/underscore.js"></script>
+<script src="/bower_components/jquery-form/jquery.form.js"></script>
+<script src="/public/js/DOMUtil.js"></script>
+<script src="/public/js/DateUtil.js"></script>
+<script src="/public/js/ProjectCtrl.js"></script>
 <script src="/public/js/Prj-EditCtrl.js"></script>
 
 <script>

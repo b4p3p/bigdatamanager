@@ -155,7 +155,7 @@ DataCtrl.getFromUrl = function(field, queryString,  callback)
     $.ajax({
         type: "get",
         url: field.URL + queryString,
-        timeout: 2000 * 60, //2m
+        timeout: 5000 * 60, //2m
 
         success: function(data){
             //console.log("    success");
@@ -164,6 +164,7 @@ DataCtrl.getFromUrl = function(field, queryString,  callback)
         },
 
         error:function(error){
+            alert(error.responseText);
             console.error("error getFromUrl:\n", error, field.URL + queryString);
             callback(null);
         }
@@ -189,7 +190,7 @@ DataCtrl.getField = function(callback, field, limit)
 
         if(result.result == true)
         {
-            console.log("set new data");
+            //console.log("set new data");
 
             async.waterfall([
 
@@ -203,13 +204,17 @@ DataCtrl.getField = function(callback, field, limit)
                 //salvo i dati ricevuti
                 function(data, next){
 
+                    console.log("     provo a salvare " + field.KEY);
+
+                    //var lenght = JSON.stringify(data).length;
+                    //lenght = lenght /  1024 / 1024;
+                    //lenght = parseFloat(lenght).toFixed(2);
+                    //console.log("Salvo: " + field.KEY + " - " + lenght + " MB - ");
+
                     DataCtrl.storage.setContents(
                         field.KEY, JSON.stringify(data)).then(function()
                         {
-                            var lenght = JSON.stringify(data).length;
-                            lenght = lenght /  1024 / 1024;
-                            lenght = parseFloat(lenght).toFixed(2);
-                            console.log("Scritti: " + lenght + " MB - " + field.KEY);
+                            console.log("     salvato " + field.KEY);
                             next(null, data);
                         }
                     );

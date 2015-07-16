@@ -382,21 +382,20 @@ var PrjEditCtrl = {
                 alert('GetTagsVocabulary fail');
             }
         });
-    },
-
-    refreshCounter: function() {
-        jQuery.ajax({
-            type: "GET",
-            url: '/vocabulary/refresh',
-            dataType: 'json',
-            async: true,
-            success: function (data) {
-                alert("Done!");
-                DatabaseCtrl.loadTags();
-            },
-            error: function (data) {
-                alert('GetTagsVocabulary fail');
-            }
-        });
     }
 };
+
+var PrjEditEventCtrl = function() {
+
+    this.$btnSyncUserTags = $("#synUserTag");
+    this.$terminal = $("#terminal");
+
+    this.$btnSyncUserTags.click( function(){
+        prjEECtrl.$terminal.attr("src", "/test" );
+        setInterval(function(){
+            prjEECtrl.$terminal.scrollTop( prjEECtrl.$terminal.contents().height() + 100);
+        } , 500);
+    });
+
+};
+var prjEECtrl = new PrjEditEventCtrl();

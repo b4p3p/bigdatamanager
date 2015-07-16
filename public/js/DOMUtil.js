@@ -48,7 +48,7 @@ var DomUtil = {
             var $o = $('<option value="' + options[i].toLowerCase() + '" >' + options[i] + '</option>');
             if(subtext)
                 $o.attr("data-subtext", subtext[i]);
-
+            $o.attr("data-group", title);
             $group.append($o);
         }
 
@@ -63,6 +63,24 @@ var DomUtil = {
 
         for ( var i = 0; i < options.length; i++)
             tags.push ( options[i].text );
+
+        return tags;
+    },
+
+    getSelectedComboGroup: function( $combo )
+    {
+        var tags = [];
+        if(!$combo) return tags;
+        var options = $combo.find(":selected");
+
+        for ( var i = 0; i < options.length; i++)
+        {
+            var group = $(options[i]).attr("data-group");
+            if( group == "null")
+                group = null;
+            tags.push ( { text:options[i].text, group: group } );
+        }
+
 
         return tags;
     },
@@ -96,13 +114,14 @@ var DomUtil = {
 
 };
 
-var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer, $cmbUsers)
+var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer, $cmbUsers, $cmbTerms)
 {
     this.$cmbNations = $cmbNations;
     this.$cmbRegions = $cmbRegions;
     this.$cmbTags = $cmbTags;
     this.$sliderTimer = $sliderTimer;
     this.$cmbUsers = $cmbUsers;
+    this.$cmbTerms = $cmbTerms;
     this.queryString = "";
     this.value = {};
 
@@ -113,6 +132,7 @@ var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer, $
         var nations = DomUtil.getSelectedCombo(this.$cmbNations);
         var tags = DomUtil.getSelectedCombo(this.$cmbTags);
         var users = DomUtil.getSelectedCombo(this.$cmbUsers);
+        var terms = DomUtil.getSelectedComboGroup(this.$cmbTerms);
         var interval = DomUtil.getIntervalFromRangeSlider(this.$sliderTimer);
 
         if(nations.length > 0)
@@ -147,7 +167,8 @@ var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer, $
                 regions: regions,
                 tags: tags,
                 interval: interval,
-                users: users
+                users: users,
+                terms: terms
             }
         };
 
@@ -189,13 +210,27 @@ var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer, $
                 this.value.conditions.tags.indexOf(tag) != -1;
     };
 
+    this.containTerm = function(tag, text)
+    {
+        //controllo che il testo e il tag siano presenti nelle condizioni
+        var conds = this.value.conditions.terms;
+        if( conds.length == 0 ) return true;
+        var words = text.split(' ');
+
+        for(var i = 0; i < words.length; i++)
+            for(var j = 0; j < conds.length; j++)
+                if( conds[j].text == words[i] &&
+                    conds[j].group == tag)
+                    return true;
+
+        return false;
+    };
+
     this.isInRange = function(date)
     {
         var d = new Date(date);
         return  d >= this.value.conditions.interval.min &&
                 d <= this.value.conditions.interval.max
     };
-
-
 
 };
