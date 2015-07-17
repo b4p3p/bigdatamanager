@@ -60,6 +60,11 @@ DataCtrl.FIELD = {
         KEY: "nations",
         URL: "/regions/nations",
         LASTUPDATE: "nations-lastupdate"
+    },
+    DATAFILTER: {
+        KEY: "data",
+        URL: "/datas/datafilter",
+        LASTUPDATE: "data-lastupdate"
     }
 };
 

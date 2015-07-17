@@ -22,7 +22,7 @@ var DomUtil = {
 
     addOptionValue : function( combo , option, subtext, isDisable ) {
 
-        var $o = $('<option value="' + option.toLowerCase() + '" >' + option + '</option>')
+        var $o = $('<option value="' + option.toLowerCase() + '" >' + option + '</option>');
         if (subtext)
             $o.attr("data-subtext", subtext);
 
@@ -98,12 +98,19 @@ var DomUtil = {
         return $combo.find('option[label="'+option+'"]').closest("optgroup").attr('label');
     },
 
-    deselectAll: function( $combo )
+    deselectAll: function( $combo, requireRefresh)
     {
-        var options = $combo.find('option');
-
+        var options = $($combo).find('option');
         for (var i = 0; i < options.length; i++)
             $(options[i]).prop('selected', false);
+
+        if(requireRefresh)
+        {
+            if($combo.className == 'selectpicker')
+                $($combo).selectpicker('refresh');
+            else
+                $($combo).multiselect('refresh');
+        }
     },
 
     getIntervalFromRangeSlider: function( $slider )

@@ -1,277 +1,240 @@
 <script src="/bower_components/jquery-form/jquery.form.js"></script>
 <script src="/node_modules/underscore/underscore.js"></script>
 <script src="/public/js/JQueryUtil.js"></script>
-<script src="/public/js/Stat-DataCtrl.js"></script>
+<script src="/public/js/DOMUtil.js"></script>
 <script type="text/javascript" src="/node_modules/bootstrap-multiselect/dist/js/bootstrap-multiselect.js"></script>
-
-
+<link rel="stylesheet" href="/node_modules/bootstrap-multiselect/dist/css/bootstrap-multiselect.css" type="text/css"/>
 
 <style>
-
-    #formType {
-        /*margin-left: 20px;*/
-        /*width: 100%;*/
-        /*margin-top: 0px;*/
-    }
-
-    .form-option {
-        /*margin-right: 50px;*/
-    }
-
-    #slider-container {
-        position: relative;
-        /*left: 25%;*/
-        /*width: 100%;*/
-        margin-top: 10px;
-        margin-bottom: 20px;
-        margin-left: 30px;
-        margin-right: 30px;
-    }
-
-    .form-inline > .form-group {
-        vertical-align: top;
-    }
-
-    .panel-heading div:after {
-        font-family: 'Glyphicons Halflings';
-        content: "\e114";
-        float: right;
-        color: grey;
-    }
-
-    .panel-heading div.collapsed:after {
-        content: "\e080";
-    }
-
-    .panel-heading div {
+    li.remove-filters {
         cursor: pointer;
-        cursor: hand;
     }
 
+    li > a{
+        cursor: pointer;
+    }
+
+    li > a > input{
+        cursor: pointer;
+    }
+
+    .pagination {
+        margin: 0;
+    }
+
+    .pagination-detail {
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
 </style>
 
 <div id="container" style="margin-top: 0px">
 
-    <!--<div id="slider-container">-->
-        <!--<div id="slider-bar"></div>-->
-    <!--</div>-->
+    <!--<div id="filter-bar"></div>-->
 
-    <!--<div class="panel-group" id="accordion">-->
-        <!--<div class="panel panel-default" id="panel">-->
-            <!--<div class="panel-heading">-->
-                <!--<h4 class="panel-title">-->
-                    <!--<div data-toggle="collapse" data-target="#collapse" class="collapsed"-->
-                         <!--style="text-align: center; font-size: 14px;">-->
-                        <!--Generic filters-->
-                    <!--</div>-->
-                <!--</h4>-->
-            <!--</div>-->
-            <!--<div id="collapse" class="panel-collapse collapse">-->
-                <!--<div class="panel-body" style="padding: 0; padding-top: 10px">-->
-
-                        <!--<div id="formUsers" class="form-group form-option col-md-4">-->
-                            <!--<label class="fix-label" for="cmbUsers">Users</label><br>-->
-                            <!--<select class="selectpicker" id="cmbUsers"-->
-                                    <!--data-live-search="true" title="Select users"-->
-                                    <!--multiple>-->
-                            <!--</select>-->
-                        <!--</div>-->
-                        <!--<div id="formTags" class="form-group form-option col-md-4">-->
-                            <!--<label class="fix-label" for="cmbTags">Tags</label><br>-->
-                            <!--<select class="selectpicker" id="cmbTags"-->
-                                    <!--data-live-search="true" title="Select tags"-->
-                                    <!--multiple>-->
-                            <!--</select>-->
-                        <!--</div>-->
-                        <!--<div id="formTerms" class="form-group form-option col-md-4">-->
-                            <!--<label class="fix-label" for="cmbUsers">Terms</label><br>-->
-                            <!--<select class="selectpicker" id="cmbTerms"-->
-                                    <!--data-live-search="true" title="Select terms"-->
-                                    <!--multiple>-->
-                            <!--</select>-->
-                        <!--</div>-->
-
-                <!--</div>-->
-            <!--</div>-->
-        <!--</div>-->
-
-        <!--<div class="panel panel-default" id="panelGeo">-->
-            <!--<div class="panel-heading">-->
-                <!--<h4 class="panel-title">-->
-                    <!--<div data-toggle="collapse" data-target="#collapseGeo" class="collapsed"-->
-                         <!--style="text-align: center; font-size: 14px;">-->
-                        <!--Filters geolocation-->
-                    <!--</div>-->
-                <!--</h4>-->
-
-            <!--</div>-->
-            <!--<div id="collapseGeo" class="panel-collapse collapse">-->
-                <!--<div class="panel-body" style="padding: 0; padding-top: 10px">-->
-
-                        <!--<div class="form-group form-option col-md-4">-->
-                            <!--<label class="fix-label">Visualization:</label><br>-->
-                            <!--<div class="radio">-->
-                                <!--<label><input id="radioBar" type="radio" name="optchart"-->
-                                              <!--onclick="ShowDataCtrl.handleClick();" checked=""> Only geolocated</label>-->
-                            <!--</div>-->
-                            <!--<div class="radio">-->
-                                <!--<label><input id="radioRadar" type="radio" name="optchart"-->
-                                              <!--onclick="ShowDataCtrl.handleClick();"> Only geolocated</label>-->
-                            <!--</div>-->
-                            <!--<div class="radio">-->
-                                <!--<label><input id="radioRadar" type="radio" name="optchart"-->
-                                              <!--onclick="ShowDataCtrl.handleClick();"> All data</label>-->
-                            <!--</div>-->
-                        <!--</div>-->
-
-                        <!--<div id="formRegions" class="form-group form-option col-md-4">-->
-                            <!--<div class="form-group form-combo">-->
-                                <!--<label class="fix-label" for="cmbRegions">Regions</label><br>-->
-                                <!--<select id="cmbRegions"-->
-                                        <!--multiple="multiple">-->
-                                <!--</select>-->
-                            <!--</div>-->
-                        <!--</div>-->
-
-                        <!--<div id="formNations" class="form-group form-option col-md-4">-->
-                            <!--<div class="form-group form-combo">-->
-                                <!--<label class="fix-label" for="cmbNations">Nations</label><br>-->
-                                <!--<select class="selectpicker" id="cmbNations"-->
-                                        <!--data-live-search="true" title="Select nations"-->
-                                        <!--multiple>-->
-                                <!--</select>-->
-                            <!--</div>-->
-                        <!--</div>-->
-
-                <!--</div>-->
-            <!--</div>-->
-        <!--</div>-->
-    <!--<div>-->
-
-    <!--</div>-->
-    <!--</div>-->
-
-
-        <!--<div style="margin-top: 20px">-->
-            <!--<button type="button" class="btn btn-success"-->
-                    <!--id="cmbFilter"-->
-                    <!--style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"-->
-                    <!--onclick="timeLineCtrl.clickFilter()">-->
-                <!--<span id="img-filter" class="glyphicon glyphicon-filter" aria-hidden="true"></span> Apply filter-->
-            <!--</button>-->
-
-            <!--<button type="button" class="btn btn-danger"-->
-                    <!--id="cmbRestore"-->
-                    <!--style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"-->
-                    <!--onclick="timeLineCtrl.clickRestore()"-->
-                    <!--disabled>-->
-                <!--<span id="img-restore" class="glyphicon glyphicon-remove" aria-hidden="true"></span> Restore-->
-            <!--</button>-->
-        <!--</div>-->
-
-<!--</div>-->
-    <div id="filter-bar"></div>
-    <button id="load" type="button" class="btn btn-default dropdown-toggle btn-filter"
-            data-toggle="dropdown" aria-expanded="false">
+    <button id="load" type="button" class="btn btn-default dropdown-toggle btn-filter hidden"
+            data-toggle="dropdown" aria-expanded="true">
         <span class="fa fa-spinner fa-spin"></span></button>
 
-    <table id="data-table" data-toggle="table"
-           data-cache="true" data-pagination="true"
+    <div id="showdatafilter" class="btn-toolbar hidden">
+
+        <div class="btn-group btn-group-filter-main">
+        <button type="button" class="btn btn-default dropdown-toggle btn-filter"
+                data-toggle="dropdown"><span class="glyphicon glyphicon-filter"></span></button>
+
+            <ul class="dropdown-menu" role="menu">
+
+            <li class="remove-filters">
+                <a><span class="glyphicon glyphicon-remove"></span> Remove all filters</a>
+            </li>
+
+            <li class="divider"></li>
+
+            <li data-filter-field="user">
+                <a><input type="checkbox"> Users</a>
+            </li>
+
+            <li data-filter-field="date">
+                <a><input type="checkbox"> Date</a>
+            </li>
+
+            <li data-filter-field="nation">
+                <a><input type="checkbox"> Nations</a>
+            </li>
+
+            <li data-filter-field="region">
+                <a><input type="checkbox"> Regions</a>
+            </li>
+            <li data-filter-field="tag">
+                <a><input type="checkbox"> Tags</a>
+            </li>
+
+            <li data-filter-field="tokens">
+                <a><input type="checkbox"> Tokens</a>
+            </li>
+
+        </ul>
+        </div>
+
+        <div class="btn-group btn-group-filters">
+            <div class="btn-group hidden" data-filter-field="user">
+                <select class="selectpicker" id="cmbUsers" title="Users" data-live-search="true"
+                        multiple></select>
+            </div>
+            <div class="btn-group hidden" data-filter-field="date">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Date <span class="caret"></span></button>
+                <ul class="dropdown-menu" role="menu">
+                    <li data-val="lte" class="static"><a><input id="lteCh" type="checkbox" class="filter-enabled"> Less than
+                            <input id="lte" class="form-control" type="text" placeholder="yyyy-mm-dd"></a></li>
+                    <li data-val="gte" class="static"><a><input id="gteCh" type="checkbox" class="filter-enabled"> More than
+                            <input id="gte" class="form-control" type="text" placeholder="yyyy-mm-dd"></a></li>
+                    <li data-val="eq" class="static"><a><input id="eqCh" type="checkbox" class="filter-enabled"> Equals
+                            <input id="eq" class="form-control" type="text" placeholder="yyyy-mm-dd"></a></li>
+                </ul>
+
+            </div>
+            <div class="btn-group hidden" data-filter-field="nation">
+                <select class="selectpicker" id="cmbNations" data-live-search="true" title="Nations" multiple></select>
+            </div>
+            <div class="btn-group hidden" data-filter-field="region">
+                <select class="multiselect" id="cmbRegions" multiple="multiple"></select>
+            </div>
+            <div class="btn-group hidden" data-filter-field="tag">
+                <select class="selectpicker" id="cmbTags" data-live-search="true" title="Tags" multiple></select>
+            </div>
+            <div class="btn-group hidden" data-filter-field="tokens">
+                <select class="selectpicker" id="cmbTokens" data-live-search="true" title="Tokens" multiple></select>
+            </div>
+
+        </div>
+
+        <div id="refresh" class="btn-group btn-group-filter-refresh hidden">
+            <button id='refreshButton' type="button" class="btn btn-default btn-primary btn-refresh" data-toggle="dropdown"
+                    style="display: block;" onclick="ShowDataCtrl.refreshGui()"><span class="glyphicon glyphicon-ok"></span>
+            </button>
+        </div>
+    </div>
+
+    <table id="data-table" class="hidden" data-toggle="table"
+           data-cache="true"
            data-sort-name="name" data-sort-order="desc"
            data-search="true"
-           data-url="/datas/datas"
            data-show-columns="true"
            data-show-filter="true">
-           <!--data-toolbar="#filter-bar"-->
-
         <thead>
         <tr>
-            <th data-sortable="true" data-field="user">
+            <th data-sortable="true" data-field="user" class="col-md-1">
                 User
             </th>
-            <th data-field="text"
-                class="col-md-5">
+            <th data-field="text" class="col-md-5">
                 Text
             </th>
-            <th data-sortable="true" data-field="date"
+            <th data-sortable="true" data-field="date" class="col-md-1"
                 data-formatter="formatterData.date">
                 Date
             </th>
-            <th data-sortable="true" data-field="nation">
+            <th data-sortable="true" data-field="nation" class="col-md-1">
                 Nation
             </th>
-            <th data-sortable="true" data-field="region" data-visible="false">
+            <th data-sortable="true" data-field="region" data-visible="false" class="col-md-1">
                 Region
             </th>
-            <th data-field="tag">
+            <th data-field="tag" class="col-md-1">
                 Tag
             </th>
-            <th data-field="tokens"
+            <th data-field="tokens" class="col-md-1"
                 data-formatter="formatterData.tokens">
                 Tokens
             </th>
         </tr>
         </thead>
     </table>
+    <div id="paginationTable" class="clearfix hidden">
+        <div id="pagination" class="pull-right pagination" style="float: left; margin-top: 10px; margin-bottom: 10px"></div>
+        <div class="pull-left pagination-detail" style="float: right">
+            <span id="dataNum" class="pagination-info"></span>
+            <span class="page-list">
+                <span class="btn-group dropup">
+                    <button type="button" class="btn btn-default  dropdown-toggle" data-toggle="dropdown">
+                        <span id="pageSize" class="page-size">10</span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul id="menuDataNum" class="dropdown-menu" role="menu">
+                        <li class="active"><a>10</a></li>
+                        <li><a>25</a></li>
+                        <li><a>50</a></li>
+                        <li><a>100</a></li>
+                    </ul>
+                </span> records per page</span></div>
+    </div>
 </div>
+
+<script src="/public/js/BootstrapTableFilter.js"></script>
+<script src="/public/js/Stat-DataCtrl.js"></script>
 
 <script type="text/javascript">
 
-    ShowDataCtrl.getData(function(){
-        $('#load').addClass("hidden");
-        $('#data-table').prop("data-toolbar","#filter-bar");
+    $('#data-table').removeClass("hidden");
+    $('#load').removeClass("hidden");
 
-        $(function() {
+    $(document).ready(function () {
 
-            $('#filter-bar').bootstrapTableFilter({
-                connectTo: '#data-table',
-                filters:[
-                        {
-                            field: 'user',
-                            label: 'Users',
-                            type: 'select',
-                            values: ShowDataCtrl.getUsersFilter()
-                        },
-                        {
-                            field: 'date',
-                            label: 'Date',
-                            type: 'range'
-                        },
-                        {
-                            field: 'nation',
-                            label: 'Nations',
-                            type: 'select',
-                            values: ShowDataCtrl.getNationsFilter()
-                        },
-                        {
-                            field: 'region',
-                            label: 'Regions',
-                            type: 'select',
-                            values: ShowDataCtrl.getRegionsFilter()
-                        },
-                        {
-                            field: 'tag',
-                            label: 'Tags',
-                            type: 'select',
-                            values: ShowDataCtrl.getTagsFilter()
-                        },
-                        {
-                            field: 'tokens',
-                            label: 'Tokens',
-                            type: 'search'
-                        }
-                    ],
-                onAll: function (name, args) {
-                    var d = new Date();
-                    $('#log').prepend(d.toLocaleString() + ': ' + name + "\n");
-                },
-                onSubmit: function (data) {
-                    var data = $('#filter-bar').bootstrapTableFilter('getData');
-                    var d = new Date();
-                    $('#log').prepend(d.toLocaleString() + ': ' + JSON.stringify(data) + "\n");
+        $('.selectpicker').selectpicker({
+            width: '90px'
+        });
+        $('.selectpicker').css('border-radius', 0);
+
+        $('#cmbRegions').multiselect(
+                {
+                    nonSelectedText: "Regions",
+                    enableFiltering: true,
+                    enableClickableOptGroups: true
                 }
+        );
+
+        $('.multiselect').css('border-radius', 0);
+
+        ShowDataCtrl.getData(function () {
+            ShowDataCtrl.initGui();
+            $('#load').addClass('hidden');
+            ShowDataCtrl.refreshTable();
+            $('#paginationTable').removeClass('hidden');
+            $('#dataNum').text("Showing 1 to 10 of " + ShowDataCtrl.stat.data.countTot + " rows ");
+
+            $('#pagination').bootpag({
+                total: parseInt(ShowDataCtrl.count / parseInt($($('#menuDataNum li.active')[0]).text()))+1,
+                page: 1,
+                maxVisible: 5,
+                leaps: true,
+                firstLastUse: true,
+                first: '‹',
+                last: '›',
+                wrapClass: 'pagination',
+                activeClass: 'active',
+                disabledClass: 'disabled',
+                nextClass: 'next',
+                prevClass: 'prev',
+                lastClass: 'last',
+                firstClass: 'first'
+            }).on("page", function(event, num){
+                var numForPag = $($('#menuDataNum li.active')[0]).text();
+                ShowDataCtrl.page = num;
+                ShowDataCtrl.skip = num*numForPag-numForPag;
+                ShowDataCtrl.limit = numForPag;
+                console.log("skip: " + ShowDataCtrl.skip + " limit: " + ShowDataCtrl.limit);
+                ShowDataCtrl.refreshTable();
             });
         });
+    });
+
+    $('#menuDataNum li').click(function(){
+        $('#menuDataNum li').removeClass('active');
+        $(this).addClass('active');
+        var value = $(this).text();
+        $('#pageSize').text(value);
+
+        ShowDataCtrl.limit = $($('#menuDataNum li.active')[0]).text();
+        ShowDataCtrl.refreshTable();
     });
 
 </script>

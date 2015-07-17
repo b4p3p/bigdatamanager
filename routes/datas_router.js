@@ -48,5 +48,16 @@ module.exports = function (router, app) {
 
     });
 
+    router.get('/datafilter', function (req, res)
+    {
+        var project = req.session.project || req.query.project;
+        var query = req.query;
+
+        Data.getDataFilter( project , query, function(err, docs){
+            res.json(docs);
+        });
+
+    });
+
 };
 

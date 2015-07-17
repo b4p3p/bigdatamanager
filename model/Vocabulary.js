@@ -48,6 +48,11 @@ Vocabulary.insertTags =  function(project, data, callback) {
 
     vocabularies.findOne( {project: project} , function (err, doc)
     {
+        if(doc == null){
+            doc = new vocabularies();
+            doc.project = project;
+        }
+
         var i = _.findIndex( doc.userTags, function(item){
             return item.tag == data.tag
         });
@@ -321,6 +326,7 @@ Vocabulary.syncUserTags = function (project,  callback) {
     var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
 
     vocabularies.findOne({project: project}, {userTags:1, _id:0}, function(err, doc){
+
         var dict = {};
 
         _.each(doc.userTags, function(item){

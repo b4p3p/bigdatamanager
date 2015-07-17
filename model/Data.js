@@ -158,6 +158,8 @@ Data.importFromFile = function (type, file, projectName, cb_ris)
 
 Data.getDatas = function (projectName, query, callback)
 {
+    //query.limit = 50;
+
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
 
@@ -165,6 +167,9 @@ Data.getDatas = function (projectName, query, callback)
 
     if(query.isGeo)
         exec.where("nation").exists();
+
+    if(query.skip)
+        exec.skip(query.skip);
 
     if(query.limit)
         exec.limit(query.limit);
@@ -182,6 +187,136 @@ Data.getDatas = function (projectName, query, callback)
         callback(err, docs);
         connection.close();
     });
+};
+
+Data.getDataFilter = function (projectName, query, callback)
+{
+    //query.limit = 50;
+
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+    var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
+
+
+
+    async.parallel({
+        data: function(next)
+        {
+            var exec = datas.find({projectName: projectName});
+
+            if(query.hasOwnProperty("nations"))
+            {
+                var nations = query.nations.split(",");
+                exec.where('nation').in(nations);
+            }
+
+            if(query.hasOwnProperty("regions"))
+            {
+                var regions = query.regions.split(",");
+                exec.where('region').in(regions);
+            }
+
+            if(query.hasOwnProperty("users"))
+            {
+                var users = query.users.split(",");
+                exec.where('user').in(users);
+            }
+
+            if(query.hasOwnProperty("tags"))
+            {
+                var tags = query.tags.split(",");
+                exec.where('tag').in(tags);
+            }
+
+            if(query.hasOwnProperty("tokens"))
+            {
+                var tokens = query.tokens.split(",");
+                exec.where('tokens').in(tokens);
+            }
+
+            if(query.hasOwnProperty("end")) {
+                exec.where('date').lte(new Date(query.end));
+            }
+            if(query.hasOwnProperty("start")) {
+                exec.where('date').gte(new Date(query.start));
+            }
+            if(query.hasOwnProperty("eq")) {
+                exec.where('date').eq(new Date(query.end));
+            }
+
+            if(query.skip)
+                exec.skip(query.skip);
+
+            if(query.limit)
+                exec.limit(query.limit);
+            else
+                exec.limit(30000);      //resolve crash chrome
+
+            exec.exec(function (err, docs) {
+
+                _.each(docs, function(doc){
+                    if(doc["nation"] == null) {
+                        doc["nation"] = "-";
+                        doc["region"] = "-";
+                    }
+                    delete doc._doc["_id"];
+                });
+                next(null, docs);
+            });
+        },
+        count: function(next)
+        {
+            var exec = datas.find({projectName: projectName});
+
+            if(query.hasOwnProperty("nations"))
+            {
+                var nations = query.nations.split(",");
+                exec.where('nation').in(nations);
+            }
+
+            if(query.hasOwnProperty("regions"))
+            {
+                var regions = query.regions.split(",");
+                exec.where('region').in(regions);
+            }
+
+            if(query.hasOwnProperty("users"))
+            {
+                var users = query.users.split(",");
+                exec.where('user').in(users);
+            }
+
+            if(query.hasOwnProperty("tags"))
+            {
+                var tags = query.tags.split(",");
+                exec.where('tag').in(tags);
+            }
+
+            if(query.hasOwnProperty("tokens"))
+            {
+                var tokens = query.tokens.split(",");
+                exec.where('tokens').in(tokens);
+            }
+
+            if(query.hasOwnProperty("end")) {
+                exec.where('date').lte(new Date(query.end));
+            }
+            if(query.hasOwnProperty("start")) {
+                exec.where('date').gte(new Date(query.start));
+            }
+            if(query.hasOwnProperty("eq")) {
+                exec.where('date').eq(new Date(query.end));
+            }
+
+            exec.count(function(err, count){
+                next(null, count);
+            });
+        }
+    },function(err, result){
+        callback(err, {count: result.count, data: result.data });
+        connection.close();
+    });
+
+
 };
 
 /**
