@@ -59,5 +59,27 @@ module.exports = function (router, app) {
 
     });
 
+    router.get('/overrideTokensData', function (req, res) {
+
+        res.setHeader('Connection', 'Transfer-Encoding');
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Transfer-Encoding', 'chunked');
+
+        var start = new Date();
+
+        res.write('<body style="color:dimgrey;font-family: monospace;font-size: 15px;text-align: left;position: static;">');
+
+        res.write('########################################<br>');
+        res.write('###### Override tokens data start ######<br>');
+        res.write('########################################<br>');
+
+        var project = req.session.project || req.query.project;
+
+        Data.overrideTokensData(project, res, function(err) {
+            res.end("fatto!")
+        });
+
+    });
+
 };
 

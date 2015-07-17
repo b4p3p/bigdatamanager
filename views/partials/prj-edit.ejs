@@ -99,6 +99,8 @@
 
 </style>
 
+<link href="/public/css/terminal.css" rel="stylesheet">
+
 <!--<script src="/node_modules/socketio-file-upload/client.js"></script>-->
 <!--<script src="/bower_components/socket.io-client/socket.io.js"></script>-->
 
@@ -267,7 +269,7 @@
 
         <a class="btn btn-default" id= "addButton"
            style="margin-top: 8px; margin-left: 15px; float: right;"
-           onclick="PrjEditCtrl.showInsertTag()">Add tag
+           onclick="prjEditCtrl.showInsertTag()">Add tag
         </a>
 
         <a class="btn btn-default" id= "synUserTag"
@@ -276,17 +278,33 @@
         </a>
 
         <a class="btn btn-default" id= "synDataTag"
-           style="margin-top: 8px; float: right;">
+           style="margin-top: 8px;  margin-left: 15px; float: right;">
             Sync Data Vocabulary
+        </a>
+
+        <a class="btn btn-danger" id= "overrideDataTokens"
+           style="margin-top: 8px;  margin-left: 15px; float: right;">
+            Override data tokens
         </a>
 
     </div>
 
 </div>
 
-<iframe class="terminal" id="terminal">
+<div>
 
-</iframe>
+    <div id="bar">
+        <div id="red">
+        </div>
+        <div id="yellow">
+        </div>
+        <div id="green">
+        </div>
+    </div>
+
+    <iframe id="terminal"> </iframe>
+
+</div>
 
 <script src="/node_modules/underscore/underscore.js"></script>
 <script src="/bower_components/jquery-form/jquery.form.js"></script>

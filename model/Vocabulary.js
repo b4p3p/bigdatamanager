@@ -11,6 +11,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var Data = require("../model/Data");
 var Project = require("../model/Project");
+var WaitController = require("../controller/waitController");
 
 var Vocabulary = function(){};
 
@@ -161,147 +162,6 @@ Vocabulary.getVocabulary = function(project, callback) {
     )
 };
 
-
-// CHIAMA syncCustomTags E syncTokensData
-
-Vocabulary.syncVocabulary = function (project, username,  callback) {
-
-    /**
-     * Sincronizzo il vocabolario con i token inseriti dall'utente e i token
-     * calcolati automaticamente (datas.tokens)
-     */
-
-    var docSync = {
-        username: username,
-        project: project,
-        userTags: [],
-        tags: []
-    };
-
-    var connection = mongoose.createConnection('mongodb://localhost/oim');
-    var vocabularies = connection.model(Vocabulary.MODEL_NAME, Vocabulary.SCHEMA);
-    var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
-    //
-
-    async.waterfall([
-
-        //prendo tutti i testi
-        function (next)
-        {
-
-            //{ $limit: 100 },
-
-            datas.aggregate(
-
-                { $match: { projectName: project } },
-
-                { $group: {
-                    _id: "$tag" ,
-                    count: {"$sum": 1} ,
-                    documents:{ $push:{ text:"$text" } }
-                }},
-
-                { $project: {
-                    _id:0,
-                    tag:"$_id",
-                    count: 1,
-                    documents: 1
-                }}
-
-            ).exec (
-                function (err, doc)
-                {
-                    next(null, doc);
-                }
-            );
-        },
-
-        //tokenizzo
-        function(docs, next)
-        {
-            // x ogni tag
-            async.each(docs, function(obj, nextDoc)
-            {
-                var docTag = {
-                    tag: obj.tag,
-                    tags: []
-                };
-
-                // x ogni documento nel tag
-                async.each(obj.documents,
-
-                    function (obj, innerNext)
-                    {
-                        var corpus = new textMiner.Corpus([ obj.text ]);
-
-                        var wordArr = corpus
-                            .clean()
-                            .trim()
-                            .toLower().removeWords(textMiner.STOPWORDS.IT)
-                            .clean().documents.map(function(x){
-                            return x;
-                        });
-
-                        wordArr = wordArr[0].split(' ');
-
-                        async.each(wordArr,
-
-                            function(wa, next){
-
-                                if( wa[0] == '@' )           { next(null); return; }
-                                if(wa.startsWith('rt'))      { next(null); return; }
-                                if(wa.startsWith('http'))      { next(null); return; }
-                                if(docTag.tags[wa] != null ) { next(null); return; }
-
-                                docTag.tags[wa] = true;
-                                next(null);
-                            },
-
-                            function (err) {
-                                innerNext(null)
-                            }
-                        )
-                    },
-
-                    function (err)
-                    {
-                        console.log("elaborato tag " + docTag.tag);
-                        docTag.tags = _.keys(docTag.tags);
-                        docSync.tags.push(docTag);
-                        nextDoc(null);
-                    }
-                );
-
-            },
-
-            function(err)
-            {
-                next(null) ; //next waterfall
-            });
-        },
-
-        //salvo il file
-        function (next) {
-            vocabularies.update(
-                {username:username, project: project},
-                docSync,
-                { upsert:true, w:1 },
-                function (err, result) {
-                    next(null);
-                }
-            )
-        }
-
-    ], function(err, result){
-
-        connection.close();
-        callback(null, docSync);
-
-    });
-
-};
-
-
 /// EFFETTUA LA SINSCRONIZZAZIONE INSERENDO I COUNTER
 
 function updateProjects(docs, connection, project, next) {
@@ -315,7 +175,7 @@ function updateProjects(docs, connection, project, next) {
     );
 }
 
-Vocabulary.syncUserTags = function (project,  callback) {
+Vocabulary.syncUserTags = function (project, res,  callback) {
 
     /**
      * Sincronizzo SOLO i tokens presenti nella collections data
@@ -325,91 +185,52 @@ Vocabulary.syncUserTags = function (project,  callback) {
     var vocabularies = connection.model(Vocabulary.MODEL_NAME, Vocabulary.SCHEMA);
     var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
 
-    vocabularies.findOne({project: project}, {userTags:1, _id:0}, function(err, doc){
+    vocabularies.findOne( {project: project}, {userTags:1, _id:0}, function(err, doc){
+
+        if(doc == null)
+        {
+            res.write("Create new document<br>");
+            doc = new vocabularies();
+            doc.project = project;
+        }
 
         var dict = {};
-
+        res.write("Get userTags<br>");
         _.each(doc.userTags, function(item){
             var tag = item.tag == "" || item.tag == null ? null : item.tag;
             dict[tag] = { tag: tag, tokens: item.tokens };
         });
 
-        var fn =
-        {
-            map: function () {
+        res.write('Update vocabulary<br>');
 
-                for(var tag in dict)
-                {
-                    var tokens = dict[tag].tokens;
-                    var arr = this.text.split(' ');
-                    tokens.forEach( function(token){
-                        var filter = arr.filter( function(item){
-                            return item.toLowerCase() == token.toLowerCase();
-                        });
-                        var len = filter.length;
-                        if( len > 0 ) emit( { tag: tag, token:token }, len );
-                    })
-                }
-            },
-            reduce: function(key, values) {
-                var count = 0;
-                values.forEach( function(v) {
-                    count += v;
-                });
-                return count;
-            },
-            query: {
-                projectName: project
-            },
-            out: {
-                replace: 'word_count'
-            },
-            scope: { dict: dict },
-            verbose: true
-        };
-
-        datas.mapReduce( fn , function (err, model, stats) {
-            console.log('map reduce took %d ms', stats.processtime);
-            model.aggregate([
-                {$project:{
-                    _id:0,
-                    key:"$_id",
-                    count: "$value"
-                }},
-                {$sort:{count:-1}},
-                {$limit:50},
-                {$group:{
-                    _id:"$key.tag",
-                    counter: {$push: { token: "$key.token", count: "$count" }}
-                }},
-                {$project:{
-                    _id:0,
-                    counter:1,
-                    tag:"$_id"
-                }}
-            ], function(err, docs){
-
-                vocabularies.update(
-                    { project: project },
-                    { $set: {
-                        project: project,
-                        syncUserTags: docs }
-                    } ,
-                    { w:1, upsert: true },
-                    function (err) {
-                        if(!err)
-                            updateProjects(docs, connection , project,  callback);
-                        else
-                            callback(err, {} );
+        Vocabulary.prepareUserTags( project, res, dict, datas, function(err, docs) {
+            vocabularies.update(
+                { project: project },
+                { $set: {
+                    project: project,
+                    syncUserTags: docs }
+                } ,
+                { w:1, upsert: true },
+                function (err) {
+                    if(!err)
+                    {
+                        res.write('Update project');
+                        updateProjects(docs, connection , project,  callback);
                     }
-                );
-            })
-        });
+                    else
+                    {
+                        res.write('Errore!!!');
+                        callback(err, {} );
+                    }
+
+                }
+            );
+        })
     })
 
 };
 
-Vocabulary.syncDataTags = function (project, query,  callback) {
+Vocabulary.syncDataTags = function (project, query, res, callback) {
 
     /**
      * Sincronizzo SOLO i tokens presenti in user tags in vocabularies
@@ -418,65 +239,67 @@ Vocabulary.syncDataTags = function (project, query,  callback) {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var vocabularies = connection.model(Vocabulary.MODEL_NAME, Vocabulary.SCHEMA);
 
-    Vocabulary.prepareDataTags(project, query, function(err, docs){
+    Vocabulary.prepareDataTags(project, query, res, function(err, docs){
 
-        async.parallel( [
+        res.write("Update vocabulary<br>");
 
-            //salvo il documento in vocabulary
-            function(next){
-                vocabularies.update(
-                    { project: project },
-                    { $set: {
-                        project: project,
-                        syncDataTags: docs }
-                    } ,
-                    { w:1, upsert: true },
-                    function (err) {
-                        if(!err)
-                            updateProjects(docs, connection , project,  next);
-                        else
-                            next(err);
-                    }
-                )
-            },
-
-            //salvo solo i data tokens
-            function(next){
-                var dataTags = _.map(docs, function(item){
-
-                    var tokens = _.map(item.counter, function(item){
-                        return item.token;
-                    });
-
-                    return {
-                        tag: item.tag,
-                        tokens: tokens
-                    }
-                });
-
-                vocabularies.update(
-                    { project: project },
-                    { $set: {
-                        dataTags: dataTags
-                    }},
-                    { w:1, upsert: true },
-                    function (err) {
-                        next(err);
-                    }
-                )
+        var dataTags = _.map(docs, function(item){
+            var tokens = _.map(item.counter, function(item){
+                return item.token;
+            });
+            return {
+                tag: item.tag,
+                tokens: tokens
             }
-
-        ], function (err, result) {
-            callback(err, docs)
         });
 
+        vocabularies.update(
+            { project: project },
+            { $set: {
+                project: project,
+                syncDataTags: docs,
+                dataTags: dataTags} },
+            { w:1, upsert: true },
+            function (err) {
+                if(!err)
+                {
+                    res.write("Update project<br>");
+                    updateProjects(docs, connection , project,  callback);
+                }
+                else
+                {
+                    res.write("Error!!!<br>");
+                    callback(err, null);
+                }
+            }
+        );
     });
 };
 
+function convertPrepareRis(tmpRis){
+    var arrayRis = [];
+    _.each(tmpRis, function(item){
+        var counter = [];
+        _.each(item.counter, function(item){
+            counter.push(item);
+        });
+        arrayRis.push({tag: item.tag, counter: counter});
+    });
+    return arrayRis;
+}
 
-/// LEGGE I TOKENS DA DATAS E COSRUISCE I DATA TAGS IN VOCABULARY
+function limitConvertResult(arrayRis, num){
+    //ordino e limito i risultati
+    _.each(arrayRis, function(item, index){
+        arrayRis[index].counter = _.sortBy(item.counter, 'count').reverse();
+        arrayRis[index].counter = arrayRis[index].counter.slice(0,num);
+    });
+    return arrayRis;
+}
 
-Vocabulary.prepareDataTags = function(project, query, callback){
+/// LEGGE I TOKENS DA DATAS E COSRUISCE I DOCSYNC E  DATATAGS IN VOCABULARY
+
+Vocabulary.prepareDataTags = function(project, query, res, callback) {
 
     /**
      * Costruisco il documento per la sincronizzazione dei token presenti
@@ -486,18 +309,129 @@ Vocabulary.prepareDataTags = function(project, query, callback){
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
 
+    res.write("Fetch data");
+
+    var wait = new WaitController(res);
+    wait.start();
+
+    var ris = {};
+
+    datas.find({projectName:project},{text:1, tag:1, tokens:1}, function(err, docs){
+        wait.stop();
+        res.write("Group data<br>");
+        async.each(docs, function(doc, next){
+
+            //fix tag null
+            var tag = doc.tag;
+            if(doc["tag"]==null||doc.tag=="null"||doc.tag=="undefined") tag = null;
+
+            if(ris[tag]==null){
+                ris[tag] = {tag: tag, counter: {} };
+                res.write("Found " + tag + "<br>");
+            }
+
+            //prepare data text
+            var arrayText = Data.cleanText(doc.text).split(' ');
+
+            //calcolo il counter dai token presenti nel documento
+            _.each(doc.tokens, function(token){
+                var count = _.reduce(arrayText, function(memo, item){
+                    if( item.toLowerCase() == token )
+                        return memo + 1;
+                    else
+                        return memo;
+                }, 0);
+
+                if(ris[tag].counter[token] == null)
+                    ris[tag].counter[token] = {token:token, count:0};
+                ris[tag].counter[token].count++;
+            });
+
+            next(null);
+
+        },function(err){
+            var arrayRis = convertPrepareRis(ris);
+            arrayRis = limitConvertResult(arrayRis, 10);
+            callback(err, arrayRis);
+        });
+    });
+};
+
+Vocabulary.prepareUserTags = function(project, res, dict, datas, callback){
+
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+    var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
+
+    res.write("Fetch data");
+
+    var wait = new WaitController(res);
+    wait.start();
+
+    //fix dict
+    _.each(dict, function(tag){
+        tag = tag.tag;
+        dict[tag].counter = {};
+        _.each(dict[tag].tokens, function(token) {
+            dict[tag].counter[token] = {token:token, count:0};
+        });
+    });
+    delete dict["tokens"];
+
+    datas.find({projectName:project},{text:1, tag:1, tokens:1}, function(err, docs){
+        wait.stop();
+        res.write("Group data<br>");
+        async.each(docs, function(doc, next){
+
+            //fix tag null
+            var tag = doc.tag;
+            if(doc["tag"]==null||doc.tag=="null"||doc.tag=="undefined") tag = null;
+
+            if(dict[tag]==null){
+                dict[tag] = {tag: tag, counter: {} };
+                res.write("Found " + tag + "<br>");
+            }
+
+            //prepare data text
+            var arrayText = Data.cleanText(doc.text).split(' ');
+
+            //calcolo il counter prendendo il dizionario dell'utente
+            _.each(arrayText, function(word){
+                if(dict[tag]['counter'][word] != null)
+                    dict[tag]['counter'][word].count ++;
+            });
+
+            next(null);
+
+        }, function(err){
+            var arrayRis = convertPrepareRis(dict);
+            arrayRis = limitConvertResult(arrayRis, 10);
+            callback(err, arrayRis);
+        })
+
+    });
+};
+
+/// LEGGE DA USERTAGS IN VOCABULARY E CREA IL DOCSYNC
+Vocabulary.prepareUserTags__ = function(project, res, dict, datas, callback){
+
+    res.write("Perform mapReduce function<br>");
+
     var fn =
     {
         map: function () {
-            var arr = this.text.split(' ');
-            this.tokens.forEach( function(token){
-                var tag = this.tag ? this.tag : null;
-                var filter = arr.filter( function(item){
-                    return item.toLowerCase() == token.toLowerCase();
-                });
-                var len = filter.length;
-                if( len > 0 ) emit( { tag: tag, token:token }, len);
-            })
+
+            for(var tag in dict)
+            {
+                var tokens = dict[tag].tokens;
+                var arr = this.text.split(' ');
+                tokens.forEach( function(token){
+                    var filter = arr.filter( function(item){
+                        return item.toLowerCase() == token.toLowerCase();
+                    });
+                    var len = filter.length;
+                    if( len > 0 ) emit( { tag: tag, token:token }, len );
+                })
+            }
         },
         reduce: function(key, values) {
             var count = 0;
@@ -506,39 +440,25 @@ Vocabulary.prepareDataTags = function(project, query, callback){
             });
             return count;
         },
-        query: {
-            projectName: project
-        },
-        out: {
-            replace: 'word_count'
-        },
+        query: { projectName: project },
+        out: { replace: 'word_count' },
+        scope: { dict: dict },
         verbose: true
     };
 
     datas.mapReduce( fn , function (err, model, stats) {
-        console.log('map reduce took %d ms', stats.processtime);
-        model.aggregate([
-            {$project:{
-                _id:0,
-                key:"$_id",
-                count: "$value"
-            }},
-            {$sort:{count:-1}},
-            {$limit:50},
-            {$group:{
-                _id:"$key.tag",
-                counter: {$push: { token: "$key.token", count: "$count" }}
-            }},
-            {$project:{
-                _id:0,
-                tag:"$_id",
-                counter:1
-            }}
+        console.log('mapReduce took %d ms', stats.processtime);
+        res.write('mapReduce took ' + stats.processtime / 1000 + ' s<br>');
+        model.aggregate( [
+            {$project:{ _id:0, key:"$_id", count: "$value" }},
+            {$sort:{count:-1}},  {$limit:50},
+            {$group:{ _id:"$key.tag", counter: {$push: { token: "$key.token", count: "$count" }} }},
+            {$project:{ _id:0, counter:1, tag:"$_id" }}
         ], function(err, docs){
-            connection.close();
-            callback(null, docs);
-        });
-    } )
+            callback(docs);
+        })
+    });
+
 };
 
 

@@ -1,8 +1,18 @@
 "use strict";
 
 var Vocabulary = require("../model/Vocabulary");
+var _ = require("underscore");
 
 module.exports = function (router) {
+
+    router.get('/sync*', function (req, res, next) {
+        var project = req.session.project || req.query.project;
+        if(project==null){
+            res.redirect('/view/openproject');
+        }else{
+            next(null);
+        }
+    });
 
     /// GET COCABULARY
     router.get('/vocabulary', function (req, res) {
@@ -16,45 +26,78 @@ module.exports = function (router) {
     });
 
 
-    /// SINCRONIZZAZIONE
+    function writeResult(res, doc, start) {
 
-    router.get('/syncVocabulary', function (req, res) {
-        var project = req.session.project || req.query.project;
-        var user = req.session.user || req.query.user;
+        res.write('<hr>');
+        res.write('Result:<br>');
 
-        if( !user || !project )
-        {
-            res.json({error:1});
-            return;
-        }
-
-        Vocabulary.syncVocabulary(project, user, function(err, doc)
-        {
-            res.json(doc);
+        _.each(doc, function(item){
+            res.write('<b>Tag:</b>' + item.tag + '</br>');
+            res.write('<b>Counter:</b><br>');
+            res.write('<ui>');
+            _.each(item.counter, function(item){
+                res.write('<li>' + item.token + ":" + item.count + '</li>');
+            });
+            res.write('</ul>');
         });
 
-    });
+        res.write('Finish in ' + (new Date().getTime() - start.getTime()) / 1000 + " s");
+
+        res.end('</body>');
+
+    }
 
     router.get('/syncUserTags', function (req, res) {
+
+        res.setHeader('Connection', 'Transfer-Encoding');
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Transfer-Encoding', 'chunked');
+
+        var start = new Date();
+
+        res.write('<body style="color:dimgrey;font-family: monospace;font-size: 15px;text-align: left;position: static;">');
+
+        res.write('##################################<br>');
+        res.write('###### Sync User Tags start ######<br>');
+        res.write('##################################<br>');
+
         var project = req.session.project || req.query.project;
-        Vocabulary.syncUserTags(project, function(err, doc){
-            res.json(doc);
+
+        Vocabulary.syncUserTags(project, res, function(err, doc){
+            //res.json(doc);
+            writeResult(res, doc, start);
+            var diff = new Date().getTime() - start.getTime();
+            res.end("Process complete in " + diff / 1000 + " sec." );
         });
-    });
+
+    } );
 
     router.get('/syncDataTags', function (req, res) {
 
-        console.log("CALL: /syncDataTags");
+        res.setHeader('Connection', 'Transfer-Encoding');
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Transfer-Encoding', 'chunked');
+
+        var start = new Date();
+
+        res.write('<body style="color:dimgrey;font-family: monospace;font-size: 15px;text-align: left;position: static;">');
+
+        res.write('##################################<br>');
+        res.write('###### Sync Data tags start ######<br>');
+        res.write('##################################<br>');
 
         var project = req.session.project || req.query.project;
 
-        Vocabulary.syncDataTags( project, {}, function(err, docs)
-        {
-            res.json(docs);
-        });
-
+        Vocabulary.syncDataTags(
+            project,
+            {},
+            res,
+            function(err, doc) {
+                //res.json(docs);
+                writeResult(res, doc, start);
+            }
+        );
     });
-
 
     /// GET TAGS
 

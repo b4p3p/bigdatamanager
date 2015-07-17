@@ -75,8 +75,10 @@ module.exports = function (app) {
                 loop(res)
             }
             else
+            {
                 res.end("fine");
-
+                //res.end("<p>");
+            }
         },400);
     }
 
@@ -86,6 +88,7 @@ module.exports = function (app) {
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.setHeader('Transfer-Encoding', 'chunked');
         cont = 0;
+        //res.write("<p>");
         loop(res);
     });
 

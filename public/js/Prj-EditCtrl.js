@@ -2,8 +2,7 @@
 
 var PrjEditFormatterTag = function(){
 
-    function addElement(value, row, index, suffix, event, isDelete)
-    {
+    function addElement(value, row, index, suffix, event, isDelete) {
         var $div = $("<div></div>");
         var $a = $("<a></a>").addClass( suffix + index );
         var icon = isDelete ? "glyphicon-remove" : "glyphicon-pencil";
@@ -160,9 +159,17 @@ var PrjEditFormCtrl = {
 
 };
 
-var PrjEditCtrl = {
+var PrjEditCtrl = function()
+{
+    this.intervalScroll = null;
+    this.$btnSyncUserTags = $("#synUserTag");
+    this.$btnSyncDataTags = $("#synDataTag");
+    this.$btnOverrideDataTokens = $("#overrideDataTokens");
 
-    showInsertTag: function () {
+    this.$terminal = $("#terminal");
+    this.$tableTag = $('#tagsTable');
+
+    this.showInsertTag = function () {
 
         var str;
         $.ajax({
@@ -218,155 +225,149 @@ var PrjEditCtrl = {
             }
         });
 
-    },
+    };
 
-    setTableTag: function() {
-        $('#tagsTable').bootstrapTable('destroy');
-        $('#tagsTable').bootstrapTable({
-            columns: [
+    this.setTableTag = function() {
+        this.$tableTag.bootstrapTable('destroy');
+        this.$tableTag.bootstrapTable({
+            columns: [{
+
+                field: 'tag',
+                title: 'Tag',
+                //align: 'center',
+                //switchable: false,
+                sortable: true,
+                formatter: operateFormatterTag,
+                events:
                 {
-                    field: 'tag',
-                    title: 'Tag',
-                    //align: 'center',
-                    //switchable: false,
-                    sortable: true,
-                    formatter: operateFormatterTag,
-                    events:
-                    {
-                        'click .editT': function (e, value, row, index) {
-                            console.log(JSON.stringify(row), index);
+                    'click .editT': function (e, value, row, index) {
+                        console.log(JSON.stringify(row), index);
 
-                            bootbox.prompt({
-                                title: "Edit tag: " + JSON.stringify(row.tag),
-                                value: row.tag,
-                                callback: function (result) {
-                                    if (result === null) {
-                                        console.log("Prompt edit tag dismissed");
-                                    } else {
-                                        console.log("New tag: " + result);
-                                        var data = {
-                                            newTag: result,
-                                            oldTag: row.tag
-                                        };
-                                        $.ajax({
-                                            url: '/vocabulary/tag',
-                                            contentType: "application/json; charset=utf-8",
-                                            type: 'move',
-                                            async: true,
-                                            data: JSON.stringify(data),
-                                            dataType: "json",
-                                            success: function(html) {
-                                                DatabaseCtrl.loadTags();
-                                            },
-                                            error: function(xhr, status, error){
-                                                alert("Error: " + error);
-                                            }
-                                        });
-                                    }
+                        bootbox.prompt({
+                            title: "Edit tag: " + JSON.stringify(row.tag),
+                            value: row.tag,
+                            callback: function (result) {
+                                if (result === null) {
+                                    console.log("Prompt edit tag dismissed");
+                                } else {
+                                    console.log("New tag: " + result);
+                                    var data = {
+                                        newTag: result,
+                                        oldTag: row.tag
+                                    };
+                                    $.ajax({
+                                        url: '/vocabulary/tag',
+                                        contentType: "application/json; charset=utf-8",
+                                        type: 'move',
+                                        async: true,
+                                        data: JSON.stringify(data),
+                                        dataType: "json",
+                                        success: function(html) {
+                                            DatabaseCtrl.loadTags();
+                                        },
+                                        error: function(xhr, status, error){
+                                            alert("Error: " + error);
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+                }
+            },
+            {
+                field: 'words',
+                title: 'Vocabulary',
+                formatter: operateFormatterVocabulary,
+                events:
+                {
+                    'click .editV': function (e, value, row, index) {
+                        console.log(row, index);
+
+                        bootbox.prompt({
+                            title: "Edit vocabulary of tag: " + JSON.stringify(row.tag),
+                            value: row.words,
+                            callback: function (result) {
+                                if (result === null) {
+                                    console.log("Prompt edit vocabulary dismissed");
+                                } else {
+                                    console.log("New words: " + result);
+                                    var data = {
+                                        tag: row.tag,
+                                        words: result
+                                    };
+                                    $.ajax({
+                                        url: '/vocabulary/words',
+                                        contentType: "application/json; charset=utf-8",
+                                        type: 'PUT',
+                                        async: false,
+                                        data: JSON.stringify(data),
+                                        dataType: "json",
+                                        success: function(html) {
+                                            DatabaseCtrl.loadTags();
+                                        },
+                                        error: function(xhr, status, error){
+                                            alert("Error: " + error);
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+                }
+            },
+            {
+                field: 'operate',
+                title: 'Delete tag',
+                align: 'center',
+                formatter: operateFormatterDelete,
+                events: {
+                    'click .remove': function (e, value, row, index) {
+                        console.log(row, index);
+
+                        bootbox.confirm("<h4>Are you sure to delete tag: "
+                            + JSON.stringify(row.tag)
+                            + "?</h4>",
+                            function (result) {
+                                if (result) {
+                                    console.log("User confirmed delete dialog");
+                                    //var data = {
+                                    //    type: "tag",
+                                    //    data: {
+                                    //        tag: row.tag
+                                    //    }
+                                    //};
+                                    $.ajax({
+                                        url: '/vocabulary/tag',
+                                        contentType: "application/json; charset=utf-8",
+                                        type: 'DELETE',
+                                        async: false,
+                                        data: JSON.stringify({tag:row.tag}),
+                                        dataType: "json",
+                                        success: function(html) {
+                                            DatabaseCtrl.loadTags();
+                                        },
+                                        error: function(xhr, status, error){
+                                            alert("Error: " + error);
+                                        }
+                                    });
+                                } else {
+                                    console.log("User declined delete dialog");
                                 }
                             });
-                        }
                     }
-                },
-                {
-                    field: 'words',
-                    title: 'Vocabulary',
-                    formatter: operateFormatterVocabulary,
-                    events:
-                    {
-                        'click .editV': function (e, value, row, index) {
-                            console.log(row, index);
-
-                            bootbox.prompt({
-                                title: "Edit vocabulary of tag: " + JSON.stringify(row.tag),
-                                value: row.words,
-                                callback: function (result) {
-                                    if (result === null) {
-                                        console.log("Prompt edit vocabulary dismissed");
-                                    } else {
-                                        console.log("New words: " + result);
-                                        var data = {
-                                            tag: row.tag,
-                                            words: result
-                                        };
-                                        $.ajax({
-                                            url: '/vocabulary/words',
-                                            contentType: "application/json; charset=utf-8",
-                                            type: 'PUT',
-                                            async: false,
-                                            data: JSON.stringify(data),
-                                            dataType: "json",
-                                            success: function(html) {
-                                                DatabaseCtrl.loadTags();
-                                            },
-                                            error: function(xhr, status, error){
-                                                alert("Error: " + error);
-                                            }
-                                        });
-                                    }
-                                }
-                            });
-                        }
-                    }
-                },
-                {
-                    field: 'operate',
-                    title: 'Delete tag',
-                    align: 'center',
-                    formatter: operateFormatterDelete,
-                    events: {
-                        'click .remove': function (e, value, row, index) {
-                            console.log(row, index);
-
-                            bootbox.confirm("<h4>Are you sure to delete tag: "
-                                + JSON.stringify(row.tag)
-                                + "?</h4>",
-                                function (result) {
-                                    if (result) {
-                                        console.log("User confirmed delete dialog");
-                                        //var data = {
-                                        //    type: "tag",
-                                        //    data: {
-                                        //        tag: row.tag
-                                        //    }
-                                        //};
-                                        $.ajax({
-                                            url: '/vocabulary/tag',
-                                            contentType: "application/json; charset=utf-8",
-                                            type: 'DELETE',
-                                            async: false,
-                                            data: JSON.stringify({tag:row.tag}),
-                                            dataType: "json",
-                                            success: function(html) {
-                                                DatabaseCtrl.loadTags();
-                                            },
-                                            error: function(xhr, status, error){
-                                                alert("Error: " + error);
-                                            }
-                                        });
-                                    } else {
-                                        console.log("User declined delete dialog");
-                                    }
-                                });
-                        }
-                    }
-                }],
+                }
+            }],
             data: DatabaseCtrl.tags,
             search: true,
             striped: true,
             dataType: 'json',
             smartDisplay: true
-            //showRefresh: true,
-            //minimumCountColumns: 1,
-            //showColumns: true,
-            //pagination: true,
-            //clickToSelect: true
         });
 
-    },
-    
-    loadTags: function () {
+    };
 
+    this.loadTags = function () {
         jQuery.ajax({
             type: "GET",
             url: '/vocabulary/vocabulary',
@@ -382,20 +383,54 @@ var PrjEditCtrl = {
                 alert('GetTagsVocabulary fail');
             }
         });
-    }
-};
+    };
 
-var PrjEditEventCtrl = function() {
+    this.setIntervalScroll = function () {
 
-    this.$btnSyncUserTags = $("#synUserTag");
-    this.$terminal = $("#terminal");
+        clearInterval(prjEditCtrl.intervalScroll);
 
-    this.$btnSyncUserTags.click( function(){
-        prjEECtrl.$terminal.attr("src", "/test" );
-        setInterval(function(){
-            prjEECtrl.$terminal.scrollTop( prjEECtrl.$terminal.contents().height() + 100);
+        prjEditCtrl.intervalScroll = setInterval(function() {
+
+            prjEditCtrl.$terminal.contents().scrollTop(
+                prjEditCtrl.$terminal.contents().height() + 200
+            );
+
+            prjEditCtrl.$terminal.contents().find("body")
+                .css('color','#fff')
+                .css('font-family','monospace')
+                .css('font-size','15px')
+                .css('text-align','left')
+                .css('position','static')
+                .css('word-wrap','break-word');
+
         } , 500);
+
+    };
+
+    //click user tag sync
+    this.$btnSyncUserTags.click( function(){
+        prjEditCtrl.$terminal.attr("src", "/vocabulary/syncUserTags" );
+        prjEditCtrl.setIntervalScroll();
+    });
+
+    //click data tag sync
+    this.$btnSyncDataTags.click( function(){
+        prjEditCtrl.$terminal.attr("src", "/vocabulary/syncDataTags" );
+        prjEditCtrl.setIntervalScroll();
+    });
+
+    //override tokens in data
+    this.$btnOverrideDataTokens.click( function(){
+        prjEditCtrl.$terminal.attr("src", "/datas/overrideTokensData" );
+        prjEditCtrl.setIntervalScroll();
+    });
+
+    //cancello l'evento dello scroll
+    this.$terminal.on("load", function() {
+        prjEditCtrl.$terminal.contents().scrollTop( prjEditCtrl.$terminal.contents().height() + 200);
+        clearInterval(prjEditCtrl.intervalScroll);
     });
 
 };
-var prjEECtrl = new PrjEditEventCtrl();
+var prjEditCtrl = new PrjEditCtrl();
+
