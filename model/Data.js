@@ -552,7 +552,7 @@ Data.overrideTokensData = function (project, res, callback) {
             var terms = _.filter( tm.Terms(corpus).vocabulary, function(item){
 
                 //return true;
-                if( /^rt$/  .test(item) ) return false;
+                //if( /^rt$/  .test(item) ) return false;
                 if( /^http/ .test(item) ) return false;
                 if( /^@/    .test(item) ) return false;
                 if( /^co\//    .test(item) ) return false;
