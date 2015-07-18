@@ -56,10 +56,10 @@ DataCtrl.FIELD = {
         URL: "/vocabulary/wordcount",
         LASTUPDATE: "wordcount-lastupdate"
     },
-    NATIONS: {
+    DATANATIONS: {
         KEY: "nations",
-        URL: "/regions/nations",
-        LASTUPDATE: "nations-lastupdate"
+        URL: "/datas/nations",
+        LASTUPDATE: "datanations-lastupdate"
     },
     DATAFILTER: {
         KEY: "data",

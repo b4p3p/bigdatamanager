@@ -235,26 +235,18 @@ Regions.importFromFile = function (fileNames, callback) {
  */
 Regions.getNations = function (project, callback) {
 
-    console.log("CALL: Regions.getLightNations");
-
     var connection = mongoose.createConnection('mongodb://localhost/oim');
-    var datas = connection.model("datas", SchemaData);
-
-    datas.aggregate([
-        {$match: { projectName: project }},
-        {$group:{
-            _id : "$nation",
-            sum: {$sum:1}
-        }},
-        {$project:{
-            _id : 0,
-            nation: { $ifNull: [ "$_id", "undefined" ] },
-            sum: 1
-        }}
-    ], function(err, doc){
-        callback(err, doc)
+    var regions = connection.model("regions", Regions.SCHEMA);
+    regions.aggregate([
+        {$group:{ _id:{nation:"$properties.NAME_0",
+                       region: "$properties.NAME_1"} }},
+        {$group:{ _id:"$_id.nation", count:{$sum:1} }},
+        {$project:{ _id:0, nation:"$_id", count:1 }},
+        {$sort:{nation:1}}
+    ], function(err, result){
+        connection.close();
+        callback(err, result);
     });
-
 };
 
 /**

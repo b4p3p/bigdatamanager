@@ -559,6 +559,7 @@ Data.overrideTokensData = function (project, res, callback) {
                 if( /^&quot/    .test(item) ) return false;
                 if( /^\/\//    .test(item) ) return false;
                 if( /^.$/    .test(item) ) return false;
+                if( item.length <=2 ) return false;
 
                 return true;
             });
@@ -730,5 +731,33 @@ Data.cleanText = function(text){
     text = text.replace(/’/g, ' ');
     return text;
 };
+
+Data.getNations = function (project, callback) {
+
+    console.log("CALL: Data.getNations");
+
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+    var datas = connection.model("datas", Data.SCHEMA);
+
+    datas.aggregate([
+        {$match: {projectName: project}},
+        {
+            $group: {
+                _id: "$nation",
+                sum: {$sum: 1}
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                nation: {$ifNull: ["$_id", "undefined"]},
+                sum: 1
+            }
+        }
+    ], function (err, doc) {
+        callback(err, doc)
+    });
+
+}
 
 module.exports = Data;

@@ -81,5 +81,13 @@ module.exports = function (router, app) {
 
     });
 
+    router.get('/nations', function (req, res)
+    {
+        var project = req.session.project || req.query.project;
+        Data.getNations( project, function(err, data) {
+            res.json(data);
+        });
+    });
+
 };
 

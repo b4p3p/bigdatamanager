@@ -38,8 +38,8 @@
 
     .button{
         /*border-radius: 50px;*/
-        float: right;
         /*margin-top: 30px;*/
+        float: right;
         width: 108px;
     }
 
@@ -89,17 +89,34 @@
         margin-bottom: 50px;
     }
 
-    /*h3{*/
-        /*margin-left: -20px;*/
-    /*}*/
+    h3{
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
 
-    /*.col_sx{*/
-    /*min-width: 100px;*/
-    /*}*/
+    .inline {
+        display: inline-block;
+    }
+
+    #divbtnsync{
+        /*position: relative;*/
+        vertical-align: top;
+    }
+
+    .hcenter{
+        position: relative;
+        width: 50%;
+        margin: 0 25%;
+    }
 
 </style>
 
 <link href="/public/css/terminal.css" rel="stylesheet">
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
+<script>
+    google.load("visualization", "1.1", {packages:[ 'corechart' ] });
+</script>
 
 <!--<script src="/node_modules/socketio-file-upload/client.js"></script>-->
 <!--<script src="/bower_components/socket.io-client/socket.io.js"></script>-->
@@ -113,6 +130,18 @@
 <% } else { %>
 
 <h3>Data</h3>
+
+<div>
+    <!--Syncronize with exists region-->
+    <div id="piechart" style="width: 400px; height: 200px;" class="inline"></div>
+    <div class="inline" id="divbtnsync">
+        <label style="text-align: center;display: block">Synchronize all regions with stored data</label>
+        <div>
+            <button class="btn btn-danger hcenter" type="submit" id="btnsyncproject"
+                    style="width: 108px;">Sync</button>
+        </div>
+    </div>
+</div>
 
 <h3>Edit project</h3>
 
@@ -319,15 +348,6 @@
 
     ProjectCtrl.getProject( ProjectCtrl.loadEditForm );
     ProjectCtrl.showExample();
-
-    $("#upload_input").fileinput( {
-        previewFileType: "json",
-        allowedFileExtensions: ["json"]
-    });
-
-    $('#cmbType').on('change', function () {
-        ProjectCtrl.showExample();
-    });
 
 </script>
 

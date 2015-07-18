@@ -161,6 +161,8 @@ var PrjEditFormCtrl = {
 
 var PrjEditCtrl = function()
 {
+    var _self = this;
+
     this.intervalScroll = null;
     this.$btnSyncUserTags = $("#synUserTag");
     this.$btnSyncDataTags = $("#synDataTag");
@@ -168,6 +170,14 @@ var PrjEditCtrl = function()
 
     this.$terminal = $("#terminal");
     this.$tableTag = $('#tagsTable');
+
+    this.optionsPie = {
+        title: null,
+        pieSliceText: 'label',
+        backgroundColor: 'transparent',
+        chartArea: {left:0,top:0,bottom: 0, width:"100%",height:"100%"},
+        legend:{position:'right', alignment:'start'}
+    };
 
     this.showInsertTag = function () {
 
@@ -429,6 +439,40 @@ var PrjEditCtrl = function()
     this.$terminal.on("load", function() {
         prjEditCtrl.$terminal.contents().scrollTop( prjEditCtrl.$terminal.contents().height() + 200);
         clearInterval(prjEditCtrl.intervalScroll);
+    });
+
+    //evento della combo
+    $('#cmbType').on('change', function () {
+        ProjectCtrl.showExample();
+    });
+
+    //inizializzo il file input
+    $("#upload_input").fileinput( {
+        previewFileType: "json",
+        allowedFileExtensions: ["json"]
+    });
+
+    DataCtrl.getFromUrl(DataCtrl.FIELD.DATANATIONS, null, function(doc){
+
+        var data = [];
+        data[0] = ['Nation', 'Count data'];
+        _.each(doc, function(row){
+            data.push([row.nation, row.sum]);
+        });
+        var dataTable = google.visualization.arrayToDataTable(data);
+
+        //var dataTable = google.visualization.arrayToDataTable([
+        //    ['Task', 'Hours per Day'],
+        //    ['Work',     11],
+        //    ['Eat',      2],
+        //    ['Commute',  2],
+        //    ['Watch TV', 2],
+        //    ['Sleep',    7]
+        //]);
+
+        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+
+        chart.draw(dataTable, _self.optionsPie);
     });
 
 };
