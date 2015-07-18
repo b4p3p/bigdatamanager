@@ -5,7 +5,7 @@ var bootstrapTableFilter = new BootstrapTableFilter('showdatafilter');
 var formatterData = {
     tokens: function(value, row, index){
         if(value)
-            return value.toString();
+            return value.join(", ");
     },
 
     date: function(value, row, index){
@@ -26,7 +26,7 @@ ShowDataCtrl.$dataTable = null;
 
 ShowDataCtrl.$cmbTags = null;
 ShowDataCtrl.$cmbUsers = null;
-ShowDataCtrl.$cmbTerms = null;
+ShowDataCtrl.$cmbTokens = null;
 ShowDataCtrl.$cmbNations = null;
 ShowDataCtrl.$cmbRegions = null;
 ShowDataCtrl.page = 1;
@@ -37,7 +37,6 @@ ShowDataCtrl.selectedTags = null;
 ShowDataCtrl.selectedTokens = null;
 ShowDataCtrl.selectedUsers = null;
 
-ShowDataCtrl.data = null;
 ShowDataCtrl.count = null;
 ShowDataCtrl.stat = null;
 ShowDataCtrl.users = null;
@@ -51,14 +50,6 @@ ShowDataCtrl.getData = function (callback)
     console.log("CALL: getData");
 
     async.parallel({
-            data: function(next)
-            {
-                DataCtrl.getField( function(doc){
-                    ShowDataCtrl.data = doc;
-                    next(null, doc);
-                }, DataCtrl.FIELD.DATA);
-            },
-
             stat: function(next)
             {
                 DataCtrl.getField( function(doc){
@@ -75,15 +66,15 @@ ShowDataCtrl.getData = function (callback)
                     ShowDataCtrl.users = doc;
                     next(null, doc);
                 }, DataCtrl.FIELD.USERS );
-            //},
-            //
-            //wordcount: function (next)
-            //{
-            //    DataCtrl.getField( function(doc)
-            //    {
-            //        ShowmapCtrl.tokens = doc;
-            //        next(null, doc);
-            //    }, DataCtrl.FIELD.WORDCOUNT);
+            },
+
+            wordcount: function (next)
+            {
+                DataCtrl.getField( function(doc)
+                {
+                    ShowDataCtrl.tokens = doc;
+                    next(null, doc);
+                }, DataCtrl.FIELD.WORDCOUNT);
             }},
 
         function(err, results) {
@@ -106,7 +97,7 @@ ShowDataCtrl.initGui = function ()
     ShowDataCtrl.initComboRegions();
     ShowDataCtrl.initComboTags();
     ShowDataCtrl.initComboUsers();
-    //ShowDataCtrl.initComboTokens(); //TODO tokens
+    ShowDataCtrl.initComboTokens();
 
     bootstrapTableFilter.showFilter();
     $('.selectpicker').selectpicker('refresh');
@@ -186,12 +177,12 @@ ShowDataCtrl.initComboTokens = function()
 {
     console.log("CALL: initComboTokens");
 
-    _.each(ShowDataCtrl.tokens, function (obj, key) {
+    _.each(ShowDataCtrl.tokens.syncDataTags, function (obj, key) {
         var terms = [];
         var count = [];
 
         _.each(obj, function (row, key) {
-            terms.push(row.word);
+            terms.push(row.token);
             count.push(row.count);
         });
 
@@ -271,13 +262,13 @@ ShowDataCtrl.deselectCombo = function ()
     ShowDataCtrl.refreshGui();
 };
 
-var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $cmbUsers, $cmbTerms, date, skip, limit)
+var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $cmbUsers, $cmbTokens, date, skip, limit)
 {
     this.$cmbNations = $cmbNations;
     this.$cmbRegions = $cmbRegions;
     this.$cmbTags = $cmbTags;
     this.$cmbUsers = $cmbUsers;
-    this.$cmbTerms = $cmbTerms;
+    this.$cmbTokens = $cmbTokens;
     this.date = date;
     this.skip = skip;
     this.limit = limit;
@@ -291,7 +282,7 @@ var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $cmbUsers, $cmb
         var nations = DomUtil.getSelectedCombo(this.$cmbNations);
         var tags = DomUtil.getSelectedCombo(this.$cmbTags);
         var users = DomUtil.getSelectedCombo(this.$cmbUsers);
-        var terms = DomUtil.getSelectedComboGroup(this.$cmbTerms);
+        var tokens = DomUtil.getSelectedCombo(this.$cmbTokens);
 
         if(nations.length > 0)
             arrayQueryString.push("nations=" + nations.join(","));
@@ -301,6 +292,9 @@ var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $cmbUsers, $cmb
 
         if(tags.length > 0)
             arrayQueryString.push("tags=" + tags.join(","));
+
+        if(tokens.length > 0)
+            arrayQueryString.push("tokens=" + tokens.join(","));
 
         if(users.length > 0)
             arrayQueryString.push("users=" + users.join(","));
@@ -327,7 +321,7 @@ var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $cmbUsers, $cmb
                 regions: regions,
                 tags: tags,
                 users: users,
-                terms: terms,
+                tokens: tokens,
                 interval: this.date
             }
         };
