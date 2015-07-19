@@ -4,55 +4,34 @@
     <% include ../partials/header.ejs %>
     <% include ../partials/bootstrap.ejs %>
     <link href="/public/css/login.css" rel="stylesheet" type="text/css">
-    <script src="/public/lib/bootstrap-validator/validator.js"></script>
-
-    <style>
-
-    </style>
 
 </head>
 <body>
 
-<div class="wrapper">
-
-    <div class="container container-custom">
-
-        <h1 class="title">Open data manager</h1>
-        <img id="imglogin" src="/public/img/login.png" >
-
-        <form action="/login" method="post">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" class="form-control" name="username" id="username"
-                       placeholder="Enter username" required>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-6 col-md-4 col-md-offset-4">
+            <div class="account-wall">
+                <img class="profile-img" src="/public/img/BigDataManager-logo2.png"
+                     alt="">
+                <form class="form-signin" action="/login" method="post">
+                    <input id="username" name="username" type="text" class="form-control" placeholder="Username" required autofocus>
+                    <input id="password" name="password" type="password" class="form-control" placeholder="Password" required>
+                    <% if (status.status > 0) { %>
+                    <div class="alert alert-danger" role="alert">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="sr-only">Error:</span>
+                    <%= status.message %>
+                    </div>
+                    <% } %>
+                    <button class="btn btn-lg btn-primary btn-block" type="submit">
+                        Sign in</button>
+                    <a href="#" onclick="guestClick()" class="pull-right need-help">Guest account</a><span class="clearfix"></span>
+                </form>
             </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input name="password" type="password" class="form-control" id="password"
-                       placeholder="Password" required>
-            </div>
-
-            <% if (status.status > 0) { %>
-            <div class="alert alert-danger" role="alert">
-                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                <span class="sr-only">Error:</span>
-                <%= status.message %>
-            </div>
-            <% } %>
-
-            <div id="container-header">
-                <button type="submit" class="btn btn-success" >Log In</button>
-                <a href="/view/register">Need an account? Sign up free.</a>
-            </div>
-
-            <hr class="separator">
-
-        </form>
-
-        <button class="btn btn-success btn-block" onclick="guestClick()" >Guest account</button>
-
+            <a href="/view/register" class="text-center new-account">Create an account </a>
+        </div>
     </div>
-
 </div>
 
 </body>

@@ -3,48 +3,35 @@
 <head>
     <% include ../partials/jquery.ejs %>
     <% include ../partials/bootstrap.ejs %>
-    <link href="/public/css/signup.css" rel="stylesheet" type="text/css">
-    <script src="/public/lib/bootstrap-validator/validator.js"></script>
+    <link href="/public/css/login.css" rel="stylesheet" type="text/css">
+
 </head>
 <body>
+
 <div class="container">
-    <img id="imglogin" src="/public/img/register.png" >
-    <form action="/users/adduser" method="post" autocomplete="off"
-          data-toggle="validator" role="form">
-        <div class="form-group">
-            <label for="name">Name</label>
-            <input autocomplete="off" type="text" class="form-control"
-                   name="firstName" id="name" placeholder="Enter name" required>
+    <div class="row">
+        <div class="col-sm-6 col-md-4 col-md-offset-4">
+            <div class="account-wall">
+                <img class="profile-img" src="/public/img/BigDataManager-logo2.png"
+                     alt="">
+                <form class="form-signin" action="/users/adduser" method="post" autocomplete="off">
+                    <input name="firstName" id="name" type="text" class="form-control" placeholder="First Name" required autofocus>
+                    <input name="lastName" id="lastname" type="text" class="form-control" placeholder="Last Name" required autofocus>
+                    <input id="username" name="username" type="text" class="form-control" placeholder="Username" required autofocus>
+                    <input id="password" name="password" type="password" class="form-control" placeholder="Password" required>
+                    <% if ( status && status.error > 0 ) { %>
+                    <div class="alert alert-danger" role="alert">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="sr-only">Error:</span>
+                    <%= status.message %>
+                    </div>
+                    <% } %>
+                    <button class="btn btn-lg btn-primary btn-block" type="submit">
+                        Register</button>
+                </form>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="lastname">Last name</label>
-            <input autocomplete="off" type="text" class="form-control"
-                   name="lastName" id="lastname" placeholder="Last name" required>
-        </div>
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input autocomplete="off" type="text" class="form-control"
-                   name="username" id="username" placeholder="Enter name" required>
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input name="password" type="password" class="form-control"
-                   id="password" placeholder="Password" required>
-        </div>
-
-        <% if (status && status.error > 0 ) { %>
-        <div class="alert alert-danger" role="alert">
-            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-            <span class="sr-only">Error:</span>
-            <%= status.message %>
-        </div>
-         <% } %>
-
-        <div id="container-header">
-            <button type="submit" class="btn btn-success btn-block" >Register</button>
-        </div>
-
-    </form>
+    </div>
 
 </div>
 </body>
