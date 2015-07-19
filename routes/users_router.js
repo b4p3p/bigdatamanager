@@ -41,7 +41,7 @@ module.exports = function (router, app) {
                 res.render('../views/pages/register.ejs', arg );
             }
             else
-                res.redirect('/views/login');
+                res.redirect('/views/pages/login.ejs');
         })
 
     });

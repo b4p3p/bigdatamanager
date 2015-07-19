@@ -76,7 +76,8 @@ ConstantsRouter.PAGE =
     STAT_MAP: "stat-map",
     STAT_COMPARE: "stat-compare",
     STAT_TIMELINE: "stat-timeline",
-    STAT_TAG: "stat-tag"
+    STAT_TAG: "stat-tag",
+    STAT_USER: "stat-user"
 };
 
 /**

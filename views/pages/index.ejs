@@ -21,7 +21,6 @@
 
     <script src="/public/js/DataCtrl.js"></script>
     <script src="/public/js/JQueryUtil.js"></script>
-    <script src="/public/js/DOMUtil.js"></script>
 
     <style>
         .container
@@ -98,16 +97,16 @@
             <img src="/public/img/uni-ba.png" class="img-responsive imageheader onlydesktop" alt="Uniba" >
 
             <% if(isGuest){ %>
-                <img src="/public/img/guest.png" class="img-responsive imageheader img-user" alt="User" >
+            <img src="/public/img/guest.png" class="img-responsive imageheader img-user" alt="User" >
             <%} else {%>
-                <img src="/public/img/icon-user.png" class="img-responsive imageheader img-user" alt="User" >
+            <img src="/public/img/icon-user.png" class="img-responsive imageheader img-user" alt="User" >
             <%}%>
 
             <div class="col-xs-1">
                 <% if(isGuest){ %>
-                    <h4 class="content-header">guest</h4>
+                <h4 class="content-header">guest</h4>
                 <%} else {%>
-                    <h4 class="content-header"><%= user %></h4>
+                <h4 class="content-header"><%= user %></h4>
                 <%}%>
             </div>
 
@@ -214,6 +213,9 @@
                         <li><a href="/view/stat/showtag">
                                 <img src="/public/img/icon-cloud.png" class="subMenu-ico"/>
                                 Word cloud</a></li>
+                        <li><a href="/view/stat/showusers">
+                                <img src="/public/img/icon-users.png" class="subMenu-ico"/>
+                                User statistics</a></li>
                     </ul>
                 </li>
 
@@ -225,36 +227,38 @@
 
             <!-- HOME -->
             <% if(page == "home"){ %>
-                <% include ../partials/home.ejs %>
+            <% include ../partials/home.ejs %>
 
             <% }else if (page == "profile") { %>
-                <% include ../partials/profile.ejs %>
+            <% include ../partials/profile.ejs %>
 
             <!-- DATABASE -->
             <% }else if (page == "db-users") { %>
-                <% include ../partials/db-users.ejs%>
+            <% include ../partials/db-users.ejs%>
             <% }else if (page == "db-nations") { %>
-                <% include ../partials/db-nations.ejs%>
+            <% include ../partials/db-nations.ejs%>
 
             <!-- STAT -->
             <% }else if (page == "stat-data") { %>
-                <% include ../partials/stat-showdata.ejs %>
+            <% include ../partials/stat-showdata.ejs %>
             <% }else if (page == "stat-map") { %>
-                <% include ../partials/stat-map.ejs %>
+            <% include ../partials/stat-map.ejs %>
             <% }else if (page == "stat-compare") { %>
-                <% include ../partials/stat-compare.ejs %>
+            <% include ../partials/stat-compare.ejs %>
             <% }else if (page == "stat-timeline") { %>
-                <% include ../partials/stat-timeline.ejs %>
+            <% include ../partials/stat-timeline.ejs %>
             <% }else if (page == "stat-tag") { %>
-                <% include ../partials/stat-tags.ejs %>
+            <% include ../partials/stat-tags.ejs %>
+            <% }else if (page == "stat-user") { %>
+            <% include ../partials/stat-users.ejs %>
 
             <!-- PROJECT -->
             <% }else if (page == "new-project") { %>
-                <% include ../partials/prj-new.ejs %>
+            <% include ../partials/prj-new.ejs %>
             <% }else if (page == "open-project") { %>
-                <% include ../partials/prj-open.ejs %>
+            <% include ../partials/prj-open.ejs %>
             <% }else if (page == "edit-project") { %>
-                <% include ../partials/prj-edit.ejs %>
+            <% include ../partials/prj-edit.ejs %>
             <% } %>
 
         </div>

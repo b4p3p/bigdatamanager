@@ -111,6 +111,12 @@ module.exports = function (router) {
         res.render('../views/pages/index.ejs', arg );
     });
 
+    router.get('/stat/showusers', function (req, res)
+    {
+        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.STAT_USER);
+        res.render('../views/pages/index.ejs', arg );
+    });
+
 };
 
 //
