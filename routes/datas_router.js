@@ -59,6 +59,17 @@ module.exports = function (router, app) {
 
     });
 
+    router.get('/userdata', function (req, res)
+    {
+        var project = req.session.project || req.query.project;
+        var query = req.query;
+
+        Data.getUserData( project , query, function(err, docs){
+            res.json(docs);
+        });
+
+    });
+
     router.get('/overrideTokensData', function (req, res) {
 
         res.setHeader('Connection', 'Transfer-Encoding');

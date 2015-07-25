@@ -215,7 +215,7 @@ Data.getDataFilter = function (projectName, query, callback)
         {
             var exec = datas.find({projectName: projectName});
 
-            exec = addWhereClause(exec, query);
+            exec = Util.addWhereClause(exec, query);
 
             exec.count(function(err, count){
                 next(null, count);
@@ -281,21 +281,6 @@ Data.getUsers = function(projectName, par, callback)
             sum: 1
         });
 
-    //.group({
-    //    _id:"$_id.u",
-    //    counter:{ $push:{
-    //        tag:"$_id.t",
-    //        subtotal:"$subtotal",
-    //        isGeo:"$isGeo"}
-    //    },
-    //    sum:{ $sum:"$subtotal"}})
-    //.project({
-    //    _id:0,
-    //    "user":"$_id",
-    //    counter:1,
-    //    sum: 1}
-
-
     // ordinamento di default
     if( !par.sort ){ par.sort = "sum"; par.order = "desc"; }
 
@@ -312,6 +297,34 @@ Data.getUsers = function(projectName, par, callback)
         connection.close();
         callback(err, docs);
     });
+};
+
+Data.getUserData = function( project , query, callback){
+
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+    var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
+
+    var users = [];
+    if(query.users != null) users = query.users.split(',');
+
+    var exec = datas.aggregate()
+        .match({projectName: project, user: {$in:users}})
+        .group({
+            _id:"$user",
+            data:{$push:{
+                text:"$text",
+                region:"$region",
+                nation:"$nation",
+                date:"$date",
+                tag:"$tag",
+                tokens:"$tokens"
+            }}
+        })
+        .project({data:1, _id:0, user:"$_id"})
+        .exec(function(err, result){
+            callback(err, result);
+            connection.close();
+        })
 };
 
 /**
