@@ -27,7 +27,10 @@ User.addUser = function(user, callback){
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var UserModel = connection.model("users", USER_SCHEMA);
     var u = new UserModel(user);
-    u.save( function(err, result){ callback(err); } );
+    u.save( function(err, result){
+        connection.close();
+        callback(err);
+    } );
 };
 
 User.getUser = function (username, callback)

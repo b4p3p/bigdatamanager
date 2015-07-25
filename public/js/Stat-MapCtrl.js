@@ -727,7 +727,7 @@ ShowmapCtrl.getData = function () {
                 next(null, doc);
             }, DataCtrl.FIELD.WORDCOUNT);
         }
-    }, function() {
+    }, function(err, result) {
         ShowmapCtrl.getDataMapAsync();
         formCtrl.load();
     });

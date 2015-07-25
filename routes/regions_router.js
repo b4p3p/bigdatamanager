@@ -8,7 +8,7 @@ var async = require('async');
 var requestJson = require('request-json');
 var urlencode = require('urlencode');
 
-module.exports = function (router, app) {
+module.exports = function (router, app, upload) {
 
     router.get('/regions', function (req, res)
     {
@@ -34,15 +34,9 @@ module.exports = function (router, app) {
         res.redirect('/view/db/nations')
     });
 
-    router.post("/putnation", function (req, res)
+    app.post("/regions/putnation", app.up_nations , function (req, res)
     {
-        if( !app.isUploadDone() )
-        {
-            console.log("UPLOADING....");
-            return;
-        }
-
-        var files = app.getUploadedFiles();
+        var files = req.files;
         var username = req.session.user;
         var project = req.session.project;
         var ris = {};
@@ -54,16 +48,17 @@ module.exports = function (router, app) {
             {
                 if (err == null)
                 {
-                    var Project = require("../model/Project");
-                    Project.sync( req.headers.host, project, function(err){
-                        res.json( {status:0, result:result } );
-                    })
+                    res.json( {status:0, result:result } );
+
+                    //var Project = require("../model/Project");
+                    //Project.sync( req.headers.host, project, function(err){
+                    //
+                    //})
                 }
                 else
                     res.json( {status:1, error:err.message } );
             }
         );
-
     });
 
     /**
@@ -78,4 +73,40 @@ module.exports = function (router, app) {
 
     });
 };
+
+
+
+//router.post("/putnation", function (req, res)
+//{
+//    if( !app.isUploadDone() )
+//    {
+//        console.log("UPLOADING....");
+//        return;
+//    }
+//
+//    var files = app.getUploadedFiles();
+//    var username = req.session.user;
+//    var project = req.session.project;
+//    var ris = {};
+//
+//    var Regions = require('../model/Regions');
+//
+//    Regions.importFromFile(files,
+//        function (err, result)
+//        {
+//            if (err == null)
+//            {
+//                res.json( {status:0, result:result } );
+//
+//                //var Project = require("../model/Project");
+//                //Project.sync( req.headers.host, project, function(err){
+//                //
+//                //})
+//            }
+//            else
+//                res.json( {status:1, error:err.message } );
+//        }
+//    );
+//
+//});
 

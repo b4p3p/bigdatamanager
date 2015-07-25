@@ -5,10 +5,11 @@ var url = 'mongodb://localhost:27017/oim';
 var MongoClient = require('mongodb').MongoClient;
 var async = require("async");
 var request = require("request");
-var Summary = require("../model/Summary");
-var Regions = require("../model/Regions");
-var Datas = require("../model/Data");
-var CrowdPulse = require("../model/CrowdPulse");
+
+var Summary =       require("../model/Summary");
+var Regions =       require("../model/Regions");
+var Datas =         require("../model/Data");
+var CrowdPulse =    require("../model/CrowdPulse");
 
 var Project = function (data) {
     this.data = data;
@@ -23,7 +24,7 @@ Project.SCHEMA = new mongoose.Schema({
     dateLastUpdate: {type: Date, default: Date.now()},
     description : {type : String, default:""} ,
     size : Number
-});
+}, {strict:false});
 
 Project.prototype.data = {};    //json
 
@@ -294,10 +295,14 @@ Project.sync = function(project, username, res, callback)
     console.log("CALL: Project.sync");
 
     var connection  = mongoose.createConnection('mongodb://localhost/oim');
-    var summaries   = connection.model( Summary.MODEL_NAME, Summary.SCHEMA);
-    var regions   = connection.model( Regions.MODEL_NAME, Regions.SCHEMA);
-    var datas   = connection.model( Datas.MODEL_NAME, Datas.SCHEMA);
-    var projects   = connection.model( Project.MODEL_NAME, Project.SCHEMA);
+
+    Datas = require("../model/Data");
+
+    var summaries   =   connection.model( Summary.MODEL_NAME, Summary.SCHEMA);
+    var regions   =     connection.model( Regions.MODEL_NAME, Regions.SCHEMA);
+    var datas   =       connection.model( Datas.MODEL_NAME, Datas.SCHEMA);
+    var projects   =    connection.model( Project.MODEL_NAME, Project.SCHEMA);
+
     var docSync = {};
 
     async.waterfall([

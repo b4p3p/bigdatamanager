@@ -30,13 +30,12 @@ module.exports = function (router, app) {
 
         Users.addUser(obj, function(err){
 
-            if(err)
-            {
-                var arg = {error: true};
+            if(err) {
+                var arg = null;
                 if(err.code == 11000)
-                    arg.message = "Username already exists";
+                    arg = ConstantsRouter.argError(err.code, "Username already exists")
                 else
-                    arg.message = err.message;
+                    arg = ConstantsRouter.argError(1, err.message);
 
                 res.render('../views/pages/register.ejs', arg );
             }

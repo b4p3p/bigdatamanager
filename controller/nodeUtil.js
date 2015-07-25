@@ -2,6 +2,8 @@ var Util = function () {};
 
 Util.addWhereClause = function(exec, query)
 {
+    if(query == null) return exec;
+
     if(query.hasOwnProperty("terms"))
     {
         var terms = query.terms.split(',');

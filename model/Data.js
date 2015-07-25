@@ -4,19 +4,12 @@ var async = require('async');
 var _ = require('underscore');
 var fs = require('fs');
 var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
 var converter = require('../controller/converterCtrl');
 var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://localhost:27017/oim';
 var tm = require("text-miner");
 var Util = require("../controller/nodeUtil");
-
-//var ERROR = function() {
-//    return {
-//        status: 0,
-//        message: ''
-//    };
-//};
+var Project = require("../model/Project");
 
 /**
  * Model data
@@ -34,27 +27,27 @@ Data.ResultFile = {
 
 Data.MODEL_NAME = "datas";
 
-Data.SCHEMA = new Schema(
-    {
-        projectName: {type: String, required: true},
-        id: {type: String, required: true},
-        date: Date,
-        latitude: Number,
-        longitude: Number,
-        loc: {
-            type: String,
-            coordinates: []
-        },
-        source: String,
-        text: {type: String, required: true},
-        user: String,
-        tag: String,
-        nation : String,
-        region: String,
-        tokens: [String]
+Data.SCHEMA = new mongoose.Schema({
+    projectName: {type: String, required: true},
+    id: {type: String, required: true},
+    date: Date,
+    latitude: Number,
+    longitude: Number,
+    loc: {
+        type: String,
+        coordinates: []
     },
-    { strict: false }
-);
+    source: String,
+    text: {type: String, required: true},
+    user: String,
+    tag: String,
+    nation : String,
+    region: String,
+    tokens: [String]
+},{
+    strict: false
+});
+
 //Data.SCHEMA.index({ loc: '2dsphere' });
 
 Data.projectName = null;
@@ -74,10 +67,10 @@ Data.prototype.data = {};
  */
 Data.importFromFile = function (type, file, projectName, cb_ris)
 {
-    async.waterfall([
+    async.waterfall( [
 
             // 1) leggo il file
-            function (cb_wf) {
+            function (cb_wf)        {
 
                 console.log("  1) leggo il file " + file);
 
@@ -94,14 +87,13 @@ Data.importFromFile = function (type, file, projectName, cb_ris)
             },
 
             // 2) converto il file
-            function (data, cb_wf) {
+            function (data, cb_wf)  {
 
                 console.log("  2) controllo il tipo di " + file + " in json");
                 console.log("     fileLenght: " + data.length);
 
                 if (type == "csv") {
                     console.log("     converto il file in json");
-
                     converter.csvToJson(data, function (jsonData) {
                         if (jsonData)
                             cb_wf(null, jsonData);
@@ -116,10 +108,9 @@ Data.importFromFile = function (type, file, projectName, cb_ris)
             },
 
             // 3) salvo il file json
-            function (jsonData, cb_wf)
-            {
+            function (jsonData, cb_wf) {
 
-                console.log("  3) salvo il json: length" + jsonData.length);
+                console.log("  3) salvo il json: length: " + jsonData.length);
 
                 addDataArray(jsonData, projectName, function (err, result) {
                     //non da mai errore, ma result
@@ -133,7 +124,33 @@ Data.importFromFile = function (type, file, projectName, cb_ris)
                     }
 
                 });
-            }],
+            },
+
+            // 4) aggiorno il contatore dei dati
+            function(resultInsert, next){
+                var connection = mongoose.createConnection('mongodb://localhost/oim');
+                var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
+                var projects = connection.model(Project.MODEL_NAME, Project.SCHEMA);
+
+                projects.findOne({projectName:projectName}, function(err, project){
+                    datas.find({projectName:projectName}).count(function(err, cont){
+                        project.size = cont;
+                        project.save(function(err){
+                            if(err)console.error(err);
+                            connection.close();
+                            next(err, resultInsert);
+                        });
+
+                        //project.update( {set:{size:cont} }, function(err, result){
+                        //    connection.close();
+                        //    next(err, resultInsert);
+                        //})
+
+                    })
+                })
+            }
+
+        ],
 
         // Funzione di errore di waterfall
         function (err, result) {
@@ -307,7 +324,7 @@ Data.getUserData = function( project , query, callback){
     var users = [];
     if(query.users != null) users = query.users.split(',');
 
-    var exec = datas.aggregate()
+    datas.aggregate()
         .match({projectName: project, user: {$in:users}})
         .group({
             _id:"$user",
@@ -503,9 +520,9 @@ Data.overrideTokensData = function (project, res, callback) {
                 if( /^&quot/    .test(item) ) return false;
                 if( /^\/\//    .test(item) ) return false;
                 if( /^.$/    .test(item) ) return false;
-                if( item.length <=2 ) return false;
+                return item.length > 2;
 
-                return true;
+
             });
 
             contStem++;
@@ -523,12 +540,6 @@ Data.overrideTokensData = function (project, res, callback) {
             callback(err);
         });
     });
-
-    /**
-     *
-     * @param num - [10|20|30|...|100]
-     * @param res
-     */
 
     function printPercentage(steps, cont, res)
     {
@@ -685,23 +696,19 @@ Data.getNations = function (project, callback) {
 
     datas.aggregate([
         {$match: {projectName: project}},
-        {
-            $group: {
+        {$group: {
                 _id: "$nation",
                 sum: {$sum: 1}
-            }
-        },
-        {
-            $project: {
+            }},
+        {$project: {
                 _id: 0,
                 nation: {$ifNull: ["$_id", "undefined"]},
                 sum: 1
-            }
-        }
+            }}
     ], function (err, doc) {
         callback(err, doc)
     });
 
-}
+};
 
 module.exports = Data;

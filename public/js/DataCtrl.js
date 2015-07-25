@@ -197,6 +197,8 @@ DataCtrl.getField = function(callback, field, limit)
 
     DataCtrl.requireRefresh( field, function(result) {
 
+        result.result = true;
+
         if(result.result == true)
         {
             //console.log("set new data");
