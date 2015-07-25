@@ -7,6 +7,7 @@ UsersCtrl.$restoreButton = null;
 UsersCtrl.$statButton = null;
 
 UsersCtrl.data = null;
+UsersCtrl.filteredUserData = null;
 UsersCtrl.users = null;
 UsersCtrl.selectedUsers = null;
 
@@ -50,12 +51,24 @@ UsersCtrl.lineOptions = {
     //Boolean - Whether to show a stroke for datasets
     datasetStroke: true,
     //Number - Pixel width of dataset stroke
-    datasetStrokeWidth: 2,
+    datasetStrokeWidth: 3,
     //Boolean - Whether to fill the dataset with a colour
     datasetFill: true,
-    //String - A legend template
-    legendTemplate: ""
+    multiTooltipTemplate: function(valuesObject){
+                              if(valuesObject.value != 0)
+                                return valuesObject.label + ": " + valuesObject.value;
+                                }
+
+    //legendTemplate: '<div>'
+    //                    +'<% for (var i=0; i<datasets.length; i++) { %>'
+    //                        +'<div>'
+    //                            +'<div style=\"background-color:<%=datasets[i].strokeColor%>; width:15px; height:15px; display:inline-block; margin-right:8px\";></div>'
+    //                            +'<% if (datasets[i].label) { %><%= datasets[i].label %><% } %>'
+    //                        +'</div>'
+    //                    +'<% } %>'
+    //                +'</div>'
 };
+
 
 UsersCtrl.getUsers = function (callback)
 {
@@ -123,9 +136,12 @@ UsersCtrl.clickStat = function ()
 
     var queryString = conditions.getQueryString();
 
-    DataCtrl.getFromUrl(DataCtrl.FIELD.DATAFILTER, queryString, function(doc) {
-        UsersCtrl.data = doc.data;
-        UsersCtrl.filteredData = doc.data;
+    DataCtrl.getFromUrl(DataCtrl.FIELD.USERDATA, queryString, function(doc) {
+        UsersCtrl.data = doc;
+        UsersCtrl.filteredUserData = doc.data;
+        UsersCtrl.maxDate = new Date(doc.properties.maxDate);
+        UsersCtrl.minDate = new Date(doc.properties.minDate);
+
         UsersCtrl.drawCharts();
         $imgFilter.removeClass("fa fa-spinner fa-spin");
         $imgFilter.addClass("fa fa-bar-chart");
@@ -144,43 +160,48 @@ UsersCtrl.clickRestore = function()
     UsersCtrl.$statButton.prop("disabled", false);
 };
 
-UsersCtrl.drawCharts = function() //Tutte le statistiche
+UsersCtrl.drawCharts = function()
 {
-    UsersCtrl.filterData();
-
     UsersCtrl.drawTimeLine();
+    //TODO add statistics
 };
 
-UsersCtrl.filterData = function()
+UsersCtrl.drawTimeLine = function ()
 {
-    console.log("CALL: filterData");
+    console.log("CALL: drawTimeLine");
 
-    UsersCtrl.maxDate = null;
-    UsersCtrl.minDate = null;
+    UsersCtrl.setFuncNextDate();
+    UsersCtrl.clearCanvas();
 
-    async.filter(UsersCtrl.data,
-        function(obj, next){
-            var cond = UsersCtrl.selectedUsers.indexOf(obj.user);
-            if(cond)
-            {
-                var date = new Date(obj.date);
-                if(!UsersCtrl.maxDate) UsersCtrl.maxDate = date;
-                if(!UsersCtrl.minDate) UsersCtrl.minDate = date;
-                UsersCtrl.maxDate = UsersCtrl.maxDate > date ? UsersCtrl.maxDate : date;
-                UsersCtrl.minDate = UsersCtrl.minDate < date ? UsersCtrl.minDate : date;
-            }
-            next(cond);
-        },
-        function(results) {
-            UsersCtrl.filteredData = results;
-        }
+    var dataset = UsersCtrl.lineData();
+    var scale = 20;
+
+    UsersCtrl.$formType.removeClass('hidden');
+    UsersCtrl.$timeLineContainer.removeClass('hidden');
+    UsersCtrl.$timeLineContainer.css("overflow-x", "auto");
+
+    if(UsersCtrl.$radioWeeks.is(':checked'))
+        scale = 50;
+    if(UsersCtrl.$radioMonths.is(':checked'))
+        scale = 100;
+
+    $("#" + UsersCtrl.timeLineID).width(scale * dataset.datasets[0].data.length);
+
+    var hc = $('body > .container').height();
+    var htop = $('#formType').height();
+    var hmin = hc - htop;
+    $("#" + UsersCtrl.timeLineID).css('max-height', hmin);
+    $("#" + UsersCtrl.timeLineID).css('min-height', "250px");
+    $("#" + UsersCtrl.timeLineID).css('min-width', "250px");
+
+    var ctx = document.getElementById(UsersCtrl.timeLineID).getContext("2d");
+    UsersCtrl.timeLineChart = new Chart(ctx);
+    UsersCtrl.timeLineLine = UsersCtrl.timeLineChart.Line(
+        dataset,
+        UsersCtrl.lineOptions
     );
-};
-
-UsersCtrl.handleModeClick = function($radio)
-{
-    console.log("CALL: handleModeClick");
-    UsersCtrl.drawTimeLine();
+    //var legend =  UsersCtrl.timeLineLine.generateLegend();
+    //$('#timeLineContainer').append(legend);
 };
 
 UsersCtrl.clearCanvas = function()
@@ -221,40 +242,6 @@ UsersCtrl.setFuncNextDate = function ()
 
 };
 
-UsersCtrl.drawTimeLine = function ()
-{
-    console.log("CALL: drawTimeLine");
-
-    UsersCtrl.setFuncNextDate();
-    UsersCtrl.clearCanvas();
-
-    var dataset = UsersCtrl.lineData();
-    var scale = 20;
-
-    UsersCtrl.$formType.removeClass('hidden');
-    UsersCtrl.$timeLineContainer.removeClass('hidden');
-    UsersCtrl.$timeLineContainer.css("overflow-x", "auto");
-
-    if(UsersCtrl.$radioWeeks.is(':checked'))
-        scale = 50;
-    if(UsersCtrl.$radioMonths.is(':checked'))
-        scale = 100;
-
-    $("#" + UsersCtrl.timeLineID).width(scale * dataset.datasets[0].data.length);
-
-    var hc = $('body > .container').height();
-    var htop = $('#formType').height();
-    var hmin = hc - htop;
-    $("#" + UsersCtrl.timeLineID).css('max-height', hmin);
-
-    var ctx = document.getElementById(UsersCtrl.timeLineID).getContext("2d");
-    UsersCtrl.timeLineChart = new Chart(ctx);
-    UsersCtrl.timeLineLine = UsersCtrl.timeLineChart.Line(
-        dataset,
-        UsersCtrl.lineOptions
-    );
-};
-
 UsersCtrl.lineData = function ()
 {
     console.log("CALL: lineData");
@@ -272,7 +259,7 @@ UsersCtrl.getLabels = function ()
 {
     console.log("CALL: getLabels");
 
-    if (UsersCtrl.filteredData == null || UsersCtrl.filteredData.length == 0) return [];
+    if (UsersCtrl.filteredUserData == null || UsersCtrl.filteredUserData.length == 0) return [];
 
     var ris = [];
     var min = UsersCtrl.minDate;
@@ -294,55 +281,39 @@ UsersCtrl.getLabels = function ()
 
 UsersCtrl.getDataset = function ()
 {
-    console.log("CALL: getDataset");
+    //console.log("CALL: getDataset");
 
+    var color = colorUtil.generateColor(UsersCtrl.filteredUserData.length);
+    var cont = -1;
     var ris = [];
-    _.each(UsersCtrl.selectedUsers, function(user, index){
+    var dataset = null;
+    _.each(UsersCtrl.filteredUserData, function(userObj, index){
 
-        async.filter(UsersCtrl.filteredData,
-            function(obj, next){
-                var cond = objCond.containUser(obj.user) &&
-                    objCond.containTag(obj.tag);
-                if(cond)
-                {
-                    var date = new Date(obj.date);
-                    if(!timeLineCtrl.maxDate) timeLineCtrl.maxDate = date;
-                    if(!timeLineCtrl.minDate) timeLineCtrl.minDate = date;
-                    timeLineCtrl.maxDate = timeLineCtrl.maxDate > date ? timeLineCtrl.maxDate : date;
-                    timeLineCtrl.minDate = timeLineCtrl.minDate < date ? timeLineCtrl.minDate : date;
-                }
-                next(cond);
-            },
-            function(results) {
-                timeLineCtrl.filteredData = results;
-            }
-        );
-    var dataset= UsersCtrl.getDatasetValue(user);
-
-        ris[index] = {
-            label: "Tweets time line",
-            fillColor: "rgba(151,187,205,0.2)",
-            strokeColor: "rgba(151,187,205,1)",
-            pointColor: "rgba(151,187,205,1)",
-            pointStrokeColor: "#fff",
-            pointHighlightFill: "#fff",
-            pointHighlightStroke: "rgba(151,187,205,1)",
-            data: dataset
-        };
+        dataset = UsersCtrl.getDatasetValue(userObj);
+            ris[index] = {
+                label: userObj.user,
+                fillColor: "rgba(151,187,205,0.2)",//colorUtil.ColorLuminance(color[index], 1),
+                strokeColor: color[index],
+                pointColor: color[index],
+                pointStrokeColor: "#fff",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: color[index],
+                data: dataset
+            };
     });
 
     return ris;
 };
 
-UsersCtrl.getDatasetValue = function (user)
+UsersCtrl.getDatasetValue = function (userObj)
 {
-    console.log("CALL: getDatasetValue");
+    //console.log("CALL: getDatasetValue");
 
-    if (UsersCtrl.filteredData == null || UsersCtrl.filteredData.length == 0) return [];
+    if (userObj.data == null || userObj.data.length == 0) return [];
 
     var ris = [];
 
-    var dataset = _.groupBy(UsersCtrl.filteredData, function(obj){
+    var dataset = _.groupBy(userObj.data, function(obj){
         return UsersCtrl.selectLabelDate( new Date(obj.date));
     });
     var min = UsersCtrl.minDate;
@@ -360,4 +331,10 @@ UsersCtrl.getDatasetValue = function (user)
     ris.push(0);
     if(UsersCtrl.$radioDays.is(':checked')) ris.push(0);
     return ris;
+};
+
+UsersCtrl.handleModeClick = function($radio)
+{
+    console.log("CALL: handleModeClick");
+    UsersCtrl.drawTimeLine();
 };
