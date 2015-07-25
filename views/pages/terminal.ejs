@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+
+   <link href="/public/css/terminal.css" rel="stylesheet">
+   <style>
+
+      html{
+         height: 100%;
+      }
+
+      body{
+         height: calc(100% - 40px);
+      }
+      .terminal{
+         height: 100%;
+         width: 100%;
+         border: 2px;
+         margin-bottom: 0;
+      }
+
+   </style>
+
+   <script src="/bower_components/jquery/dist/jquery.js"></script>
+
+</head>
+<body>
+
+   <div id="bar">
+      <div id="red">
+      </div>
+      <div id="yellow">
+      </div>
+      <div id="green">
+      </div>
+   </div>
+
+   <iframe class="terminal" id="terminal"> </iframe>
+
+</body>
+
+<script src="/public/js/TerminalCtrl.js"></script>
+
+<script>
+   var tCtrl = new TerminalCtrl("terminal");
+</script>

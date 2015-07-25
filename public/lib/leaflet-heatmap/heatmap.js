@@ -451,11 +451,9 @@ var Canvas2dRenderer = (function Canvas2dRendererClosure() {
       var len = imgData.length;
       var palette = this._palette;
 
-
       for (var i = 3; i < len; i+= 4) {
         var alpha = imgData[i];
         var offset = alpha * 4;
-
 
         if (!offset) {
           continue;

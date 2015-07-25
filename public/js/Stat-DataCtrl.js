@@ -19,7 +19,6 @@ var formatterData = {
     }
 };
 
-
 function ShowDataCtrl() {};
 
 ShowDataCtrl.$dataTable = null;

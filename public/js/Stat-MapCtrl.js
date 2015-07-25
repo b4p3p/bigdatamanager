@@ -1,14 +1,15 @@
 "use strict";
-
 var ShowmapCtrl = function(){};
 
 // Button controller
 var BtnCtrl = function() {
 
+    var _self = this;
     this.$imgFilterButton = $("#img-filter");
+    this.$cmdFilter =        $('#cmdFilter');
+    this.$cmdRestore =       $('#cmdRestore');
 
-    this.removeWaitFromAllCheck = function()
-    {
+    this.removeWaitFromAllCheck = function() {
         $(".spinner-wait").addClass("hidden");
     };
 
@@ -17,11 +18,11 @@ var BtnCtrl = function() {
     };
 
     this.enableFilterButton = function(){
-        ShowmapCtrl.$cmdFilter.removeAttr("disabled");
+        this.$cmdFilter.removeAttr("disabled");
     };
 
     this.disableFilterButton = function(){
-        ShowmapCtrl.$cmdFilter.prop("disabled", true);
+        this.$cmdFilter.prop("disabled", true);
     };
 
     this.addImgWaitFilterButton = function(){
@@ -36,28 +37,155 @@ var BtnCtrl = function() {
     {
         this.$imgFilterButton.addClass("glyphicon glyphicon-filter");
         this.$imgFilterButton.removeClass("fa fa-spinner fa-spin");
-    }
+    };
+
+    this.$cmdFilter.click(function(){
+
+        console.log("CALL: cmdFilter_click");
+
+        _self.disableFilterButton();
+        _self.addImgWaitFilterButton();
+
+        var conditions = new ObjConditions( formCtrl.$cmbSelectNations,
+            null, formCtrl.$cmbSelectTags,  formCtrl.$sliderTimer,
+            formCtrl.$cmbSelectUsers,  formCtrl.$cmbSelectTerms
+        );
+
+        var queryString = conditions.getQueryString();
+
+        async.waterfall([
+            function(next){
+                // chiedo il nuvo stat filtrato
+                DataCtrl.getFromUrl(DataCtrl.FIELD.STAT, queryString, function(docStat){
+                    ShowmapCtrl.stat = docStat;
+                    next(null);
+                });
+            },
+            function(next){
+
+                ShowmapCtrl.filteredRegions = _.filter(ShowmapCtrl.regions, function(obj){
+                    return conditions.containNation(obj.properties.NAME_0);
+                });
+                next(null);
+            },
+            function(next){
+
+                //chiedo i nuovi dati
+                ShowmapCtrl.getDataMapAsync(conditions);
+                next(null);
+
+            }], function(err) {
+                mapCtrl.refreshLayers();
+                btnCtrl.enableFilterButton();
+                btnCtrl.removeImgWaitFilterButton();
+            }
+        );
+
+        //DataCtrl.getFromUrl(DataCtrl.FIELD.STAT, queryString, function(docStat){
+        //    ShowmapCtrl.filteredStat = docStat;
+        //    async.waterfall([
+        //        //function (next) {
+        //        //    ShowmapCtrl.filterData( conditions, ShowmapCtrl.datas , function(result){
+        //        //        ShowmapCtrl.filteredDatas = result;
+        //        //        next();
+        //        //    })
+        //        //},
+        //        function (next) {
+        //            ShowmapCtrl.filterRegions(conditions, ShowmapCtrl.regions , function(result){
+        //                ShowmapCtrl.filteredRegions = result;
+        //                next();
+        //            })
+        //        },
+        //        function(next){
+        //            ShowmapCtrl.refreshData(function(){next();})
+        //        }
+        //    ], function () {
+        //        formCtrl.setCountData();
+        //        btnCtrl.enableFilterButton();
+        //        btnCtrl.removeImgWaitFilterButton();
+        //    });
+        //});
+    });
+
+};
+
+//Progress
+var ProgressCount = function(idProgress) {
+    this.$divProgress = $('#' + idProgress + " > div");
+    this.$divText = $( '#' + idProgress + " > div > div");
+
+    this.setPercentage = function(){
+        var tot = ShowmapCtrl.stat.data.countTot;
+        var fatti = ShowmapCtrl.datas.length;
+        var percentage = parseInt( (fatti / tot) * 100 ).toFixed(2);
+
+        this.$divProgress.prop("aria-valuenow", percentage );
+        this.$divProgress.css("width", percentage + "%");
+        this.$divText.text(percentage + "% - " + fatti + " / " + tot);
+    };
+
+    this.stopProgress = function(){
+        this.$divProgress.removeClass("active");
+    };
+
+    this.reset = function(){
+        this.$divProgress.addClass("active");
+        this.$divProgress.prop("aria-valuenow", 0 );
+        this.$divProgress.css("width", 0 + "%");
+        this.$divText.text("Loading...");
+    };
 
 };
 
 //Form Controller
-var FormCtrl = function(){
+var FormCtrl = function() {
 
-    this.$radioData = $("#$radioData");
+    var _self = this;
+
+    this.progressCount = new ProgressCount("progressCount");
+
+    this.$spinnerHeatmap = $("#spinner-heatmap");
+    this.$spinnerCluster = $("#spinner-cluster");
+    this.$spinnerBoundaries = $("#spinner-boundaries");
+
+    this.$radioData = $("#radioData");
     this.$radioUser = $("#radioVocabulary");
-    this.$contData = $("#countData");
+    this.$cmbSelectTags =    $('#cmbTags');
+    this.$cmbSelectNations = $('#cmbNations');
+    this.$cmbSelectUsers =   $('#cmbUsers');
+    this.$cmbSelectTerms =   $('#cmbTerms');
+
+    this.$chkHeatmap = $('#chk_heatmap');
+    this.$chkMarkercluster = $('#chk_markerCluster');
+    this.$chkBoudaries = $('#chk_boundaries');
+
+    this.$sliderTimer = $("#slider");
+
+    this.$sliderTimer.dateRangeSlider({
+            enabled : true,
+            bounds: {
+                min: new Date(1950, 1, 1 ) ,
+                max: new Date(2050, 1, 1 )
+            } ,
+            defaultValues:{
+                min: new Date(1950, 1, 1 ),
+                max: new Date(2050, 1, 1 )
+            }
+        });
 
     $('input[name="typeVoc"]').change( function(){
-        formCtrl.setComboTerms();
+        _self.setComboTerms();
     });
+
     this.enableForm = function(){
         console.log("CALL: enable form");
         btnCtrl.removeWaitFromAllCheck();
         btnCtrl.enableFilterButton();
         btnCtrl.enableAllCheck();
     };
+
     this.setComboTerms = function(){
-        DomUtil.clearSelectpicker(ShowmapCtrl.$cmbSelectTerms);
+        DomUtil.clearSelectpicker(this.$cmbSelectTerms);
         var terms = [];
         var count = [];
         var key = this.$radioData.is(":checked") ? "syncDataTags" : "syncUserTags";
@@ -68,97 +196,466 @@ var FormCtrl = function(){
                 terms.push( obj.token );
                 count.push( obj.count );
             });
-            DomUtil.addOptionGroup(ShowmapCtrl.$cmbSelectTerms, tag, terms, count );
+            DomUtil.addOptionGroup(_self.$cmbSelectTerms, tag, terms, count );
         });
-        ShowmapCtrl.$cmbSelectTerms.selectpicker('refresh');
+        this.$cmbSelectTerms.selectpicker('refresh');
     };
-    this.setCountData = function(){
-        this.$contData.text( ShowmapCtrl.filteredDatas.length );
+
+    this.setIntervalSlider = function(min, max) {
+        this.$sliderTimer.dateRangeSlider( {
+            enabled : true ,
+            bounds:{ min: min, max: max},
+            defaultValues:{ min: min, max: max }
+        });
+        this.$sliderTimer.dateRangeSlider("min", min);
+        this.$sliderTimer.dateRangeSlider("max", max);
+    };
+
+    this.load = function() {
+        console.log("CALL: form.load()");
+
+        var min = new Date( ShowmapCtrl.stat.data.minDate );
+        var max = new Date( ShowmapCtrl.stat.data.maxDate );
+
+        this.setIntervalSlider(min, max);
+
+        this.$cmbSelectTags.attr("title", "Select Tags");
+        this.$cmbSelectNations.attr("title", "Select Nations");
+        this.$cmbSelectUsers.attr("title", "Select Users");
+        this.$cmbSelectTerms.attr("title", "Select Terms");
+
+        //nations
+        _.each(ShowmapCtrl.stat.data.nations, function(obj){
+            DomUtil.addOptionValue(_self.$cmbSelectNations, obj.name);
+        });
+
+        //tags
+        _.each(ShowmapCtrl.stat.data.allTags, function(obj){
+            DomUtil.addOptionValue(_self.$cmbSelectTags, obj);
+        });
+
+        //users - attivo solo gli utenti che hanno tweet geolocalizzati
+        var obj = null;
+        var isDisable = true;
+        for (var i = 0; i < 50 && i < ShowmapCtrl.users.length; i++ ){
+            isDisable = true;
+            obj = ShowmapCtrl.users[i];
+            for(var j = 0; j < obj.counter.length; j++)
+                if(obj.counter[j].isGeo)
+                    isDisable = false;
+            DomUtil.addOptionValue(this.$cmbSelectUsers, obj.user, obj.sum, isDisable);
+        }
+
+        this.setComboTerms();
+
+        $('.selectpicker').selectpicker('refresh');
+
+        formCtrl.enableForm();
+    };
+
+    this.showSpinner = function($spinner){
+        $spinner.removeClass("hidden");
+        $spinner.removeClass("fa fa-spinner fa-spin spinner-datas");
+        $spinner.addClass("fa fa-refresh fa-spin");
+        $spinner.show();
+    };
+
+    this.hideSpinner = function($spinner){
+        $spinner.removeClass("fa fa-refresh fa-spin");
+        $spinner.addClass("fa fa-spinner fa-spin spinner-datas");
+        $spinner.hide();
+    };
+
+    //click checkbox
+    this.$chkHeatmap.click(function(){
+
+        console.log( "CALL: $chkHeatmap.click (" + _self.$chkHeatmap.prop("checked") + ")" );
+
+        if( _self.$chkHeatmap.prop("checked") )
+            mapCtrl.heatmapCtrl.show();
+        else
+            mapCtrl.heatmapCtrl.hide();
+    });
+
+    this.$chkMarkercluster.click(function(){
+
+        if( _self.$chkMarkercluster.prop("checked") )
+            mapCtrl.markerCtrl.show();
+        else
+            mapCtrl.markerCtrl.hide();
+    });
+
+    this.$chkBoudaries.click(function(){
+
+        if( _self.$chkBoudaries.prop("checked") )
+            mapCtrl.boundariesCtrl.show();
+        else
+            mapCtrl.boundariesCtrl.hide();
+    })
+
+};
+
+//BoundariesCtrl
+var BoudariesCtrl = function(map) {
+
+    var _self = this;
+    this.map = map;
+    this.layer = null;
+    this.legend = null;
+
+    this.activeLayerBoundaries = null;
+    this.showInfoActiveLayer = false;
+
+    this.refresh = function(){
+        if(!formCtrl.$chkBoudaries.prop("checked")) return;
+        this.show();
+    };
+
+    this.show = function() {
+
+        console.log("CALL: boundaries.show()");
+
+        formCtrl.showSpinner(formCtrl.$spinnerBoundaries);
+
+        if (this.layer != null) this.hide();    //funziona anche da refresh
+
+        this.layer = L.geoJson( ShowmapCtrl.filteredRegions, {
+            style: _self.styleFeature,
+            onEachFeature: _self.onEachFeature
+        });
+
+        this.layer.addTo( this.map );
+        this.layer.bringToFront();
+
+        this.insertLegend();
+
+        formCtrl.hideSpinner(formCtrl.$spinnerBoundaries);
+
+    };
+
+    this.hide = function() {
+
+        console.log("CALL: hideBoundaries.hide()");
+
+        if ( this.layer != null)
+        {
+            this.map.removeLayer( this.layer );
+            this.layer = null;
+            this.removeLegend();
+        }
+    };
+
+    this.insertLegend = function() {
+
+        console.log("CALL: insertLegend");
+
+        if ( this.legend == null) {
+            this.legend = L.control( {position: 'bottomleft'});
+            this.legend.onAdd = function () { //map
+                var div = L.DomUtil.create('div', 'info legend'),
+                    grades = [0, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8],
+                    labels = [],
+                    from, to;
+                labels.push('<label style="margin: 0px; margin-bottom: 10px; text-align: center"><b>Percentage of<br>total points</b></label>');
+                for (var i = 0; i < grades.length; i++) {
+                    from = grades[i];
+                    to = grades[i + 1];
+
+                    labels.push(
+                        '<i style="background:' + _self.getColorBoundaries(from + 0.01) + '"></i> ' +
+                        from + (to ? '&ndash;' + to : '+'));
+                }
+                div.innerHTML = labels.join('<br>');
+                return div;
+            };
+            this.legend.addTo(this.map);
+        }
+    };
+
+    this.removeLegend = function() {
+        if( this.legend != null ) {
+            this.map.removeControl( this.legend );
+            this.legend = null;
+        }
+    };
+
+    this.getColorBoundaries = function(percentage) {
+        return percentage > 0.8 ? '#800026' :
+            percentage > 0.7 ? '#BD0026' :
+                percentage > 0.6 ? '#E31A1C' :
+                    percentage > 0.5 ? '#FC4E2A' :
+                        percentage > 0.4 ? '#FD8D3C' :
+                            percentage > 0.3 ? '#FEB24C' :
+                                percentage > 0.2 ? '#FED976' :
+                                    '#FFEDA0';
+    };
+
+    this.getAvg = function(feature) {
+        var nation = feature.properties.NAME_0;
+        var region = feature.properties.NAME_1;
+        var avg = 0;
+        if(ShowmapCtrl.stat.data.nations[nation] != null)
+            avg = ShowmapCtrl.stat.data.nations[nation].regions[region].avg;
+        return avg;
+    };
+
+    this.styleFeature = function(feature){
+        var avg = _self.getAvg( feature );
+        return {
+            fillColor: _self.getColorBoundaries( avg ),
+            fillOpacity: 0.5,  weight: 2,
+            opacity: 0.5,  color: 'white', dashArray: '3'
+        }
+    };
+
+    this.onEachFeature = function(feature, layer){
+        layer.on({
+            mouseover: _self.onFeatureMouseover,
+            mouseout: _self.onFeatureMouseout,
+            click: _self.onFeatureClick
+        });
+    };
+
+    this.onFeatureMouseover = function(e) {
+        var layer = e.target;
+        _self.map.dragging.disable();
+
+        layer.setStyle({
+            weight: 5, color: '#666',
+            dashArray: '', fillOpacity: 0.7
+        });
+
+        if (!L.Browser.ie && !L.Browser.opera) { layer.bringToFront(); }
+    };
+
+    this.onFeatureMouseout = function(e) {
+
+        if ( this.activeLayerBoundaries != null &&
+             this.showInfoActiveLayer ) return;
+
+        _self.map.dragging.enable();
+        _self.layer.resetStyle(e.target);
+    };
+
+    this.onFeatureClick = function(e) {
+
+        // lock map
+        _self.activeLayerBoundaries = e.target;
+
+        // chiudo altri popup aperti
+        if ( _self.showInfoActiveLayer ) {
+            _self.map.closePopup(); return;
+        }
+
+        var nation = e.target.feature.properties.NAME_0;
+        var region = e.target.feature.properties.NAME_1;
+
+        var tot_tweet = 0;
+        var counter = {};
+        if( ShowmapCtrl.stat.data.nations[nation] != null &&
+            ShowmapCtrl.stat.data.nations[nation].regions[region] != null)
+        {
+            var eNation = ShowmapCtrl.stat.data.nations[nation].regions[region];
+            tot_tweet = eNation.count;
+            counter = eNation.counter;
+        }
+
+        var pop = '<div class="popup">' +
+            '<h3 class="title-popup" style="min-width: 100px">' +
+            region +
+            '</h3>';
+
+        _.each(counter, function(obj, k){
+            var tag = k.charAt(0).toUpperCase() + k.slice(1) + ': ';
+            pop = pop +
+                '<div class="row-popup">' +
+                '<div class="label-popup-left">' + tag + '</div>' +
+                '<div class="label-popup-right">' + obj.count + '</div>' +
+                '</div>';
+        });
+
+        pop += "<hr class='separator'>";
+
+        pop +=
+            '<div class="row-popup">' +
+            '<div class="label-popup-left">Tot:</div>' +
+            '<div class="label-popup-right">' + tot_tweet + '</div>' +
+            '</div>';
+
+        console.log("Popup " + e.target.feature.properties.NAME_1);
+        e.target.bindPopup(pop).openPopup();
+
+        //ShowmapCtrl.mainMap.fitBounds(e.target.getBounds());
+    }
+
+};
+
+//HeatMapController
+var HeatmapCtrl = function(map) {
+
+    var _self = this;
+
+    this.map = map;
+    this.cfg = {
+        // radius should be small ONLY if scaleRadius is true (or small radius is intended)
+        // if scaleRadius is false it will be the constant radius used in pixels
+        "radius": 100,
+        "maxOpacity": 0.6,
+        // scales the radius based on map zoom
+        "scaleRadius": false,
+        // if set to false the heatmap uses the global maximum for colorization
+        // if activated: uses the data maximum within the current map boundaries
+        //   (there will always be a red spot with useLocalExtremas true)
+        "useLocalExtrema": false,
+        // which field name in your data represents the latitude - default "lat"
+        latField: 'latitude',
+        // which field name in your data represents the longitude - default "lng"
+        lngField: 'longitude',
+        // which field name in your data represents the data value - default "value"
+        valueField: 'count'
+    };
+
+    this.layer = new HeatmapOverlay( this.cfg );
+    this.map.addLayer( this.layer );                //sembra un bug di leaflet
+
+    this.show = function() {
+
+        console.log("CALL: heatmap.show()");
+
+        formCtrl.showSpinner(formCtrl.$spinnerHeatmap);
+
+        //if ( !this.map.hasLayer(this.layer) && formCtrl.$chkHeatmap.prop("checked") )
+
+        _self.map.addLayer(_self.layer);
+        _self.setData();
+
+        formCtrl.hideSpinner(formCtrl.$spinnerHeatmap);
+    };
+
+    this.hide = function(){
+        console.log("CALL: heatmap.hide()");
+        this.map.removeLayer( this.layer );
+    };
+
+    this.setData = function() {
+
+        if(!formCtrl.$chkHeatmap.prop("checked")) return;   //bug di leaflet
+
+        if(_self.map.hasLayer(_self.layer) == false ) _self.map.addLayer(_self.layer);
+
+        console.log("CALL: heatmap.setData - data.lenght=" + ShowmapCtrl.datas.length);
+
+        _self.layer.setData( { max: 1,  data: ShowmapCtrl.datas });
+    };
+
+    this.clear = function(){
+        this.map.removeLayer( this.layer );
     }
 };
 
-var btnCtrl = null;
-var formCtrl = null;
+//Marker cluster
+var MarkerClusterCtrl = function(map){
 
-var cfg =
-{
-    // radius should be small ONLY if scaleRadius is true (or small radius is intended)
-    // if scaleRadius is false it will be the constant radius used in pixels
-    "radius": 100,
-    "maxOpacity": 0.6,
-    // scales the radius based on map zoom
-    "scaleRadius": false,
-    // if set to false the heatmap uses the global maximum for colorization
-    // if activated: uses the data maximum within the current map boundaries
-    //   (there will always be a red spot with useLocalExtremas true)
-    "useLocalExtrema": false,
-    // which field name in your data represents the latitude - default "lat"
-    latField: 'latitude',
-    // which field name in your data represents the longitude - default "lng"
-    lngField: 'longitude',
-    // which field name in your data represents the data value - default "value"
-    valueField: 'count'
+    var _self = this;
+    this.map = map;
+    this.layer = null;
+
+    this.show = function(){
+        console.log("CALL: markerCluster.show()");
+        formCtrl.showSpinner(formCtrl.$spinnerCluster);
+
+        //setTimeout(this.showAsync, 100);
+
+        if(this.layer == null){
+            this.layer = new L.markerClusterGroup({
+                animateAddingMarkers: true,
+                chunkedLoading: true
+            });
+        }
+
+        setTimeout(function(){
+            _self.setData();
+            formCtrl.hideSpinner(formCtrl.$spinnerCluster);
+        },100);
+
+    };
+
+    this.hide = function(){
+        console.log("CALL: markerCluster.hide()");
+        this.map.removeLayer( this.layer );
+    };
+
+    this.appendData = function(docs){
+
+        if(!this.layer) return;
+        if(!formCtrl.$chkMarkercluster.prop("checked")) return;   //bug di leaflet
+
+        var markerList = [];
+        async.each( docs,
+            function(d, next) {
+                markerList.push(_self.createMarker(d)); next(null);
+            } ,
+
+            function() {
+                _self.layer.addLayers( markerList );
+            }
+        );
+    };
+
+    this.setData = function(){
+
+        console.log("CALL: markerCluster.setData()");
+
+        if(!this.layer) return;
+
+        _self.layer.clearLayers();
+        _self.appendData(ShowmapCtrl.datas);
+        _self.map.addLayer( _self.layer );
+    };
+
+    this.createMarker = function(d) {
+        var etichetta = d.tag;
+        var text = d.text;
+        var lat = d.latitude;
+        var lng = d.longitude;
+        var icon = getIcon(etichetta);
+
+        var marker = new L.Marker(
+            new L.LatLng(lat, lng),
+            {
+                icon: icon,
+                title: text
+            });
+        marker.bindPopup(text +
+            "<br><b>User: </b>" + d.user +
+            "<br><b>Tag: </b>" + etichetta +
+            "<br><b>Lon: </b>" + lng +
+            "<br><b>Lat: </b>" + lat);
+        return marker;
+    }
+
+    this.clear = function(){
+        if(_self.layer)
+            _self.layer.clearLayers();
+    }
+
 };
 
-//map
-ShowmapCtrl.mainMap = null;
+//Map Ctrl
+var MapCtrl = function(IDMap) {
 
-//layer
-ShowmapCtrl.layerHeatmap = null;
-ShowmapCtrl.layerMakerCluster = null;
-ShowmapCtrl.layerBoundaries = null;
-ShowmapCtrl.layerLegend = null;
+    var _self = this;
 
-//controls
-ShowmapCtrl.IDmapContainer = '';
-ShowmapCtrl.$cmbSelectTags = null;
-ShowmapCtrl.$cmbSelectNations = null;
-ShowmapCtrl.$cmbSelectUsers = null;
-ShowmapCtrl.$cmbSelectTerms = null;
-ShowmapCtrl.$sliderTimer = null;
+    this.IDMap = IDMap;
+    this.mainMap = null;
+    this.$map = $('#' + IDMap);
 
-ShowmapCtrl.$cmdFilter = null;
-ShowmapCtrl.$cmdRestore = null;
-
-ShowmapCtrl.legendControl = null;
-ShowmapCtrl.chkMarkercluster = null;
-ShowmapCtrl.chkHeatmap = null;
-ShowmapCtrl.chkBoudaries = null;
-ShowmapCtrl.activeLayerBoundaries = null;
-ShowmapCtrl.showInfoActiveLayer = false;
-
-//data variable
-ShowmapCtrl.stat = null;
-ShowmapCtrl.filteredStat = null;
-
-ShowmapCtrl.regions = null;
-ShowmapCtrl.filteredRegions = null;
-
-ShowmapCtrl.datas = null;
-ShowmapCtrl.filteredDatas = null;
-
-ShowmapCtrl.users = null;
-ShowmapCtrl.terms = null;
-
-ShowmapCtrl.contNonGeo = 0;
-
-ShowmapCtrl.init = function()
-{
-    btnCtrl = new BtnCtrl();
-    formCtrl = new FormCtrl();
-};
-
-ShowmapCtrl.initMap = function(mapContainer)
-{
-    ShowmapCtrl.IDmapContainer = mapContainer;
-
-    function createMap()
-    {
+    function createMap() {
         var lat = 42.22;
         var long = 12.986;
 
         // set up the map
-        ShowmapCtrl.mainMap = new L.Map( ShowmapCtrl.IDmapContainer);
+        _self.mainMap = new L.Map( _self.IDMap);
 
         // create the tile layer with correct attribution
         var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
@@ -171,198 +668,147 @@ ShowmapCtrl.initMap = function(mapContainer)
         });
 
         // start the map in Italy
-        ShowmapCtrl.mainMap.setView( new L.LatLng(lat, long), 6 );
-        ShowmapCtrl.mainMap.addLayer(osm);
-    };
-
-    function resizeMap()
-    {
-        var deltaHeight = 200;
-        //var deltaWidth = -100;
-
-        var map = $('#' + ShowmapCtrl.IDmapContainer);
-        //var width = $(window).width();
-        var height = $(window).height();
-
-        map.css("height", $(window).height() - deltaHeight);
-        map.css("margin-top",50);
+        _self.mainMap.setView( new L.LatLng(lat, long), 6 );
+        _self.mainMap.addLayer(osm);
     }
 
-    createMap();
+    function resizeMap() {
+        //_self.$map.css("height", $(window).height()); // -200
+        _self.$map.css("height", 400); // -200
+    }
+
     resizeMap();
+    createMap();
+
+    this.heatmapCtrl = new HeatmapCtrl(this.mainMap);
+    this.markerCtrl = new MarkerClusterCtrl(this.mainMap);
+    this.boundariesCtrl = new BoudariesCtrl(this.mainMap);
 
     $(window).on("resize", function(){
         resizeMap();
     });
 
     $(document).ready(function() {
-        ShowmapCtrl.mainMap.invalidateSize();
+        _self.mainMap.invalidateSize();
     });
 
+    this.refreshLayers = function()
+    {
+        mapCtrl.heatmapCtrl.clear();
+        mapCtrl.markerCtrl.clear();
+        mapCtrl.boundariesCtrl.refresh();
+    }
+
 };
 
-ShowmapCtrl.initGui = function()
-{
-    ShowmapCtrl.$cmbSelectTags =    $('#cmbTags');
-    ShowmapCtrl.$cmbSelectNations = $('#cmbNations');
-    ShowmapCtrl.$cmbSelectUsers =   $('#cmbUsers');
-    ShowmapCtrl.$cmbSelectTerms =   $('#cmbTerms');
+var btnCtrl = new BtnCtrl();
+var formCtrl = new FormCtrl();
 
-    ShowmapCtrl.$cmdFilter =        $('#cmdFilter');
-    ShowmapCtrl.$cmdRestore =       $('#cmdRestore');
+//data variable
+ShowmapCtrl.stat = null;
+//ShowmapCtrl.filtered Stat = null;
 
-    ShowmapCtrl.chkMarkercluster = $('#chk_markerCluster')[0];
-    ShowmapCtrl.chkHeatmap = $('#chk_heatmap')[0];
-    ShowmapCtrl.chkBoudaries = $('#chk_boundaries')[0];
+ShowmapCtrl.regions = null;
+ShowmapCtrl.filteredRegions = null;
 
-    ShowmapCtrl.$sliderTimer = $("#slider");
+ShowmapCtrl.datas = [];
 
-    ShowmapCtrl.$sliderTimer.dateRangeSlider(
-        {
-            enabled : true,
-            bounds: {
-                min: new Date(1950, 1, 1 ) ,
-                max: new Date(2050, 1, 1 )
-            } ,
-            defaultValues:{
-                min: new Date(1950, 1, 1 ),
-                max: new Date(2050, 1, 1 )
-            }
-        }
-    );
-};
+ShowmapCtrl.users = null;
+ShowmapCtrl.terms = null;
+
+ShowmapCtrl.contNonGeo = 0;
 
 /* Viene richiamata al refresh della pagina */
 ShowmapCtrl.getData = function () {
     console.log("CALL: getData");
-
     async.parallel({
-
-        data: function(next)
-        {
-            DataCtrl.getFromUrl(DataCtrl.FIELD.DATA, "?isGeo=1", function(doc){
-                ShowmapCtrl.datas = doc;
-                ShowmapCtrl.filterData(null, doc, function(result){
-                    ShowmapCtrl.filteredDatas = result;
-                    formCtrl.setCountData();
-                    next(null, doc);
-                });
-
-            });
-        },
-
-        stat: function(next)
-        {
-            DataCtrl.getField( function(doc){
-                ShowmapCtrl.stat = doc;
-                ShowmapCtrl.filteredStat = doc;
+        stat: function(next)        {
+        DataCtrl.getField( function(doc){
+            ShowmapCtrl.stat = doc;
+            next(null, doc);
+        }, DataCtrl.FIELD.STAT );
+    },
+        regions: function (next)    {
+        DataCtrl.getField(
+            function(doc)
+            {
+                ShowmapCtrl.regions = doc;
+                ShowmapCtrl.filteredRegions = doc;
                 next(null, doc);
-            }, DataCtrl.FIELD.STAT );
-        },
-
-        regions: function (next)
-        {
-            DataCtrl.getField(
-                function(doc)
-                {
-                    ShowmapCtrl.regions = doc;
-                    ShowmapCtrl.filteredRegions = doc;
-                    next(null, doc);
-                },
-                DataCtrl.FIELD.REGIONSJSON
-            );
-        },
-
-        users: function (next)
-        {
-            DataCtrl.getField( function(doc){
-                ShowmapCtrl.users = doc;
-                next(null, doc);
-            }, DataCtrl.FIELD.USERS, 50);
-        },
-
-        wordcount: function (next)
-        {
+            },
+            DataCtrl.FIELD.REGIONSJSON
+        );
+    },
+        users: function (next)      {
+        DataCtrl.getField( function(doc){
+            ShowmapCtrl.users = doc;
+            next(null, doc);
+        }, DataCtrl.FIELD.USERS, 50);
+    },
+        wordcount: function (next)  {
             DataCtrl.getField( function(doc)
             {
                 ShowmapCtrl.terms = doc;
                 next(null, doc);
             }, DataCtrl.FIELD.WORDCOUNT);
-        }},
-        function(err, results) {
-            ShowmapCtrl.loadForm();
+        }
+    }, function() {
+        ShowmapCtrl.getDataMapAsync();
+        formCtrl.load();
+    });
+};
+
+var idOp = 0;
+
+ShowmapCtrl.getDataMapAsync = function(condictions){
+
+    formCtrl.progressCount.reset();
+    //mapCtrl.refreshLayers();
+    ShowmapCtrl.datas = [];
+
+    if(condictions == null) condictions = new ObjConditions();
+
+    var timeout = setTimeout( function(){
+        idOp++;
+        ShowmapCtrl._getDataMapAsync(idOp-1, condictions, timeout, 1000, 0);
+    } , 0 );
+};
+
+ShowmapCtrl._getDataMapAsync = function(_idOp, condictions, timeout, step, start){
+
+    if(_idOp != idOp - 1) return;
+
+    condictions.setLimit(step);
+    condictions.setSkip(start);
+    condictions.setIsGeo(true);
+
+    var queryString = condictions.getQueryString();
+
+    DataCtrl.getFromUrl(DataCtrl.FIELD.DATA, queryString,
+        function(doc){
+
+            if(_idOp != idOp - 1) return;
+
+            ShowmapCtrl.datas = ShowmapCtrl.datas.concat(doc);
+            formCtrl.progressCount.setPercentage();
+
+            mapCtrl.heatmapCtrl.setData();
+            mapCtrl.markerCtrl.appendData(doc);
+
+            if(doc.length > 0) {
+                start += step;
+                var newTimeout = setTimeout( function(){
+                    ShowmapCtrl._getDataMapAsync(_idOp, condictions, newTimeout, step, start);
+                }, 0);
+            }else {
+                clearTimeout(timeout);
+                formCtrl.progressCount.stopProgress();
+            }
         }
     );
-
 };
 
-/* Dopo che i dati sono stati scaricati riempio la form */
-ShowmapCtrl.loadForm = function() {
-    console.log("CALL: loadForm");
 
-    var min = new Date( ShowmapCtrl.stat.data.minDate );
-    var max = new Date( ShowmapCtrl.stat.data.maxDate );
-
-    ShowmapCtrl.$sliderTimer.dateRangeSlider( {
-        enabled : true ,
-        bounds:{
-            min: min,
-            max: max
-        },
-        defaultValues:{
-            min: min,
-            max: max
-        }
-    });
-
-    ShowmapCtrl.$sliderTimer.dateRangeSlider("min", min);
-    ShowmapCtrl.$sliderTimer.dateRangeSlider("max", max);
-
-    ShowmapCtrl.$cmbSelectTags.attr("title", "Select Tags");
-    ShowmapCtrl.$cmbSelectNations.attr("title", "Select Nations");
-    ShowmapCtrl.$cmbSelectUsers.attr("title", "Select Users");
-    ShowmapCtrl.$cmbSelectTerms.attr("title", "Select Terms");
-
-    //nations
-    _.each(ShowmapCtrl.stat.data.nations, function(obj){
-        DomUtil.addOptionValue(ShowmapCtrl.$cmbSelectNations, obj.name);
-    });
-
-    //tags
-    _.each(ShowmapCtrl.stat.data.allTags, function(obj){
-        DomUtil.addOptionValue(ShowmapCtrl.$cmbSelectTags, obj);
-    });
-
-    //users - attivo solo gli utenti che hanno tweet geolocalizzati
-    var obj = null;
-    var isDisable = true;
-    for (var i = 0; i < 50 && i < ShowmapCtrl.users.length; i++ ){
-        isDisable = true;
-        obj = ShowmapCtrl.users[i];
-        for(var j = 0; j < obj.counter.length; j++)
-            if(obj.counter[j].isGeo)
-                isDisable = false;
-        DomUtil.addOptionValue(ShowmapCtrl.$cmbSelectUsers, obj.user, obj.sum, isDisable);
-    }
-
-    formCtrl.setComboTerms();
-
-    $('.selectpicker').selectpicker('refresh');
-
-    formCtrl.enableForm();
-
-};
-
-ShowmapCtrl.filterRegions = function(objCond, data, callback) {
-    async.filter( data, function(obj, next){
-        if(objCond)
-            next( objCond.containNation(obj.properties.NAME_0));
-        else
-            next(true);
-    },function(result){
-        callback( result ); }
-    );
-};
 
 ShowmapCtrl.filterData = function(objCond, data, callback) {
     ShowmapCtrl.contNonGeo = 0;
@@ -404,7 +850,8 @@ ShowmapCtrl.refreshData = function(callback) {
     console.log("CALL: refreshData");
 
     async.parallel([
-        function(next){
+        function(next)
+        {
             if ( ShowmapCtrl.chkHeatmap &&
                 ShowmapCtrl.chkHeatmap.checked)
                 setData_Heatmap();
@@ -430,424 +877,6 @@ ShowmapCtrl.refreshData = function(callback) {
     });
 };
 
-
-/// CLICK
-
-ShowmapCtrl.cmdFilter_click = function() {
-    console.log("CALL: cmdFilter_click");
-
-    btnCtrl.disableFilterButton();
-    btnCtrl.addImgWaitFilterButton();
-
-    var conditions = new ObjConditions(
-        ShowmapCtrl.$cmbSelectNations,
-        null,
-        ShowmapCtrl.$cmbSelectTags,
-        ShowmapCtrl.$sliderTimer,
-        ShowmapCtrl.$cmbSelectUsers,
-        ShowmapCtrl.$cmbSelectTerms
-    );
-
-    var queryString = conditions.getQueryString();
-
-    DataCtrl.getFromUrl(DataCtrl.FIELD.STAT, queryString, function(docStat){
-        ShowmapCtrl.filteredStat = docStat;
-        async.waterfall([
-            function (next) {
-                ShowmapCtrl.filterData( conditions, ShowmapCtrl.datas , function(result){
-                    ShowmapCtrl.filteredDatas = result;
-                    next();
-                })
-            },
-            function (next) {
-                ShowmapCtrl.filterRegions(conditions, ShowmapCtrl.regions , function(result){
-                    ShowmapCtrl.filteredRegions = result;
-                    next();
-                })
-            },
-            function(next){
-                ShowmapCtrl.refreshData(function(){next();})
-            }
-        ], function () {
-            formCtrl.setCountData();
-            btnCtrl.enableFilterButton();
-            btnCtrl.removeImgWaitFilterButton();
-        });
-    });
-};
-
-ShowmapCtrl.heatmap_click = function() {
-    if ( $("#chk_heatmap")[0].checked )
-        showHeatmap();
-    else
-        hideHeatmap();
-};
-
-ShowmapCtrl.markerCluster_click = function() {
-    if ( $("#chk_markerCluster")[0].checked )
-        showMarkerCluster();
-    else
-        hideMarkerCluster();
-};
-
-ShowmapCtrl.showBoundaries_click = function() {
-    if ( $("#chk_boundaries")[0].checked )
-        setBoundaries();
-    else
-        hideBoundaries();
-};
-
-
-var showHeatmap = function ()
-{
-    console.log("CALL: showHeatmap");
-
-    //visualizzo lo spinner di attesa
-    var spinnerHeatmap = $("#spinner-heatmap");
-    spinnerHeatmap.removeClass("fa fa-spinner fa-spin spinner-datas");
-    spinnerHeatmap.addClass("fa fa-refresh fa-spin");
-    spinnerHeatmap.show();
-
-    if (ShowmapCtrl.layerHeatmap == null)
-    {
-        ShowmapCtrl.layerHeatmap = new HeatmapOverlay(cfg);
-        ShowmapCtrl.mainMap.addLayer( ShowmapCtrl.layerHeatmap );
-    }
-
-    setData_Heatmap();
-
-    //rimuovo lo spinner di attesa
-    spinnerHeatmap.removeClass("fa fa-refresh fa-spin");
-    spinnerHeatmap.addClass("fa fa-spinner fa-spin spinner-datas");
-    spinnerHeatmap.hide();
-};
-
-function showMarkerCluster()
-{
-    console.log("CALL: showMarkerCluster");
-
-    //visualizzo lo spinner di attesa
-    var spinnerCluster = $("#spinner-cluster");
-    spinnerCluster.removeClass("fa fa-spinner fa-spin spinner-datas hidden");
-    spinnerCluster.addClass("fa fa-refresh fa-spin");
-
-    //spinnerCluster.show();
-
-    setTimeout(showMarkerClusterAsync, 100);
-}
-
-function showMarkerClusterAsync() {
-    console.log("CALL: showMarkerClusterAsync");
-
-    if ( ShowmapCtrl.layerMakerCluster == null )
-    {
-        console.log("     creo il MarkerClusterGroup");
-        createNewLayerMarkerCluster();
-    }
-
-    setData_MarkerCluster();
-
-    //rimuovo lo spinner di attesa
-    var spinnerCluster = $("#spinner-cluster");
-    spinnerCluster.removeClass("fa fa-refresh fa-spin");
-    spinnerCluster.addClass("fa fa-spinner fa-spin spinner-datas hidden");
-}
-
-function createNewLayerMarkerCluster() {
-    ShowmapCtrl.layerMakerCluster = new L.markerClusterGroup(
-        {
-            animateAddingMarkers: true,
-            chunkedLoading: true
-        }
-    );
-}
-
-var markerList = [];
-
-function setData_MarkerCluster() {
-    console.log("CALL: setData_MarkerCluster");
-
-    if(!ShowmapCtrl.layerMakerCluster) return;
-
-    ShowmapCtrl.layerMakerCluster.clearLayers();
-
-    createNewLayerMarkerCluster();
-
-    markerList = [];
-
-    async.each( ShowmapCtrl.filteredDatas,
-        function(d, next)
-        {
-            var etichetta = d.tag;
-            var text = d.text;
-            var lat = d.latitude;
-            var lng = d.longitude;
-            var icon = getIcon(etichetta);
-
-            var marker = new L.Marker(
-                new L.LatLng(lat, lng),
-                {
-                    icon: icon,
-                    title: text
-                });
-            marker.bindPopup(text +
-                "<br><b>User: </b>" + d.user +
-                "<br><b>Tag: </b>" + etichetta +
-                "<br><b>Lon: </b>" + lng +
-                "<br><b>Lat: </b>" + lat);
-
-            markerList.push(marker);
-
-            next(null);
-
-        } ,
-
-        function()
-        {
-            ShowmapCtrl.layerMakerCluster.addLayers( markerList );
-            ShowmapCtrl.mainMap.addLayer( ShowmapCtrl.layerMakerCluster );
-            console.log("marker cluster costruito!");
-        }
-    );
-}
-
-function setBoundaries() {
-    console.log("CALL: setBoundaries");
-
-    //visualizzo lo spinner di attesa
-    var spinnerBoundaries = $("#spinner-boundaries");
-    spinnerBoundaries.removeClass("fa fa-spinner fa-spin spinner-regions");
-    spinnerBoundaries.addClass("fa fa-refresh fa-spin");
-    spinnerBoundaries.show();
-
-    if (ShowmapCtrl.layerBoundaries != null)
-        hideBoundaries();
-
-    ShowmapCtrl.layerBoundaries = L.geoJson(
-        ShowmapCtrl.filteredRegions,
-        {
-            style: _style,
-            onEachFeature: _onEachFeature
-        }
-    );
-
-    ShowmapCtrl.layerBoundaries.addTo( ShowmapCtrl.mainMap );
-    ShowmapCtrl.layerBoundaries.bringToFront();
-
-    insertLegend();
-
-    //rimuovo lo spinner di attesa
-    spinnerBoundaries.removeClass("fa fa-refresh fa-spin");
-    spinnerBoundaries.addClass("fa fa-spinner fa-spin spinner-regions");
-    spinnerBoundaries.hide();
-}
-
-function _style(feature) {
-    return {
-        fillColor: _getColor( getAvg(feature) ),
-        fillOpacity: 0.5,
-        weight: 2,
-        opacity: 0.5,
-        color: 'white',
-        dashArray: '3'
-    };
-}
-
-function getAvg(feature) {
-    var nation = feature.properties.NAME_0;
-    var region = feature.properties.NAME_1;
-    var avg = 0;
-    if(ShowmapCtrl.filteredStat.data.nations[nation] != null)
-        avg = ShowmapCtrl.filteredStat.data.nations[nation].regions[region].avg;
-    return avg;
-}
-
-function _getColor(percentage) {
-    return percentage > 0.8 ? '#800026' :
-        percentage > 0.7 ? '#BD0026' :
-            percentage > 0.6 ? '#E31A1C' :
-                percentage > 0.5 ? '#FC4E2A' :
-                    percentage > 0.4 ? '#FD8D3C' :
-                        percentage > 0.3 ? '#FEB24C' :
-                            percentage > 0.2 ? '#FED976' :
-                                '#FFEDA0';
-}
-
-function _onEachFeature(feature, layer) {
-    layer.on
-    (
-        {
-            mouseover: _mouseover_feature,
-            mouseout: _mouseout_feature,
-            click: _click_feature
-        }
-    );
-}
-
-function _mouseover_feature(e) {
-    var layer = e.target;
-    ShowmapCtrl.mainMap.dragging.disable();
-
-    layer.setStyle({
-        weight: 5,
-        color: '#666',
-        dashArray: '',
-        fillOpacity: 0.7
-    });
-
-    if (!L.Browser.ie && !L.Browser.opera) {
-        layer.bringToFront();
-    }
-}
-
-function _mouseout_feature(e) {
-    if ( ShowmapCtrl.activeLayerBoundaries != null &&
-        ShowmapCtrl.showInfoActiveLayer ) return;
-
-    ShowmapCtrl.mainMap.dragging.enable();
-    ShowmapCtrl.layerBoundaries.resetStyle(e.target);
-}
-
-function  _click_feature(e) {
-    console.log("Click!");
-
-    // lock map
-    ShowmapCtrl.activeLayerBoundaries = e.target;
-
-    // chiudo altri popup aperti
-    if ( ShowmapCtrl.showInfoActiveLayer ) {
-        console.log("showInfoActiveLayer NULL!");
-        ShowmapCtrl.mainMap.closePopup();
-        return;
-    }
-
-    var nation = e.target.feature.properties.NAME_0;
-    var region = e.target.feature.properties.NAME_1;
-
-    var eNation = ShowmapCtrl.filteredStat.data.nations[nation].regions[region];
-    var tot_tweet = eNation.count;
-    var counter = eNation.counter;
-
-    var pop = '<div class="popup">' +
-                '<h3 class="title-popup" style="min-width: 100px">' +
-                    region +
-                '</h3>';
-
-    for(var k in counter)
-    {
-        var tag = k.charAt(0).toUpperCase() + k.slice(1) + ': ';
-        pop = pop +
-            '<div class="row-popup">' +
-             '<div class="label-popup-left">' + tag + '</div>' +
-             '<div class="label-popup-right">' + counter[k].count + '</div>' +
-            '</div>';
-    }
-
-    pop += "<hr class='separator'>";
-
-    pop +=
-        '<div class="row-popup">' +
-            '<div class="label-popup-left">Tot:</div>' +
-            '<div class="label-popup-right">' + tot_tweet + '</div>' +
-        '</div>';
-
-    console.log("Popup " + e.target.feature.properties.NAME_1);
-    e.target.bindPopup(pop).openPopup();
-
-    //ShowmapCtrl.mainMap.fitBounds(e.target.getBounds());
-}
-
-var hideHeatmap = function() {
-    console.log("CALL: hideHeatmap");
-    ShowmapCtrl.mainMap.removeLayer( ShowmapCtrl.layerHeatmap );
-    //if ( ShowmapCtrl.mainMap.layerLegend != null )
-    //    ShowmapCtrl.mainMap.removeControl( ShowmapCtrl.mainMap.layerLegend );
-};
-
-var hideMarkerCluster = function() {
-    console.log("CALL: hideMarkerCluster");
-    ShowmapCtrl.mainMap.removeLayer( ShowmapCtrl.layerMakerCluster );
-
-    //if ( ShowmapCtrl.layerLegend != null ) {
-    //    ShowmapCtrl.mainMap.removeControl( ShowmapCtrl.layerLegend );
-    //    ShowmapCtrl.layerLegend = null;
-    //}
-
-};
-
-var hideBoundaries = function() {
-    console.log("CALL: hideBoundaries");
-
-    if ( ShowmapCtrl.layerBoundaries != null)
-    {
-        ShowmapCtrl.mainMap.removeLayer( ShowmapCtrl.layerBoundaries );
-        ShowmapCtrl.layerBoundaries = null;
-        removeLegendBoundaries();
-    }
-};
-
-function removeLegendBoundaries() {
-    if( ShowmapCtrl.legendControl != null ) {
-        ShowmapCtrl.mainMap.removeControl( ShowmapCtrl.legendControl );
-        ShowmapCtrl.legendControl = null;
-    }
-}
-
-function insertLegend() {
-
-    console.log("CALL: insertLegend");
-
-    if ( ShowmapCtrl.legendControl == null)
-    {
-        ShowmapCtrl.legendControl = L.control( {position: 'bottomleft'});
-
-        ShowmapCtrl.legendControl.onAdd = function (map)
-        {
-            var div = L.DomUtil.create('div', 'info legend'),
-                grades = [0, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8],
-                labels = [],
-                from, to;
-            labels.push('<label style="margin: 0px; margin-bottom: 10px; text-align: center"><b>Percentage of<br>total points</b></label>');
-            for (var i = 0; i < grades.length; i++) {
-                from = grades[i];
-                to = grades[i + 1];
-
-                labels.push(
-                    '<i style="background:' + _getColor(from + 0.01) + '"></i> ' +
-                    from + (to ? '&ndash;' + to : '+'));
-            }
-            div.innerHTML = labels.join('<br>');
-            return div;
-        };
-
-        ShowmapCtrl.legendControl.addTo(ShowmapCtrl.mainMap);
-    }
-}
-
-function setData_Heatmap() {
-    console.log("CALL: setData_Heatmap");
-
-    var tmpData = {
-        max: 1,
-        data: ShowmapCtrl.filteredDatas
-    };
-
-    console.log("CALL: SetDataLayerHeatmap data.lenght=" + tmpData.data.length);
-
-    if (ShowmapCtrl.layerHeatmap)
-    {
-        if( tmpData.data.length != 0) {
-
-            if (!ShowmapCtrl.mainMap.hasLayer(ShowmapCtrl.layerHeatmap))
-                ShowmapCtrl.mainMap.addLayer(ShowmapCtrl.layerHeatmap);
-
-            ShowmapCtrl.layerHeatmap.setData(tmpData);
-        }
-        else
-            hideHeatmap();
-    }
-}
-
 function getIcon(etichetta) {
     switch (etichetta)
     {
@@ -866,3 +895,11 @@ function getAwesomeMarker(color) {
         markerColor: color
     });
 }
+
+var mapCtrl = null;
+
+$(document).ready(function(){
+    mapCtrl = new MapCtrl('map');
+    ShowmapCtrl.getData();
+});
+

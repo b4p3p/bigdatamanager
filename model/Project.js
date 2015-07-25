@@ -274,15 +274,23 @@ Project.getLastUpdate = function(project , callback)
     );
 };
 
+function divInline(text, divClass ){
+
+    //var div = '<div style="display:inline-block;width: ' + width +'">';
+    var div = '<div class="' + divClass + '" style="display:inline-block">';
+    div += text;
+    div += "</div>";
+    return div;
+}
+
 /**
  * Crea e salva il documento di stat in summaries
  * @param project
  * @param username
  * @param callback
  */
-Project.sync = function(project, username, callback)
+Project.sync = function(project, username, res, callback)
 {
-
     console.log("CALL: Project.sync");
 
     var connection  = mongoose.createConnection('mongodb://localhost/oim');
@@ -297,8 +305,8 @@ Project.sync = function(project, username, callback)
             //cancello la precendente sincronizzazione
             function(next)
             {
-
-                console.log("     cancello la precedente sincronizzazione");
+                res.write("DELETE previous synchronization<br>");
+                console.log("     DELETE previous synchronization");
 
                 datas.update(
                     { projectName: project } ,
@@ -314,7 +322,8 @@ Project.sync = function(project, username, callback)
             //get regions
             function(next){
 
-                console.log("     get regions");
+                console.log("     FETCH nations");
+                res.write("FETCH nations<br>");
 
                 regions.find( {},
                     function(err, regions) {
@@ -328,6 +337,8 @@ Project.sync = function(project, username, callback)
             function(regions, next){
 
                 console.log("     set regions/nations data - #" + regions.length);
+                res.write("FOUND " + regions.length + " nations<br>");
+
                 var cont=0;
                 var len = regions.length;
 
@@ -354,6 +365,7 @@ Project.sync = function(project, username, callback)
                                 },
                                 {multi: true, w: 1},
                                 function (err, result) {
+                                    res.write( divInline(cont + "/" + len, "countRes") + " - Modified " + divInline(result.result.nModified, "countDocs") + " docs in " + region._doc.properties.NAME_1 + "@" + region._doc.properties.NAME_0 + "<br>");
                                     console.log("   fatto " + cont + "/" + len + " - " + region._doc.properties.NAME_0 + ":" + region._doc.properties.NAME_1);
                                     cont++;
                                     next(null);
@@ -374,9 +386,7 @@ Project.sync = function(project, username, callback)
             {
                 console.log("     get new stat filter");
                 Summary.getStatFilter( project, username, null, function(err, doc){
-
                     next(null, doc)
-
                 });
             },
 
@@ -410,9 +420,9 @@ Project.sync = function(project, username, callback)
                         size: docSync.data.countTot
                     }},
                     { w:1 },
-                    function (err, result)
+                    function (err)
                     {
-                        next(null, docSync);
+                        next(err, docSync);
                     }
                 )
             }

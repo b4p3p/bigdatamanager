@@ -4,11 +4,10 @@ var async = require('async');
 var fs = require('fs');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-//var MongoClient = require('mongodb').MongoClient;
+var Util = require("../controller/nodeUtil");
 var url = 'mongodb://localhost:27017/oim';
 var Datas = require("../model/Data");
 var Regions = require("../model/Regions");
-//var Projects = require("../model/Project");
 var _ = require("underscore");
 
 var Summary = function () {
@@ -77,7 +76,7 @@ Summary.getStat = function (project, callback)
     );
 };
 
-Summary.getStatFilter = function (project, username, query, callback)
+Summary.getStatFilter = function (project,username, query, callback)
 {
     console.log("CALL Summary.getStatFilter of " + project);
 
@@ -98,6 +97,7 @@ Summary.getStatFilter = function (project, username, query, callback)
     };
 
     function _setDate(date) {
+
         if (!docSync.data.minDate)
             docSync.data.minDate = date;
         if (!docSync.data.maxDate)
@@ -147,7 +147,7 @@ Summary.getStatFilter = function (project, username, query, callback)
     var maxRegionCount = 0;
     var maxNationCount = 0;
 
-    query = buildQuery(query);
+    var queryAgg = buildQuery(query);
 
     async.parallel( {
 
@@ -180,7 +180,7 @@ Summary.getStatFilter = function (project, username, query, callback)
                             $match: {
                                 projectName: project,
                                 nation: {$exists: true},
-                                $and: query
+                                $and: queryAgg
                             }
                         },
 
@@ -301,7 +301,7 @@ Summary.getStatFilter = function (project, username, query, callback)
                             $match: {
                                 projectName: project,
                                 nation: {$exists: true},
-                                $and: query
+                                $and: queryAgg
                             }
                         },
 
@@ -362,10 +362,11 @@ Summary.getStatFilter = function (project, username, query, callback)
             },
 
             count: function(callback){
-                datas.find( {projectName: project}).count( function (err, result)
-                {
+                var exec = datas.find( {projectName: project} );
+                exec = Util.addWhereClause(exec, query);
+                exec.count( function (err, result) {
                     callback(err, result);
-                })
+                });
             }
         },
 
@@ -420,9 +421,6 @@ Summary.getStatFilter = function (project, username, query, callback)
             })
             ;
         });
-
-
-
 };
 
 module.exports = Summary;

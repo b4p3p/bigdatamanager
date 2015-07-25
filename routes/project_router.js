@@ -191,25 +191,32 @@ module.exports = function (router, app) {
 
     router.get('/sync', function (req, res) {
 
-        var project = req.session.project || req.query.project;
-        var username = req.session.user;
+        var project =  req.session.project || req.query.project;
+        var username = req.session.user || req.query.user;
 
-        console.log("CALL: /synchronize of %s", project);
+        res.setHeader('Connection', 'Transfer-Encoding');
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Transfer-Encoding', 'chunked');
 
-        if (!project || !username)
-            res.json({});
-        else
-        {
-            Project.sync(project, username, function (err, result) {
-                console.log("### SINCRONIZZAZIONE EFFETTUATA");
-            });
+        var start = new Date();
 
-            res.json({status:0, message: "wait"});
+        res.write('<body style="color:dimgrey;font-family: monospace;font-size: 15px;text-align: left;position: static;">');
 
-        }
+        res.write('###########################################<br>');
+        res.write('###### Synchronize datas in regions  ######<br>');
+        res.write('###########################################<br>');
+
+        if( !project ) { res.write("Error: no project<br>"); return; }
+
+        res.write("Project: " + project + "<br>");
+
+        Project.sync(project, username, res, function (err, result) {
+            res.end('Finish in ' + (new Date().getTime() - start.getTime()) / 1000 + " s");
+        });
     });
 
     router.get('/stat', function (req, res, next) {
+
         if (_.keys(req.query).length > 0) {
             next(null);
             return;

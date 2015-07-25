@@ -165,7 +165,6 @@ DataCtrl.getFromUrl = function(field, queryString,  callback)
         success: function(data){
             //console.log("    success");
             callback(data);
-
         },
 
         error:function(error){

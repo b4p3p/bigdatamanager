@@ -52,10 +52,10 @@
     position:relative;
     display: block;
 }
-#terminal {
+.terminal {
     background-color: #33485E;
     width: 100%;
-    height: 200px;
+    /*height: 200px;*/
     border-radius: 2%;
     margin: 0 auto;
     padding: 1px;

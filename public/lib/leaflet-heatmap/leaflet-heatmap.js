@@ -56,6 +56,7 @@ var HeatmapOverlay = L.Layer.extend({
         map.off('viewreset', this._resetOrigin, this);
         map.off('dragend', this._draw, this);
     },
+
     _draw: function() {
         if (!this._map) { return; }
 
@@ -68,6 +69,7 @@ var HeatmapOverlay = L.Layer.extend({
 
         this._update();
     },
+
     _update: function() {
         var bounds, zoom, scale;
 

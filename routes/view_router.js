@@ -117,6 +117,11 @@ module.exports = function (router) {
         res.render('../views/pages/index.ejs', arg );
     });
 
+    router.get('/terminal', function (req, res)
+    {
+        res.render('../views/pages/terminal.ejs');
+    });
+
 };
 
 //

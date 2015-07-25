@@ -131,10 +131,10 @@ var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer, $
     this.$cmbTerms = $cmbTerms;
     this.queryString = "";
     this.value = {};
+    this.arrayQueryString = [];
 
     this.create = function()
     {
-        var arrayQueryString = [];
         var regions = DomUtil.getSelectedCombo(this.$cmbRegions);
         var nations = DomUtil.getSelectedCombo(this.$cmbNations);
         var tags = DomUtil.getSelectedCombo(this.$cmbTags);
@@ -143,29 +143,36 @@ var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer, $
         var interval = DomUtil.getIntervalFromRangeSlider(this.$sliderTimer);
 
         if(nations.length > 0)
-            arrayQueryString.push("nations=" + nations.join(","));
+            this.arrayQueryString.push("nations=" + nations.join(","));
 
         if(regions.length > 0)
-            arrayQueryString.push("regions=" + regions.join(","));
+            this.arrayQueryString.push("regions=" + regions.join(","));
 
         if(tags.length > 0)
-            arrayQueryString.push("tags=" + tags.join(","));
+            this.arrayQueryString.push("tags=" + tags.join(","));
 
         if(users.length > 0)
-            arrayQueryString.push("users=" + users.join(","));
+            this.arrayQueryString.push("users=" + users.join(","));
+
+        if(terms.length > 0)
+        {
+            var arrTerms = [];
+            _.each(terms, function(t){
+                arrTerms.push(t.text);
+            });
+            this.arrayQueryString.push("terms=" + arrTerms.join(","));
+        }
+
 
         if(this.$sliderTimer)
         {
-            arrayQueryString.push("start=" + interval.min.yyyymmdd());
-            arrayQueryString.push("end=" + interval.max.yyyymmdd());
+            this.arrayQueryString.push("start=" + interval.min.yyyymmdd());
+            this.arrayQueryString.push("end=" + interval.max.yyyymmdd());
             interval = {
                 min: interval.min,
                 max: interval.max
             };
         }
-
-        if( arrayQueryString != [] )
-            this.queryString = "?" + arrayQueryString.join("&");
 
         this.value = {
             queryString : this.queryString,
@@ -185,12 +192,40 @@ var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer, $
 
     this.getQueryString = function()
     {
-        return this.value.queryString;
+        if( this.arrayQueryString != [] )
+            return "?" + this.arrayQueryString.join("&");
+        else
+            return "";
     };
 
     this.getConditions = function()
     {
         return this.value.conditions;
+    };
+
+    this.setSkip = function(skip){
+        this.removeCondiction("skip");
+        this.arrayQueryString.push("skip=" + skip);
+    };
+
+    this.setLimit = function(limit){
+        this.removeCondiction("limit");
+        this.arrayQueryString.push("limit=" + limit);
+    };
+
+    this.setIsGeo = function(value){
+        this.removeCondiction("isGeo");
+        this.arrayQueryString.push("isGeo=" + value);
+    };
+
+    this.removeCondiction = function(value){
+        for(var i = 0; i < this.arrayQueryString.length; i++) {
+            if(this.arrayQueryString[i].indexOf(value)>=0)
+            {
+                this.arrayQueryString.splice(i, 1);
+                return;
+            }
+        }
     };
 
     this.containRegion = function(region)

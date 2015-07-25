@@ -9,6 +9,7 @@ var converter = require('../controller/converterCtrl');
 var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://localhost:27017/oim';
 var tm = require("text-miner");
+var Util = require("../controller/nodeUtil");
 
 //var ERROR = function() {
 //    return {
@@ -166,18 +167,10 @@ Data.getDatas = function (projectName, query, callback)
 
     var exec = datas.find({projectName: projectName});
 
-    if(query.isGeo)
-        exec.where("nation").exists();
-
-    if(query.skip)
-        exec.skip(query.skip);
-
-    if(query.limit)
-        exec.limit(query.limit);
-    else
-        exec.limit(30000);      //resolve crash chrome
+    exec = Util.addWhereClause(exec, query);
 
     exec.exec(function (err, docs) {
+
         _.each(docs, function(doc){
             if(doc["nation"] == null) {
                 doc["nation"] = "-";
@@ -185,6 +178,7 @@ Data.getDatas = function (projectName, query, callback)
             }
             delete doc._doc["_id"];
         });
+
         callback(err, docs);
         connection.close();
     });
@@ -197,60 +191,13 @@ Data.getDataFilter = function (projectName, query, callback)
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
 
-
-
     async.parallel({
+
         data: function(next)
         {
             var exec = datas.find({projectName: projectName});
 
-            if(query.hasOwnProperty("nations"))
-            {
-                var nations = query.nations.split(",");
-                exec.where('nation').in(nations);
-            }
-
-            if(query.hasOwnProperty("regions"))
-            {
-                var regions = query.regions.split(",");
-                exec.where('region').in(regions);
-            }
-
-            if(query.hasOwnProperty("users"))
-            {
-                var users = query.users.split(",");
-                exec.where('user').in(users);
-            }
-
-            if(query.hasOwnProperty("tags"))
-            {
-                var tags = query.tags.split(",");
-                exec.where('tag').in(tags);
-            }
-
-            if(query.hasOwnProperty("tokens"))
-            {
-                var tokens = query.tokens.split(",");
-                exec.where('tokens').in(tokens);
-            }
-
-            if(query.hasOwnProperty("end")) {
-                exec.where('date').lte(new Date(query.end));
-            }
-            if(query.hasOwnProperty("start")) {
-                exec.where('date').gte(new Date(query.start));
-            }
-            if(query.hasOwnProperty("eq")) {
-                exec.where('date').eq(new Date(query.end));
-            }
-
-            if(query.skip)
-                exec.skip(query.skip);
-
-            if(query.limit)
-                exec.limit(query.limit);
-            else
-                exec.limit(30000);      //resolve crash chrome
+            exec = addWhereClause(exec, query);
 
             exec.exec(function (err, docs) {
 
@@ -268,55 +215,16 @@ Data.getDataFilter = function (projectName, query, callback)
         {
             var exec = datas.find({projectName: projectName});
 
-            if(query.hasOwnProperty("nations"))
-            {
-                var nations = query.nations.split(",");
-                exec.where('nation').in(nations);
-            }
-
-            if(query.hasOwnProperty("regions"))
-            {
-                var regions = query.regions.split(",");
-                exec.where('region').in(regions);
-            }
-
-            if(query.hasOwnProperty("users"))
-            {
-                var users = query.users.split(",");
-                exec.where('user').in(users);
-            }
-
-            if(query.hasOwnProperty("tags"))
-            {
-                var tags = query.tags.split(",");
-                exec.where('tag').in(tags);
-            }
-
-            if(query.hasOwnProperty("tokens"))
-            {
-                var tokens = query.tokens.split(",");
-                exec.where('tokens').in(tokens);
-            }
-
-            if(query.hasOwnProperty("end")) {
-                exec.where('date').lte(new Date(query.end));
-            }
-            if(query.hasOwnProperty("start")) {
-                exec.where('date').gte(new Date(query.start));
-            }
-            if(query.hasOwnProperty("eq")) {
-                exec.where('date').eq(new Date(query.end));
-            }
+            exec = addWhereClause(exec, query);
 
             exec.count(function(err, count){
                 next(null, count);
             });
         }
     },function(err, result){
-        callback(err, {count: result.count, data: result.data });
         connection.close();
+        callback(err, {count: result.count, data: result.data });
     });
-
 
 };
 

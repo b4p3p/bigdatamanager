@@ -1,25 +1,45 @@
-/**
- * Created by b4p3p on 24/05/15.
- */
+var Util = function () {};
 
-var CsvConverter = require("csvtojson").core.Converter;
-var ConverterCtrl = function (data) {};
-
-ConverterCtrl.csvToJson = function(csv, callback)
+Util.addWhereClause = function(exec, query)
 {
-    //Converter Class
-    var csvConverter = new CsvConverter();
+    if(query.hasOwnProperty("terms"))
+    {
+        var terms = query.terms.split(',');
+        var reg = new RegExp( terms.join("|"), "i");
+        exec.where({text: reg})
+    }
+    if(query.hasOwnProperty("nations"))
+        exec.where('nation').in( query.nations.split(",") );
 
-    csvConverter.on("end_parsed", function(jsonObj) {
-        callback(jsonObj);
-    });
+    if(query.hasOwnProperty("regions"))
+        exec.where('region').in( query.regions.split(","));
 
-    csvConverter.fromString(csv, function(jsonObj){
-        //if (jsonObj == null)
-        //    return;
-        //return saveJson(callback, jsonObj);
-    });
+    if(query.hasOwnProperty("users"))
+        exec.where('user').in(query.users.split(","));
 
+    if(query.hasOwnProperty("tags"))
+        exec.where('tag').in(query.tags.split(","));
+
+    if(query.hasOwnProperty("tokens"))
+        exec.where('tokens').in(query.tokens.split(","));
+
+    if(query.hasOwnProperty("end"))
+        exec.where('date').lte(new Date(query.end));
+
+    if(query.hasOwnProperty("start"))
+        exec.where('date').gte(new Date(query.start));
+
+    if(query.hasOwnProperty("eq"))
+        exec.where('date').eq(new Date(query.end));
+
+    if(query.skip)  exec.skip(query.skip);
+
+    if(query.limit)
+        exec.limit(query.limit);
+    else
+        exec.limit(30000);      //resolve crash chrome
+
+    return exec;
 };
 
-module.exports = ConverterCtrl;
+module.exports = Util;

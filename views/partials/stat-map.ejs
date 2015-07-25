@@ -10,8 +10,6 @@
 <script src="/public/lib/bootstrap-select/js/bootstrap-select.js"></script>
 <script src="/public/lib/bootstrap-select/js/i18n/defaults-eu.js"></script>
 
-<script src="/public/js/Stat-MapCtrl.js"></script>
-
 <style>
 
     .fix-label{
@@ -126,6 +124,10 @@
         width: auto;
     }
 
+    #progressCount{
+        width: 105%;
+    }
+
 </style>
 
 <div class="row">
@@ -180,7 +182,6 @@
             <button type="button" class="btn btn-success"
                     id="cmdFilter"
                     style="float: right; margin-top: 15px; margin-left: 10px;"
-                    onclick="ShowmapCtrl.cmdFilter_click()"
                     disabled>
                 <span id="img-filter" class="glyphicon glyphicon-filter" aria-hidden="true"></span>
                 Apply filter
@@ -214,8 +215,8 @@
         <div class="checkbox" style="margin-right: 10px;">
             <img src="/public/img/icon-heatmap.png" class="img-chk">
             <label>
-                <input type="checkbox" onclick="ShowmapCtrl.heatmap_click()"
-                       id="chk_heatmap" disabled="disabled" class="check-filter">
+                <input type="checkbox" id="chk_heatmap"
+                       disabled="disabled" class="check-filter">
                 Show Heatmap
             </label>
         </div>
@@ -227,7 +228,7 @@
         <div class="checkbox" style="margin-right: 10px;">
             <img src="/public/img/icon-marker-cluster.png" class="img-chk">
             <label>
-                <input type="checkbox" onclick="ShowmapCtrl.markerCluster_click()"
+                <input type="checkbox"
                        id="chk_markerCluster" disabled="disabled"
                        class="check-filter">
                 Show Cluster
@@ -242,35 +243,45 @@
 
             <img src="/public/img/boundaries-ico.png" class="img-chk">
             <label>
-                <input type="checkbox" onclick="ShowmapCtrl.showBoundaries_click()"
+                <input type="checkbox"
                        id="chk_boundaries" class="check-filter" disabled="disabled">
                 Show boundaries
             </label>
         </div>
 
-        <div id="countData">Loading...</div>
+        <!--<div id="countData">Loading...</div>-->
 
     </form>
 
 </div>
 
-<div class="row row-map">
+<!--style="height: 500px;width: 500px;"-->
+<!--style="height: 500px;"-->
+
+<!--row row-map-->
+
+<div class="" style="margin-top: 10px">
+
     <div id="map"></div>
-    <div id="count"></div>
+
+    <div class="progress" id="progressCount">
+        <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar"
+             aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"
+             style="width:100%;text-align: left;padding-left: 5px;color: #000066;font-weight: bold;">
+            <div style="z-index: 10;min-width: 200px">Loading...</div>
+        </div>
+    </div>
+
+    <!--<div id="count"></div>-->
 </div>
 
-<div id="count-container" class="hidden" style="margin-left: -15px">Points found: <span id="count">15000</span></div>
+<!--<div id="count-container" class="hidden" style="margin-left: -15px">-->
+    <!--Points found: <span id="count">15000</span>-->
+<!--</div>-->
+
+<script src="/public/js/Stat-MapCtrl.js"></script>
 
 <script>
-
-    ShowmapCtrl.init();
-    ShowmapCtrl.initMap('map');
-    ShowmapCtrl.initGui();
-    ShowmapCtrl.getData();
-
-    //
-    //    ShowmapCtrl.getData();
-
 
     //fix combo close
     $(document).on('mouseenter','#cmdFilter', function() {
@@ -280,8 +291,7 @@
     var project = '<%= project  %>';
     var user = '<%= user  %>';
 
-    if(!project)
-    {
+    if(!project) {
         bootbox.alert("You must first select a project<br><a href='/view/project/openproject'>Select project</a>");
     }
 

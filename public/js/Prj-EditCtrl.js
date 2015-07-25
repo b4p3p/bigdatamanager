@@ -167,6 +167,7 @@ var PrjEditCtrl = function()
     this.$btnSyncUserTags = $("#synUserTag");
     this.$btnSyncDataTags = $("#synDataTag");
     this.$btnOverrideDataTokens = $("#overrideDataTokens");
+    this.$btnSyncProject = $("#btnsyncproject");
 
     this.$terminal = $("#terminal");
     this.$tableTag = $('#tagsTable');
@@ -396,9 +397,7 @@ var PrjEditCtrl = function()
     };
 
     this.setIntervalScroll = function () {
-
         clearInterval(prjEditCtrl.intervalScroll);
-
         prjEditCtrl.intervalScroll = setInterval(function() {
 
             prjEditCtrl.$terminal.contents().scrollTop(
@@ -414,7 +413,6 @@ var PrjEditCtrl = function()
                 .css('word-wrap','break-word');
 
         } , 500);
-
     };
 
     //click user tag sync
@@ -452,29 +450,23 @@ var PrjEditCtrl = function()
         allowedFileExtensions: ["json"]
     });
 
+    //carico il pie delle nazioni
     DataCtrl.getFromUrl(DataCtrl.FIELD.DATANATIONS, null, function(doc){
-
         var data = [];
         data[0] = ['Nation', 'Count data'];
         _.each(doc, function(row){
             data.push([row.nation, row.sum]);
         });
         var dataTable = google.visualization.arrayToDataTable(data);
-
-        //var dataTable = google.visualization.arrayToDataTable([
-        //    ['Task', 'Hours per Day'],
-        //    ['Work',     11],
-        //    ['Eat',      2],
-        //    ['Commute',  2],
-        //    ['Watch TV', 2],
-        //    ['Sleep',    7]
-        //]);
-
         var chart = new google.visualization.PieChart(document.getElementById('piechart'));
-
         chart.draw(dataTable, _self.optionsPie);
     });
 
+    this.windowSyncDataTags = null;
+    this.documentSyncDataTags = null;
+    this.$btnSyncProject.click(function(){
+        _self.windowSyncDataTags = window.open("/view/terminal#syncproject");
+    });
 };
 var prjEditCtrl = new PrjEditCtrl();
 
