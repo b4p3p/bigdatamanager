@@ -142,27 +142,6 @@ timeLineCtrl.initComboUsers = function()
     timeLineCtrl.$cmbUsers.selectpicker('refresh');
 };
 
-//timeLineCtrl.loadData = function()
-//{
-//    console.log("CALL: loadData");
-//    $.ajax({
-//        type: "get",
-//        crossDomain: true,
-//        dataType: "json",
-//        url: "/gettimeline",
-//        success: function (data) {
-//            timeLineCtrl.data_day = data;
-//            timeLineCtrl.data = data;
-//            timeLineCtrl.drawTimeLine();
-//        },
-//        error: function (xhr, status, error) {
-//            console.error("ERR: ShowmapCtrl.getRegions " + status + " " + xhr.status);
-//            console.error("     Status: " + status + " " + xhr.status);
-//            console.error("     Error: " + error);
-//        }
-//    });
-//};
-
 timeLineCtrl.drawTimeLine = function ()
 {
     console.log("CALL: drawTimeLine");
