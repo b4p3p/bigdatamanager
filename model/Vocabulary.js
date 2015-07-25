@@ -516,8 +516,16 @@ Vocabulary.getWordCount = function(project, callback){
         function(err, doc) {
 
             var ris = {};
-            ris = appendxxxxTags(doc.syncDataTags, "syncDataTags", ris);
-            ris = appendxxxxTags(doc.syncUserTags, "syncUserTags", ris);
+
+            if(doc!=null) {
+                ris = appendxxxxTags(doc.syncDataTags, "syncDataTags", ris);
+                ris = appendxxxxTags(doc.syncUserTags, "syncUserTags", ris);
+            }
+            else {
+                ris["syncDataTags"] = [];
+                ris["syncUserTags"] = [];
+            }
+
             connection.close();
             callback(err, ris);
         }

@@ -43,7 +43,7 @@ app.use( session( {
     cookieName: 'session',
     secret: 'eg[isfd-8yF9-7w2315df{}+Ijsli;;to8',
     duration: 30 * 60 * 1000,
-    activeDuration: 5 * 60 * 1000,
+    activeDuration: 30 * 60 * 1000,
     httpOnly: true,
     secure: true,
     ephemeral: true
@@ -101,46 +101,53 @@ app.getUploadedFiles = function()
     return ris;
 };
 
-app.use( multer( { dest: './uploads/',
+var upload = multer( {
+    dest: 'uploads/'
+} );
+app.up_nations = upload.array("nations");
+app.up_datas = upload.array("datas");
 
-    rename: function (fieldname, filename)
-    {
-        try {
-            console.log('CALL: app.rename');
-            app.contFile++;
-
-            return Date.now() + "-" + filename;
-
-        } catch (e)
-        {
-            console.error(e);
-        }
-    },
-    onFileUploadStart: function (file) {
-        try {
-            console.log('CALL: app.onFileUploadStart (' + file.originalname + ')');
-        } catch (e) {
-            console.error(e);
-        }
-    },
-    onFileUploadComplete: function (file) {
-
-        try {
-            console.log('CALL: app.onFileUploadComplete (' + file.path + ')');
-            app.fileNames.push(file);
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-}));
+//app.use( multer( { dest: './uploads/',
+//
+//    rename: function (fieldname, filename) {
+//        try {
+//            console.log('CALL: app.rename');
+//            app.contFile++;
+//
+//            return Date.now() + "-" + filename;
+//
+//        } catch (e)
+//        {
+//            console.error(e);
+//        }
+//    },
+//
+//    onFileUploadStart: function (file) {
+//        try {
+//            console.log('CALL: app.onFileUploadStart (' + file.originalname + ')');
+//        } catch (e) {
+//            console.error(e);
+//        }
+//    },
+//
+//    onFileUploadComplete: function (file) {
+//
+//        try {
+//            console.log('CALL: app.onFileUploadComplete (' + file.path + ')');
+//            app.fileNames.push(file);
+//        } catch (e) {
+//            console.error(e);
+//        }
+//    }
+//
+//}));
 
 /**************
  * END UPLOAD
  **************/
 
 /*******************************
- ******   ROUTERvar spinnerCluster = $("#spinner-cluster");
+ ******   ROUTER ***************
  *******************************/
 
 var router_vocabulary = express.Router();
@@ -161,7 +168,7 @@ require('./routes/router')(app);
 require('./routes/database_router')(app);
 require('./routes/statistics_router')(app);
 
-require('./routes/regions_router')(router_regions, app);
+require('./routes/regions_router')(router_regions, app, upload);
 require("./routes/vocabulary")(router_vocabulary);
 require('./routes/project_router')(router_project, app);
 require('./routes/view_router')(router_view);

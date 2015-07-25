@@ -225,7 +225,7 @@
     <div class="form-group">
 
         <input type="file" class="file"
-               name="files" id="upload_input"
+               name="datas" id="upload_input"
                data-show-upload="false"
                data-show-caption="true"
                data-show-preview="false"
@@ -235,33 +235,11 @@
 
     <div class="progress-container row-form" id="progress-container">
 
-        <!--<div class="progress-object">-->
-
-            <!--<div class="progress" id="progressTest">-->
-                <!--<div class="progress-bar progress-bar-success progress-bar-striped"-->
-                     <!--role="progressbar"-->
-                     <!--aria-valuenow="50"-->
-                     <!--aria-valuemin="0"-->
-                     <!--aria-valuemax="100"-->
-                     <!--style="width:50%;text-align:left;color:black;padding-left:10px;">-->
-                    <!--Ciao mondo-->
-                <!--</div>-->
-            <!--</div>-->
-
-            <!--<div class="progress-result">-->
-                <!--Added: 100-->
-                <!--<span class="glyphicon glyphicon-ok" style="color: green" aria-hidden="true"></span>-->
-                <!--- Discard: 5-->
-                <!--<span class="glyphicon glyphicon-remove" style="color: red" aria-hidden="true"></span>-->
-            <!--</div>-->
-
-        <!--</div>-->
-
     </div>
 
 </form>
 
-<div class="form-group row-form">
+<div class="form-group row-form" style="min-height: 40px">
     <button class="btn btn-danger button"
             id="upload_btn"
             onclick="ProjectCtrl.sendFiles()">
@@ -331,7 +309,7 @@
         </div>
     </div>
 
-    <iframe id="terminal"> </iframe>
+    <iframe id="terminal" class="terminal"> </iframe>
 
 </div>
 

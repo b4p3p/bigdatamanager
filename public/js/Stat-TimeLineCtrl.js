@@ -63,7 +63,6 @@ timeLineCtrl.lineOptions = {
     legendTemplate: ""
 };
 
-
 timeLineCtrl.initGUI = function ()
 {
     console.log("CALL: initGUI");
@@ -86,19 +85,21 @@ timeLineCtrl.initGUI = function ()
 timeLineCtrl.getData = function()
 {
     console.log("CALL: getData");
+
     async.parallel({
         data: function(next)
         {
-            DataCtrl.getField( function(doc){
-                timeLineCtrl.data = doc;
-                timeLineCtrl.data_day = doc;
-                timeLineCtrl.filteredData = doc;
-                next(null, doc);
-            }, DataCtrl.FIELD.DATA);
+            next(null, {});
+
+            //DataCtrl.getField( function(doc){
+            //    timeLineCtrl.data = doc;
+            //    timeLineCtrl.data_day = doc;
+            //    timeLineCtrl.filteredData = doc;
+            //    next(null, doc);
+            //}, DataCtrl.FIELD.DATA);
         },
         stat: function(next)
         {
-            "use strict";
             DataCtrl.getField( function(doc){
                 timeLineCtrl.tags = doc.data.allTags;
                 next(null, doc);

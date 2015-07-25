@@ -10,8 +10,7 @@ var urlencode = require('urlencode');
 
 module.exports = function (router, app) {
 
-    router.get('/*', function (req, res, next)
-    {
+    router.get('/*', function (req, res, next) {
         if(!req.session.user)
         {
             res.redirect("/view/login");
@@ -27,8 +26,7 @@ module.exports = function (router, app) {
         next(null);
     });
 
-    router.get('/users', function (req, res)
-    {
+    router.get('/users', function (req, res) {
         var project = req.session.project || req.query.project;
 
         Data.getUsers( project , req.query, function(err, docs){
@@ -37,8 +35,7 @@ module.exports = function (router, app) {
         });
     });
 
-    router.get('/datas', function (req, res)
-    {
+    router.get('/datas', function (req, res) {
         var project = req.session.project || req.query.project;
         var query = req.query;
 
@@ -48,8 +45,7 @@ module.exports = function (router, app) {
 
     });
 
-    router.get('/datafilter', function (req, res)
-    {
+    router.get('/datafilter', function (req, res) {
         var project = req.session.project || req.query.project;
         var query = req.query;
 
@@ -59,8 +55,7 @@ module.exports = function (router, app) {
 
     });
 
-    router.get('/userdata', function (req, res)
-    {
+    router.get('/userdata', function (req, res) {
         var project = req.session.project || req.query.project;
         var query = req.query;
 
@@ -92,8 +87,7 @@ module.exports = function (router, app) {
 
     });
 
-    router.get('/nations', function (req, res)
-    {
+    router.get('/nations', function (req, res) {
         var project = req.session.project || req.query.project;
         Data.getNations( project, function(err, data) {
             res.json(data);

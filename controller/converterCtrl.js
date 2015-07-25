@@ -2,7 +2,7 @@
  * Created by b4p3p on 24/05/15.
  */
 
-var CsvConverter = require("csvtojson").core.Converter;
+var CsvConverter = require("csvtojson").Converter;
 var ConverterCtrl = function (data) {};
 
 ConverterCtrl.csvToJson = function(csv, callback)

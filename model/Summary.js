@@ -80,6 +80,8 @@ Summary.getStatFilter = function (project,username, query, callback)
 {
     console.log("CALL Summary.getStatFilter of " + project);
 
+    Datas = require("../model/Data");
+
     var docSync = {
         project: project,
         username: username,
@@ -119,6 +121,7 @@ Summary.getStatFilter = function (project,username, query, callback)
         var ris = [];
 
         if (query) {
+
             if (query.start) ris.push({date: {$gte: new Date(query.start)}});
             if (query.end)   ris.push({date: {$lte: new Date(query.end)}});
 
@@ -142,6 +145,9 @@ Summary.getStatFilter = function (project,username, query, callback)
     }
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
+
+
+
     var datas = connection.model(Datas.MODEL_NAME, Datas.SCHEMA);
     var regions = connection.model(Regions.MODEL_NAME, Regions.SCHEMA);
     var maxRegionCount = 0;

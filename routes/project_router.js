@@ -140,21 +140,15 @@ module.exports = function (router, app) {
         res.redirect("/project/editproject");
     });
 
-    router.post('/uploaddata', function (req, res) {
+    app.post('/project/uploaddata', app.up_datas, function (req, res) {
 
-        if (!app.isUploadDone()) {
-            console.log("UPLOADING....");
-            return;
-        }
-
-        var files = app.getUploadedFiles();
+        var files = req.files;
         var username = req.session.user;
         var project = req.session.project;
         var type = req.body.type;
         var ris = {};
 
         async.each(files,
-
             function (f, next) {
 
                 var projectData = {

@@ -303,6 +303,8 @@ Regions.removeNation = function (nation, callback) {
  */
 Regions.getRegions = function (arg_nations, isLight, callback) {
 
+    Datas = require("../model/Data");
+
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var regions = connection.model("regions", Regions.SCHEMA);
     var datas = connection.model("datas", Datas.SCHEMA);
