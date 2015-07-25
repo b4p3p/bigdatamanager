@@ -29,6 +29,9 @@
             </select>
         </div>
     </div>
+    <script>
+        $('.selectpicker').selectpicker();
+    </script>
     <div class="div-inline">
         <button type="button" class="btn btn-success"
                 id="statButton"
@@ -62,9 +65,11 @@
     </form>
     <div id="timeLineContainer" class="hidden">
         <canvas id="timeLine"></canvas>
+        <div id="legend"></div>
     </div>
 </div>
 
+<script src="/public/js/ColorUtil.js"></script>
 <script src="/public/js/Stat-Users.js"></script>
 <script src="/public/lib/chartjs/Chart.js"></script>
 <script src="/public/js/DOMUtil.js"></script>
@@ -73,7 +78,6 @@
 
     $(document).ready(function ()
     {
-        $('.selectpicker').selectpicker();
         UsersCtrl.getUsers();
     });
 

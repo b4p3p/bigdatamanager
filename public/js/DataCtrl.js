@@ -65,6 +65,11 @@ DataCtrl.FIELD = {
         KEY: "data",
         URL: "/datas/datafilter",
         LASTUPDATE: "data-lastupdate"
+    },
+    USERDATA: {
+        KEY: "userdata",
+        URL: "/datas/userdata",
+        LASTUPDATE: "data-lastupdate"
     }
 };
 
