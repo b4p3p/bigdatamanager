@@ -81,32 +81,7 @@ var BtnCtrl = function() {
             }
         );
 
-        //DataCtrl.getFromUrl(DataCtrl.FIELD.STAT, queryString, function(docStat){
-        //    ShowmapCtrl.filteredStat = docStat;
-        //    async.waterfall([
-        //        //function (next) {
-        //        //    ShowmapCtrl.filterData( conditions, ShowmapCtrl.datas , function(result){
-        //        //        ShowmapCtrl.filteredDatas = result;
-        //        //        next();
-        //        //    })
-        //        //},
-        //        function (next) {
-        //            ShowmapCtrl.filterRegions(conditions, ShowmapCtrl.regions , function(result){
-        //                ShowmapCtrl.filteredRegions = result;
-        //                next();
-        //            })
-        //        },
-        //        function(next){
-        //            ShowmapCtrl.refreshData(function(){next();})
-        //        }
-        //    ], function () {
-        //        formCtrl.setCountData();
-        //        btnCtrl.enableFilterButton();
-        //        btnCtrl.removeImgWaitFilterButton();
-        //    });
-        //});
     });
-
 };
 
 //Progress
@@ -806,75 +781,6 @@ ShowmapCtrl._getDataMapAsync = function(_idOp, condictions, timeout, step, start
             }
         }
     );
-};
-
-
-
-ShowmapCtrl.filterData = function(objCond, data, callback) {
-    ShowmapCtrl.contNonGeo = 0;
-    async.filter( data,
-        function(obj, next)
-        {
-            if(!obj["latitude"] || !obj["longitude"] )
-            {
-                ShowmapCtrl.contNonGeo ++;
-                next(false);
-                return;
-            }
-
-            if(objCond)
-            {
-                if( obj.text.indexOf( "Juve" ) > 0 ) {
-                    var test = objCond.containTerm(obj.tag , obj.text);
-                }
-
-                var tmp = objCond.containNation(obj.nation) &&
-                            objCond.containTag(obj.tag) &&
-                            objCond.isInRange(obj.date) &&
-                            objCond.containUser(obj.user) &&
-                            objCond.containTerm(obj.tag , obj.text);
-                next(tmp);
-            }
-
-            else
-                next(true);
-        },
-        function(results)
-        {
-            callback(results);
-        }
-    );
-};
-
-ShowmapCtrl.refreshData = function(callback) {
-    console.log("CALL: refreshData");
-
-    async.parallel([
-        function(next)
-        {
-            if ( ShowmapCtrl.chkHeatmap &&
-                ShowmapCtrl.chkHeatmap.checked)
-                setData_Heatmap();
-            next();
-        },
-        function (next)
-        {
-            if ( ShowmapCtrl.chkMarkercluster &&
-                ShowmapCtrl.chkMarkercluster.checked )
-                setData_MarkerCluster();
-            next();
-        },
-        function (next)
-        {
-            if ( ShowmapCtrl.chkBoudaries &&
-                ShowmapCtrl.chkBoudaries.checked )
-                setBoundaries();
-            next();
-        }
-    ], function()
-    {
-        callback();
-    });
 };
 
 function getIcon(etichetta) {

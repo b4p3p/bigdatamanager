@@ -383,8 +383,7 @@ Summary.getStatFilter = function (project,username, query, callback)
                 function(obj, next){
 
                     //nation == null
-                    if(!docSync.data.nations[obj.nation])
-                    {
+                    if(!docSync.data.nations[obj.nation]) {
                         next(null);
                         return;
                     }

@@ -197,7 +197,7 @@ Data.getDataFilter = function (projectName, query, callback)
         {
             var exec = datas.find({projectName: projectName});
 
-            exec = addWhereClause(exec, query);
+            exec = Util.addWhereClause(exec, query);
 
             exec.exec(function (err, docs) {
 
