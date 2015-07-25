@@ -51,14 +51,15 @@ UsersCtrl.lineOptions = {
     //Boolean - Whether to show a stroke for datasets
     datasetStroke: true,
     //Number - Pixel width of dataset stroke
-    datasetStrokeWidth: 3,
+    datasetStrokeWidth: 2,
     //Boolean - Whether to fill the dataset with a colour
     datasetFill: true,
-    multiTooltipTemplate: function(valuesObject){
-                              if(valuesObject.value != 0)
-                                return valuesObject.label + ": " + valuesObject.value;
-                                }
+    //tooltipTemplate: "<%if (label){%><%=label%>: <%}%><%= value %>",
 
+    //multiTooltipTemplate: "<% if (value != 0) { %>" +
+    //                        "<%= datasetLabel %> - <%= value %>" +
+    //                        "<% } %>",
+    //String - A legend template
     //legendTemplate: '<div>'
     //                    +'<% for (var i=0; i<datasets.length; i++) { %>'
     //                        +'<div>'
@@ -68,7 +69,6 @@ UsersCtrl.lineOptions = {
     //                    +'<% } %>'
     //                +'</div>'
 };
-
 
 UsersCtrl.getUsers = function (callback)
 {
@@ -292,7 +292,7 @@ UsersCtrl.getDataset = function ()
         dataset = UsersCtrl.getDatasetValue(userObj);
             ris[index] = {
                 label: userObj.user,
-                fillColor: "rgba(151,187,205,0.2)",//colorUtil.ColorLuminance(color[index], 1),
+                fillColor: "rgba(151,187,205,0.2)", //colorUtil.ColorLuminance(color[index], 1),
                 strokeColor: color[index],
                 pointColor: color[index],
                 pointStrokeColor: "#fff",
