@@ -1,0 +1,87 @@
+<script src="/public/js/Stat-Users.js"></script>
+<script src="/public/lib/chartjs/Chart.js"></script>
+<script src="/public/js/DOMUtil.js"></script>
+
+<style>
+    .form-option {
+        margin-top: 15px;
+        margin-right: 15px;
+    }
+
+    .div-inline {
+        display: inline-block;
+    }
+
+    #timeLineContainer {
+        position: relative;
+        top: 0;
+        bottom:0; !important;
+        width:100%;
+        padding-left: 0;
+        margin-top: 0;
+    }
+</style>
+
+<div id="container" style="margin-top: 0px">
+
+    <div class="div-inline">
+        <div id="formUsers" class="form-group form-option">
+            <select class="selectpicker" id="cmbUsers"
+                    data-live-search="true" title="Select users"
+                    multiple>
+            </select>
+        </div>
+    </div>
+    <div class="div-inline">
+        <button type="button" class="btn btn-success"
+                id="statButton"
+                style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"
+                onclick="UsersCtrl.clickStat()">
+            <span id="img-filter" class="fa fa-bar-chart" aria-hidden="true"></span> Show statistics
+        </button>
+        <button type="button" class="btn btn-danger"
+                id="restoreButton"
+                onclick="UsersCtrl.clickRestore()"
+                disabled>
+            <span id="img-restore" class="glyphicon glyphicon-remove" aria-hidden="true"></span> Restore
+        </button>
+    </div>
+
+    <form id="formType" class="form-inline hidden" role="form" style="margin-top: 20px; margin-bottom: 20px">
+        <div class="form-group">
+            <label class="fix-label">Visualization mode:</label><br>
+
+            <div class="radio">
+                <label><input id="radioDays" type="radio" name="optmode" value="days" checked=""
+                              onclick="UsersCtrl.handleModeClick(this);"> Days</label></div><br>
+            <div class="radio">
+                <label>
+                    <input id="radioWeeks" type="radio" name="optmode" value="weeks"
+                           onclick="UsersCtrl.handleModeClick(this);"> Weeks</label></div><br>
+            <div class="radio">
+                <label><input id="radioMonths" type="radio" name="optmode" value="months"
+                              onclick="UsersCtrl.handleModeClick(this);"> Months</label></div>
+        </div>
+    </form>
+    <div id="timeLineContainer" class="hidden">
+        <canvas id="timeLine"></canvas>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function ()
+    {
+        $('.selectpicker').selectpicker();
+        UsersCtrl.getUsers();
+    });
+
+    $('.selectpicker').on('change', function(){
+        UsersCtrl.$statButton.prop("disabled", false);
+        var selectedUsers = DomUtil.getSelectedCombo(UsersCtrl.$cmbUsers);
+        if( selectedUsers.length == 0 )
+            UsersCtrl.$restoreButton.prop("disabled", true);
+        else
+            UsersCtrl.$restoreButton.prop("disabled", false);
+    });
+</script>
