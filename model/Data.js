@@ -311,6 +311,8 @@ Data.getUserData = function( project , query, callback){
         .match({projectName: project, user: {$in:users}})
         .group({
             _id:"$user",
+            minDate:{$min:"$date"},
+            maxDate:{$max:"$date"},
             data:{$push:{
                 text:"$text",
                 region:"$region",
@@ -320,9 +322,30 @@ Data.getUserData = function( project , query, callback){
                 tokens:"$tokens"
             }}
         })
-        .project({data:1, _id:0, user:"$_id"})
-        .exec(function(err, result){
-            callback(err, result);
+        .project({minDate:1, maxDate:1, data:1, _id:0, user:"$_id"})
+        .exec(function(err, results){
+
+            if(results.length==0) {
+                callback(err, results);
+                connection.close();
+                return;
+            }
+
+            var minDate = results[0].minDate;
+            var maxDate = results[0].maxDate;
+
+            _.each(results, function(doc){
+                if(doc.minDate < minDate) minDate = doc.minDate;
+                if(doc.maxDate > minDate) maxDate = doc.maxDate;
+            });
+
+            callback(err, {
+                properties:{
+                    maxDate:maxDate,
+                    minDate:minDate
+                },
+                data:results
+            });
             connection.close();
         })
 };
