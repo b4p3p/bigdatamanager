@@ -25,7 +25,8 @@
         <div id="formUsers" class="form-group form-option">
             <select class="selectpicker" id="cmbUsers"
                     data-live-search="true" title="Select users"
-                    multiple>
+                    multiple
+                    disabled>
             </select>
         </div>
     </div>
@@ -36,8 +37,9 @@
         <button type="button" class="btn btn-success"
                 id="statButton"
                 style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"
-                onclick="UsersCtrl.clickStat()">
-            <span id="img-filter" class="fa fa-bar-chart" aria-hidden="true"></span> Show statistics
+                onclick="UsersCtrl.clickStat()"
+                disabled>
+            <span id="img-filter" class="fa fa-spinner fa-spin" aria-hidden="true"></span> Show statistics
         </button>
         <button type="button" class="btn btn-danger"
                 id="restoreButton"
@@ -64,15 +66,36 @@
         </div>
     </form>
     <div id="timeLineContainer" class="hidden">
-        <canvas id="timeLine"></canvas>
-        <div id="legend"></div>
+        <div id="timeLine"></div>
+    </div>
+
+    <div id="divBar" class="form-group hidden">
+        <label class="fix-label" style="margin-left: 3px">Sort</label><br>
+
+        <div class="btn-group" role="group" aria-label="...">
+            <button id="AZbutton" type="button" class="btn btn-default active"
+                    onclick="UsersCtrl.AZbuttonClick();" disabled>
+                <span id="img-filter" class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span> A - Z
+            </button>
+
+            <button id="ZAbutton" type="button" class="btn btn-default"
+                    onclick="UsersCtrl.ZAbuttonClick();" disabled>
+                <span id="img-filter" class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span> Z - A
+            </button>
+        </div>
+    </div>
+    <div id="barChartContainer" class="hidden">
+        <div id="barChart" style="margin-top: 50px"></div>
     </div>
 </div>
 
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script>
+    google.load('visualization', '1.1', {packages: ['corechart', 'line']});
+</script>
 <script src="/public/js/ColorUtil.js"></script>
-<script src="/public/js/Stat-Users.js"></script>
-<script src="/public/lib/chartjs/Chart.js"></script>
 <script src="/public/js/DOMUtil.js"></script>
+<script src="/public/js/Stat-Users.js"></script>
 
 <script>
 
@@ -85,7 +108,10 @@
         UsersCtrl.$statButton.prop("disabled", false);
         var selectedUsers = DomUtil.getSelectedCombo(UsersCtrl.$cmbUsers);
         if( selectedUsers.length == 0 )
+        {
+            UsersCtrl.$statButton.prop("disabled", true);
             UsersCtrl.$restoreButton.prop("disabled", true);
+        }
         else
             UsersCtrl.$restoreButton.prop("disabled", false);
     });

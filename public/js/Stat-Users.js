@@ -8,6 +8,7 @@ UsersCtrl.$statButton = null;
 
 UsersCtrl.data = null;
 UsersCtrl.filteredUserData = null;
+UsersCtrl.filteredStat = null;
 UsersCtrl.users = null;
 UsersCtrl.selectedUsers = null;
 
@@ -19,65 +20,30 @@ UsersCtrl.$radioDays = null;
 UsersCtrl.$radioWeeks = null;
 UsersCtrl.$radioMonths = null;
 UsersCtrl.$timeLineContainer = null;
-UsersCtrl.$canvasTimeLine = null;
 UsersCtrl.timeLineID = null;
 UsersCtrl.timeLineChart = null;
-UsersCtrl.timeLineLine = null;
-UsersCtrl.lineOptions = {
-    barValueSpacing: 1,
-    animation: false,
-    ///Boolean - Whether grid lines are shown across the chart
-    scaleShowGridLines: true,
-    //String - Colour of the grid lines
-    scaleGridLineColor: "rgba(0,0,0,.05)",
-    //Number - Width of the grid lines
-    scaleGridLineWidth: 1,
-    //Boolean - Whether to show horizontal lines (except X axis)
-    scaleShowHorizontalLines: true,
-    //Boolean - Whether to show vertical lines (except Y axis)
-    scaleShowVerticalLines: true,
-    //Boolean - Whether the line is curved between points
-    bezierCurve: true,
-    //Number - Tension of the bezier curve between points
-    bezierCurveTension: 0.4,
-    //Boolean - Whether to show a dot for each point
-    pointDot: true,
-    //Number - Radius of each point dot in pixels
-    pointDotRadius: 4,
-    //Number - Pixel width of point dot stroke
-    pointDotStrokeWidth: 1,
-    //Number - amount extra to add to the radius to cater for hit detection outside the drawn point
-    pointHitDetectionRadius: 2,
-    //Boolean - Whether to show a stroke for datasets
-    datasetStroke: true,
-    //Number - Pixel width of dataset stroke
-    datasetStrokeWidth: 2,
-    //Boolean - Whether to fill the dataset with a colour
-    datasetFill: true,
-    //tooltipTemplate: "<%if (label){%><%=label%>: <%}%><%= value %>",
 
-    //multiTooltipTemplate: "<% if (value != 0) { %>" +
-    //                        "<%= datasetLabel %> - <%= value %>" +
-    //                        "<% } %>",
-    //String - A legend template
-    //legendTemplate: '<div>'
-    //                    +'<% for (var i=0; i<datasets.length; i++) { %>'
-    //                        +'<div>'
-    //                            +'<div style=\"background-color:<%=datasets[i].strokeColor%>; width:15px; height:15px; display:inline-block; margin-right:8px\";></div>'
-    //                            +'<% if (datasets[i].label) { %><%= datasets[i].label %><% } %>'
-    //                        +'</div>'
-    //                    +'<% } %>'
-    //                +'</div>'
-};
+UsersCtrl.$barChartContainer = null;
+UsersCtrl.barChartID = null;
+UsersCtrl.$divBar = null;
+UsersCtrl.$AZbutton = null;
+UsersCtrl.$ZAbutton = null;
 
 UsersCtrl.getUsers = function (callback)
 {
     console.log("CALL: getUsers");
 
+    var $imgFilter = $("#img-filter");
+    $imgFilter.removeClass("fa fa-bar-chart");
+    $imgFilter.addClass("fa fa-spinner fa-spin");
     DataCtrl.getField( function(doc){
         UsersCtrl.users = doc;
         UsersCtrl.selectedUsers = doc;
         UsersCtrl.initGui();
+        $imgFilter.removeClass("fa fa-spinner fa-spin");
+        $imgFilter.addClass("fa fa-bar-chart");
+        $('.selectpicker').prop('disabled',false);
+        $('.selectpicker').selectpicker('refresh');
     }, DataCtrl.FIELD.USERS );
 };
 
@@ -87,14 +53,19 @@ UsersCtrl.initGui = function ()
     UsersCtrl.$restoreButton = $('#restoreButton');
     UsersCtrl.$statButton = $('#statButton');
     UsersCtrl.$cmbUsers = $('#cmbUsers');
-
     UsersCtrl.$formType = $('#formType');
     UsersCtrl.$radioDays = $('#radioDays');
     UsersCtrl.$radioWeeks = $('#radioWeeks');
     UsersCtrl.$radioMonths = $('#radioMonths');
     UsersCtrl.$timeLineContainer = $('#timeLineContainer');
-    UsersCtrl.$canvasTimeLine = $('#timeLine');
     UsersCtrl.timeLineID = "timeLine";
+    UsersCtrl.$AZbutton = $('#AZbutton');
+    UsersCtrl.$ZAbutton = $('#ZAbutton');
+
+    UsersCtrl.$divBar = $('#divBar');
+    UsersCtrl.$barChartContainer = $('#barChartContainer');
+    UsersCtrl.barChartID = "barChart";
+
     UsersCtrl.initComboUsers();
     $('.selectpicker').selectpicker('refresh');
 };
@@ -116,8 +87,6 @@ UsersCtrl.clickStat = function ()
     console.log("CALL: clickStat");
 
     var $imgFilter = $("#img-filter");
-    $imgFilter.removeClass("fa fa-bar-chart");
-    $imgFilter.addClass("fa fa-spinner fa-spin");
 
     UsersCtrl.selectedUsers = DomUtil.getSelectedCombo(UsersCtrl.$cmbUsers);
     if( UsersCtrl.selectedUsers.length == 0 )
@@ -142,78 +111,64 @@ UsersCtrl.clickStat = function ()
         UsersCtrl.maxDate = new Date(doc.properties.maxDate);
         UsersCtrl.minDate = new Date(doc.properties.minDate);
 
-        UsersCtrl.drawCharts();
-        $imgFilter.removeClass("fa fa-spinner fa-spin");
-        $imgFilter.addClass("fa fa-bar-chart");
-        UsersCtrl.$restoreButton.prop("disabled", false);
-        UsersCtrl.$statButton.prop("disabled", true);
+        DataCtrl.getField( function(docStat){
+            UsersCtrl.filteredStat = docStat;
+            UsersCtrl.drawCharts();
+
+            $imgFilter.removeClass("fa fa-spinner fa-spin");
+            $imgFilter.addClass("fa fa-bar-chart");
+            UsersCtrl.$restoreButton.prop("disabled", false);
+            UsersCtrl.$statButton.prop("disabled", true);
+        }, DataCtrl.FIELD.STAT );
     });
 };
 
 UsersCtrl.clickRestore = function()
 {
     console.log("CALL: clickRestore");
+
     DomUtil.deselectAll(UsersCtrl.$cmbUsers);
     $('.selectpicker').selectpicker('refresh');
-    UsersCtrl.clearCanvas();
+    UsersCtrl.clearDiv();
     UsersCtrl.$restoreButton.prop("disabled", true);
-    UsersCtrl.$statButton.prop("disabled", false);
+    UsersCtrl.$statButton.prop("disabled", true);
 };
 
 UsersCtrl.drawCharts = function()
 {
-    UsersCtrl.drawTimeLine();
-    //TODO add statistics
-};
-
-UsersCtrl.drawTimeLine = function ()
-{
-    console.log("CALL: drawTimeLine");
-
-    UsersCtrl.setFuncNextDate();
-    UsersCtrl.clearCanvas();
-
-    var dataset = UsersCtrl.lineData();
-    var scale = 20;
+    UsersCtrl.clearDiv();
 
     UsersCtrl.$formType.removeClass('hidden');
     UsersCtrl.$timeLineContainer.removeClass('hidden');
-    UsersCtrl.$timeLineContainer.css("overflow-x", "auto");
+    UsersCtrl.drawTimeLine();
 
-    if(UsersCtrl.$radioWeeks.is(':checked'))
-        scale = 50;
-    if(UsersCtrl.$radioMonths.is(':checked'))
-        scale = 100;
+    UsersCtrl.$divBar.removeClass('hidden');
+    UsersCtrl.$barChartContainer.removeClass('hidden');
+    UsersCtrl.$AZbutton.removeAttr("disabled");
+    UsersCtrl.$ZAbutton.removeAttr("disabled");
+    UsersCtrl.drawBarChart();
 
-    $("#" + UsersCtrl.timeLineID).width(scale * dataset.datasets[0].data.length);
-
-    var hc = $('body > .container').height();
-    var htop = $('#formType').height();
-    var hmin = hc - htop;
-    $("#" + UsersCtrl.timeLineID).css('max-height', hmin);
-    $("#" + UsersCtrl.timeLineID).css('min-height', "250px");
-    $("#" + UsersCtrl.timeLineID).css('min-width', "250px");
-
-    var ctx = document.getElementById(UsersCtrl.timeLineID).getContext("2d");
-    UsersCtrl.timeLineChart = new Chart(ctx);
-    UsersCtrl.timeLineLine = UsersCtrl.timeLineChart.Line(
-        dataset,
-        UsersCtrl.lineOptions
-    );
-    //var legend =  UsersCtrl.timeLineLine.generateLegend();
-    //$('#timeLineContainer').append(legend);
+    //TODO add statistics
 };
 
-UsersCtrl.clearCanvas = function()
+UsersCtrl.clearDiv = function()
 {
+    console.log("CALL: clearDiv");
+
     UsersCtrl.$formType.addClass('hidden');
     UsersCtrl.$timeLineContainer.replaceWith(
         '<div id="timeLineContainer" class="hidden">' +
-        '<canvas id="timeLine"></canvas>' +
+        '<div id="timeLine"></div>' +
         '</div>');
-
     UsersCtrl.$timeLineContainer = $('#timeLineContainer');
-    UsersCtrl.$timeLine = $('#timeLine');
+
+    UsersCtrl.$barChartContainer.replaceWith(
+        '<div id="barChartContainer" class="hidden">' +
+        '<div id="barChart" style="margin-top: 20px"></div>' +
+        '</div>');
+    UsersCtrl.$barChartContainer = $('#barChartContainer');
+    UsersCtrl.$AZbutton.prop("disabled", true);
+    UsersCtrl.$ZAbutton.prop("disabled", true);
 };
 
 //Dichiaro funzioni vuote
@@ -242,72 +197,9 @@ UsersCtrl.setFuncNextDate = function ()
 
 };
 
-UsersCtrl.lineData = function ()
-{
-    console.log("CALL: lineData");
-    return {
-        labels: UsersCtrl.getLabels(),
-        datasets: UsersCtrl.getDataset()
-    };
-};
-
-/**
- * Usa la prima regione per vedere i tag disponibili
- * @returns {Array}
- */
-UsersCtrl.getLabels = function ()
-{
-    console.log("CALL: getLabels");
-
-    if (UsersCtrl.filteredUserData == null || UsersCtrl.filteredUserData.length == 0) return [];
-
-    var ris = [];
-    var min = UsersCtrl.minDate;
-
-    while (min < UsersCtrl.maxDate) {
-        ris.push( UsersCtrl.selectLabelDate(min) );
-        min = UsersCtrl.selectStepDate(min);
-    }
-
-    //GVE
-    ris.push( UsersCtrl.selectLabelDate(min) );
-    min = UsersCtrl.selectStepDate(min);
-    if(UsersCtrl.$radioDays.is(':checked')){
-        ris.push( UsersCtrl.selectLabelDate(min) );
-        min = UsersCtrl.selectStepDate(min);}
-
-    return ris;
-};
-
-UsersCtrl.getDataset = function ()
-{
-    //console.log("CALL: getDataset");
-
-    var color = colorUtil.generateColor(UsersCtrl.filteredUserData.length);
-    var cont = -1;
-    var ris = [];
-    var dataset = null;
-    _.each(UsersCtrl.filteredUserData, function(userObj, index){
-
-        dataset = UsersCtrl.getDatasetValue(userObj);
-            ris[index] = {
-                label: userObj.user,
-                fillColor: "rgba(151,187,205,0.2)", //colorUtil.ColorLuminance(color[index], 1),
-                strokeColor: color[index],
-                pointColor: color[index],
-                pointStrokeColor: "#fff",
-                pointHighlightFill: "#fff",
-                pointHighlightStroke: color[index],
-                data: dataset
-            };
-    });
-
-    return ris;
-};
-
 UsersCtrl.getDatasetValue = function (userObj)
 {
-    //console.log("CALL: getDatasetValue");
+    console.log("CALL: getDatasetValue");
 
     if (userObj.data == null || userObj.data.length == 0) return [];
 
@@ -327,14 +219,219 @@ UsersCtrl.getDatasetValue = function (userObj)
             ris.push(dataset[key].length);
         min = UsersCtrl.selectStepDate(min);
     }
-    //GVE
     ris.push(0);
-    if(UsersCtrl.$radioDays.is(':checked')) ris.push(0);
     return ris;
+};
+
+UsersCtrl.getDataset = function ()
+{
+    console.log("CALL: getDataset");
+
+    var ris = [];
+    ris = UsersCtrl.appendDate(ris);
+    _.each(UsersCtrl.filteredUserData, function(userObj, index){
+        var rowUser = UsersCtrl.getDatasetValue(userObj);
+        _.each(rowUser, function(value, index){
+            ris[index].push(value)
+        });
+    });
+    return ris;
+};
+
+UsersCtrl.appendDate = function(ris)
+{
+    console.log("CALL: appendDate");
+    var min = UsersCtrl.minDate;
+
+    while (min <= UsersCtrl.maxDate) {
+        //var date = UsersCtrl.selectLabelDate(min);
+        //ris.push([date]);
+        ris.push([new Date(min)]);
+        min = UsersCtrl.selectStepDate(min);
+    }
+    ris.push([new Date(min)]);
+    return ris;
+};
+
+UsersCtrl.ticks = function()
+{
+    console.log("CALL: ticks");
+    var min = UsersCtrl.minDate;
+    var ris = [];
+
+    while (min <= UsersCtrl.maxDate) {
+        ris.push(new Date(min));
+        min = UsersCtrl.selectStepDate(min);
+    }
+    ris.push(new Date(min));
+    return ris;
+};
+
+UsersCtrl.drawTimeLine = function()
+{
+    console.log("CALL: drawTimeLine");
+
+    UsersCtrl.setFuncNextDate();
+
+    var hAxisLabel = "Days";
+    if(UsersCtrl.$radioWeeks.is(':checked'))
+        hAxisLabel = "Weeks";
+    if(UsersCtrl.$radioMonths.is(':checked'))
+        hAxisLabel = "Months";
+
+    var rows = UsersCtrl.getDataset();
+
+    var data = new google.visualization.DataTable();
+
+    data.addColumn('date', hAxisLabel);
+    _.each(UsersCtrl.filteredUserData, function(userObj, index){
+        data.addColumn('number', userObj.user);
+    });
+
+    data.addRows(rows);
+
+    var options = {
+        title: 'Users timeline',
+        titleTextStyle: { fontSize: 14 },
+        curveType: 'function',
+        legend: 'none',
+        backgroundColor: 'transparent',
+        hAxis: {
+            slantedText:true,
+            slantedTextAngle:60,
+            title: hAxisLabel,
+            titleTextStyle: { fontSize: 14 },
+            format: 'MMM d yyyy',
+            maxValue: UsersCtrl.maxDate,
+            minValue: UsersCtrl.minDate,
+            ticks: UsersCtrl.ticks(),
+            textStyle: { fontSize: 13 }
+        },
+        vAxis: {
+            title: 'Number of data',
+            titleTextStyle: { fontSize: 14 },
+            logScale: false,
+            viewWindow: {min:0},
+            textStyle: { fontSize: 13 }
+        },
+        height: 400,
+        colors: colorUtil.generateColor(UsersCtrl.filteredUserData.length),
+        chartArea: {
+            height: '65%',
+            top: '5%'
+        }
+    };
+
+    var chart = new google.visualization.LineChart(document.getElementById(UsersCtrl.timeLineID));
+    chart.draw(data, options);
 };
 
 UsersCtrl.handleModeClick = function($radio)
 {
     console.log("CALL: handleModeClick");
     UsersCtrl.drawTimeLine();
+};
+
+UsersCtrl.drawBarChart = function()
+{
+    console.log("CALL: drawBarChart");
+
+    if(UsersCtrl.$AZbutton.hasClass("active"))
+        UsersCtrl.filteredUserData = _.sortBy(UsersCtrl.filteredUserData, function(obj) { return obj.data; });
+    else
+    {
+        UsersCtrl.filteredUserData = _.sortBy(UsersCtrl.filteredUserData, function(obj) { return obj.data; });
+        UsersCtrl.filteredUserData.reverse();
+    }
+
+    var data = google.visualization.arrayToDataTable(UsersCtrl.buildBarData());
+
+    var chartAreaHeight = data.getNumberOfRows() * 30;
+    var chartHeight = chartAreaHeight + 80;
+    var heightBar = 60;
+
+    var options = {
+        title: "User tags",
+        titleTextStyle: { fontSize: 14 },
+        width: "100%",
+        height: chartHeight,
+        bar:    { groupWidth: heightBar + "%" },
+        legend: { position: 'top',  maxLines: 3, textStyle: {fontSize: 13}},
+        isStacked: true,
+        backgroundColor: 'transparent',
+        annotations: {
+            alwaysOutside: false,
+            textStyle:  { color: "black"}
+        },
+        chartArea: {'height': chartAreaHeight - 25, 'right':0, 'top': 100, 'left':150 },
+        hAxis: {
+            title: "Number of tagged data",
+            titleTextStyle: { fontSize: 14 },
+            textStyle: { fontSize: 13 }},
+        vAxis: {
+            title: "User",
+            titleTextStyle: { fontSize: 14 },
+            textStyle: { fontSize: 13 }}
+    };
+    var chart = new google.visualization.BarChart(document.getElementById(UsersCtrl.barChartID));
+    chart.draw(data, options);
+};
+
+UsersCtrl.buildBarData = function(dataSelected)
+{
+    console.log("CALL: buildBarData");
+
+    var data = [];
+    var header = UsersCtrl.getHeader();
+    data[0] = header;
+
+    _.each(UsersCtrl.filteredUserData, function(userObj, index){
+
+        var row = [];
+        row.push(userObj.user);
+
+        var userTags = _.countBy(userObj.data, 'tag');
+
+        _.each(UsersCtrl.filteredStat.data.allTags, function (tag, i) {
+            row[i + 1] = 0;
+            _.each(userTags, function (val, key) {
+                if (tag == key)
+                    row[i + 1] = val;
+            });
+        });
+        data.push(row);
+    });
+    return data;
+};
+
+UsersCtrl.getHeader = function()
+{
+    console.log("CALL: getHeader");
+
+    var ris = [];
+    var cont = 1;
+    ris[0] = "Users";
+    _.each(UsersCtrl.filteredStat.data.allTags, function (tag) {
+        ris[cont] = tag;
+        cont++;
+    });
+    return ris;
+};
+
+UsersCtrl.AZbuttonClick = function()
+{
+    console.log("CALL: AZbuttonClick");
+
+    UsersCtrl.$AZbutton.addClass("active");
+    UsersCtrl.$ZAbutton.removeClass("active");
+    UsersCtrl.drawBarChart();
+};
+
+UsersCtrl.ZAbuttonClick = function()
+{
+    console.log("CALL: ZAbuttonClick");
+
+    UsersCtrl.$ZAbutton.addClass("active");
+    UsersCtrl.$AZbutton.removeClass("active");
+    UsersCtrl.drawBarChart();
 };
