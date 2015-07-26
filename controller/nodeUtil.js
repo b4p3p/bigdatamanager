@@ -44,4 +44,17 @@ Util.addWhereClause = function(exec, query)
     return exec;
 };
 
+Util.addMatchClause = function(exec, query)
+{
+    if(query.tags){
+        var tags = query.tags.split(',');
+        exec.match({tag: {$in:tags}});
+    }
+
+    if(query.users){
+        var users = query.users.split(',');
+        exec.match({user: {$in:users}});
+    }
+};
+
 module.exports = Util;

@@ -94,5 +94,17 @@ module.exports = function (router, app) {
         });
     });
 
+    router.get('/databydate', function(req, res){
+
+        var project = req.session.project || req.query.project;
+
+        Data.dateByDate(project, req.query, function(err, docs){
+            if(!err) {
+                res.json(docs);
+            }else{
+                res.status(500).send(err.toString());
+            }
+        })
+    });
 };
 

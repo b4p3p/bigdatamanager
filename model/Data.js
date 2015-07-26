@@ -711,4 +711,82 @@ Data.getNations = function (project, callback) {
 
 };
 
+Data.dateByDate = function(project, query, callback){
+
+    var type = query.type || "day";
+    type = (type == "day" || type == "week" || type == "month" ) ? type : "day";
+
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+    var datas = connection.model("datas", Data.SCHEMA);
+    var exec = datas.aggregate();
+
+    exec.match({projectName: project});
+
+    Util.addMatchClause(exec, query);
+
+    Date.dateByDate_group(exec, type);
+
+    exec.sort("ts");
+
+    Date.dateByDate_project(exec, type);
+
+    exec.exec(function(err, result){
+        callback(err, result);
+    });
+
+};
+
+Date.dateByDate_group = function(exec, type) {
+    switch(type){
+        case "day":
+            exec.group({ _id: {
+                day: { $dayOfMonth: "$date" },
+                month: { $month: "$date" },
+                year: { $year: "$date" }
+            },
+                ts: {$max:"$date"}, count:{$sum:1}
+            });
+            break;
+        case "week":
+            exec.group({
+                _id: { week: { $week: "$date" },
+                        year: { $year: "$date" } },
+                ts: {$max:"$date"},
+                count:{$sum:1}
+            });
+            break;
+        case "month":
+            exec.group({
+                _id: {  month: { $month: "$date" },
+                        year: { $year: "$date" } },
+                ts: {$max:"$date"},
+                count:{$sum:1}
+            });
+            break;
+        default:    //anno
+            exec.group({
+                _id: { year: { $year: "$date" } },
+                ts: {$min:"$date"},
+                count:{$sum:1}
+            });
+    }
+};
+
+Date.dateByDate_project = function(exec, type){
+
+    //switch (type){
+    //    case "day":
+    //        exec.project({
+    //            _id:1, ts:1,
+    //            date: {$concat:[
+    //                {$substr:["$_id.year",0,10]} , "-",
+    //                {$substr:["$_id.month",0,10]}, "-",
+    //                {$substr:["$_id.day",0,10]}
+    //            ]},
+    //            count:1
+    //        });
+    //        break;
+    //}
+};
+
 module.exports = Data;

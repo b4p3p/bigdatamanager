@@ -26,26 +26,36 @@ Date.prototype.toStringDate = function()
         ].join(':');
 };
 
-Date.prototype.nextDay = function () {
+Date.prototype.nextDay = function ()
+{
     var d = new Date();
     d.setTime(this.getTime() + 1000 * 60 * 60 * 24 * 1);
     return d;
 };
 
-Date.prototype.nextWeek = function () {
+Date.prototype.nextWeek = function ()
+{
     var d = new Date();
     d.setTime(this.getTime() + 1000 * 60 * 60 * 24 * 7);
     return d;
 };
 
-Date.prototype.nextDay = function () {
+Date.prototype.prevWeek = function ()
+{
+    var d = new Date();
+    d.setTime( this.getTime() + 1000 * 60 * 60 * 24 * 7);
+    return d;
+};
+
+Date.prototype.nextDay = function ()
+{
     var d = new Date();
     d.setTime(this.getTime() + 1000 * 60 * 60 * 24 * 1);
     return d;
 };
 
-Date.prototype.toShortDate = function () {
-
+Date.prototype.toShortDate = function ()
+{
     var month = '' + (this.getMonth() + 1),
         day = '' + this.getDate(),
         year = this.getFullYear();
@@ -80,13 +90,15 @@ Date.prototype.getRangeWeek = function()
     var week = this.getWeekNumber();
 
     var d = new Date("Jan 01, " + year + " 01:00:00");
+
+    //var d = new Date(year, 0, 0);
     var w = d.getTime() -(3600000*24*(firstDay-1))+ 604800000 * (week-1);
     var n1 = new Date(w);
     var n2 = new Date(w + 518400000);
 
     return {
         start : n1,
-        end: n2
+        end:    n2
     }
 };
 
