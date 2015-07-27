@@ -70,6 +70,11 @@ DataCtrl.FIELD = {
         KEY: "userdata",
         URL: "/datas/userdata",
         LASTUPDATE: "data-lastupdate"
+    },
+    DATABYDATE:{
+        KEY: "databydate",
+        URL: "/datas/databydate",
+        LASTUPDATE: "datebydate-lastupdate"
     }
 };
 
@@ -272,6 +277,10 @@ DataCtrl.getField = function(callback, field, limit)
         }
     });
 };
+
+DataCtrl.getFieldAsync = function(field){
+
+}
 
 /**
  *

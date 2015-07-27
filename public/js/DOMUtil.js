@@ -192,7 +192,7 @@ var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer, $
 
     this.getQueryString = function()
     {
-        if( this.arrayQueryString != [] )
+        if( this.arrayQueryString != [] && this.arrayQueryString.length > 0 )
             return "?" + this.arrayQueryString.join("&");
         else
             return "";
@@ -274,5 +274,10 @@ var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $sliderTimer, $
         return  d >= this.value.conditions.interval.min &&
                 d <= this.value.conditions.interval.max
     };
+
+    this.setField = function(field, value) {
+        this.removeCondiction(field);
+        this.arrayQueryString.push(field + "=" + value);
+    }
 
 };

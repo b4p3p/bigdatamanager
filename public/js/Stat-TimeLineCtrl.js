@@ -1,402 +1,345 @@
 "use strict";
 
-function timeLineCtrl() {};
+function getDateOfWeek(w, y) {
+    var d = (1 + (w - 1) * 7); // 1st of January + 7 days for each week
+    return new Date(y, 0, d);
+}
 
-timeLineCtrl.timeLineID = "";
-timeLineCtrl.$timeLine = null;
-timeLineCtrl.timeLineChart = null;
-timeLineCtrl.timeLineLine = null;
-timeLineCtrl.$timeLineContainer = null;
+var GraphBuilder = function(timeLineCtrl){
 
-timeLineCtrl.$radioDays = null;
-timeLineCtrl.$radioWeeks = null;
-timeLineCtrl.$radioMonths = null;
+    var _self = this;
+    this.timeLineCtrl = timeLineCtrl;
 
-timeLineCtrl.$filterButton = null;
-timeLineCtrl.$restoreButton = null;
+    this.selectLabelDate = function (date)  {};
+    this.selectStepDate = function(date)    {};
 
-timeLineCtrl.$cmbUsers = null;
-timeLineCtrl.$cmbTags = null;
-
-timeLineCtrl.tags = null;
-timeLineCtrl.selectedTags = null;
-timeLineCtrl.data = null;
-timeLineCtrl.filteredData = null;
-timeLineCtrl.users = null;
-timeLineCtrl.selectedUsers = null;
-
-timeLineCtrl.maxDate = null;
-timeLineCtrl.minDate = null;
-
-timeLineCtrl.lineOptions = {
-    barValueSpacing: 1,
-    animation: false,
-    ///Boolean - Whether grid lines are shown across the chart
-    scaleShowGridLines: true,
-    //String - Colour of the grid lines
-    scaleGridLineColor: "rgba(0,0,0,.05)",
-    //Number - Width of the grid lines
-    scaleGridLineWidth: 1,
-    //Boolean - Whether to show horizontal lines (except X axis)
-    scaleShowHorizontalLines: true,
-    //Boolean - Whether to show vertical lines (except Y axis)
-    scaleShowVerticalLines: true,
-    //Boolean - Whether the line is curved between points
-    bezierCurve: true,
-    //Number - Tension of the bezier curve between points
-    bezierCurveTension: 0.4,
-    //Boolean - Whether to show a dot for each point
-    pointDot: true,
-    //Number - Radius of each point dot in pixels
-    pointDotRadius: 4,
-    //Number - Pixel width of point dot stroke
-    pointDotStrokeWidth: 1,
-    //Number - amount extra to add to the radius to cater for hit detection outside the drawn point
-    pointHitDetectionRadius: 2,
-    //Boolean - Whether to show a stroke for datasets
-    datasetStroke: true,
-    //Number - Pixel width of dataset stroke
-    datasetStrokeWidth: 2,
-    //Boolean - Whether to fill the dataset with a colour
-    datasetFill: true,
-    //String - A legend template
-    legendTemplate: ""
-};
-
-timeLineCtrl.initGUI = function ()
-{
-    console.log("CALL: initGUI");
-
-    timeLineCtrl.$radioDays = $('#radioDays');
-    timeLineCtrl.$radioWeeks = $('#radioWeeks');
-    timeLineCtrl.$radioMonths = $('#radioMonths');
-
-    timeLineCtrl.$cmbUsers = $('#cmbUsers');
-    timeLineCtrl.$cmbTags = $('#cmbTags');
-
-    timeLineCtrl.$filterButton = $('#cmbFilter');
-    timeLineCtrl.$restoreButton = $('#cmbRestore');
-
-    timeLineCtrl.$timeLineContainer = $('#timeLineContainer');
-    timeLineCtrl.$timeLine = $('#timeLine');
-    timeLineCtrl.timeLineID = "timeLine";
-};
-
-timeLineCtrl.getData = function()
-{
-    console.log("CALL: getData");
-
-    async.parallel({
-        data: function(next)
+    this.setFuncNextDate = function () {
+        if(this.timeLineCtrl.$radioDays.is(':checked'))
         {
-            next(null, {});
-
-            //DataCtrl.getField( function(doc){
-            //    timeLineCtrl.data = doc;
-            //    timeLineCtrl.data_day = doc;
-            //    timeLineCtrl.filteredData = doc;
-            //    next(null, doc);
-            //}, DataCtrl.FIELD.DATA);
-        },
-        stat: function(next)
-        {
-            DataCtrl.getField( function(doc){
-                timeLineCtrl.tags = doc.data.allTags;
-                next(null, doc);
-            }, DataCtrl.FIELD.STAT );
-        },
-        users: function (next)
-        {
-            DataCtrl.getField( function(doc){
-                timeLineCtrl.users = doc;
-                next(null, doc);
-            }, DataCtrl.FIELD.USERS, 50);
-        }},
-        function(err, results) {
-            timeLineCtrl.initComboTags();
-            timeLineCtrl.initComboUsers();
-            timeLineCtrl.removeWait();
+            this.selectLabelDate = function (date) { return date.toShortDate();};
+            this.selectStepDate = function(date) { return date.nextDay();};
+            this.timeLineCtrl.type = "day";
         }
-    );
-};
+        if(this.timeLineCtrl.$radioWeeks.is(':checked'))
+        {
+            this.selectLabelDate = function (date) {
+                var xdate = new XDate(date);
+                var week = xdate.getWeek();
+                var d = new XDate(getDateOfWeek(week, xdate.getFullYear()));
+                return d.toString("dd-MM-yyyy");
+                //return date.toShortWeek()
+            };
+            this.selectStepDate = function(date) {
+                var xdate = new XDate(date);
+                return new Date(xdate.addWeeks(1).getTime());
 
-timeLineCtrl.initComboTags = function()
-{
-    console.log("CALL: initComboTags");
-
-    _.each(timeLineCtrl.tags, function(obj){
-        DomUtil.addOptionValue(timeLineCtrl.$cmbTags, obj);
-    });
-    timeLineCtrl.$cmbTags.selectpicker('refresh');
-};
-
-timeLineCtrl.initComboUsers = function()
-{
-    console.log("CALL: initComboUsers");
-
-    var obj = null;
-    for (var i = 0; i < 50 && i < timeLineCtrl.users.length; i++ )
-    {
-        obj = timeLineCtrl.users[i];
-        DomUtil.addOptionValue(timeLineCtrl.$cmbUsers, obj.user, obj.sum);
-    }
-    timeLineCtrl.$cmbUsers.selectpicker('refresh');
-};
-
-timeLineCtrl.drawTimeLine = function ()
-{
-    console.log("CALL: drawTimeLine");
-
-    var dataset = timeLineCtrl.lineData();
-    var scale = 20;
-
-    timeLineCtrl.$timeLineContainer.removeClass('hidden');
-    timeLineCtrl.$timeLineContainer.css("overflow-x", "auto");
-
-    if(timeLineCtrl.$radioWeeks.is(':checked'))
-        scale = 50;
-    if(timeLineCtrl.$radioMonths.is(':checked'))
-        scale = 100;
-
-    $("#" + timeLineCtrl.timeLineID).width(scale * dataset.datasets[0].data.length);
-
-    var hc = $('body > .container').height();
-    var htop = $('#formType').height();
-    var hmin = hc - htop;
-    $("#" + timeLineCtrl.timeLineID).css('max-height', hmin);
-
-    var ctx = document.getElementById(timeLineCtrl.timeLineID).getContext("2d");
-    timeLineCtrl.timeLineChart = new Chart(ctx);
-    timeLineCtrl.timeLineLine = timeLineCtrl.timeLineChart.Line(
-        dataset,
-        timeLineCtrl.lineOptions
-    );
-};
-
-timeLineCtrl.lineData = function ()
-{
-    console.log("CALL: lineData");
-    return {
-        labels: timeLineCtrl.getLabels(),
-        datasets: timeLineCtrl.getDataset()
-    };
-};
-
-//Dichiaro funzioni vuote
-timeLineCtrl.selectLabelDate = function (date) {};
-timeLineCtrl.selectStepDate = function(date) {};
-
-timeLineCtrl.setFuncNextDate = function ()
-{
-    if(timeLineCtrl.$radioDays.is(':checked'))
-    {
-        timeLineCtrl.selectLabelDate = function (date) { return date.toShortDate();};
-        timeLineCtrl.selectStepDate = function(date) { return date.nextDay();};
-    }
-    if(timeLineCtrl.$radioWeeks.is(':checked'))
-    {
-        timeLineCtrl.selectLabelDate = function (date) { return date.toShortWeek();};
-        timeLineCtrl.selectStepDate = function(date) { return date.nextWeek();};
-    }
-    if(timeLineCtrl.$radioMonths.is(':checked'))
-    {
-        timeLineCtrl.selectLabelDate = function (date) { return  date.getMonthString() + "-" + date.getFullYear()};
-        timeLineCtrl.selectStepDate = function(date) { return date.nextMonth()};
-    }
-
-};
-
-/**
- * Usa la prima regione per vedere i tag disponibili
- * @returns {Array}
- */
-timeLineCtrl.getLabels = function ()
-{
-    console.log("CALL: getLabels");
-
-    if (timeLineCtrl.filteredData == null || timeLineCtrl.filteredData.length == 0) return [];
-
-    var ris = [];
-    var min = timeLineCtrl.minDate;
-
-    while (min < timeLineCtrl.maxDate) {
-        ris.push( timeLineCtrl.selectLabelDate(min) );
-        min = timeLineCtrl.selectStepDate(min);
-    }
-
-    //GVE
-    ris.push( timeLineCtrl.selectLabelDate(min) );
-    min = timeLineCtrl.selectStepDate(min);
-    if(timeLineCtrl.$radioDays.is(':checked')){
-        ris.push( timeLineCtrl.selectLabelDate(min) );
-        min = timeLineCtrl.selectStepDate(min);}
-
-
-    return ris;
-};
-
-timeLineCtrl.getDataset = function ()
-{
-    console.log("CALL: getDataset");
-
-    var dataset= timeLineCtrl.getDatasetValue();
-
-    var ris = [];
-    ris[0] = {
-        label: "Tweets time line",
-        fillColor: "rgba(151,187,205,0.2)",
-        strokeColor: "rgba(151,187,205,1)",
-        pointColor: "rgba(151,187,205,1)",
-        pointStrokeColor: "#fff",
-        pointHighlightFill: "#fff",
-        pointHighlightStroke: "rgba(151,187,205,1)",
-        data: dataset
+                //var nextWeek =  date.getRangeWeek().start.nextWeek();
+                //return nextWeek;
+            };
+            this.timeLineCtrl.type = "week";
+        }
+        if(this.timeLineCtrl.$radioMonths.is(':checked'))
+        {
+            this.selectLabelDate = function (date) { return  date.getMonthString() + "-" + date.getFullYear()};
+            this.selectStepDate = function(date) { return date.nextMonth()};
+            this.timeLineCtrl.type = "month";
+        }
     };
 
-    return ris;
+    this.setFuncNextDate();
+
 };
 
-timeLineCtrl.getDatasetValue = function ()
-{
-    console.log("CALL: getDatasetValue");
+var TimeLineCtrl = function() {
 
-    if (timeLineCtrl.filteredData == null || timeLineCtrl.filteredData.length == 0) return [];
+    var _self = this;
 
-    var ris = [];
+    this.lineOptions = {
+        barValueSpacing: 1,
+        animation: false,
+        ///Boolean - Whether grid lines are shown across the chart
+        scaleShowGridLines: true,
+        //String - Colour of the grid lines
+        scaleGridLineColor: "rgba(0,0,0,.05)",
+        //Number - Width of the grid lines
+        scaleGridLineWidth: 1,
+        //Boolean - Whether to show horizontal lines (except X axis)
+        scaleShowHorizontalLines: true,
+        //Boolean - Whether to show vertical lines (except Y axis)
+        scaleShowVerticalLines: true,
+        //Boolean - Whether the line is curved between points
+        bezierCurve: true,
+        //Number - Tension of the bezier curve between points
+        bezierCurveTension: 0.4,
+        //Boolean - Whether to show a dot for each point
+        pointDot: true,
+        //Number - Radius of each point dot in pixels
+        pointDotRadius: 4,
+        //Number - Pixel width of point dot stroke
+        pointDotStrokeWidth: 1,
+        //Number - amount extra to add to the radius to cater for hit detection outside the drawn point
+        pointHitDetectionRadius: 2,
+        //Boolean - Whether to show a stroke for datasets
+        datasetStroke: true,
+        //Number - Pixel width of dataset stroke
+        datasetStrokeWidth: 2,
+        //Boolean - Whether to fill the dataset with a colour
+        datasetFill: true,
+        //String - A legend template
+        legendTemplate: ""
+    };
 
-    var dataset = _.groupBy(timeLineCtrl.filteredData, function(obj){
-        return timeLineCtrl.selectLabelDate( new Date(obj.date));
-    });
-    var min = timeLineCtrl.minDate;
+    this.type = "day";  // "day" || "week" || "month"
+    this.users = null;
+    this.tags = null;
 
-    //Inserisco le date mancanti
-    while (min <= timeLineCtrl.maxDate) {
-        var key = timeLineCtrl.selectLabelDate(min);
-        if (dataset[key] == null)
-            ris.push(0);
-        else
-            ris.push(dataset[key].length);
-        min = timeLineCtrl.selectStepDate(min);
-    }
-    //GVE
-    ris.push(0);
-    if(timeLineCtrl.$radioDays.is(':checked')) ris.push(0);
-    return ris;
-};
+    this.$radioDays = $('#radioDays');
+    this.$radioWeeks = $('#radioWeeks');
+    this.$radioMonths = $('#radioMonths');
 
-timeLineCtrl.removeWait = function ()
-{
-    console.log("remove wait");
+    this.$cmbUsers = $('#cmbUsers');
+    this.$cmbTags = $('#cmbTags');
 
-    $("#spinner").addClass("hidden");
-    $(".timecontent").removeClass("hidden");
-};
+    this.$btnFilter = $('#btnFilter');
+    this.$btnRestore = $('#btnRestore');
 
-timeLineCtrl.handleModeClick = function(radio)
-{
-    console.log("CALL: handleModeClick");
+    this.$imgFilter = $("#img-filter");
 
-    timeLineCtrl.$filterButton.removeAttr("disabled");
-    timeLineCtrl.$restoreButton.prop("disabled", true);
-};
+    this.$timeLineContainer = $('#timeLineContainer');
+    this.$timeLine = $('#timeLine');
 
-timeLineCtrl.clearCanvas = function()
-{
-    timeLineCtrl.$timeLineContainer.replaceWith(
-        '<div id="timeLineContainer" class="timecontent hidden">' +
-        '<canvas id="timeLine"></canvas>' +
-        '</div>');
+    this.timeLineID = "timeLine";
 
-    timeLineCtrl.$timeLineContainer = $('#timeLineContainer');
-    timeLineCtrl.$timeLine = $('#timeLine');
-};
+    this.graphBuilder = new GraphBuilder(this);
 
-timeLineCtrl.clickFilter = function()
-{
-    console.log("CALL: clickFilter");
+    this.getData = function() {
 
-    var $imgFilter = $("#img-filter");
-    $imgFilter.removeClass("glyphicon glyphicon-filter");
-    $imgFilter.addClass("fa fa-spinner fa-spin");
+        console.log("CALL: getData");
 
-    setTimeout( function(){
+        async.parallel({
+                data: function(next) {
+                    DataCtrl.getFromUrl(DataCtrl.FIELD.DATABYDATE, null, function(result){
+                        _self.data = result;
+                        next(null, result);
+                    });
+                },
+                stat: function(next) {
+                    DataCtrl.getField( function(doc){
+                        _self.tags = doc.data.allTags;
+                        _self.stat = doc;
+                        next(null, doc);
+                    }, DataCtrl.FIELD.STAT );
+                },
+                users: function (next) {
+                    DataCtrl.getField( function(doc){
+                        _self.users = doc;
+                        next(null, doc);
+                    }, DataCtrl.FIELD.USERS, 50);
+                }},
+            function(err, results) {
+                _self.initComboTags();
+                _self.initComboUsers();
+                _self.removeWait();
+                _self.drawTimeLine();
+            }
+        );
+    };
 
-        timeLineCtrl.setFuncNextDate();
-        timeLineCtrl.clearCanvas();
+    this.initComboTags = function() {
+        console.log("CALL: initComboTags");
 
-        timeLineCtrl.selectedTags = DomUtil.getSelectedCombo(timeLineCtrl.$cmbTags);
-        timeLineCtrl.selectedUsers = DomUtil.getSelectedCombo(timeLineCtrl.$cmbUsers);
+        _.each(_self.tags, function(obj){
+            DomUtil.addOptionValue(_self.$cmbTags, obj);
+        });
+        _self.$cmbTags.selectpicker('refresh');
+    };
 
-        if(timeLineCtrl.selectedTags.length == 0)
-            DomUtil.selectAll(timeLineCtrl.$cmbTags);
+    this.initComboUsers = function() {
+        console.log("CALL: initComboUsers");
 
-        if(timeLineCtrl.selectedUsers.length == 0)
-            DomUtil.selectAll(timeLineCtrl.$cmbUsers);
+        var obj = null;
+        for (var i = 0; i < 50 && i < _self.users.length; i++ )
+        {
+            obj = _self.users[i];
+            DomUtil.addOptionValue(_self.$cmbUsers, obj.user, obj.sum);
+        }
+        _self.$cmbUsers.selectpicker('refresh');
+    };
 
-        $('.selectpicker').selectpicker('refresh');
+    this.removeWait = function () {
+
+        console.log("remove wait");
+
+        $("#spinner").addClass("hidden");
+        $(".timecontent").removeClass("hidden");
+    };
+
+    this.addWaitImg = function($img){
+        $img.removeClass("glyphicon glyphicon-filter");
+        $img.addClass("fa fa-spinner fa-spin");
+    };
+
+    this.removeWaitImg = function($img){
+        $img.removeClass("fa fa-spinner fa-spin");
+        $img.addClass("glyphicon glyphicon-filter");
+    };
+
+    this.clearCanvas = function() {
+        this.$timeLineContainer.replaceWith(
+            '<div id="timeLineContainer" class="timecontent hidden">' +
+            '<canvas id="timeLine"></canvas>' +
+            '</div>');
+
+        this.$timeLineContainer = $('#timeLineContainer');
+        this.$timeLine = $('#timeLine');
+    };
+
+    this.setDisableAllBtn = function(value){
+        _self.$btnFilter.prop("disabled", value);
+        _self.$btnRestore.prop("disabled", value);
+    };
+
+    this.drawTimeLine = function(){
+
+        console.log("CALL: drawTimeLine");
+
+        var dataset = _self.toLineData();
+        var scale = 20;
+
+        _self.$timeLineContainer.removeClass('hidden');
+        _self.$timeLineContainer.css("overflow-x", "auto");
+
+        if(_self.$radioWeeks.is(':checked'))
+            scale = 50;
+        if(_self.$radioMonths.is(':checked'))
+            scale = 100;
+
+        $("#" + this.timeLineID).width(scale * dataset.datasets[0].data.length);
+
+        var hc = $('body > .container').height();
+        var htop = $('#formType').height();
+        var hmin = hc - htop - 30;
+        $("#" + _self.timeLineID).css('max-height', hmin);
+
+        var ctx = document.getElementById(_self.timeLineID).getContext("2d");
+        _self.timeLineChart = new Chart(ctx);
+        _self.timeLineLine = _self.timeLineChart.Line(
+            dataset,
+            _self.lineOptions
+        );
+    };
+
+    this.toLineData = function () {
+        console.log("CALL: toLineData");
+        return {
+            labels: _self.getLabels(),
+            datasets: _self.getDataset()
+        };
+    };
+
+    /* Usa la prima regione per vedere i tag disponibili
+     * @returns {Array}
+     */
+    this.getLabels = function () {
+        console.log("CALL: getLabels");
+
+        if (_self.data == null || _self.data.length == 0) return [];
+
+        var ris = [];
+        var min = new Date(_self.stat.data.minDate);
+        var max = new Date(_self.stat.data.maxDate);
+
+        while (min < max) {
+            ris.push( this.graphBuilder.selectLabelDate(min) );
+            min = this.graphBuilder.selectStepDate(min);
+        }
+
+        //GVE - non si vede bene il time line
+        ris.push( this.graphBuilder.selectLabelDate(min) );
+        min = this.graphBuilder.selectStepDate(min);
+        if(this.$radioDays.is(':checked')){
+            ris.push( this.graphBuilder.selectLabelDate(min) );
+            min = this.graphBuilder.selectStepDate(min);
+        }
+
+        return ris;
+    };
+
+    this.getDataset = function () {
+        console.log("CALL: getDataset");
+
+        var dataset = this.getDatasetValue();
+
+        return [{
+            label: "Tweets time line",
+            fillColor: "rgba(151,187,205,0.2)",
+            strokeColor: "rgba(151,187,205,1)",
+            pointColor: "rgba(151,187,205,1)",
+            pointStrokeColor: "#fff",
+            pointHighlightFill: "#fff",
+            pointHighlightStroke: "rgba(151,187,205,1)",
+            data: dataset
+        }];
+    };
+
+    this.getDatasetValue = function () {
+
+        console.log("CALL: getDatasetValue");
+
+        if (this.data == null || this.data.length == 0) return [];
+
+        var ris = [];
+        var dataset = _.object( _.map( this.data, function(item){
+            return [
+                _self.graphBuilder.selectLabelDate( new Date(item.ts) ) ,
+                item.count]
+        }));
+
+        //var dataset = _.groupBy(this.data, function(obj){
+        //    return _self.graphBuilder.selectLabelDate( new Date(obj.date));
+        //});
+
+        //Inserisco le date mancanti
+        var min = new Date(this.stat.data.minDate);
+        var max = new Date(this.stat.data.maxDate);
+        while (min <= max) {
+            var key = _self.graphBuilder.selectLabelDate(min);
+            if (dataset[key] == null)
+                ris.push(0);
+            else
+                ris.push(dataset[key]);
+            min = _self.graphBuilder.selectStepDate(min);
+        }
+        //GVE
+        ris.push(0);
+        if(this.$radioDays.is(':checked')) ris.push(0);
+
+        return ris;
+    };
+
+    this.$btnFilter.click(function(){
+
+        console.log("CALL: clickFilter");
+
+        _self.graphBuilder.setFuncNextDate();
+        _self.addWaitImg(_self.$imgFilter);
+        _self.setDisableAllBtn(true);
 
         var conditions = new ObjConditions(
-            null,
-            null,
-            timeLineCtrl.$cmbTags,
-            null,
-            timeLineCtrl.$cmbUsers);
+            null, null, _self.$cmbTags,
+            null, _self.$cmbUsers);
 
-        timeLineCtrl.filterData(conditions);
+        conditions.setField("type", _self.type);
 
-        $imgFilter.removeClass("fa fa-spinner fa-spin");
-        $imgFilter.addClass("glyphicon glyphicon-filter");
+        DataCtrl.getFromUrl(DataCtrl.FIELD.DATABYDATE, conditions.getQueryString(), function(result){
+            _self.data = result;
+            _self.removeWaitImg(_self.$imgFilter);
+            _self.setDisableAllBtn(false);
+            _self.clearCanvas();
+            _self.drawTimeLine();
+        });
 
-        timeLineCtrl.$restoreButton.removeAttr("disabled");
-        timeLineCtrl.$filterButton.prop("disabled", true);
-        timeLineCtrl.drawTimeLine();
-    }, 50);
-};
+    });
 
-timeLineCtrl.filterData = function(objCond)
-{
-    timeLineCtrl.maxDate = null;
-    timeLineCtrl.minDate = null;
-
-    async.filter(timeLineCtrl.data,
-        function(obj, next){
-            var cond = objCond.containUser(obj.user) &&
-                objCond.containTag(obj.tag);
-            if(cond)
-            {
-                var date = new Date(obj.date);
-                if(!timeLineCtrl.maxDate) timeLineCtrl.maxDate = date;
-                if(!timeLineCtrl.minDate) timeLineCtrl.minDate = date;
-                timeLineCtrl.maxDate = timeLineCtrl.maxDate > date ? timeLineCtrl.maxDate : date;
-                timeLineCtrl.minDate = timeLineCtrl.minDate < date ? timeLineCtrl.minDate : date;
-            }
-            next(cond);
-        },
-        function(results) {
-            timeLineCtrl.filteredData = results;
-        }
-    );
-};
-
-timeLineCtrl.clickRestore = function()
-{
-    console.log("CALL: clickRestore");
-
-    var $imgRestore = $("#img-restore");
-    $imgRestore.removeClass("glyphicon glyphicon-remove");
-    $imgRestore.addClass("fa fa-spinner fa-spin");
-
-    $imgRestore.removeClass("fa fa-spinner fa-spin");
-    $imgRestore.addClass("glyphicon glyphicon-remove");
-
-    timeLineCtrl.clearCanvas();
-
-    timeLineCtrl.filteredData = timeLineCtrl.data;
-
-    DomUtil.deselectAll(timeLineCtrl.$cmbTags);
-    DomUtil.deselectAll(timeLineCtrl.$cmbUsers);
-    $('.selectpicker').selectpicker('refresh');
-
-    timeLineCtrl.$filterButton.removeAttr("disabled");
-    timeLineCtrl.$restoreButton.prop("disabled", true);
+    this.getData();
 };

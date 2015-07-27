@@ -340,7 +340,7 @@ function toWordBarData(vocabulary, type)
         var counter = row.counter;
         _.each(counter, function(row){
             ris.push( [ row.token, row.count, StatWordCloudCtrl.fill(count) ]);
-        })
+        });
         count += 1;
     });
 

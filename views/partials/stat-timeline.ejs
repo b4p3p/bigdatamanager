@@ -4,6 +4,7 @@
         /*height: 500px;*/
         margin-top: 0;
         padding-left: 0;
+       height: 50%;
     }
 
     #timeLineContainer {
@@ -11,7 +12,7 @@
         top: 0;
         bottom:0; !important;
         width:100%;
-        /*height: 50%;*/
+        height: 50%;
         padding-left: 0;
         margin-top: 0;
     }
@@ -50,73 +51,75 @@
 
 </style>
 
-<script src="/public/js/Stat-TimeLineCtrl.js"></script>
-<script src="/public/lib/chartjs/Chart.js"></script>
-<script src="/public/js/DOMUtil.js"></script>
-
-
 <div id="spinner" style="text-align: center">
     <img src="/public/img/ajax-loader.gif" alt="Loading" class="spinnerImage"/>
     <p>Loading data...</p>
 </div>
 
-
 <div class="timecontent hidden" id="container">
 
-        <form id="formType" class="form-inline" role="form">
+     <form id="formType" class="form-inline" role="form">
 
-            <div class="form-group form-option">
-                <label class="fix-label">Visualization mode:</label><br>
+         <div class="form-group form-option">
+             <label class="fix-label">Visualization mode:</label><br>
 
-                <div class="radio">
-                    <label><input id="radioDays" type="radio" name="optmode" value="days" checked=""
-                                  onclick="timeLineCtrl.handleModeClick(this);"> Days</label>
-                </div><br>
-                <div class="radio">
-                    <label>
-                        <input id="radioWeeks" type="radio" name="optmode" value="weeks"
-                               onclick="timeLineCtrl.handleModeClick(this);"> Weeks</label>
-                </div><br>
-                <div class="radio">
-                    <label><input id="radioMonths" type="radio" name="optmode" value="months"
-                                  onclick="timeLineCtrl.handleModeClick(this);"> Months</label>
-                </div>
-            </div>
+             <div class="radio">
+                 <label><input id="radioDays" type="radio" name="optmode" value="days" checked=""
+                               > Days</label>
 
-            <div id="formTags" class="form-group form-option">
-                    <label class="fix-label" for="cmbTags">Tags</label><br>
-                    <select class="selectpicker" id="cmbTags"
-                            data-live-search="true" title="Select tags"
-                            multiple>
-                    </select>
-                </div>
+                <!--onclick="timeLineCtrl.handleModeClick(this);"-->
 
-            <div id="formUsers" class="form-group form-option">
-                    <label class="fix-label" for="cmbUsers">Users</label><br>
-                    <select class="selectpicker" id="cmbUsers"
-                            data-live-search="true" title="Select users"
-                            multiple>
-                    </select>
-                </div>
+             </div><br>
+             <div class="radio">
+                 <label>
+                     <input id="radioWeeks" type="radio" name="optmode" value="weeks"
+                            > Weeks</label>
+                <!--onclick="timeLineCtrl.handleModeClick(this);"-->
 
-            <div id="formButton" class="form-group" style="margin-top: 25px; margin-left: 25px">
+             </div><br>
+             <div class="radio">
+                 <label><input id="radioMonths" type="radio" name="optmode" value="months"
+                               > Months</label>
+             </div>
 
-                <button type="button" class="btn btn-success"
-                        id="cmbFilter"
-                        style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"
-                        onclick="timeLineCtrl.clickFilter()">
-                    <span id="img-filter" class="glyphicon glyphicon-filter" aria-hidden="true"></span> Apply filter
-                </button>
+            <!--onclick="timeLineCtrl.handleModeClick(this);"-->
+         </div>
 
-                <button type="button" class="btn btn-danger"
-                        id="cmbRestore"
-                        style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"
-                        onclick="timeLineCtrl.clickRestore()"
-                        disabled>
-                    <span id="img-restore" class="glyphicon glyphicon-remove" aria-hidden="true"></span> Restore
-                </button>
-            </div>
-        </form>
+         <div id="formTags" class="form-group form-option">
+                 <label class="fix-label" for="cmbTags">Tags</label><br>
+                 <select class="selectpicker" id="cmbTags"
+                         data-live-search="true" title="Select tags"
+                         multiple>
+                 </select>
+             </div>
+
+         <div id="formUsers" class="form-group form-option">
+                 <label class="fix-label" for="cmbUsers">Users</label><br>
+                 <select class="selectpicker" id="cmbUsers"
+                         data-live-search="true" title="Select users"
+                         multiple>
+                 </select>
+             </div>
+
+         <div id="formButton" class="form-group" style="margin-top: 25px; margin-left: 25px">
+
+            <!--onclick="timeLineCtrl.clickFilter()"-->
+
+             <button type="button" class="btn btn-success"
+                     id="btnFilter"
+                     style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"
+                     >
+                 <span id="img-filter" class="glyphicon glyphicon-filter" aria-hidden="true"></span> Apply filter
+             </button>
+
+             <button type="button" class="btn btn-danger"
+                     id="btnRestore"
+                     style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"
+                     disabled>
+                 <span id="img-restore" class="glyphicon glyphicon-remove" aria-hidden="true"></span> Restore
+             </button>
+         </div>
+     </form>
 
 </div>
 
@@ -124,20 +127,22 @@
     <canvas id="timeLine"></canvas>
 </div>
 
+<script src="/public/js/DOMUtil.js"></script>
+<script src="/public/js/DateUtil.js"></script>
+<script src="/bower_components/Chart.js/Chart.js"></script>
+<script src="/public/js/Stat-TimeLineCtrl.js"></script>
+
 <script>
 
-    $(document).ready(function ()
-    {
-        $('.selectpicker').selectpicker();
-    });
+   $(document).ready(function(){
+      var timeLineCtrl = new TimeLineCtrl();
+   });
 
-    timeLineCtrl.initGUI();
-    timeLineCtrl.getData();
+   $('.selectpicker').selectpicker();
 
-    $('.selectpicker').on('change', function(){
-        timeLineCtrl.$filterButton.removeAttr("disabled");
-        timeLineCtrl.$restoreButton.prop("disabled", true);
-    });
+//   $('.selectpicker').on('change', function(){
+//     timeLineCtrl.$filterButton.removeAttr("disabled");
+//     timeLineCtrl.$restoreButton.prop("disabled", true);
+//   });
 
-//    timeLineCtrl.loadData();
 </script>

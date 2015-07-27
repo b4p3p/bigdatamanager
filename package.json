@@ -46,6 +46,7 @@
     "snowball": ">=0.3.1",
     "angular": ">=1.4.3",
     "randomcolor": ">=0.3.0",
-    "text-miner": ">=1.0.3"
+    "text-miner": ">=1.0.3",
+    "xdate": "*"
   }
 }
