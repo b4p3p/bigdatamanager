@@ -34,6 +34,14 @@ UsersCtrl.$divMap = null;
 UsersCtrl.$mapContainer = null;
 UsersCtrl.mapChartID = null;
 
+UsersCtrl.$divCloud = null;
+UsersCtrl.$cloudContainer = null;
+UsersCtrl.$cloudChart = null;
+
+UsersCtrl.fill = null;
+UsersCtrl.userTokens = null;
+UsersCtrl.dataCloud = [];
+
 UsersCtrl.getUsers = function (callback)
 {
     console.log("CALL: getUsers");
@@ -74,6 +82,10 @@ UsersCtrl.initGui = function ()
     UsersCtrl.$divMap = $('#divMap');
     UsersCtrl.$mapContainer = $('#mapContainer');
     UsersCtrl.mapChartID = "mapChart";
+
+    UsersCtrl.$divCloud = $('#divCloud');
+    UsersCtrl.$cloudContainer = $('#cloudContainer');
+    UsersCtrl.$cloudChart = $('#cloudChart');
 
     UsersCtrl.initComboUsers();
     $('.selectpicker').selectpicker('refresh');
@@ -120,6 +132,7 @@ UsersCtrl.clickStat = function ()
         UsersCtrl.colors = colorUtil.generateColor(UsersCtrl.filteredUserData.length);
         UsersCtrl.maxDate = new Date(doc.properties.maxDate);
         UsersCtrl.minDate = new Date(doc.properties.minDate);
+        UsersCtrl.setDataCloud();
 
         DataCtrl.getField( function(docStat){
             UsersCtrl.filteredStat = docStat;
@@ -162,7 +175,9 @@ UsersCtrl.drawCharts = function()
     UsersCtrl.$mapContainer.removeClass('hidden');
     UsersCtrl.drawMap();
 
-    //TODO add statistics
+    UsersCtrl.$divCloud.removeClass('hidden');
+    UsersCtrl.$cloudContainer.removeClass('hidden');
+    UsersCtrl.drawWordCloud();
 };
 
 UsersCtrl.clearDiv = function()
@@ -191,6 +206,13 @@ UsersCtrl.clearDiv = function()
         '<div id="mapChart"></div>' +
         '</div>');
     UsersCtrl.$mapContainer = $('#mapContainer');
+
+    UsersCtrl.$divCloud.addClass('hidden');
+    UsersCtrl.$cloudContainer.replaceWith(
+        '<div id="cloudContainer" class="hidden">' +
+        '<svg id="cloudChart"></svg>' +
+        '</div>');
+    UsersCtrl.$cloudContainer = $('#cloudContainer');
 };
 
 //Dichiaro funzioni vuote
@@ -478,17 +500,18 @@ UsersCtrl.drawMap = function()
             normal: {
                 name: 'Normal',
                 mapType: 'normal'
-               },
+            },
             terrain: {
                 name: 'Terrain',
-                mapType: 'terrain'},
+                mapType: 'terrain'
+            },
             satellite: {
                 name: 'Satellite',
-                mapType: 'satellite'}
+                mapType: 'satellite'
+            }
         }
     };
     var map = new google.visualization.Map(document.getElementById(UsersCtrl.mapChartID));
-
     map.draw(data, options);
 };
 
@@ -513,3 +536,149 @@ UsersCtrl.buildMapData = function()
     return data;
 };
 
+UsersCtrl.drawWordCloud = function()
+{
+    UsersCtrl.fill = d3.scale.category20();
+    var words = UsersCtrl.dataCloud;
+    var max = words[words.length - 1].size;
+    var min = words[0].size;
+
+    var randomRotate = d3.scale.linear().domain([0, 1]).range([-20, 20]);
+    var wordScale = d3.scale.linear().domain([min, max]).range([15, 100]);
+
+    var w = UsersCtrl.$divCloud.width();
+    var h = 400;
+
+    UsersCtrl.$divCloud.height(h);
+
+    UsersCtrl.$cloudChart.empty();
+    UsersCtrl.$cloudChart.width(w);
+    UsersCtrl.$cloudChart.height(h);
+
+    UsersCtrl.$cloudChart.attr("width", w);
+    UsersCtrl.$cloudChart.attr("height", h);
+
+    d3.layout.cloud()
+        .size([w , h])
+        .words(words)
+        .rotate(function () {
+            return randomRotate(Math.random())
+        })
+        .font("Impact")
+        .fontSize(function (d) {
+            return wordScale(d.size);
+        })
+        .on("end", UsersCtrl.drawCloud)
+        .start();
+};
+
+UsersCtrl.drawCloud = function()
+{
+    var w = UsersCtrl.$divCloud.width();
+    //var h = 400;
+    var h = 400;
+
+    var wordG = d3.select("#cloudChart")
+        .append("g")
+        .attr("width", w)
+        .attr("height", h)
+        .attr("id", "wordCloudG")
+        .attr("transform","translate(" + w/2 + "," + h/2 + ")");
+
+    wordG.selectAll("text")
+        .data(UsersCtrl.dataCloud)
+        .enter()
+        .append("text")
+        //.attr("transform", function(d) {
+        //    try
+        //    {
+        //        var str = "translate(" + [d.x, d.y] + ");rotate(" + d.rotate + ")";
+        //        console.log("sono qui");
+        //        return str
+        //    }catch(e)
+        //    {
+        //        console.log(e);
+        //    }
+        //})
+
+        .style("font-size", function(d)
+        {
+            //cont += 1;
+            //console.log(cont);
+            return d.size + "px";
+        })
+        .style("cursor", "default")
+        .style("z-index", 20)
+        .style("background", "#000000")
+        .style("font-family", "Impact")
+        .style("fill", function(d, i) {
+            return UsersCtrl.fill(i);
+        })
+        .attr("text-anchor", "middle")
+        .attr("transform", function(d) {
+            return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+        })
+        .text(function(d) { return d.text; })
+        .on("mouseover", function(d, i)
+        {
+            //var tag = StatWordCloudCtrl.wordCloudData[d.text];
+            //var value = statController.wordsOccurr[tag][d.text];
+            ////alert("text: " + d.text + "; size: " + value + "; tag: " + tag );
+            //div.transition()
+            //    .duration(200)
+            //    .style("opacity", .9);
+            //div.html(
+            //    '<div class="tip">Tag: <b>' + tag + '</b><br>Occurrences: <b>' + value + '</b></div>'
+            //)
+            //    .style("left", (d3.event.pageX) + "px")
+            //    .style("top", (d3.event.pageY - 28) + "px");
+            //d3.select(this).style("font-weight","bold");
+        })
+        .on("mouseout", function(d, i)
+        {
+            d3.select(this).style("font-weight","normal");
+            $(".tip").addClass("hidden");
+        });
+};
+
+UsersCtrl.setDataCloud = function()
+{
+    var tokens = [];
+    var userTokens = [];
+    _.each(UsersCtrl.filteredUserData, function(userObj, index) {
+        _.each(userObj.data, function(dataObj){
+            tokens.push(dataObj.tokens);
+            _.each(dataObj.tokens, function(token) {
+                var obj = {
+                    word: token,
+                    user: userObj.user
+                };
+                userTokens.push(obj);
+            });
+        });
+    });
+    UsersCtrl.userTokens = _
+        .chain(userTokens)
+        .groupBy('user')
+        .map(function(value, key) {
+            return {
+                user: key,
+                words: _.uniq(_.pluck(value, 'word'))
+            }
+        })
+        .value();
+
+    var flat_arr = [].concat.apply([],tokens);
+    var res =
+        _.chain(flat_arr)
+            .groupBy( function(word){return word;} )
+            .sortBy( function(word){ return word.length; } )
+            .value();
+    $.each( res, function( index, word ){
+        var obj = {
+            text: word[0],
+            size: word.length
+        };
+        UsersCtrl.dataCloud.push(obj);
+    });
+};

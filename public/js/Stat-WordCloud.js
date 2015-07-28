@@ -63,7 +63,8 @@ var StatWordCloudCtrl = {
         });
     },
 
-    setData: function(type){
+    setData: function(type)
+    {
         var data = StatWordCloudCtrl.vocabulary;
         StatWordCloudCtrl.wordCloudData = toWordCloudData(data, type);
         StatWordCloudCtrl.tagsBarData = toTagsBarData(data, type);
