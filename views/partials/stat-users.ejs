@@ -17,6 +17,22 @@
         padding-left: 0;
         margin-top: 0;
     }
+
+    #line{
+        border-bottom: 2px #ccc solid;
+        overflow:visible;
+        height:9px;
+        margin: 50px 0 50px 0;
+    }
+    #label-map {
+        text-anchor: start;
+        font-family: Arial;
+        font-size: 14px;
+        font-weight: bold;
+        stroke: none;
+        stroke-width: 0px;
+        color: black
+    }
 </style>
 
 <div id="container" style="margin-top: 0px">
@@ -51,7 +67,7 @@
 
     <form id="formType" class="form-inline hidden" role="form" style="margin-top: 20px; margin-bottom: 20px">
         <div class="form-group">
-            <label class="fix-label">Visualization mode:</label><br>
+            <label class="fix-label">Visualization mode</label><br>
 
             <div class="radio">
                 <label><input id="radioDays" type="radio" name="optmode" value="days" checked=""
@@ -70,6 +86,7 @@
     </div>
 
     <div id="divBar" class="form-group hidden">
+        <div id="line"></div>
         <label class="fix-label" style="margin-left: 3px">Sort</label><br>
 
         <div class="btn-group" role="group" aria-label="...">
@@ -85,13 +102,20 @@
         </div>
     </div>
     <div id="barChartContainer" class="hidden">
-        <div id="barChart" style="margin-top: 50px"></div>
+        <div id="barChart"></div>
     </div>
-</div>
+
+    <div id="divMap" class="form-group hidden">
+        <div id="line"></div>
+        <label id="label-map" class="fix-label" style="margin-left: 3px">Map user data</label><br>
+        <div id="mapContainer" class="hidden">
+            <div id="mapChart"></div>
+        </div>
+    </div>
 
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 <script>
-    google.load('visualization', '1.1', {packages: ['corechart', 'line']});
+    google.load('visualization', '1.1', {packages: ['corechart', 'line', 'map']});
 </script>
 <script src="/public/js/ColorUtil.js"></script>
 <script src="/public/js/DOMUtil.js"></script>

@@ -11,6 +11,7 @@ UsersCtrl.filteredUserData = null;
 UsersCtrl.filteredStat = null;
 UsersCtrl.users = null;
 UsersCtrl.selectedUsers = null;
+UsersCtrl.colors = [];
 
 UsersCtrl.maxDate = null;
 UsersCtrl.minDate = null;
@@ -28,6 +29,10 @@ UsersCtrl.barChartID = null;
 UsersCtrl.$divBar = null;
 UsersCtrl.$AZbutton = null;
 UsersCtrl.$ZAbutton = null;
+
+UsersCtrl.$divMap = null;
+UsersCtrl.$mapContainer = null;
+UsersCtrl.mapChartID = null;
 
 UsersCtrl.getUsers = function (callback)
 {
@@ -65,6 +70,10 @@ UsersCtrl.initGui = function ()
     UsersCtrl.$divBar = $('#divBar');
     UsersCtrl.$barChartContainer = $('#barChartContainer');
     UsersCtrl.barChartID = "barChart";
+
+    UsersCtrl.$divMap = $('#divMap');
+    UsersCtrl.$mapContainer = $('#mapContainer');
+    UsersCtrl.mapChartID = "mapChart";
 
     UsersCtrl.initComboUsers();
     $('.selectpicker').selectpicker('refresh');
@@ -108,6 +117,7 @@ UsersCtrl.clickStat = function ()
     DataCtrl.getFromUrl(DataCtrl.FIELD.USERDATA, queryString, function(doc) {
         UsersCtrl.data = doc;
         UsersCtrl.filteredUserData = doc.data;
+        UsersCtrl.colors = colorUtil.generateColor(UsersCtrl.filteredUserData.length);
         UsersCtrl.maxDate = new Date(doc.properties.maxDate);
         UsersCtrl.minDate = new Date(doc.properties.minDate);
 
@@ -148,6 +158,10 @@ UsersCtrl.drawCharts = function()
     UsersCtrl.$ZAbutton.removeAttr("disabled");
     UsersCtrl.drawBarChart();
 
+    UsersCtrl.$divMap.removeClass('hidden');
+    UsersCtrl.$mapContainer.removeClass('hidden');
+    UsersCtrl.drawMap();
+
     //TODO add statistics
 };
 
@@ -162,13 +176,21 @@ UsersCtrl.clearDiv = function()
         '</div>');
     UsersCtrl.$timeLineContainer = $('#timeLineContainer');
 
+    UsersCtrl.$divBar.addClass('hidden');
     UsersCtrl.$barChartContainer.replaceWith(
         '<div id="barChartContainer" class="hidden">' +
-        '<div id="barChart" style="margin-top: 20px"></div>' +
+        '<div id="barChart"></div>' +
         '</div>');
     UsersCtrl.$barChartContainer = $('#barChartContainer');
     UsersCtrl.$AZbutton.prop("disabled", true);
     UsersCtrl.$ZAbutton.prop("disabled", true);
+
+    UsersCtrl.$divMap.addClass('hidden');
+    UsersCtrl.$mapContainer.replaceWith(
+        '<div id="mapContainer" class="hidden">' +
+        '<div id="mapChart"></div>' +
+        '</div>');
+    UsersCtrl.$mapContainer = $('#mapContainer');
 };
 
 //Dichiaro funzioni vuote
@@ -315,7 +337,7 @@ UsersCtrl.drawTimeLine = function()
             textStyle: { fontSize: 13 }
         },
         height: 400,
-        colors: colorUtil.generateColor(UsersCtrl.filteredUserData.length),
+        colors: UsersCtrl.colors,
         chartArea: {
             height: '65%',
             top: '5%'
@@ -354,8 +376,8 @@ UsersCtrl.drawBarChart = function()
         title: "User tags",
         titleTextStyle: { fontSize: 14 },
         width: "100%",
-        height: chartHeight,
-        bar:    { groupWidth: heightBar + "%" },
+        height: data.Gf.length == 1? "100%" : chartHeight,
+        bar: { groupWidth: heightBar + "%" },
         legend: { position: 'top',  maxLines: 3, textStyle: {fontSize: 13}},
         isStacked: true,
         backgroundColor: 'transparent',
@@ -363,7 +385,7 @@ UsersCtrl.drawBarChart = function()
             alwaysOutside: false,
             textStyle:  { color: "black"}
         },
-        chartArea: {'height': chartAreaHeight - 25, 'right':0, 'top': 100, 'left':150 },
+        chartArea: {'height': chartAreaHeight, 'right':0, 'top': 100, 'left':150 },
         hAxis: {
             title: "Number of tagged data",
             titleTextStyle: { fontSize: 14 },
@@ -377,7 +399,7 @@ UsersCtrl.drawBarChart = function()
     chart.draw(data, options);
 };
 
-UsersCtrl.buildBarData = function(dataSelected)
+UsersCtrl.buildBarData = function()
 {
     console.log("CALL: buildBarData");
 
@@ -435,3 +457,59 @@ UsersCtrl.ZAbuttonClick = function()
     UsersCtrl.$AZbutton.removeClass("active");
     UsersCtrl.drawBarChart();
 };
+
+UsersCtrl.drawMap = function()
+{
+    var data = new google.visualization.DataTable();
+    data.addColumn('number', 'Lat');
+    data.addColumn('number', 'Long');
+    data.addColumn('string', 'User');
+
+    data.addRows(UsersCtrl.buildMapData());
+
+    var options = {
+        showTip: true,
+        enableScrollWheel: true,
+        zoomLevel: 2,
+        mapType: 'normal',
+        useMapTypeControl: true,
+        mapTypeIds: ['normal', 'terrain', 'satellite'],
+        maps: {
+            normal: {
+                name: 'Normal',
+                mapType: 'normal'
+               },
+            terrain: {
+                name: 'Terrain',
+                mapType: 'terrain'},
+            satellite: {
+                name: 'Satellite',
+                mapType: 'satellite'}
+        }
+    };
+    var map = new google.visualization.Map(document.getElementById(UsersCtrl.mapChartID));
+
+    map.draw(data, options);
+};
+
+UsersCtrl.buildMapData = function()
+{
+    console.log("CALL: buildMapData");
+
+    var data = [];
+    var row = [];
+    _.each(UsersCtrl.filteredUserData, function(userObj, index){
+        _.each(userObj.data, function(dataObj){
+            var text = userObj.user + ': "' + dataObj.text + '"';
+            row.push(dataObj.latitude);
+            row.push(dataObj.longitude);
+            row.push(text);
+
+            data.push(row);
+            row = [];
+            });
+        });
+
+    return data;
+};
+
