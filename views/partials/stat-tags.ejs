@@ -34,12 +34,26 @@
         margin-left: 0;
         padding-left: 0;
     }
+    .tip{
+        display: block;
+        background: #333;
+        background: rgba(0,0,0,.8);
+        border-radius: 5px;
+        bottom: 26px;
+        color: #fff;
+        content: attr(title);
+        left: 20%;
+        padding: 5px 15px;
+        position: relative;
+        z-index: 98;
+        text-align:left;
+    }
 
 </style>
 
 <div id="spinner" style="text-align: center">
     <img src="/public/img/ajax-loader.gif" alt="Loading" class="spinnerImage"/>
-    <p>Loading word cloud graph...</p>
+    <p>Loading data...</p>
 </div>
 
 <div id="container" class="hidden">

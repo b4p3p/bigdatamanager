@@ -40,6 +40,7 @@ var StatWordCloudCtrl = {
     fill : null,
     $wordCloud : $("#Tags"),
     $tagsBarChart : $("#TagsBarChart"),
+    dictKey: {},
 
     loadData: function()
     {
@@ -111,14 +112,14 @@ var StatWordCloudCtrl = {
 
     _drawCloud: function() {
 
-        //var cont = 0;
-
-        //var container = $("#Tags");
-
         var container = $("#container");
 
         var w = container.width();
         var h = 400;
+
+        var div = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
 
         var wordG = d3.select("#Tags")
             .append("g")
@@ -131,22 +132,7 @@ var StatWordCloudCtrl = {
             .data(StatWordCloudCtrl.wordCloudData)
             .enter()
             .append("text")
-            //.attr("transform", function(d) {
-            //    try
-            //    {
-            //        var str = "translate(" + [d.x, d.y] + ");rotate(" + d.rotate + ")";
-            //        console.log("sono qui");
-            //        return str
-            //    }catch(e)
-            //    {
-            //        console.log(e);
-            //    }
-            //})
-
-            .style("font-size", function(d)
-            {
-                //cont += 1;
-                //console.log(cont);
+            .style("font-size", function(d) {
                 return d.size + "px";
             })
             .style("cursor", "default")
@@ -163,18 +149,17 @@ var StatWordCloudCtrl = {
             .text(function(d) { return d.text; })
             .on("mouseover", function(d, i)
             {
-                //var tag = StatWordCloudCtrl.wordCloudData[d.text];
-                //var value = statController.wordsOccurr[tag][d.text];
-                ////alert("text: " + d.text + "; size: " + value + "; tag: " + tag );
-                //div.transition()
-                //    .duration(200)
-                //    .style("opacity", .9);
-                //div.html(
-                //    '<div class="tip">Tag: <b>' + tag + '</b><br>Occurrences: <b>' + value + '</b></div>'
-                //)
-                //    .style("left", (d3.event.pageX) + "px")
-                //    .style("top", (d3.event.pageY - 28) + "px");
-                //d3.select(this).style("font-weight","bold");
+                div.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                div.html(
+                    '<div class="tip">Token: <b>' + d.text + '</b><br>Tag: <b>'
+                    + _.keys(StatWordCloudCtrl.dictKey[d.text]).join(', ')
+                    + '</b><br>Occurrences: <b>' + d.size + '</b></div>'
+                )
+                    .style("left", (d3.event.pageX) + "px")
+                    .style("top", (d3.event.pageY - 28) + "px");
+                d3.select(this).style("font-weight","bold");
             })
             .on("mouseout", function(d, i)
             {
@@ -298,6 +283,13 @@ function toWordCloudData(vocabulary, type)
     _.each(data, function(tag){
         var counter = tag.counter;
         _.each(counter, function(c){
+
+            if(StatWordCloudCtrl.dictKey[c.token] == null)
+                StatWordCloudCtrl.dictKey[c.token] = {};
+
+            if(StatWordCloudCtrl.dictKey[c.token][tag.tag] == null)
+                StatWordCloudCtrl.dictKey[c.token][tag.tag] = true;
+
             var obj = {
                 text: c.token,
                 size: c.count
@@ -348,7 +340,8 @@ function toWordBarData(vocabulary, type)
     return ris;
 }
 
-function getTot(counter) {
+function getTot(counter)
+{
     var sum = 0;
     _.each(counter, function(word){
         sum+=word.count

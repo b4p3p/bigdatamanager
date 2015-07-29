@@ -35,7 +35,6 @@ UsersCtrl.$mapContainer = null;
 UsersCtrl.mapChartID = null;
 
 UsersCtrl.$divCloud = null;
-UsersCtrl.$cloudContainer = null;
 UsersCtrl.$cloudChart = null;
 
 UsersCtrl.fill = null;
@@ -84,7 +83,6 @@ UsersCtrl.initGui = function ()
     UsersCtrl.mapChartID = "mapChart";
 
     UsersCtrl.$divCloud = $('#divCloud');
-    UsersCtrl.$cloudContainer = $('#cloudContainer');
     UsersCtrl.$cloudChart = $('#cloudChart');
 
     UsersCtrl.initComboUsers();
@@ -108,6 +106,8 @@ UsersCtrl.clickStat = function ()
     console.log("CALL: clickStat");
 
     var $imgFilter = $("#img-filter");
+    $imgFilter.removeClass("fa fa-bar-chart");
+    $imgFilter.addClass("fa fa-spinner fa-spin");
 
     UsersCtrl.selectedUsers = DomUtil.getSelectedCombo(UsersCtrl.$cmbUsers);
     if( UsersCtrl.selectedUsers.length == 0 )
@@ -176,7 +176,6 @@ UsersCtrl.drawCharts = function()
     UsersCtrl.drawMap();
 
     UsersCtrl.$divCloud.removeClass('hidden');
-    UsersCtrl.$cloudContainer.removeClass('hidden');
     UsersCtrl.drawWordCloud();
 };
 
@@ -207,12 +206,13 @@ UsersCtrl.clearDiv = function()
         '</div>');
     UsersCtrl.$mapContainer = $('#mapContainer');
 
-    UsersCtrl.$divCloud.addClass('hidden');
-    UsersCtrl.$cloudContainer.replaceWith(
-        '<div id="cloudContainer" class="hidden">' +
-        '<svg id="cloudChart"></svg>' +
-        '</div>');
-    UsersCtrl.$cloudContainer = $('#cloudContainer');
+    UsersCtrl.$divCloud.replaceWith(
+        '<div id="divCloud" class="form-group hidden">' +
+        '<div id="line"></div>' +
+        '<label id="labelID" class="fix-label" style="margin-left: 3px">Word cloud token users</label><br>' +
+        '<svg id="cloudChart"></svg></div>');
+    UsersCtrl.$divCloud = $('#divCloud');
+    UsersCtrl.$cloudChart = $('#cloudChart');
 };
 
 //Dichiaro funzioni vuote
@@ -549,14 +549,7 @@ UsersCtrl.drawWordCloud = function()
     var w = UsersCtrl.$divCloud.width();
     var h = 400;
 
-    UsersCtrl.$divCloud.height(h);
-
     UsersCtrl.$cloudChart.empty();
-    UsersCtrl.$cloudChart.width(w);
-    UsersCtrl.$cloudChart.height(h);
-
-    UsersCtrl.$cloudChart.attr("width", w);
-    UsersCtrl.$cloudChart.attr("height", h);
 
     d3.layout.cloud()
         .size([w , h])
@@ -575,8 +568,15 @@ UsersCtrl.drawWordCloud = function()
 UsersCtrl.drawCloud = function()
 {
     var w = UsersCtrl.$divCloud.width();
-    //var h = 400;
     var h = 400;
+
+    $("#cloudChart")
+        .attr("width",  w)
+        .attr("height",  h);
+
+    var div = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
 
     var wordG = d3.select("#cloudChart")
         .append("g")
@@ -589,22 +589,7 @@ UsersCtrl.drawCloud = function()
         .data(UsersCtrl.dataCloud)
         .enter()
         .append("text")
-        //.attr("transform", function(d) {
-        //    try
-        //    {
-        //        var str = "translate(" + [d.x, d.y] + ");rotate(" + d.rotate + ")";
-        //        console.log("sono qui");
-        //        return str
-        //    }catch(e)
-        //    {
-        //        console.log(e);
-        //    }
-        //})
-
-        .style("font-size", function(d)
-        {
-            //cont += 1;
-            //console.log(cont);
+        .style("font-size", function(d) {
             return d.size + "px";
         })
         .style("cursor", "default")
@@ -621,18 +606,15 @@ UsersCtrl.drawCloud = function()
         .text(function(d) { return d.text; })
         .on("mouseover", function(d, i)
         {
-            //var tag = StatWordCloudCtrl.wordCloudData[d.text];
-            //var value = statController.wordsOccurr[tag][d.text];
-            ////alert("text: " + d.text + "; size: " + value + "; tag: " + tag );
-            //div.transition()
-            //    .duration(200)
-            //    .style("opacity", .9);
-            //div.html(
-            //    '<div class="tip">Tag: <b>' + tag + '</b><br>Occurrences: <b>' + value + '</b></div>'
-            //)
-            //    .style("left", (d3.event.pageX) + "px")
-            //    .style("top", (d3.event.pageY - 28) + "px");
-            //d3.select(this).style("font-weight","bold");
+            div.transition()
+                .duration(200)
+                .style("opacity", .9);
+            div.html(
+                '<div class="tip">Token: <b>' + d.text + '</b><br>Occurrences: <b>' + d.size + '</b></div>'
+            )
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px");
+            d3.select(this).style("font-weight","bold");
         })
         .on("mouseout", function(d, i)
         {

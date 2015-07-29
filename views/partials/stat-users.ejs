@@ -33,6 +33,20 @@
         stroke-width: 0px;
         color: black
     }
+    .tip{
+        display: block;
+        background: #333;
+        background: rgba(0,0,0,.8);
+        border-radius: 5px;
+        bottom: 26px;
+        color: #fff;
+        content: attr(title);
+        left: 20%;
+        padding: 5px 15px;
+        position: relative;
+        z-index: 98;
+        text-align:left;
+    }
 </style>
 
 <div id="container" style="margin-top: 0px">
@@ -46,9 +60,11 @@
             </select>
         </div>
     </div>
+
     <script>
         $('.selectpicker').selectpicker();
     </script>
+
     <div class="div-inline">
         <button type="button" class="btn btn-success"
                 id="statButton"
@@ -81,6 +97,7 @@
                               onclick="UsersCtrl.handleModeClick(this);"> Months</label></div>
         </div>
     </form>
+
     <div id="timeLineContainer" class="hidden">
         <div id="timeLine"></div>
     </div>
@@ -101,6 +118,7 @@
             </button>
         </div>
     </div>
+
     <div id="barChartContainer" class="hidden">
         <div id="barChart"></div>
     </div>
@@ -114,21 +132,16 @@
     </div>
 
     <div id="divCloud" class="form-group hidden">
-
         <div id="line"></div>
-
         <label id="labelID" class="fix-label" style="margin-left: 3px">Word cloud token users</label><br>
-
-        <svg id="cloudChart" height="500" width="500"></svg>
-
-        <div id="cloudContainer" class="hidden">
-
-        </div>
-
     </div>
+
+    <svg style="width:100%;height:100%;" id="cloudChart" ></svg>
+
 </div>
 
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
 <script>
     google.load('visualization', '1.1', {packages: ['corechart', 'line', 'map']});
 </script>
