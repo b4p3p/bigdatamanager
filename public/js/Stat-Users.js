@@ -40,6 +40,7 @@ UsersCtrl.$cloudChart = null;
 UsersCtrl.fill = null;
 UsersCtrl.userTokens = null;
 UsersCtrl.dataCloud = [];
+UsersCtrl.wordsCloud = [];
 
 UsersCtrl.getUsers = function (callback)
 {
@@ -132,7 +133,7 @@ UsersCtrl.clickStat = function ()
         UsersCtrl.colors = colorUtil.generateColor(UsersCtrl.filteredUserData.length);
         UsersCtrl.maxDate = new Date(doc.properties.maxDate);
         UsersCtrl.minDate = new Date(doc.properties.minDate);
-        UsersCtrl.setDataCloud();
+        UsersCtrl.dataCloud = doc.wordcount;
 
         DataCtrl.getField( function(docStat){
             UsersCtrl.filteredStat = docStat;
@@ -539,9 +540,9 @@ UsersCtrl.buildMapData = function()
 UsersCtrl.drawWordCloud = function()
 {
     UsersCtrl.fill = d3.scale.category20();
-    var words = UsersCtrl.dataCloud;
-    var max = words[words.length - 1].size;
-    var min = words[0].size;
+    UsersCtrl.wordsCloud = UsersCtrl.setDataCloud();
+    var min = UsersCtrl.wordsCloud[UsersCtrl.wordsCloud.length - 1].size;
+    var max = UsersCtrl.wordsCloud[0].size;
 
     var randomRotate = d3.scale.linear().domain([0, 1]).range([-20, 20]);
     var wordScale = d3.scale.linear().domain([min, max]).range([15, 100]);
@@ -553,7 +554,7 @@ UsersCtrl.drawWordCloud = function()
 
     d3.layout.cloud()
         .size([w , h])
-        .words(words)
+        .words(UsersCtrl.wordsCloud)
         .rotate(function () {
             return randomRotate(Math.random())
         })
@@ -586,7 +587,7 @@ UsersCtrl.drawCloud = function()
         .attr("transform","translate(" + w/2 + "," + h/2 + ")");
 
     wordG.selectAll("text")
-        .data(UsersCtrl.dataCloud)
+        .data(UsersCtrl.wordsCloud)
         .enter()
         .append("text")
         .style("font-size", function(d) {
@@ -610,7 +611,8 @@ UsersCtrl.drawCloud = function()
                 .duration(200)
                 .style("opacity", .9);
             div.html(
-                '<div class="tip">Token: <b>' + d.text + '</b><br>Occurrences: <b>' + d.size + '</b></div>'
+                '<div class="tip">Token: <b>' + d.text + '</b><br>' +
+                UsersCtrl.getUsersOcc(d.text) + '</div>'
             )
                 .style("left", (d3.event.pageX) + "px")
                 .style("top", (d3.event.pageY - 28) + "px");
@@ -625,42 +627,23 @@ UsersCtrl.drawCloud = function()
 
 UsersCtrl.setDataCloud = function()
 {
-    var tokens = [];
     var userTokens = [];
-    _.each(UsersCtrl.filteredUserData, function(userObj, index) {
-        _.each(userObj.data, function(dataObj){
-            tokens.push(dataObj.tokens);
-            _.each(dataObj.tokens, function(token) {
-                var obj = {
-                    word: token,
-                    user: userObj.user
-                };
-                userTokens.push(obj);
-            });
-        });
+    _.each(UsersCtrl.dataCloud, function(value, key) {
+            var obj = {
+                text: key,
+                size: value.size
+            };
+            userTokens.push(obj);
     });
-    UsersCtrl.userTokens = _
-        .chain(userTokens)
-        .groupBy('user')
-        .map(function(value, key) {
-            return {
-                user: key,
-                words: _.uniq(_.pluck(value, 'word'))
-            }
-        })
-        .value();
+    return userTokens;
+};
 
-    var flat_arr = [].concat.apply([],tokens);
-    var res =
-        _.chain(flat_arr)
-            .groupBy( function(word){return word;} )
-            .sortBy( function(word){ return word.length; } )
-            .value();
-    $.each( res, function( index, word ){
-        var obj = {
-            text: word[0],
-            size: word.length
-        };
-        UsersCtrl.dataCloud.push(obj);
+UsersCtrl.getUsersOcc = function(text)
+{
+    var res = 'Users: <br>';
+    _.each(UsersCtrl.dataCloud[text].users, function(value, key) {
+        res += '<b>' + key + '</b>: ' + value + '<br>';
     });
+    res += 'Total: <b>' + UsersCtrl.dataCloud[text].size + '</b>';
+    return res;
 };
