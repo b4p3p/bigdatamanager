@@ -387,12 +387,39 @@ function getUserData_wordcount(datas, project, users, callback) {
         .match({projectName: project, user: {$in:users}})
         .unwind("tokens")
         .group({
-            _id: "$tokens",      //_id:{user:"$user", token: '$tokens'},
-            size: { $sum : 1 }   //tags: { $addToSet: "$tag" }
+            _id: {token: "$tokens", user: "$user"},
+            size: { $sum : 1 }
         })
-        .project({ _id:0, text:"$_id", size:1 })
         .sort("-size")
-        .exec(function(err, results){ callback(err, results); })
+        .project({_id:0, user:"$_id.user", token:"$_id.token", size:1})
+
+        .exec(function(err, results){
+
+            var dict = {};
+            var dictArr = [];
+            async.each(results, function(item, next){
+
+                if( dict[item.token] == null )
+                    dict[item.token] = {
+                        size:0,
+                        users:{}
+                    };
+
+                if( dict[item.token].users[item.user] == null )
+                    dict[item.token].users[item.user] = item.size;
+                else
+                    dict[item.token][item.user] = "oooooops";
+
+                dict[item.token].size += item.size;
+
+                next(null);
+            }, function(err){
+                //_.each(dict, function(value, key){
+                //    dictArr.push({ text: key, size: value })
+                //});
+                callback(err, dict );
+            });
+        })
 }
 
 /**
