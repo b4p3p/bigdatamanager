@@ -8,6 +8,7 @@ function getDateOfWeek(w, y) {
 var GraphBuilder = function(timeLineCtrl){
 
     var _self = this;
+
     this.timeLineCtrl = timeLineCtrl;
 
     this.selectLabelDate = function (date)  {};

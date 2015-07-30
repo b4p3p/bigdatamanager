@@ -391,12 +391,11 @@ UsersCtrl.drawBarChart = function()
     var data = google.visualization.arrayToDataTable(UsersCtrl.buildBarData());
 
     var chartAreaHeight = data.getNumberOfRows() * 30;
-    var chartHeight = chartAreaHeight + 80;
+    var chartHeight = chartAreaHeight + 150;
     var heightBar = 60;
 
     var options = {
         title: "User tags",
-        titleTextStyle: { fontSize: 14 },
         width: "100%",
         height: data.Gf.length == 1? "100%" : chartHeight,
         bar: { groupWidth: heightBar + "%" },

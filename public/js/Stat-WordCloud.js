@@ -4,13 +4,13 @@ var FormCtrl = function()
 {
     this.$radioUser = $("#radioUser")[0];
     this.$radioData = $("#radioData")[0];
-    this.$radios = $("div.radio input");
+    this.$radios = $("div.optType input");
 
     //evento per il cambio della legenda
     this.$radios.each(function(){
         $(this).click(function(e){
             var selClass = this.className;
-            $("p.radio").each(function(){
+            $("p.optType").each(function(){
                 if($(this).hasClass(selClass) )
                     $(this).removeClass("hidden");
                 else
