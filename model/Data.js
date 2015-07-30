@@ -324,21 +324,35 @@ Data.getUserData = function( project , query, callback){
     var users = [];
     if(query.users != null) users = query.users.split(',');
 
+    async.parallel({
+
+        data:function(next){
+            getUserData_data(datas, project, users, function(err, result){
+                next(err, result) })
+        },
+
+        wordcount: function(next){
+            getUserData_wordcount(datas, project, users, function(err, result){
+                next(err, result) })
+        }
+
+    }, function(err, results){
+        connection.close();
+        results.data.wordcount = results.wordcount;
+        callback(err, results.data );
+    });
+};
+
+function getUserData_data(datas, project, users, callback) {
     datas.aggregate()
         .match({projectName: project, user: {$in:users}})
         .group({
             _id:"$user",
-            minDate:{$min:"$date"},
-            maxDate:{$max:"$date"},
-            data:{$push:{
-                text:"$text",
-                region:"$region",
-                nation:"$nation",
-                date:"$date",
-                tag:"$tag",
-                tokens:"$tokens",
-                latitude: "$latitude",
-                longitude: "$longitude"
+            minDate:{$min:"$date"}, maxDate:{$max:"$date"},
+            data:{ $push:{
+                text:"$text",  date:"$date",
+                tag:"$tag", tokens:"$tokens",
+                latitude:"$latitude", longitude:"$longitude"
             }}
         })
         .project({minDate:1, maxDate:1, data:1, _id:0, user:"$_id"})
@@ -352,7 +366,6 @@ Data.getUserData = function( project , query, callback){
 
             var minDate = results[0].minDate;
             var maxDate = results[0].maxDate;
-
             _.each(results, function(doc){
                 if(doc.minDate < minDate) minDate = doc.minDate;
                 if(doc.maxDate > minDate) maxDate = doc.maxDate;
@@ -365,9 +378,22 @@ Data.getUserData = function( project , query, callback){
                 },
                 data:results
             });
-            connection.close();
+        });
+}
+
+function getUserData_wordcount(datas, project, users, callback) {
+
+    datas.aggregate()
+        .match({projectName: project, user: {$in:users}})
+        .unwind("tokens")
+        .group({
+            _id: "$tokens",      //_id:{user:"$user", token: '$tokens'},
+            size: { $sum : 1 }   //tags: { $addToSet: "$tag" }
         })
-};
+        .project({ _id:0, text:"$_id", size:1 })
+        .sort("-size")
+        .exec(function(err, results){ callback(err, results); })
+}
 
 /**
  *
@@ -792,3 +818,57 @@ Date.dateByDate_project = function(exec, type){
 };
 
 module.exports = Data;
+
+
+
+
+//Data.getUserData_ = function( project , query, callback){
+//
+//    var connection = mongoose.createConnection('mongodb://localhost/oim');
+//    var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
+//
+//    var users = [];
+//    if(query.users != null) users = query.users.split(',');
+//
+//    datas.aggregate()
+//        .match({projectName: project, user: {$in:users}})
+//        .group({
+//            _id:"$user",
+//            minDate:{$min:"$date"},
+//            maxDate:{$max:"$date"},
+//            data:{$push:{
+//                text:"$text",
+//                date:"$date",
+//                tag:"$tag",
+//                tokens:"$tokens",
+//                latitude:"$latitude",
+//                longitude:"$longitude"
+//            }}
+//        })
+//        .project({minDate:1, maxDate:1, data:1, _id:0, user:"$_id"})
+//        .exec(function(err, results){
+//
+//            if(results.length==0) {
+//                callback(err, results);
+//                connection.close();
+//                return;
+//            }
+//
+//            var minDate = results[0].minDate;
+//            var maxDate = results[0].maxDate;
+//
+//            _.each(results, function(doc){
+//                if(doc.minDate < minDate) minDate = doc.minDate;
+//                if(doc.maxDate > minDate) maxDate = doc.maxDate;
+//            });
+//
+//            callback(err, {
+//                properties:{
+//                    maxDate:maxDate,
+//                    minDate:minDate
+//                },
+//                data:results
+//            });
+//            connection.close();
+//        })
+//};
