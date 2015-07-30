@@ -60,7 +60,14 @@ module.exports = function (router, app) {
         var query = req.query;
 
         Data.getUserData( project , query, function(err, docs){
-            res.json(docs);
+            if(err)
+            {
+                res.status(500).end( err.toString() );
+            }else
+            {
+                res.json(docs);
+            }
+
         });
 
     });
