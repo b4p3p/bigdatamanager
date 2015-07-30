@@ -415,7 +415,8 @@ UsersCtrl.drawBarChart = function()
         vAxis: {
             title: "User",
             titleTextStyle: { fontSize: 14 },
-            textStyle: { fontSize: 13 }}
+            textStyle: { fontSize: 13 }},
+        tooltip: { textStyle: {fontSize: 13}}
     };
     var chart = new google.visualization.BarChart(document.getElementById(UsersCtrl.barChartID));
     chart.draw(data, options);

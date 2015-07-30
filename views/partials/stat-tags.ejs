@@ -9,20 +9,35 @@
 </script>
 
 <style>
-    #Tags{
-        /*position: relative;*/
-        /*left: 15%;*/
-        /*width: 400px;*/
-        /*height: 400px;*/
-        /*min-height: 400px;*/
+    .NameHighlights {
+        position:relative;
+    }
+    .NameHighlights div {
+        display: none;
+    }
+    .NameHighlightsHover {
+        position:relative;
+    }
+    .NameHighlightsHover div {
+        display:inline;
+        position:absolute;
+        /*width: 30em;*/
+        /*top:1.3em;*/
+        /**top:20px;*/
+        /*left:100px;*/
+        z-index:1000;
+        background: rgba(224, 224, 224, 0.5);
+        padding:5px 15px 5px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        text-align: center;
+        background-opacity: 0.4;
     }
     #TagsBarChart
     {
         width:100%;
         height:100%;
         margin-top:3%;
-        /*padding-left:10%; */
-        /*padding-right:10%    */
     }
     #WordsBarChart
     {
@@ -57,45 +72,28 @@
 </div>
 
 <div id="container" class="hidden">
-    <div class="panel panel-default">
-        <div class="panel-body">
-            <form class="form-horizontal">
-                <fieldset>
-                    <div class="form-group">
-                        <label class="col-xs-1 control-label">Select data from:</label>
-                        <div class="col-xs-11">
-                            <div style="display: inline-block">
-                                <!--class="col-xs-5"-->
-                                <div class="radio">
-                                    <label>
-                                        <input class="radioData" id="radioData" name="typeVoc" value="radioData" type="radio" checked>
-                                        From data
-                                    </label>
-                                </div>
-                                <div class="radio">
-                                    <label>
-                                        <input class="radioUser" id="radioUser" name="typeVoc" value="radioUser" type="radio">
-                                        From user vocabulary
-                                    </label>
-                                </div>
-                            </div>
-                            <!--class="col-xs-7"-->
-                            <div style="display: inline-block;vertical-align: top;margin-top: 8px;margin-left: 20px;">
-                                <img src="/public/img/info-icon.png" width="25px"
-                                     style="display: inline-block;">
-                                <p class="radio radioData" id="infoData" style="text-align: left;display: inline-block;">
-                                    I dati sono estratti dal campo Token presente nei dati
-                                </p>
-                                <p class="radio radioUser hidden" id="infoUser" style="text-align: left;display: inline-block;">
-                                    I dati sono calcolati sulla base del dizionario inserito dall'utente
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-            </form>
+    <div class="form-group form-option">
+        <label class="fix-label">Select data from:</label><br>
+
+        <div class="radio NameHighlights">
+            <label style="margin-right: 20px; font-weight: normal">
+                <input class="radioData" id="radioData" name="typeVoc" value="radioData" type="radio" checked>
+                From data
+            </label>
+            <div><i class="fa fa-info-circle" style="margin-right: 5px"></i>
+                I dati sono estratti dal campo <i>Token</i> presente nei dati</div>
+        </div>
+
+        <div class="radio NameHighlights">
+            <label style="margin-right: 20px; font-weight: normal">
+                <input class="radioUser" id="radioUser" name="typeVoc" value="radioUser" type="radio">
+                From user vocabulary
+            </label>
+            <div><i class="fa fa-info-circle" style="margin-right: 5px"></i>
+                I dati sono calcolati sulla base del dizionario inserito dall'utente</div>
         </div>
     </div>
+
     <svg id="Tags" ></svg>
     <div id="TagsBarChart"></div>
     <div id="WordsBarChart" style=""></div>
@@ -104,5 +102,29 @@
 <script src="/public/js/Stat-WordCloud.js"></script>
 
 <script>
+    var radio = document.querySelectorAll('.NameHighlights');
+    for (var i = radio.length; i--;) {
+        (function () {
+            var t;
+            radio[i].onmouseover = function () {
+                hideAll();
+                clearTimeout(t);
+                this.className = 'NameHighlightsHover';
+            };
+            radio[i].onmouseout = function () {
+                var self = this;
+                t = setTimeout(function () {
+                    self.className = 'NameHighlights';
+                }, 300);
+            };
+        })();
+    }
+
+    function hideAll() {
+        for (var i = radio.length; i--;) {
+            radio[i].className = 'NameHighlights';
+        }
+    };
+
     StatWordCloudCtrl.loadData();
 </script>

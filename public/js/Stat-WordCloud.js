@@ -92,7 +92,7 @@ var StatWordCloudCtrl = {
         //$(container).replaceWith('<svg id="Tags" ></svg>');
 
         var w = container.width();
-        var h = 400;
+        var h = 250;
         this.$wordCloud.width(w);
         this.$wordCloud.height(h);
 
@@ -115,7 +115,7 @@ var StatWordCloudCtrl = {
         var container = $("#container");
 
         var w = container.width();
-        var h = 400;
+        var h = 250;
 
         var div = d3.select("body").append("div")
             .attr("class", "tooltip")
@@ -171,36 +171,38 @@ var StatWordCloudCtrl = {
 
     drawTagsBar: function()
     {
-        var heightBar = 60;
         var data = google.visualization.arrayToDataTable( StatWordCloudCtrl.tagsBarData );
+        var chartAreaHeight = data.getNumberOfRows() * 30;
+        var chartHeight = chartAreaHeight + 80;
+        var heightBar = 60;
         var options = {
             title: 'Tags occurrences',
-            titleTextStyle: {fontSize: '18'},
-            height: data.length * (heightBar - 10),
+            titleTextStyle: {fontSize: '15'},
+            height: chartHeight,//data.length * (heightBar - 10),
             chartArea: {
-                'height': '70%',
+                'height': chartAreaHeight,
                 'right':'0%',
-                'left':'20%'
+                'left': 100
             },
             width: "100%",
             bar: { groupWidth: heightBar + "%" },
             legend: 'none',
-            axisTitlesPosition: 'in',
             vAxis: {title:'Tags', textStyle:{
                 color: 'black',
-                fontSize: 15},
+                fontSize: 13},
                 titleTextStyle:{
-                    fontSize: 15
+                    fontSize: 14
                 }
             },
             hAxis: {title:'Occurrences', textStyle:{
                 color: 'grey',
-                fontSize: 12},
+                fontSize: 13},
                 titleTextStyle:{
-                    fontSize: 15
+                    fontSize: 14
                 }
             },
-            backgroundColor: 'transparent'
+            backgroundColor: 'transparent',
+            tooltip: { textStyle: {fontSize: 13}}
         };
 
         //$("#TagsBarChart").replaceWith('<div id="TagsBarChart"></div>');
@@ -213,36 +215,38 @@ var StatWordCloudCtrl = {
     drawWordBar: function()
     {
         var w = $("#container").width();
-        var heightBar = 60;
         var data = google.visualization.arrayToDataTable(StatWordCloudCtrl.wordBarData);
+        var chartAreaHeight = data.getNumberOfRows() * 30;
+        var chartHeight = chartAreaHeight + 80;
+        var heightBar = 60;
         var options = {
             title: 'Words occurrences',
             titleTextStyle: {fontSize: '15'},
-            height: StatWordCloudCtrl.wordBarData.length * (heightBar-30),
+            height: chartHeight,//StatWordCloudCtrl.wordBarData.length * (heightBar-30),
             chartArea: {
-                'height': '100%',
+                'height': chartAreaHeight,
                 'width': '100%',
                 'right':'0%' ,
                 'top': '3%',
-                'left':'20%'
+                'left':100
             },
             width: "100%",
             bar: { groupWidth: heightBar + "%" },
             legend: 'none',
-            axisTitlesPosition: 'in',
             vAxis: {title:'Words', textStyle:{
                 color: 'grey',
                 fontSize: 13},
                 titleTextStyle:{
-                    fontSize: 15}
+                    fontSize: 14}
             },
             hAxis: {title:'Occurrences', textStyle:{
                 color: 'grey',
-                fontSize: 12},
+                fontSize: 13},
                 titleTextStyle:{
-                    fontSize: 15}
+                    fontSize: 14}
             },
-            backgroundColor: 'transparent'
+            backgroundColor: 'transparent',
+            tooltip: { textStyle: {fontSize: 13}}
         };
         var chart = new google.visualization.BarChart(document.getElementById("WordsBarChart"));
         chart.draw(data, options);
