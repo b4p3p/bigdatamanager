@@ -298,7 +298,7 @@ CompareCtrl.createBarRow = function(obj)
     else
         newRow[0] = obj.nation + " - " + obj.name;
 
-    //var cont = 0;
+    var cont = 0;
     _.each(CompareCtrl.filteredStat.data.allTags, function (tag) {
         {
             if(obj.counter[tag] == null)
@@ -311,12 +311,12 @@ CompareCtrl.createBarRow = function(obj)
                     newRow.push(obj.counter[tag].count);
                 else
                     newRow.push((obj.avg*obj.counter[tag].count)/obj.count);
-                //cont += obj.counter[tag].count;
+                cont += obj.counter[tag].count;
                 newRow.push("");
             }
         }
     });
-    //newRow[newRow.length-1] = cont;
+    newRow[newRow.length-1] = cont;
     return newRow;
 };
 

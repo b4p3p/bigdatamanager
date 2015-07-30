@@ -11,6 +11,7 @@ UsersCtrl.filteredUserData = null;
 UsersCtrl.filteredStat = null;
 UsersCtrl.users = null;
 UsersCtrl.selectedUsers = null;
+UsersCtrl.colors = [];
 
 UsersCtrl.maxDate = null;
 UsersCtrl.minDate = null;
@@ -28,6 +29,17 @@ UsersCtrl.barChartID = null;
 UsersCtrl.$divBar = null;
 UsersCtrl.$AZbutton = null;
 UsersCtrl.$ZAbutton = null;
+
+UsersCtrl.$divMap = null;
+UsersCtrl.$mapContainer = null;
+UsersCtrl.mapChartID = null;
+
+UsersCtrl.$divCloud = null;
+UsersCtrl.$cloudChart = null;
+
+UsersCtrl.fill = null;
+UsersCtrl.userTokens = null;
+UsersCtrl.dataCloud = [];
 
 UsersCtrl.getUsers = function (callback)
 {
@@ -66,6 +78,13 @@ UsersCtrl.initGui = function ()
     UsersCtrl.$barChartContainer = $('#barChartContainer');
     UsersCtrl.barChartID = "barChart";
 
+    UsersCtrl.$divMap = $('#divMap');
+    UsersCtrl.$mapContainer = $('#mapContainer');
+    UsersCtrl.mapChartID = "mapChart";
+
+    UsersCtrl.$divCloud = $('#divCloud');
+    UsersCtrl.$cloudChart = $('#cloudChart');
+
     UsersCtrl.initComboUsers();
     $('.selectpicker').selectpicker('refresh');
 };
@@ -87,6 +106,8 @@ UsersCtrl.clickStat = function ()
     console.log("CALL: clickStat");
 
     var $imgFilter = $("#img-filter");
+    $imgFilter.removeClass("fa fa-bar-chart");
+    $imgFilter.addClass("fa fa-spinner fa-spin");
 
     UsersCtrl.selectedUsers = DomUtil.getSelectedCombo(UsersCtrl.$cmbUsers);
     if( UsersCtrl.selectedUsers.length == 0 )
@@ -108,8 +129,10 @@ UsersCtrl.clickStat = function ()
     DataCtrl.getFromUrl(DataCtrl.FIELD.USERDATA, queryString, function(doc) {
         UsersCtrl.data = doc;
         UsersCtrl.filteredUserData = doc.data;
+        UsersCtrl.colors = colorUtil.generateColor(UsersCtrl.filteredUserData.length);
         UsersCtrl.maxDate = new Date(doc.properties.maxDate);
         UsersCtrl.minDate = new Date(doc.properties.minDate);
+        UsersCtrl.setDataCloud();
 
         DataCtrl.getField( function(docStat){
             UsersCtrl.filteredStat = docStat;
@@ -148,7 +171,12 @@ UsersCtrl.drawCharts = function()
     UsersCtrl.$ZAbutton.removeAttr("disabled");
     UsersCtrl.drawBarChart();
 
-    //TODO add statistics
+    UsersCtrl.$divMap.removeClass('hidden');
+    UsersCtrl.$mapContainer.removeClass('hidden');
+    UsersCtrl.drawMap();
+
+    UsersCtrl.$divCloud.removeClass('hidden');
+    UsersCtrl.drawWordCloud();
 };
 
 UsersCtrl.clearDiv = function()
@@ -162,13 +190,29 @@ UsersCtrl.clearDiv = function()
         '</div>');
     UsersCtrl.$timeLineContainer = $('#timeLineContainer');
 
+    UsersCtrl.$divBar.addClass('hidden');
     UsersCtrl.$barChartContainer.replaceWith(
         '<div id="barChartContainer" class="hidden">' +
-        '<div id="barChart" style="margin-top: 20px"></div>' +
+        '<div id="barChart"></div>' +
         '</div>');
     UsersCtrl.$barChartContainer = $('#barChartContainer');
     UsersCtrl.$AZbutton.prop("disabled", true);
     UsersCtrl.$ZAbutton.prop("disabled", true);
+
+    UsersCtrl.$divMap.addClass('hidden');
+    UsersCtrl.$mapContainer.replaceWith(
+        '<div id="mapContainer" class="hidden">' +
+        '<div id="mapChart"></div>' +
+        '</div>');
+    UsersCtrl.$mapContainer = $('#mapContainer');
+
+    UsersCtrl.$divCloud.replaceWith(
+        '<div id="divCloud" class="form-group hidden">' +
+        '<div id="line"></div>' +
+        '<label id="labelID" class="fix-label" style="margin-left: 3px">Word cloud token users</label><br>' +
+        '<svg id="cloudChart"></svg></div>');
+    UsersCtrl.$divCloud = $('#divCloud');
+    UsersCtrl.$cloudChart = $('#cloudChart');
 };
 
 //Dichiaro funzioni vuote
@@ -315,7 +359,7 @@ UsersCtrl.drawTimeLine = function()
             textStyle: { fontSize: 13 }
         },
         height: 400,
-        colors: colorUtil.generateColor(UsersCtrl.filteredUserData.length),
+        colors: UsersCtrl.colors,
         chartArea: {
             height: '65%',
             top: '5%'
@@ -347,15 +391,14 @@ UsersCtrl.drawBarChart = function()
     var data = google.visualization.arrayToDataTable(UsersCtrl.buildBarData());
 
     var chartAreaHeight = data.getNumberOfRows() * 30;
-    var chartHeight = chartAreaHeight + 80;
+    var chartHeight = chartAreaHeight + 150;
     var heightBar = 60;
 
     var options = {
         title: "User tags",
-        titleTextStyle: { fontSize: 14 },
         width: "100%",
-        height: chartHeight,
-        bar:    { groupWidth: heightBar + "%" },
+        height: data.Gf.length == 1? "100%" : chartHeight,
+        bar: { groupWidth: heightBar + "%" },
         legend: { position: 'top',  maxLines: 3, textStyle: {fontSize: 13}},
         isStacked: true,
         backgroundColor: 'transparent',
@@ -363,7 +406,7 @@ UsersCtrl.drawBarChart = function()
             alwaysOutside: false,
             textStyle:  { color: "black"}
         },
-        chartArea: {'height': chartAreaHeight - 25, 'right':0, 'top': 100, 'left':150 },
+        chartArea: {'height': chartAreaHeight, 'right':0, 'top': 100, 'left':150 },
         hAxis: {
             title: "Number of tagged data",
             titleTextStyle: { fontSize: 14 },
@@ -371,13 +414,14 @@ UsersCtrl.drawBarChart = function()
         vAxis: {
             title: "User",
             titleTextStyle: { fontSize: 14 },
-            textStyle: { fontSize: 13 }}
+            textStyle: { fontSize: 13 }},
+        tooltip: { textStyle: {fontSize: 13}}
     };
     var chart = new google.visualization.BarChart(document.getElementById(UsersCtrl.barChartID));
     chart.draw(data, options);
 };
 
-UsersCtrl.buildBarData = function(dataSelected)
+UsersCtrl.buildBarData = function()
 {
     console.log("CALL: buildBarData");
 
@@ -434,4 +478,189 @@ UsersCtrl.ZAbuttonClick = function()
     UsersCtrl.$ZAbutton.addClass("active");
     UsersCtrl.$AZbutton.removeClass("active");
     UsersCtrl.drawBarChart();
+};
+
+UsersCtrl.drawMap = function()
+{
+    var data = new google.visualization.DataTable();
+    data.addColumn('number', 'Lat');
+    data.addColumn('number', 'Long');
+    data.addColumn('string', 'User');
+
+    data.addRows(UsersCtrl.buildMapData());
+
+    var options = {
+        showTip: true,
+        enableScrollWheel: true,
+        zoomLevel: 2,
+        mapType: 'normal',
+        useMapTypeControl: true,
+        mapTypeIds: ['normal', 'terrain', 'satellite'],
+        maps: {
+            normal: {
+                name: 'Normal',
+                mapType: 'normal'
+            },
+            terrain: {
+                name: 'Terrain',
+                mapType: 'terrain'
+            },
+            satellite: {
+                name: 'Satellite',
+                mapType: 'satellite'
+            }
+        }
+    };
+    var map = new google.visualization.Map(document.getElementById(UsersCtrl.mapChartID));
+    map.draw(data, options);
+};
+
+UsersCtrl.buildMapData = function()
+{
+    console.log("CALL: buildMapData");
+
+    var data = [];
+    var row = [];
+    _.each(UsersCtrl.filteredUserData, function(userObj, index){
+        _.each(userObj.data, function(dataObj){
+            var text = userObj.user + ': "' + dataObj.text + '"';
+            row.push(dataObj.latitude);
+            row.push(dataObj.longitude);
+            row.push(text);
+
+            data.push(row);
+            row = [];
+            });
+        });
+
+    return data;
+};
+
+UsersCtrl.drawWordCloud = function()
+{
+    UsersCtrl.fill = d3.scale.category20();
+    var words = UsersCtrl.dataCloud;
+    var max = words[words.length - 1].size;
+    var min = words[0].size;
+
+    var randomRotate = d3.scale.linear().domain([0, 1]).range([-20, 20]);
+    var wordScale = d3.scale.linear().domain([min, max]).range([15, 100]);
+
+    var w = UsersCtrl.$divCloud.width();
+    var h = 400;
+
+    UsersCtrl.$cloudChart.empty();
+
+    d3.layout.cloud()
+        .size([w , h])
+        .words(words)
+        .rotate(function () {
+            return randomRotate(Math.random())
+        })
+        .font("Impact")
+        .fontSize(function (d) {
+            return wordScale(d.size);
+        })
+        .on("end", UsersCtrl.drawCloud)
+        .start();
+};
+
+UsersCtrl.drawCloud = function()
+{
+    var w = UsersCtrl.$divCloud.width();
+    var h = 400;
+
+    $("#cloudChart")
+        .attr("width",  w)
+        .attr("height",  h);
+
+    var div = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+
+    var wordG = d3.select("#cloudChart")
+        .append("g")
+        .attr("width", w)
+        .attr("height", h)
+        .attr("id", "wordCloudG")
+        .attr("transform","translate(" + w/2 + "," + h/2 + ")");
+
+    wordG.selectAll("text")
+        .data(UsersCtrl.dataCloud)
+        .enter()
+        .append("text")
+        .style("font-size", function(d) {
+            return d.size + "px";
+        })
+        .style("cursor", "default")
+        .style("z-index", 20)
+        .style("background", "#000000")
+        .style("font-family", "Impact")
+        .style("fill", function(d, i) {
+            return UsersCtrl.fill(i);
+        })
+        .attr("text-anchor", "middle")
+        .attr("transform", function(d) {
+            return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+        })
+        .text(function(d) { return d.text; })
+        .on("mouseover", function(d, i)
+        {
+            div.transition()
+                .duration(200)
+                .style("opacity", .9);
+            div.html(
+                '<div class="tip">Token: <b>' + d.text + '</b><br>Occurrences: <b>' + d.size + '</b></div>'
+            )
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px");
+            d3.select(this).style("font-weight","bold");
+        })
+        .on("mouseout", function(d, i)
+        {
+            d3.select(this).style("font-weight","normal");
+            $(".tip").addClass("hidden");
+        });
+};
+
+UsersCtrl.setDataCloud = function()
+{
+    var tokens = [];
+    var userTokens = [];
+    _.each(UsersCtrl.filteredUserData, function(userObj, index) {
+        _.each(userObj.data, function(dataObj){
+            tokens.push(dataObj.tokens);
+            _.each(dataObj.tokens, function(token) {
+                var obj = {
+                    word: token,
+                    user: userObj.user
+                };
+                userTokens.push(obj);
+            });
+        });
+    });
+    UsersCtrl.userTokens = _
+        .chain(userTokens)
+        .groupBy('user')
+        .map(function(value, key) {
+            return {
+                user: key,
+                words: _.uniq(_.pluck(value, 'word'))
+            }
+        })
+        .value();
+
+    var flat_arr = [].concat.apply([],tokens);
+    var res =
+        _.chain(flat_arr)
+            .groupBy( function(word){return word;} )
+            .sortBy( function(word){ return word.length; } )
+            .value();
+    $.each( res, function( index, word ){
+        var obj = {
+            text: word[0],
+            size: word.length
+        };
+        UsersCtrl.dataCloud.push(obj);
+    });
 };

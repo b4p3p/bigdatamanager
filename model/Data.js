@@ -336,7 +336,9 @@ Data.getUserData = function( project , query, callback){
                 nation:"$nation",
                 date:"$date",
                 tag:"$tag",
-                tokens:"$tokens"
+                tokens:"$tokens",
+                latitude: "$latitude",
+                longitude: "$longitude"
             }}
         })
         .project({minDate:1, maxDate:1, data:1, _id:0, user:"$_id"})
