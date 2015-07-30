@@ -1,16 +1,18 @@
 "use strict";
 
-var FormCtrl = function()
-{
+var FormCtrl = function(statWordCloudCtrl) {
+
+    var _self = this;
+
     this.$radioUser = $("#radioUser")[0];
     this.$radioData = $("#radioData")[0];
     this.$radios = $("div.optType input");
 
     //evento per il cambio della legenda
-    this.$radios.each(function(){
-        $(this).click(function(e){
+    this.$radios.each(function() {
+        $(this).click(function(e) {
             var selClass = this.className;
-            $("p.optType").each(function(){
+            $("p.optType").each(function() {
                 if($(this).hasClass(selClass) )
                     $(this).removeClass("hidden");
                 else
@@ -19,32 +21,33 @@ var FormCtrl = function()
         })
     });
 
-    this.$radios.change(function(){
-        StatWordCloudCtrl.setData(formCtrl.getTypeData());
+    this.$radios.change(function() {
+        statWordCloudCtrl.setData(_self.getTypeData());
     });
 
-    this.getTypeData = function()
-    {
+    this.getTypeData = function() {
         return this.$radioUser.checked ? "syncUserTags" : "syncDataTags"
     }
 
 };
-var formCtrl = new FormCtrl();
 
-var StatWordCloudCtrl = {
+var StatWordCloudCtrl = function() {
 
-    vocabulary : null,
-    wordCloudData: null,
-    tagsBarData: null,
-    wordBarData: null,
-    fill : null,
-    $wordCloud : $("#Tags"),
-    $tagsBarChart : $("#TagsBarChart"),
-    dictKey: {},
+    var _self = this;
 
-    loadData: function()
-    {
-        StatWordCloudCtrl.fill = d3.scale.category20();
+    this.vocabulary = null;
+    this.wordCloudData = null;
+    this.tagsBarData = null;
+    this.wordBarData = null;
+    this.fill = null;
+    this.$wordCloud = $("#Tags");
+    this.$tagsBarChart = $("#TagsBarChart");
+    this.dictKey = {};
+
+    this.formCtrl = new FormCtrl(this);
+
+    this.loadData = function() {
+        this.fill = d3.scale.category20();
 
         $.ajax({
             type: "get",
@@ -52,9 +55,9 @@ var StatWordCloudCtrl = {
             dataType: "json",
             url: "/vocabulary/vocabulary",
             success: function (data) {
-                StatWordCloudCtrl.removeWait();
-                StatWordCloudCtrl.vocabulary = data;
-                StatWordCloudCtrl.setData(formCtrl.getTypeData());
+                _self.removeWait();
+                _self.vocabulary = data;
+                _self.setData(_self.formCtrl.getTypeData());
             },
             error: function (xhr, status, error) {
                 console.error("ERR: StatWordCloudCtrl.loadData " + status + " " + xhr.status);
@@ -62,23 +65,21 @@ var StatWordCloudCtrl = {
                 console.error("     Error: " + error);
             }
         });
-    },
+    };
 
-    setData: function(type)
-    {
-        var data = StatWordCloudCtrl.vocabulary;
-        StatWordCloudCtrl.wordCloudData = toWordCloudData(data, type);
-        StatWordCloudCtrl.tagsBarData = toTagsBarData(data, type);
-        StatWordCloudCtrl.wordBarData = toWordBarData(data, type);
-        StatWordCloudCtrl.drawCloud();
-        StatWordCloudCtrl.drawTagsBar();
-        StatWordCloudCtrl.drawWordBar();
+    this.setData = function(type) {
+        var data = this.vocabulary;
+        this.wordCloudData = this.toWordCloudData(data, type);
+        this.tagsBarData = this.toTagsBarData(data, type);
+        this.wordBarData = this.toWordBarData(data, type);
+        this.drawCloud();
+        this.drawTagsBar();
+        this.drawWordBar();
 
-    },
+    };
 
-    drawCloud: function ()
-    {
-        var interval = getInterval(StatWordCloudCtrl.wordCloudData);
+    this.drawCloud = function () {
+        var interval = this.getInterval(this.wordCloudData);
         var max = interval.max;
         var min = interval.min;
         var randomRotate = d3.scale.linear().domain([0, 1]).range([-20, 20]);
@@ -86,10 +87,7 @@ var StatWordCloudCtrl = {
 
         this.$wordCloud.empty();
 
-        //var container = this.$wordCloud;
         var container = $("#container");
-
-        //$(container).replaceWith('<svg id="Tags" ></svg>');
 
         var w = container.width();
         var h = 250;
@@ -98,7 +96,7 @@ var StatWordCloudCtrl = {
 
         d3.layout.cloud()
             .size([w , h])
-            .words(StatWordCloudCtrl.wordCloudData)
+            .words(this.wordCloudData)
             .rotate(function () {
                 return randomRotate(Math.random())
             })
@@ -108,9 +106,9 @@ var StatWordCloudCtrl = {
             })
             .on("end", this._drawCloud)
             .start();
-    },
+    };
 
-    _drawCloud: function() {
+    this._drawCloud = function() {
 
         var container = $("#container");
 
@@ -129,7 +127,7 @@ var StatWordCloudCtrl = {
             .attr("transform","translate(" + w/2 + "," + h/2 + ")");
 
         wordG.selectAll("text")
-            .data(StatWordCloudCtrl.wordCloudData)
+            .data(_self.wordCloudData)
             .enter()
             .append("text")
             .style("font-size", function(d) {
@@ -140,7 +138,7 @@ var StatWordCloudCtrl = {
             .style("background", "#000000")
             .style("font-family", "Impact")
             .style("fill", function(d, i) {
-                return StatWordCloudCtrl.fill(i);
+                return _self.fill(i);
             })
             .attr("text-anchor", "middle")
             .attr("transform", function(d) {
@@ -154,7 +152,7 @@ var StatWordCloudCtrl = {
                     .style("opacity", .9);
                 div.html(
                     '<div class="tip">Token: <b>' + d.text + '</b><br>Tag: <b>'
-                    + _.keys(StatWordCloudCtrl.dictKey[d.text]).join(', ')
+                    + _.keys(_self.dictKey[d.text]).join(', ')
                     + '</b><br>Occurrences: <b>' + d.size + '</b></div>'
                 )
                     .style("left", (d3.event.pageX) + "px")
@@ -167,11 +165,10 @@ var StatWordCloudCtrl = {
                 $(".tip").addClass("hidden");
             });
 
-    },
+    };
 
-    drawTagsBar: function()
-    {
-        var data = google.visualization.arrayToDataTable( StatWordCloudCtrl.tagsBarData );
+    this.drawTagsBar = function() {
+        var data = google.visualization.arrayToDataTable( this.tagsBarData );
         var chartAreaHeight = data.getNumberOfRows() * 30;
         var chartHeight = chartAreaHeight + 80;
         var heightBar = 60;
@@ -206,23 +203,22 @@ var StatWordCloudCtrl = {
         };
 
         //$("#TagsBarChart").replaceWith('<div id="TagsBarChart"></div>');
-        $("#TagsBarChart").empty();
+        this.$tagsBarChart.empty();
         //$("#TagsBarChart").width = 500;
         var chart = new google.visualization.BarChart(document.getElementById("TagsBarChart"));
         chart.draw(data, options);
-    },
+    };
 
-    drawWordBar: function()
-    {
+    this.drawWordBar = function() {
         var w = $("#container").width();
-        var data = google.visualization.arrayToDataTable(StatWordCloudCtrl.wordBarData);
+        var data = google.visualization.arrayToDataTable(this.wordBarData);
         var chartAreaHeight = data.getNumberOfRows() * 30;
         var chartHeight = chartAreaHeight + 80;
         var heightBar = 60;
         var options = {
             title: 'Words occurrences',
             titleTextStyle: {fontSize: '15'},
-            height: chartHeight,//StatWordCloudCtrl.wordBarData.length * (heightBar-30),
+            height: chartHeight,
             chartArea: {
                 'height': chartAreaHeight,
                 'width': '100%',
@@ -250,105 +246,101 @@ var StatWordCloudCtrl = {
         };
         var chart = new google.visualization.BarChart(document.getElementById("WordsBarChart"));
         chart.draw(data, options);
-    },
+    };
 
-    removeWait: function()
-    {
+    this.removeWait = function() {
         $("#spinner").addClass("hidden");
         $("#container").removeClass("hidden");
-    }
+    };
+
+    this.getInterval = function(data) {
+        if(data.length == 0) return {max: 0, min:0};
+
+        var max = data[0].size;
+        var min = data[0].size;
+        for(var d in data)
+        {
+            if(data[d].size > max) max = data[d].size;
+            if(data[d].size < min) min = data[d].size;
+        }
+
+        return {max: max, min:min};
+    };
+
+    /**
+     *
+     * @param vocabulary
+     * @returns {Array} - [{text:{String}, size: Number}, {..}, ... ]}
+     */
+    this.toWordCloudData = function(vocabulary, type) {
+        var ris = [];
+        var data = vocabulary[type];
+
+        _.each(data, function(tag){
+            var counter = tag.counter;
+            _.each(counter, function(c){
+
+                if(_self.dictKey[c.token] == null)
+                    _self.dictKey[c.token] = {};
+
+                if(_self.dictKey[c.token][tag.tag] == null)
+                    _self.dictKey[c.token][tag.tag] = true;
+
+                var obj = {
+                    text: c.token,
+                    size: c.count
+                };
+                ris.push(obj);
+            });
+        });
+
+        return ris;
+
+    };
+
+    this.toTagsBarData = function(vocabulary, type) {
+        var ris = [];
+        var count = 0;
+        var data = vocabulary[type];
+
+        ris[0] = ["Tags", "Occurrences", { role: "style" } ];
+
+        _.each( data, function(row) {
+            var sum = _self.getTot(row.counter);
+            var tag = row.tag;
+            if( tag == null ) tag = "undefined";
+            ris.push([tag, sum, _self.fill(count)]);
+            count+=1;
+        });
+
+        return ris;
+    };
+
+    this.toWordBarData = function(vocabulary, type) {
+        var ris = [];
+        var data = vocabulary[type];
+        var count = 0;
+
+        ris[0] = ["Words", "Occurrences", { role: "style" } ];
+
+        _.each(data, function(row){
+            var counter = row.counter;
+            _.each(counter, function(row){
+                ris.push( [ row.token, row.count, _self.fill(count) ]);
+            });
+            count += 1;
+        });
+
+        return ris;
+    };
+
+    this.getTot = function(counter) {
+        var sum = 0;
+        _.each(counter, function(word){
+            sum+=word.count
+        });
+        return sum;
+    };
+
+    this.loadData();
 };
-
-function getInterval(data)
-{
-    if(data.length == 0) return {max: 0, min:0};
-
-    var max = data[0].size;
-    var min = data[0].size;
-    for(var d in data)
-    {
-        if(data[d].size > max) max = data[d].size;
-        if(data[d].size < min) min = data[d].size;
-    }
-
-    return {max: max, min:min};
-}
-
-/**
- *
- * @param vocabulary
- * @returns {Array} - [{text:{String}, size: Number}, {..}, ... ]}
- */
-function toWordCloudData(vocabulary, type)
-{
-    var ris = [];
-    var data = vocabulary[type];
-
-    _.each(data, function(tag){
-        var counter = tag.counter;
-        _.each(counter, function(c){
-
-            if(StatWordCloudCtrl.dictKey[c.token] == null)
-                StatWordCloudCtrl.dictKey[c.token] = {};
-
-            if(StatWordCloudCtrl.dictKey[c.token][tag.tag] == null)
-                StatWordCloudCtrl.dictKey[c.token][tag.tag] = true;
-
-            var obj = {
-                text: c.token,
-                size: c.count
-            };
-            ris.push(obj);
-        });
-    });
-
-    return ris;
-
-}
-
-function toTagsBarData(vocabulary, type)
-{
-    var ris = [];
-    var count = 0;
-    var data = vocabulary[type];
-
-    ris[0] = ["Tags", "Occurrences", { role: "style" } ];
-
-    _.each( data, function(row) {
-        var sum = getTot(row.counter);
-        var tag = row.tag;
-        if( tag == null ) tag = "undefined";
-        ris.push([tag, sum, StatWordCloudCtrl.fill(count)]);
-        count+=1;
-    });
-
-    return ris;
-}
-
-function toWordBarData(vocabulary, type)
-{
-    var ris = [];
-    var data = vocabulary[type];
-    var count = 0;
-
-    ris[0] = ["Words", "Occurrences", { role: "style" } ];
-
-    _.each(data, function(row){
-        var counter = row.counter;
-        _.each(counter, function(row){
-            ris.push( [ row.token, row.count, StatWordCloudCtrl.fill(count) ]);
-        });
-        count += 1;
-    });
-
-    return ris;
-}
-
-function getTot(counter)
-{
-    var sum = 0;
-    _.each(counter, function(word){
-        sum+=word.count
-    });
-    return sum;
-}
