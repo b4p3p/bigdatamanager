@@ -224,10 +224,7 @@ var TimeLineCtrl = function() {
 
         var ctx = document.getElementById(_self.timeLineID).getContext("2d");
         _self.timeLineChart = new Chart(ctx);
-        _self.timeLineLine = _self.timeLineChart.Line(
-            dataset,
-            _self.lineOptions
-        );
+        _self.timeLineLine = _self.timeLineChart.Line(dataset, _self.lineOptions );
     };
 
     this.toLineData = function () {
@@ -338,6 +335,9 @@ var TimeLineCtrl = function() {
             _self.setDisableAllBtn(false);
             _self.clearCanvas();
             _self.drawTimeLine();
+
+            console.log( _self.$timeLine.width() );
+            console.log( _self.$timeLineContainer.width() );
         });
 
     });

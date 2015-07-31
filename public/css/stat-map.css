@@ -1,0 +1,119 @@
+.fix-label{
+    min-width: 50px;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    float: left;
+}
+#map{
+    width: 105%;
+}
+#form-combos{
+    margin-left: 20px;
+}
+.spinner-container
+{
+    position: relative;
+    top: 12px;
+    display: inline-table;
+    min-width: 15px;
+}
+#spinner-boundaries  {
+    /*margin-left: 20px;*/
+}
+#slider-container {
+    position: relative;
+    /*left: 25%;*/
+    width: 90%;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    margin-left: 30px;
+}
+.row-map
+{
+    padding-top: -40px;
+    margin-top: -40px;
+}
+#indexContent
+{
+    margin-top: 0;
+    padding-top: 0;
+}
+.img-chk
+{
+    width: 25px;
+    height: 25px;
+}
+label
+{
+    padding-top: 20px;
+}
+.popup
+{
+    text-align: center;
+}
+.title-popup
+{
+    text-align: center;
+    padding-top: 0; !important;
+    padding-bottom: 0; !important;
+    margin-top: 0; !important;
+    margin-bottom: 10px; !important;
+}
+.row-popup
+{
+    margin-top: 0; !important;
+    margin-bottom: 0; !important;
+    width: 100%; !important;
+}
+.label-popup-left
+{
+    width: 55%;
+    /*min-width: 100px;*/
+    margin: 0;
+    padding: 0;
+    /*float: left;*/
+    text-align: left;
+    display: inline-block;
+}
+.label-popup-right
+{
+    width: 40px;
+    margin: 0;
+    padding: 0;
+    /*float: right;*/
+    text-align: right;
+    display: inline-block;
+}
+.label-popup-end
+{
+    text-align: right;
+    margin-top: 10px;
+    padding: 0;
+}
+.separator
+{
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border: 0;
+    border-top: 4px solid #aaa;
+    border-radius: 20px;
+}
+.form-combo{
+    margin-right: 10px;
+}
+
+#countData{
+    float: right;
+    margin-top: 22px;
+    margin-right: -50px;
+    text-align: right;
+    width: auto;
+}
+
+#progressCount{
+    width: 105%;
+}
+
+/*.ui-rangeSlider-bar{*/
+    /*width: 100%;*/
+/*}*/

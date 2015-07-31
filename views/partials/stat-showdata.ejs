@@ -2,8 +2,6 @@
 <script src="/node_modules/underscore/underscore.js"></script>
 <script src="/public/js/JQueryUtil.js"></script>
 <script src="/public/js/DOMUtil.js"></script>
-<script type="text/javascript" src="/node_modules/bootstrap-multiselect/dist/js/bootstrap-multiselect.js"></script>
-<link rel="stylesheet" href="/node_modules/bootstrap-multiselect/dist/css/bootstrap-multiselect.css" type="text/css"/>
 
 <style>
     li.remove-filters {
@@ -178,6 +176,8 @@
     $('#load').removeClass("hidden");
 
     $(document).ready(function () {
+
+        $('#data-table').bootstrapTable();
 
         $('.selectpicker').selectpicker({
             width: '90px'

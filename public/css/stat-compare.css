@@ -1,0 +1,29 @@
+#formType {
+    /*margin-left: 20px;*/
+    /*width: 100%;*/
+}
+
+#regionsBar {
+    margin-top: -100px;
+    width: 100%;
+}
+
+#slider-container {
+    position: relative;
+    /*left: 25%;*/
+    width: 90%;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    margin-left: 30px;
+}
+
+.form-option {
+    margin-right: 50px;
+}
+
+.radar {
+    position: relative;
+    left: 5%;
+    right: 25%;
+    /*padding-bottom: 20px;*/
+}

@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
 
     <% include ../partials/header.ejs %>
-    <% include ../partials/jquery.ejs %>
-    <% include ../partials/bootstrap.ejs %>
+
+    <% include ../imports/jquery.ejs %>
+    <% include ../imports/bootstrap.ejs %>
 
     <script src="/node_modules/xdate/src/xdate.js"></script>
 
@@ -195,7 +196,7 @@
                 <li>
                     <a class="btn btn-link" data-toggle="collapse" data-target="#subStat">
                         <i class="fa fa-bar-chart" style="float: left; margin-right: 28%"></i>
-                        Statistics
+                            Statistics
                         <i class="fa fa-sort-down"></i>
                     </a>
                     <ul class="nav collapse" id="subStat">
@@ -273,14 +274,12 @@
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
 
-
 <script>
     $(document).ready(function() {
         $('[data-toggle=offcanvas]').click(function() {
             $('.sidebar-offcanvas').toggleClass('active', 1000);
         });
     });
-
 </script>
 
 </body>

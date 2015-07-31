@@ -2,10 +2,12 @@ var UploaderCtrl = function($formUpload, $btnFiles, $progressContainer, uploader
 {
     this.$formUpload = $formUpload;
     this.$btnFiles =  $btnFiles;
+    this.$btnFiles.fileinput();
     this.$progressContainer = $progressContainer;
     this.uploaderEvent = uploaderEvent;
     this.files = {};
     this.progress = {};
+
 
     this.getFiles = function(){
         return this.$btnFiles[0].files;

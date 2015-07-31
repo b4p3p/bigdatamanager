@@ -1,39 +1,92 @@
-<div class="row">
+<div ng-app ng-controller="ngHomeCtrl">
 
-    <p class="lead">Login as:</p>
+    <h2>Login as:</h2>
 
-    <div>
-        <img src="/public/img/icon-user.png" class="img-circle"
-             style="background: lightblue;float: left;margin-right: 50px;width: 100px;height: 100px">
+    <div class="row">
+
+        <div style="display: inline-block" >
+            <img src="/public/img/icon-user.png" class="img-circle"
+                 style="background: lightblue;width: 100px;height: 100px">
+        </div>
+        <!--class="col-md-9 col-xs-9 col-span-9"-->
+        <div style="display: inline-block">
+            <h3>Username:</h3>
+            <div >
+                <%if(isGuest){%>
+                <p>Guest account</p>
+                <p>To create projects, you must be registered</p>
+                <%} else { %>
+                <div style="display: inline-block;">
+                    <%= user %>
+                </div>
+                <%}%>
+            </div>
+        </div>
+
     </div>
-    <div style="padding-left: 20px">
-        <p><b>Username:</b></p>
-        <%if(isGuest){%>
-            <p>Guest account</p>
-            <p>To create projects, you must be registered</p>
-        <%} else { %>
-            <p><%= user %></p>
-        <%}%>
+
+    <div class="row" style="margin-top: 20px">
+
+        <div style="display: inline-block">
+            <img src="/public/img/folder.png" class="img-circle"
+                 style="background: lightblue;width: 100px;height: 100px">
+        </div>
+
+        <div style="display: inline-block">
+            <h3>Project:</h3>
+            <div >
+                <%if(!project){%>
+                    <a href="/view/project/openproject">Open project</a>
+                <%} else { %>
+                    <p><%= project %></p>
+                <% } %>
+            </div>
+        </div>
+
     </div>
+
+    <hr>
+
 </div>
 
-<div class="row" style="margin-top: 20px">
-    <div>
-        <img src="/public/img/folder.png" class="img-circle"
-             style="background: lightblue;float: left;margin-right: 50px;width: 100px;height: 100px">
-    </div>
-    <div style="padding-left: 20px">
-        <p><b>Project:</b></p>
-        <%if(!project){%>
-            <a href="/view/project/openproject">Open project</a>
-        <%} else { %>
-            <p><%= project %></p>
-        <% } %>
-    </div>
-</div>
 
-<div class="row" style="margin-top: 20px">
 
-    <!--<p class="lead">Mettere qui alcune statistiche belle</p>-->
+<!--<div class="row">-->
 
-</div>
+    <!--<p class="lead">Login as:</p>-->
+
+    <!--<div>-->
+        <!--<img src="/public/img/icon-user.png" class="img-circle"-->
+             <!--style="background: lightblue;float: left;margin-right: 50px;width: 100px;height: 100px">-->
+    <!--</div>-->
+    <!--<div style="padding-left: 20px">-->
+        <!--<p><b>Username:</b></p>-->
+        <!--<%if(isGuest){%>-->
+            <!--<p>Guest account</p>-->
+            <!--<p>To create projects, you must be registered</p>-->
+        <!--<%} else { %>-->
+            <!--<p><%= user %></p>-->
+        <!--<%}%>-->
+    <!--</div>-->
+<!--</div>-->
+
+<!--<div class="row" style="margin-top: 20px">-->
+    <!--<div>-->
+        <!--<img src="/public/img/folder.png" class="img-circle"-->
+             <!--style="background: lightblue;float: left;margin-right: 50px;width: 100px;height: 100px">-->
+    <!--</div>-->
+    <!--<div style="padding-left: 20px">-->
+        <!--<p><b>Project:</b></p>-->
+        <!--<%if(!project){%>-->
+            <!--<a href="/view/project/openproject">Open project</a>-->
+        <!--<%} else { %>-->
+            <!--<p><%= project %></p>-->
+        <!--<% } %>-->
+    <!--</div>-->
+<!--</div>-->
+
+<!--<div class="row" style="margin-top: 20px">-->
+
+    <!--&lt;!&ndash;<p class="lead">Mettere qui alcune statistiche belle</p>&ndash;&gt;-->
+
+<!--</div>-->

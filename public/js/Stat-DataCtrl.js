@@ -218,7 +218,7 @@ ShowDataCtrl.refreshTable = function ()
     if( $('#eqCh').is(':checked') && $('#eq').val()!="" )
         date['eq'] =  $('#eq').val();
 
-    var conditions = new ObjConditions(
+    var conditions = new ShowDataCtrl.ObjConditions(
         ShowDataCtrl.$cmbNations,
         ShowDataCtrl.$cmbRegions,
         ShowDataCtrl.$cmbTags,
@@ -261,7 +261,7 @@ ShowDataCtrl.deselectCombo = function ()
     ShowDataCtrl.refreshGui();
 };
 
-var ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $cmbUsers, $cmbTokens, date, skip, limit)
+ShowDataCtrl.ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $cmbUsers, $cmbTokens, date, skip, limit)
 {
     this.$cmbNations = $cmbNations;
     this.$cmbRegions = $cmbRegions;

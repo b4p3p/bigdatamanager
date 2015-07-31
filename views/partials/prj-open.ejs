@@ -21,11 +21,9 @@
     }
 </style>
 
-<script src="/public/js/DateUtil.js"></script>
-<script src="/public/js/ProjectCtrl.js"></script>
-
 <div class="row" style="margin-top: 10px">
-    <table data-toggle="table" id="tableProjects" data-pagination="true" data-search="true"
+    <table data-toggle="table"
+           id="tableProjects" data-pagination="true" data-search="true"
            data-url="/project/projects">
         <thead>
         <tr>
@@ -45,6 +43,9 @@
     </table>
 </div>
 
-<script>
+<script src="/public/js/DateUtil.js"></script>
+<script src="/public/js/ProjectCtrl.js"></script>
 
+<script>
+    $("#tableProjects").bootstrapTable({url:"/project/projects"});
 </script>

@@ -1,0 +1,63 @@
+#container{
+    height: 100px;
+}
+
+#timeLine {
+
+    /*height: 400px;*/
+
+    /*max-height: calc(100% - 40px - 100px - 100px);*/
+
+
+    height: 470px;
+    min-width: 100%;
+
+    margin-top: 0;
+    padding-left: 0;
+
+    /*height: 50%;*/
+    /*height: 100%;*/
+}
+
+#timeLineContainer {
+    position: relative;
+    top: 0;
+    bottom:0; !important;
+    width:100%;
+    /*height: auto;*/
+    /*max-height: 50%;*/
+    padding-left: 0;
+    margin-top: 0;
+}
+
+#cmbTypeBisualization {
+    float: left;
+    margin-right: 5px
+}
+
+#formType {
+    /*margin-left: 20px;*/
+    /*width: 100%;*/
+    margin-bottom: 10px;
+}
+
+/*#container{*/
+/*margin-top: 20px;;*/
+/*padding-left: 10px;*/
+/*padding-right: 0;*/
+/*}*/
+
+.form-option {
+    margin-right: 50px;
+}
+
+#formType {
+    margin-left: 10px;
+    /*width: 100%;*/
+    margin-bottom: 10px;
+    margin-top: 20px;
+}
+
+.form-inline > .form-group {
+    vertical-align: top;
+}

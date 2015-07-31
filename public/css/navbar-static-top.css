@@ -60,6 +60,13 @@ h3{font-weight: 300; font-size: 22px;margin-bottom: 40px}
 	margin-bottom: 15px;
 }
 
+.nav-stacked{
+	height: 70%;
+	max-height: 70%;
+	overflow-y: auto;
+	z-index: 10;
+}
+
 /* collapsed sidebar styles */
 @media screen and (max-width: 767px) {
 

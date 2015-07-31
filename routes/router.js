@@ -2,7 +2,6 @@
 
 var extend = require('util')._extend;
 var ConstantsRouter = require('./constants_router');
-var MongoClient = require('mongodb').MongoClient;
 
 module.exports = function (app) {
 
@@ -18,6 +17,17 @@ module.exports = function (app) {
         req.session.isGuest = true;
 
         res.redirect("/view/home");
+
+    });
+
+    app.get('/logout', function (req, res)
+    {
+        console.log("CALL: /logout");
+
+        req.session.destroy();
+        req.session.isGuest = null;
+
+        res.end("ok");
 
     });
 
@@ -51,10 +61,9 @@ module.exports = function (app) {
             else
             {
                 // ### success ###
-
                 req.session.user = username;
                 req.session.isGuest = false;
-                res.redirect('/view/home');
+                res.redirect('/view/app');
             }
 
         });

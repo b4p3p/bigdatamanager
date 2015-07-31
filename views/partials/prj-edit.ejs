@@ -112,21 +112,16 @@
 </style>
 
 <link href="/public/css/terminal.css" rel="stylesheet">
-<script type="text/javascript" src="https://www.google.com/jsapi"></script>
-
-<script>
-    google.load("visualization", "1.1", {packages:[ 'corechart' ] });
-</script>
 
 <!--<script src="/node_modules/socketio-file-upload/client.js"></script>-->
 <!--<script src="/bower_components/socket.io-client/socket.io.js"></script>-->
 
 <% if(project==null) {%>
-<div class="alert alert-danger" role="alert">
-    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-    <span class="sr-only">Error:</span>
-    You must select project.
-</div>
+    <div class="alert alert-danger" role="alert">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span class="sr-only">Error:</span>
+        You must select project.
+    </div>
 <% } else { %>
 
 <h3>Data</h3>
@@ -313,8 +308,6 @@
 
 </div>
 
-<script src="/node_modules/underscore/underscore.js"></script>
-<script src="/bower_components/jquery-form/jquery.form.js"></script>
 <script src="/public/js/DOMUtil.js"></script>
 <script src="/public/js/DateUtil.js"></script>
 <script src="/public/js/ProjectCtrl.js"></script>
@@ -322,10 +315,11 @@
 
 <script>
 
-    ProjectCtrl.init('<%= user %>', '<%= project %>');
-
-    ProjectCtrl.getProject( ProjectCtrl.loadEditForm );
-    ProjectCtrl.showExample();
+    $(document).ready(function(){
+        ProjectCtrl.init('<%= user %>', '<%= project %>');
+        ProjectCtrl.getProject( ProjectCtrl.loadEditForm );
+        ProjectCtrl.showExample();
+    });
 
 </script>
 

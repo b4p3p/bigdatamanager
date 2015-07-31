@@ -1,8 +1,6 @@
-<script src="/bower_components/jquery-form/jquery.form.js"></script>
-<script src="/node_modules/underscore/underscore.js"></script>
-<script src="/public/js/JQueryUtil.js"></script>
-<script src="/public/js/UploaderCtrl.js"></script>
-<script src="/public/js/DB-NationsCtrl.js"></script>
+<!--<script src="/bower_components/jquery-form/jquery.form.js"></script>-->
+<!--<script src="/node_modules/underscore/underscore.js"></script>-->
+<!--<script src="/public/js/JQueryUtil.js"></script>-->
 
 <style>
    .btn-delete {
@@ -194,7 +192,14 @@
    </a>
 </div>
 
+<script src="/public/js/UploaderCtrl.js"></script>
+<script src="/public/js/DB-NationsCtrl.js"></script>
+
 <script>
+
+   $(document).ready(function(){
+      $("#table-nations").bootstrapTable({url: '/regions/nations'});
+   });
 
    DBNationsCtrl.init();
    uploaderCtrl = new UploaderCtrl(
