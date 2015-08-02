@@ -93,10 +93,12 @@ body{
     vertical-align: middle;
     height: 100%;
     margin: auto;
+    padding-left: 20px;
 }
 
 .btn-logout{
     float: right;
+    padding-right: 20px;
 }
 
 .label-nav{

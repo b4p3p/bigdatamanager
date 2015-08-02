@@ -1,8 +1,8 @@
-@mainColor: #103AB7;
-@colorHeaderMenu: #FFCF66;
-@heightLogo: 50px;
-@colorItemHover: #0C2C8C;
-@colorBack: #1EA2B4 /*#3054C0*/;
+@mainColor: #303641;
+@colorHeaderMenu: #303641;
+@heightLogo: 60px;
+@colorItemHover: #333944;
+@colorBack: #333944 /*#3054C0*/;
 @widthExpandedMenu: 280px;
 @widthCollapsedMenu: 40px;
 
@@ -49,7 +49,7 @@
   min-height: 100%;
   margin: 0;
   padding: 0;
-  border-radius: 0 25px;
+  //border-radius: 0 25px;
 }
 
 //container principale
@@ -79,7 +79,7 @@
   height: @heightLogo;
   position: relative;
   left: 50%;
-  top: -10px;
+  top: -5px;
 }
 
 .multilevelpushmenu_wrapper .ltr {
@@ -107,9 +107,11 @@
 .multilevelpushmenu_wrapper h2 {
   font-size: 1.5em;
   line-height: 1em;
-  font-weight: bold;
-  color: #1f4164;
-  padding: 0 .4em 0 .4em;
+  font-weight: 400;
+  color: #aaabae;
+  padding: .8em .4em 0 .4em;
+  font-family: "Segoe UI";
+  font-style: normal;
 }
 
 .multilevelpushmenu_wrapper ul {
@@ -120,12 +122,12 @@
 
 .multilevelpushmenu_wrapper li {
   cursor: pointer;
-  border-top: 1px solid #295685;
+  border-top: 1px solid rgba(69, 74, 84, 0.7);
   padding: .4em .4em .4em .4em;
 }
 
 .multilevelpushmenu_wrapper li:last-child {
-  border-bottom: 1px solid #295685;
+  border-bottom:1px solid rgba(69, 74, 84, 0.7);
 }
 
 .multilevelpushmenu_wrapper li:hover {
@@ -136,11 +138,14 @@
   display: block;
   outline: none;
   overflow: hidden;
-  font-size: 1.5em;
+  //font-size: 1.2em;
   line-height: 1em;
   padding: .2em .2em;
   text-decoration: none;
-  color: #fff;
+  color: #aaabae;
+  font-family: "Segoe UI";
+  font-style: normal;
+  font-weight: 400;
 }
 
 .multilevelpushmenu_wrapper a:hover {
@@ -151,7 +156,7 @@
   display: block;
   padding: .4em .4em .4em .4em;
   background: @colorBack;  /*#2e6196;*/
-  border-top: 1px solid #295685;
+  border-top: 1px solid rgba(69, 74, 84, 0.7);
 }
 
 .multilevelpushmenu_wrapper .floatRight {
@@ -164,6 +169,7 @@
 
 .multilevelpushmenu_wrapper .cursorPointer {
   cursor: pointer;
+  padding-top: .8em;
 }
 
 .multilevelpushmenu_wrapper .iconSpacing_ltr {
