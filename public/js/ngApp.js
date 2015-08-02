@@ -43,19 +43,35 @@ ngApp.controller('ngAppCtrl', ['$scope', function($scope) {
                 location.href = $item.find( 'a:first' ).attr( 'href' );
             },
 
+            onExpandMenuStart: function(){
+                $("#menu").addClass("menuOnExpand");
+                $("#content").addClass("contentOnExpand");
+            },
+
             onExpandMenuEnd: function(){
+                $("#menu").removeClass("menuOnExpand");
+                $("#content").removeClass("contentOnExpand");
+
                 var $scopeNgView = angular.element($("#ngview")).scope();
                 if($scopeNgView.onExpandMenuEnd)
                     $scopeNgView.onExpandMenuEnd();
             },
 
             onCollapseMenuStart: function() {
+
+                $("#menu").addClass("menuOnCollapse");
+                $("#content").addClass("contentOnCollapse");
+
                 var $scopeNgView = angular.element($("#ngview")).scope();
                 if($scopeNgView.onCollapseMenuStart)
                     $scopeNgView.onCollapseMenuStart();
             },
 
             onCollapseMenuEnd: function() {
+
+                $("#menu").removeClass("menuOnCollapse");
+                $("#content").removeClass("contentOnCollapse");
+
                 var $scopeNgView = angular.element($("#ngview")).scope();
                 if($scopeNgView.onCollapseMenuEnd)
                     $scopeNgView.onCollapseMenuEnd();
@@ -68,17 +84,28 @@ ngApp.controller('ngAppCtrl', ['$scope', function($scope) {
         $('#menu').multilevelpushmenu('redraw');
     });
 
-    $(window).resize(function () {
-        _self.resizeMenu();
-    });
+    $(window).resize(function () { _self.resizeMenu(); });
 
     $scope.resizeMenu = function(){
         $("#menu>nav").height( $("#content").height() + 120 );
     };
 
-    $scope.collapseStart = function(){
-        console.log("collapseStart");
-    }
+    $scope.collapseStart = function(){ console.log("collapseStart"); }
+
+    $scope.srcUser = function() {
+        return window.ISGUEST == "true" ?
+            "/public/img/guest.png" :
+            "/public/img/icon-user.png";
+    };
+
+    $scope.Username = function(){
+        return window.ISGUEST == "true" ?
+            "guest" :
+            window.USERNAME
+    };
+
+    $scope.Project =  window.PROJECT;
+
 
 }]);
 

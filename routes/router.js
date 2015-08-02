@@ -16,7 +16,7 @@ module.exports = function (app) {
         req.session.destroy();
         req.session.isGuest = true;
 
-        res.redirect("/view/home");
+        res.redirect("/view/app");
 
     });
 

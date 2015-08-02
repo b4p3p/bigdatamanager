@@ -2,28 +2,36 @@
 <html>
 <head>
     <% include ../partials/header.ejs %>
+    <% include ../imports/jquery.ejs %>
     <% include ../imports/bootstrap.ejs %>
 
     <link href="/public/css/login.css" rel="stylesheet" type="text/css">
 
 </head>
+
 <body>
 
 <div class="container">
+
     <div class="row">
-        <div class="col-sm-6 col-md-4 col-md-offset-4">
+        <div class="col-sm-6 col-sm-offset-3 col-md-4 col-md-offset-4 ">
             <div class="account-wall">
                 <img class="profile-img" src="/public/img/BigDataManager-logo-slogan.png"
                      alt="">
+
                 <form class="form-signin" action="/login" method="post">
-                    <input id="username" name="username" type="text" class="form-control" placeholder="Username" required autofocus>
+
+                    <div class="form-group">
+                        <input id="username" name="username" type="text" class="form-control" placeholder="Username" required autofocus>
+                    </div>
+
                     <input id="password" name="password" type="password" class="form-control" placeholder="Password" required>
                     <% if (status.status > 0) { %>
-                    <div class="alert alert-danger" role="alert">
-                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                    <span class="sr-only">Error:</span>
-                    <%= status.message %>
-                    </div>
+                        <div class="alert alert-danger" role="alert">
+                            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                            <span class="sr-only">Error:</span>
+                            <%= status.message %>
+                        </div>
                     <% } %>
                     <button class="btn btn-lg btn-primary btn-block" type="submit">
                         Sign in</button>

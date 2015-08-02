@@ -21,6 +21,7 @@
     "heatmap.js-amd": "pa7/heatmap.js",
     "jquery": "~2.1.4",
     "bootstrap-select": "~1.7.3",
-    "bootbox": "~4.4.0"
+    "bootbox": "~4.4.0",
+    "less": "~2.5.1"
   }
 }
