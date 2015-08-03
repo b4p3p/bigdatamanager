@@ -48,7 +48,8 @@ ngApp.controller('ngAppCtrl', ['$scope', function($scope) {
         var className = item.className;
         if(className == "link-menu")
         {
-            location.href = item.find( 'a:first' ).attr( 'href' );
+            var href = $(item).attr( 'href' );
+            location.href = href;
         }
         e.preventDefault();
     });
