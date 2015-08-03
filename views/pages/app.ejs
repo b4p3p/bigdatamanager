@@ -13,10 +13,9 @@
     <% include ../imports/charts.ejs %>
 
     <!--<link href="/public/css/navbar-static-top.css" rel="stylesheet">-->
-    <link href="/public/css/app.css" rel="stylesheet">
-    <link href="/public/css/home.css" rel="stylesheet">
-    <link href="/public/css/multilevelpushmenu.less" rel="stylesheet/less" type="text/css">
-    <script src="/bower_components/less/dist/less.js"></script>
+    <link  href="/public/css/app.less" rel="stylesheet/less" type="text/css">
+
+    <!--<link href="/public/css/multilevelpushmenu.less" rel="stylesheet/less" type="text/css">-->
 
     <script>
         window.USERNAME = '<%= user %>';
@@ -30,87 +29,152 @@
     <script src="/public/js/ColorUtil.js"></script>
     <script src="/public/js/DateUtil.js"></script>
 
+    <link rel="stylesheet/less" type="text/css" href="/public/css/multiLevelSlidingSidebar.less">
+
+    <script src="/bower_components/less/dist/less.js"></script>
+
 </head>
 
 <body ng-controller="ngAppCtrl">
 
-    <div class="navbar navbar-default navbar-fixed-top" id="nav-bar" ng-controller="ngNavCtrl">
+<div class="page-container">
 
-        <div class="item-nav">
-            <img ng-src={{srcUser()}}>
-        </div>
-
-        <div class="item-nav">
-            <div class="label-nav">{{Username()}}</div>
-        </div>
-
-        <div class="item-nav">
-            <img src="/public/img/folder.png">
-        </div>
-
-        <div class="item-nav">
-            <div class="label-nav">{{Project}}</div>
-        </div>
-
-        <div class="item-nav btn-logout">
-            <button class="btn-link" ng-click="Logout()">
-                <img src="/public/img/logout-box.png"
-                     style="width: 30px;height: 30px">
-            </button>
-        </div>
-    </div>
-
-    <div id="menu" >
-        <nav>
-            <h2><i class="fa fa-reorder"></i>
-                <div style="display: inline-block;">
-                    <img src="/public/img/bdm-logo.png"
-                         class="logo-topmenu">
-                </div>
-                <!--BigDataManager-->
-            </h2>
-            <ul>
-                <li><a href="#/home" ><i class="fa fa-th"></i>Home</a></li>
-                <!-- DATABASE -->
-                <li>
-                    <a href="#"><i class="fa fa-cogs"></i>Database</a>
-                    <h2><i class="fa fa-cogs"></i>Database</h2>
-                    <ul>
-                        <li><a href="#/db/users"><i class="fa fa-plus"></i>Users</a></li>
-                        <li><a href="#/db/nations"><i class="fa fa-folder-open"></i>Nations</a></li>
-                    </ul>
-                </li>
-                <!-- PROJECTS -->
-                <li>
-                    <a href="#"><i class="fa fa-database"></i>Projects</a>
-                    <h2><i class="fa fa-database"></i>Projects</h2>
-                    <ul>
-                        <li><a href="#project/newproject"><i class="fa fa-plus"></i>New project</a></li>
-                        <li><a href="#project/openproject"><i class="fa fa-folder-open"></i>Open project</a></li>
-                        <li><a href="#project/editproject"><i class="fa fa-pencil"></i>Edit project</a></li>
-                    </ul>
-                </li>
-                <!-- STATISTICS -->
-                <li>
-                    <a href="#"><i class="fa fa-bar-chart"></i>Statistics</a>
-                    <h2><i class="fa fa-bar-chart"></i>Statistics</h2>
-                    <ul>
-                        <li><a href="#stat/showdata">Show data <img src="/public/img/icon-table.png" class="subMenu-ico"/></a></li>
-                        <li><a href="#stat/showmap">Show map <img src="/public/img/icon-osm.png" class="subMenu-ico"/></a></li>
-                        <li><a href="#stat/compare">Compare <img src="/public/img/icon-compare.png" class="subMenu-ico"/></a></li>
-                        <li><a href="#stat/timeline">Timeline <img src="/public/img/icon-line.png" class="subMenu-ico"/></a></li>
-                        <li><a href="#stat/showtag">Word cloud <img src="/public/img/icon-cloud.png" class="subMenu-ico"/></a></li>
-                        <li><a href="#stat/showusers">User statistics <img src="/public/img/icon-users.png" class="subMenu-ico"/></a></li>
-                    </ul>
-                </li>
-
-            </ul>
-        </nav>
-    </div>
-
-    <div id="content">
+    <div class="content" id="content">
         <ng-view onload="resizeMenu()" id="ngview"></ng-view>
     </div>
+
+    <div class="sidebar-menu" id="sidebar-menu">
+        <header class="logo">
+            <a href="#" class="sidebar-icon"> <span class="fa fa-bars"></span> </a>
+            <a href="#">
+                <img id="logo" src="/public/img/logo-completo.png" alt="Logo"/>
+            </a>
+        </header>
+        <div style="border-top:1px solid rgba(69, 74, 84, 0.7)"></div>
+        <div class="menu">
+            <ul id="menu" >
+                <li id="menu-home" >
+                    <a href="#/" class="link-menu">
+                        <i class="fa fa-home"></i><span>Home</span>
+                    </a>
+                </li>
+                <li id="menu-comunicacao" >
+
+                    <a href="#">
+                        <i class="fa fa-anchor"></i>
+                        <span>Database</span>
+                        <span class="fa fa-angle-double-right" style="float: right"></span>
+                    </a>
+
+                    <ul id="menu-comunicacao-sub" >
+                        <li id="menu-mensagens-enviadas" >
+                            <a href="#/db/users" class="link-menu">Users</a>
+                        </li>
+                        <li id="menu-mensagens-enviadas" >
+                            <a href="#/db/nations" class="link-menu">Nations</a>
+                        </li>
+                    </ul>
+                </li>
+                <li id="menu-academico" ><a href="#"><i class="fa fa-envelope"></i><span>About</span><span class="fa fa-angle-right" style="float: right"></span></a>
+                    <ul id="menu-academico-sub" >
+                        <li id="menu-academico-avaliacoes" ><a href="#">Contact us</a></li>
+                        <li id="menu-academico-boletim" ><a href="#">About us</a></li>
+                    </ul>
+                </li>
+                <li><a href="#"><i class="fa fa-share-alt"></i><span>Share</span><span class="fa fa-angle-right" style="float: right"></span></a>
+                    <ul>
+                        <li><a href="#"><i class="fa fa-facebook"></i> <a href="http://www.jqueryscript.net/tags.php?/Facebook/">Facebook</a></a></li>
+                        <li><a href="#"><i class="fa fa-pinterest"></i> Pinterest</a></li>
+                    </ul>
+                </li>
+                <li><a href="#"><i class="fa fa-history"></i><span>Blog</span></a></li>
+                <li><a href="#"><i class="fa fa-gears"></i><span>Settings</span></a></li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+    <!--<div class="navbar navbar-default navbar-fixed-top" id="nav-bar" ng-controller="ngNavCtrl">-->
+
+        <!--<div class="item-nav">-->
+            <!--<img ng-src={{srcUser()}}>-->
+        <!--</div>-->
+
+        <!--<div class="item-nav">-->
+            <!--<div class="label-nav">{{Username()}}</div>-->
+        <!--</div>-->
+
+        <!--<div class="item-nav">-->
+            <!--<img src="/public/img/folder.png">-->
+        <!--</div>-->
+
+        <!--<div class="item-nav">-->
+            <!--<div class="label-nav">{{Project}}</div>-->
+        <!--</div>-->
+
+        <!--<div class="item-nav btn-logout">-->
+            <!--<button class="btn-link" ng-click="Logout()">-->
+                <!--<img src="/public/img/logout-box.png"-->
+                     <!--style="width: 30px;height: 30px">-->
+            <!--</button>-->
+        <!--</div>-->
+    <!--</div>-->
+
+    <!--<% include ../content/multiLevelSlidingSidebar.html %>-->
+
+
+    <!--<div id="menu" >-->
+        <!--<nav>-->
+            <!--<h2><i class="fa fa-reorder"></i>-->
+                <!--<div style="display: inline-block;">-->
+                    <!--<img src="/public/img/bdm-logo.png"-->
+                         <!--class="logo-topmenu">-->
+                <!--</div>-->
+                <!--&lt;!&ndash;BigDataManager&ndash;&gt;-->
+            <!--</h2>-->
+            <!--<ul>-->
+                <!--<li><a href="#/home" ><i class="fa fa-th"></i>Home</a></li>-->
+                <!--&lt;!&ndash; DATABASE &ndash;&gt;-->
+                <!--<li>-->
+                    <!--<a href="#"><i class="fa fa-cogs"></i>Database</a>-->
+                    <!--<h2><i class="fa fa-cogs"></i>Database</h2>-->
+                    <!--<ul>-->
+                        <!--<li><a href="#/db/users"><i class="fa fa-plus"></i>Users</a></li>-->
+                        <!--<li><a href="#/db/nations"><i class="fa fa-folder-open"></i>Nations</a></li>-->
+                    <!--</ul>-->
+                <!--</li>-->
+                <!--&lt;!&ndash; PROJECTS &ndash;&gt;-->
+                <!--<li>-->
+                    <!--<a href="#"><i class="fa fa-database"></i>Projects</a>-->
+                    <!--<h2><i class="fa fa-database"></i>Projects</h2>-->
+                    <!--<ul>-->
+                        <!--<li><a href="#project/newproject"><i class="fa fa-plus"></i>New project</a></li>-->
+                        <!--<li><a href="#project/openproject"><i class="fa fa-folder-open"></i>Open project</a></li>-->
+                        <!--<li><a href="#project/editproject"><i class="fa fa-pencil"></i>Edit project</a></li>-->
+                    <!--</ul>-->
+                <!--</li>-->
+                <!--&lt;!&ndash; STATISTICS &ndash;&gt;-->
+                <!--<li>-->
+                    <!--<a href="#"><i class="fa fa-bar-chart"></i>Statistics</a>-->
+                    <!--<h2><i class="fa fa-bar-chart"></i>Statistics</h2>-->
+                    <!--<ul>-->
+                        <!--<li><a href="#stat/showdata">Show data <img src="/public/img/icon-table.png" class="subMenu-ico"/></a></li>-->
+                        <!--<li><a href="#stat/showmap">Show map <img src="/public/img/icon-osm.png" class="subMenu-ico"/></a></li>-->
+                        <!--<li><a href="#stat/compare">Compare <img src="/public/img/icon-compare.png" class="subMenu-ico"/></a></li>-->
+                        <!--<li><a href="#stat/timeline">Timeline <img src="/public/img/icon-line.png" class="subMenu-ico"/></a></li>-->
+                        <!--<li><a href="#stat/showtag">Word cloud <img src="/public/img/icon-cloud.png" class="subMenu-ico"/></a></li>-->
+                        <!--<li><a href="#stat/showusers">User statistics <img src="/public/img/icon-users.png" class="subMenu-ico"/></a></li>-->
+                    <!--</ul>-->
+                <!--</li>-->
+
+            <!--</ul>-->
+        <!--</nav>-->
+    <!--</div>-->
+
+    <!--<div id="content">-->
+        <!--<ng-view onload="resizeMenu()" id="ngview"></ng-view>-->
+    <!--</div>-->
 
     <!--<div>-->
         <!-- -->
