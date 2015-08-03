@@ -10,9 +10,11 @@
 
 <div id="container" class="hidden">
 
-    <div id="slider-container" class="row">
-        <div id="slider-bar"></div>
-    </div>
+    <div id="slider-bar" style="margin-bottom: 20px"></div>
+
+    <!--<div id="slider-container" class="row">-->
+
+    <!--</div>-->
 
     <form class="form-inline" id="formType" role="form">
 
@@ -61,6 +63,7 @@
                               onclick="CompareCtrl.handleClick(this);" value="regions"> Regions</label>
             </div>
         </div>
+
         <div id="formRegions" class="form-group hidden" style="position: absolute">
             <div class="form-group form-combo">
                 <label class="fix-label" for="cmbRegions">Regions</label><br>
@@ -80,25 +83,32 @@
             </div>
         </div>
 
+        <div id="formButtons" class="form-group"
+             style="float: right;padding-top: 20px">
+
+            <button type="button" class="btn btn-success"
+                    id="cmbFilter"
+                    style="float: right; margin-top: 15px; margin-left: 10px;"
+                    onclick="CompareCtrl.clickFilter()"
+                    disabled>
+                <span id="img-filter" class="glyphicon glyphicon-filter" aria-hidden="true"></span> Apply filter
+            </button>
+
+            <button type="button" class="btn btn-danger"
+                    id="cmbRestore"
+                    style="float: right; margin-top: 15px; margin-left: 10px;"
+                    onclick="CompareCtrl.clickRestore()"
+                    disabled>
+                <span id="img-restore" class="glyphicon glyphicon-remove" aria-hidden="true"></span> Restore
+            </button>
+
+        </div>
+
     </form>
 
     <div class="row">
 
-        <button type="button" class="btn btn-success"
-                id="cmbFilter"
-                style="float: right; margin-top: 15px; margin-left: 10px;"
-                onclick="CompareCtrl.clickFilter()"
-                disabled>
-            <span id="img-filter" class="glyphicon glyphicon-filter" aria-hidden="true"></span> Apply filter
-        </button>
 
-        <button type="button" class="btn btn-danger"
-                id="cmbRestore"
-                style="float: right; margin-top: 15px; margin-left: 10px;"
-                onclick="CompareCtrl.clickRestore()"
-                disabled>
-            <span id="img-restore" class="glyphicon glyphicon-remove" aria-hidden="true"></span> Restore
-        </button>
     </div>
 
     <div class="alert alert-warning hidden" role="alert" id="warning" style="margin-top: 20px">
@@ -118,17 +128,18 @@
         <form class="form-inline hidden" id="formSort" role="form">
 
             <div class="form-group">
+
                 <label class="fix-label" style="margin-left: 3px">Order by</label><br>
 
                 <div class="btn-group" role="group" aria-label="...">
                     <button id="NameButton" type="button" class="btn btn-default active"
                             onclick="CompareCtrl.NameButtonClick();" disabled> Name
                     </button>
-
                     <button id="NumButton" type="button" class="btn btn-default"
                             onclick="CompareCtrl.NumButtonClick();" disabled> Number
                     </button>
                 </div>
+
             </div>
             <div class="form-group">
                 <label class="fix-label" style="margin-left: 3px">Sort</label><br>
@@ -149,6 +160,7 @@
     </div>
 
     <div id="barChart" style="margin-top: 20px"></div>
+
     <div>
         <div class="col-md-3" id="radarLegend"></div>
         <canvas class="radar col-md-9" id="radarChart"></canvas>

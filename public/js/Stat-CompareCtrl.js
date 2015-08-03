@@ -346,7 +346,7 @@ CompareCtrl.drawBar = function()
             alwaysOutside: false,
             textStyle:  { color: "black"}
         },
-        chartArea: {'height': chartAreaHeight, 'right':0},
+        chartArea: {'height': chartAreaHeight, 'right':0, 'left':'300'},
         isStacked: true,
         backgroundColor: 'transparent',
         hAxis: { title: CompareCtrl.$radioByNumber.is(':checked')? "Data by tags": "Percentage of data than the maximum",

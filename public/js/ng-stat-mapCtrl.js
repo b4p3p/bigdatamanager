@@ -8,16 +8,24 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
 
     $scope.name = "ngStatMapCtrl";
 
-    var intervalResize = setInterval( function(){
-        $(window).trigger('resize');
-        if(mapCtrl && mapCtrl.mainMap)
-            mapCtrl.mainMap.invalidateSize();
-    }, 500 );
+    $scope.resize = function()
+    {
+        setTimeout(function() {
+            $(window).trigger('resize');
+            if (mapCtrl && mapCtrl.mainMap)
+                mapCtrl.mainMap.invalidateSize();
+        }, 600);
+    };
+
+    //var intervalResize = setInterval( function(){
+    //    $(window).trigger('resize');
+    //    if(mapCtrl && mapCtrl.mainMap)
+    //        mapCtrl.mainMap.invalidateSize();
+    //}, 500 );
 
     //quando clicck sul menu devo disattivare sempre il timer dei dati
     $scope.onItemClick = function() {
         idOp = -1000;
-        clearInterval(intervalResize);
     };
 
     //Form Controller
@@ -692,7 +700,8 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
 
         function resizeMap() {
             //_self.$map.css("height", $(window).height()); // -200
-            _self.$map.css("height", 400); // -200
+            //_self.$map.css("height", 400); // -200
+            _self.$map.css("height", "100%"); // -200
         }
 
         resizeMap();

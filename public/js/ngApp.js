@@ -19,15 +19,22 @@ ngApp.factory('Todos', function(){
 ngApp.controller('ngAppCtrl', ['$scope', function($scope) {
 
     var _self = $scope;
-
     var toggle = true;
 
     $(".page-container")
-        .addClass("sidebar-collapsed")
-        .removeClass("sidebar-collapsed-back");
-    $("#menu span").css({"position":"absolute"});
+        .removeClass("sidebar-collapsed")
+        .addClass("sidebar-collapsed-back");
+    setTimeout(function() {
+        $("#menu span").css({"position":"relative"});
+    }, 400);
 
     $(".sidebar-icon").click(function() {
+
+        //notifico che è stato modificato il layout
+        var $scopeNgView = angular.element($("#ngview")).scope();
+        if( $scopeNgView.resize )
+            $scopeNgView.resize();
+
         if (toggle){
             $(".page-container")
                 .addClass("sidebar-collapsed")
@@ -53,75 +60,16 @@ ngApp.controller('ngAppCtrl', ['$scope', function($scope) {
         var className = item.className;
         if(className == "link-menu")
         {
+            //notifico che è cambiata la pagina
+            var $scopeNgView = angular.element($("#ngview")).scope();
+            if( $scopeNgView.onItemClick)
+                $scopeNgView.onItemClick();
+
             var href = $(item).attr( 'href' );
             location.href = href;
         }
         e.preventDefault();
     });
-
-    //$(document).ready(function () {
-    //
-    //    $('#menu').css("visibility", "visible");
-    //
-    //    $('#menu').multilevelpushmenu({
-    //        collapsed: false,
-    //        mode: 'overlap', // or cover
-    //        preventItemClick: false,
-    //        onItemClick: function() {
-    //
-    //            var $scopeNgView = angular.element($("#ngview")).scope();
-    //
-    //            if( $scopeNgView.onItemClick)
-    //                $scopeNgView.onItemClick();
-    //
-    //            //var event = arguments[0],           // First argument is original event object
-    //            //var $menuLevelHolder = arguments[1] // Second argument is menu level object containing clicked item (<div> element)
-    //            var $item = arguments[2];             // Third argument is clicked item (<li> element)
-    //            //options = arguments[3];             // Fourth argument is instance settings/options object
-    //            // Redirecting the page
-    //            location.href = $item.find( 'a:first' ).attr( 'href' );
-    //        },
-    //
-    //        onExpandMenuStart: function(){
-    //            $("#menu").addClass("menuOnExpand");
-    //            $("#content").addClass("contentOnExpand");
-    //        },
-    //
-    //        onExpandMenuEnd: function(){
-    //            $("#menu").removeClass("menuOnExpand");
-    //            $("#content").removeClass("contentOnExpand");
-    //
-    //            var $scopeNgView = angular.element($("#ngview")).scope();
-    //            if($scopeNgView.onExpandMenuEnd)
-    //                $scopeNgView.onExpandMenuEnd();
-    //        },
-    //
-    //        onCollapseMenuStart: function() {
-    //
-    //            $("#menu").addClass("menuOnCollapse");
-    //            $("#content").addClass("contentOnCollapse");
-    //
-    //            var $scopeNgView = angular.element($("#ngview")).scope();
-    //            if($scopeNgView.onCollapseMenuStart)
-    //                $scopeNgView.onCollapseMenuStart();
-    //        },
-    //
-    //        onCollapseMenuEnd: function() {
-    //
-    //            $("#menu").removeClass("menuOnCollapse");
-    //            $("#content").removeClass("contentOnCollapse");
-    //
-    //            var $scopeNgView = angular.element($("#ngview")).scope();
-    //            if($scopeNgView.onCollapseMenuEnd)
-    //                $scopeNgView.onCollapseMenuEnd();
-    //        }
-    //
-    //    });
-    //
-    //    //$('#menu').multilevelpushmenu('option', 'menuHeight', $(document).height());
-    //    $('#menu').multilevelpushmenu('option', 'menuWidth', 280);
-    //    $('#menu').multilevelpushmenu('redraw');
-    //});
 
     $(window).resize(function () { _self.resizeMenu(); });
 
@@ -196,7 +144,8 @@ ngApp.config( ['$routeProvider', function ($routeProvider) {
             templateUrl: '/view/stat/timeline'
         })
         .when('/stat/showtag', {
-            templateUrl: '/view/stat/showtag'
+            templateUrl: '/view/stat/showtag',
+            controller: 'ngStatCloudCtrl'
         })
         .when('/stat/showusers', {
             templateUrl: '/view/stat/showusers'

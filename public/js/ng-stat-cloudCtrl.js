@@ -1,6 +1,6 @@
-ngApp.controller('ngStatCompareCtrl', ['$scope', function($scope) {
+ngApp.controller('ngStatCloudCtrl', ['$scope', function($scope) {
 
-    $scope.name = "ngStatCompareCtrl";
+    $scope.name = "ngStatCloudCtrl";
 
     $scope.resize = function()
     {

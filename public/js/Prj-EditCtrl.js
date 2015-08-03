@@ -1,5 +1,7 @@
 "use strict";
 
+$(".selectpicker").selectpicker();
+
 var PrjEditFormatterTag = function(){
 
     function addElement(value, row, index, suffix, event, isDelete) {
