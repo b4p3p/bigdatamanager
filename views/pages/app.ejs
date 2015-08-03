@@ -58,37 +58,48 @@
                         <i class="fa fa-home"></i><span>Home</span>
                     </a>
                 </li>
-                <li id="menu-comunicacao" >
-
+                <li id="menu-database" >
                     <a href="#">
-                        <i class="fa fa-anchor"></i>
+                        <i class="fa fa-cogs"></i>
                         <span>Database</span>
                         <span class="fa fa-angle-double-right" style="float: right"></span>
                     </a>
-
-                    <ul id="menu-comunicacao-sub" >
-                        <li id="menu-mensagens-enviadas" >
-                            <a href="#/db/users" class="link-menu">Users</a>
-                        </li>
-                        <li id="menu-mensagens-enviadas" >
-                            <a href="#/db/nations" class="link-menu">Nations</a>
-                        </li>
+                    <ul id="menu-database-sub" >
+                        <li><a href="#/db/users" class="link-menu"><i class="fa fa-plus"></i>Users</a></li>
+                        <li><a href="#/db/nations" class="link-menu"><i class="fa fa-folder-open"></i>Nations</a></li>
                     </ul>
                 </li>
-                <li id="menu-academico" ><a href="#"><i class="fa fa-envelope"></i><span>About</span><span class="fa fa-angle-right" style="float: right"></span></a>
+                <li id="menu-project" >
+                    <a href="#">
+                        <i class="fa fa-database"></i>
+                        <span>Project</span>
+                        <span class="fa fa-angle-right" style="float: right"></span>
+                    </a>
                     <ul id="menu-academico-sub" >
-                        <li id="menu-academico-avaliacoes" ><a href="#">Contact us</a></li>
-                        <li id="menu-academico-boletim" ><a href="#">About us</a></li>
+
+                        <li><a href="#project/newproject" class="link-menu"><i class="fa fa-plus"></i>New project</a></li>
+                        <li><a href="#project/openproject" class="link-menu"><i class="fa fa-folder-open"></i>Open project</a></li>
+                        <li><a href="#project/editproject" class="link-menu"><i class="fa fa-pencil"></i>Edit project</a></li>
+
+                        <!--<li id="menu-academico-avaliacoes" ><a href="#">Contact us</a></li>-->
+                        <!--<li id="menu-academico-boletim" ><a href="#">About us</a></li>-->
                     </ul>
                 </li>
-                <li><a href="#"><i class="fa fa-share-alt"></i><span>Share</span><span class="fa fa-angle-right" style="float: right"></span></a>
+
+                <li>
+                    <a href="#"><i class="fa fa-bar-chart"></i>
+                        <span>Statistics</span>
+                        <span class="fa fa-angle-right" style="float: right"></span>
+                    </a>
                     <ul>
-                        <li><a href="#"><i class="fa fa-facebook"></i> <a href="http://www.jqueryscript.net/tags.php?/Facebook/">Facebook</a></a></li>
-                        <li><a href="#"><i class="fa fa-pinterest"></i> Pinterest</a></li>
+                        <li><a href="#stat/showdata" class="link-menu">Show data </a></li>
+                        <li><a href="#stat/showmap" class="link-menu">Show map</a></li>
+                        <li><a href="#stat/compare" class="link-menu">Compare</a></li>
+                        <li><a href="#stat/timeline" class="link-menu">Timeline</a></li>
+                        <li><a href="#stat/showtag" class="link-menu">Word cloud</a></li>
+                        <li><a href="#stat/showusers" class="link-menu">User statistics</a></li>
                     </ul>
                 </li>
-                <li><a href="#"><i class="fa fa-history"></i><span>Blog</span></a></li>
-                <li><a href="#"><i class="fa fa-gears"></i><span>Settings</span></a></li>
             </ul>
         </div>
     </div>

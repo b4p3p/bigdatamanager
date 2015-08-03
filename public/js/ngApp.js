@@ -22,6 +22,11 @@ ngApp.controller('ngAppCtrl', ['$scope', function($scope) {
 
     var toggle = true;
 
+    $(".page-container")
+        .addClass("sidebar-collapsed")
+        .removeClass("sidebar-collapsed-back");
+    $("#menu span").css({"position":"absolute"});
+
     $(".sidebar-icon").click(function() {
         if (toggle){
             $(".page-container")

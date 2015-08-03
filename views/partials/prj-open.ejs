@@ -12,36 +12,36 @@
     .img-delete
     {
         position: relative;
-        top: -4px;
+        top: -3px;
     }
     .selectProj
     {
         position: relative;
-        top: -5px;
+        top: -4px;
     }
 </style>
 
-<div class="row" style="margin-top: 10px">
-    <table data-toggle="table"
-           id="tableProjects" data-pagination="true" data-search="true"
-           data-url="/project/projects">
-        <thead>
-        <tr>
-            <th data-field="userProject">Username</th>
-            <th data-field="projectName">Project Name</th>
-            <th data-field="dateCreation"
-                data-formatter="ProjectCtrl.dateCreationFormatter">Creation Date</th>
-            <th data-field="dateLastUpdate"
-                data-formatter="ProjectCtrl.dateLastUpdateFormatter">Last Edit</th>
-            <th data-field="size">Size</th>
-            <th data-field="Delete project" data-width="60"
-                data-formatter="ProjectCtrl.deleteColumnFormatter">Delete</th>
-            <th data-field="Open project" data-width="60"
-                data-formatter="ProjectCtrl.openColumnFormatter">Open</th>
-        </tr>
-        </thead>
-    </table>
-</div>
+<h3>Open project</h3>
+
+<table data-toggle="table"
+       id="tableProjects" data-pagination="true" data-search="true"
+       data-url="/project/projects">
+    <thead>
+    <tr>
+        <th data-field="userProject">Username</th>
+        <th data-field="projectName">Project Name</th>
+        <th data-field="dateCreation"
+            data-formatter="ProjectCtrl.dateCreationFormatter">Creation Date</th>
+        <th data-field="dateLastUpdate"
+            data-formatter="ProjectCtrl.dateLastUpdateFormatter">Last Edit</th>
+        <th data-field="size">Size</th>
+        <th data-field="Delete project" data-width="60"
+            data-formatter="ProjectCtrl.deleteColumnFormatter">Delete</th>
+        <th data-field="Open project" data-width="60"
+            data-formatter="ProjectCtrl.openColumnFormatter">Open</th>
+    </tr>
+    </thead>
+</table>
 
 <script src="/public/js/DateUtil.js"></script>
 <script src="/public/js/ProjectCtrl.js"></script>
