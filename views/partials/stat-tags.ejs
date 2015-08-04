@@ -68,19 +68,31 @@
     <p>Loading data...</p>
 </div>
 
-<div class="form-group form-option container">
+<div id="container" class="hidden">
+    <div class="form-group form-option container">
+        <label class="fix-label">Select tokens from:</label><br>
+        
 
     <label class="fix-label">Select data from:</label><br>
 
-    <div class="optType NameHighlights">
+            <label style="margin-right: 20px; font-weight: normal">
+                <input class="radioData" id="radioData" name="typeVoc" value="radioData" type="radio" checked>
+                Data
+            </label>
 
         <label style="margin-right: 20px; font-weight: normal">
             <input class="radioData" id="radioData" name="typeVoc" value="radioData" type="radio" checked>
             From data
         </label>
 
-        <div><i class="fa fa-info-circle" style="margin-right: 5px"></i>
-            I dati sono estratti dal campo <i>Token</i> presente nei dati</div>
+        <div class="optType NameHighlights">
+            <label style="margin-right: 20px; font-weight: normal">
+                <input class="radioUser" id="radioUser" name="typeVoc" value="radioUser" type="radio">
+                User vocabulary
+            </label>
+            <div><i class="fa fa-info-circle" style="margin-right: 5px"></i>
+                I dati sono calcolati sulla base del dizionario inserito dall'utente</div>
+        </div>
     </div>
 
     <div class="optType NameHighlights">
