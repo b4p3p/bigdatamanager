@@ -11,14 +11,13 @@ var urlencode = require('urlencode');
 module.exports = function (router, app) {
 
     router.get('/*', function (req, res, next) {
-        if(!req.session.user)
-        {
+
+        if(!req.session.user) {
             res.redirect("/view/login");
             return;
         }
 
-        if(!req.session.project)
-        {
+        if(!req.session.project) {
             res.redirect("/view/project/openproject");
             return;
         }

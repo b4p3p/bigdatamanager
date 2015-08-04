@@ -53,6 +53,15 @@ module.exports = function (router) {
     });
 
     /// DB
+    router.get('/db/*', function (req, res, next) {
+
+        if(req.session.level > 0)
+            next(null);
+        else{
+            res.redirect("/view/login");
+        }
+    });
+
     router.get('/db/nations', function (req, res)
     {
         var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.DB_NATIONS);

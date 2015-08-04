@@ -13,7 +13,8 @@ var USER_SCHEMA = new mongoose.Schema({
     password: String,
     firstName: String,
     lastName: String,
-    created: Date
+    created: Date,
+    level: Number
 }, {strict: false});
 
 User.prototype.data = {};    //json
@@ -36,7 +37,6 @@ User.addUser = function(user, callback){
 User.getUser = function (username, callback)
 {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
-
     var Users = connection.model(MODEL_NAME, USER_SCHEMA);
 
     Users.findOne( {username: username }, function (err, doc)
@@ -66,14 +66,11 @@ User.getUserPsw = function (username, password , callback)
  */
 User.getUsers = function(callback)
 {
-
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var Users = connection.model(MODEL_NAME, USER_SCHEMA);
 
-    Users.find(
-        {},
-        { _id:0, "firstName":1, "lastName":1, "username":1, "created":1}
-    ).lean().exec ( function(err, data){
+    Users.find({}, { _id:0, "firstName":1, "lastName":1, "username":1, "created":1, "level":1}
+    ).sort("-level").lean().exec ( function(err, data){
         connection.close();
         callback(err, data);
     });

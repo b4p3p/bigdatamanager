@@ -15,6 +15,7 @@ module.exports = function (app) {
 
         req.session.destroy();
         req.session.isGuest = true;
+        req.session.level = -1;
 
         res.redirect("/view/app");
 
@@ -63,6 +64,7 @@ module.exports = function (app) {
                 // ### success ###
                 req.session.user = username;
                 req.session.isGuest = false;
+                req.session.level = data.level;
                 res.redirect('/view/app');
             }
 

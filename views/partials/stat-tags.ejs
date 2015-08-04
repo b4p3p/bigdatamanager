@@ -68,65 +68,45 @@
     <p>Loading data...</p>
 </div>
 
-<div id="container" class="hidden">
-    <div class="form-group form-option">
-        <label class="fix-label">Select data from:</label><br>
+<div class="form-group form-option container">
 
-        <div class="optType NameHighlights">
+    <label class="fix-label">Select data from:</label><br>
 
-            <label style="margin-right: 20px; font-weight: normal">
-                <input class="radioData" id="radioData" name="typeVoc" value="radioData" type="radio" checked>
-                From data
-            </label>
+    <div class="optType NameHighlights">
 
-            <div><i class="fa fa-info-circle" style="margin-right: 5px"></i>
-                I dati sono estratti dal campo <i>Token</i> presente nei dati</div>
-        </div>
+        <label style="margin-right: 20px; font-weight: normal">
+            <input class="radioData" id="radioData" name="typeVoc" value="radioData" type="radio" checked>
+            From data
+        </label>
 
-        <div class="optType NameHighlights">
-            <label style="margin-right: 20px; font-weight: normal">
-                <input class="radioUser" id="radioUser" name="typeVoc" value="radioUser" type="radio">
-                From user vocabulary
-            </label>
-            <div><i class="fa fa-info-circle" style="margin-right: 5px"></i>
-                I dati sono calcolati sulla base del dizionario inserito dall'utente</div>
-        </div>
+        <div><i class="fa fa-info-circle" style="margin-right: 5px"></i>
+            I dati sono estratti dal campo <i>Token</i> presente nei dati</div>
     </div>
+
+    <div class="optType NameHighlights">
+        <label style="margin-right: 20px; font-weight: normal">
+            <input class="radioUser" id="radioUser" name="typeVoc" value="radioUser" type="radio">
+            From user vocabulary
+        </label>
+        <div><i class="fa fa-info-circle" style="margin-right: 5px"></i>
+            I dati sono calcolati sulla base del dizionario inserito dall'utente</div>
+    </div>
+
+</div>
+
+<div id="container" class="hidden container">
 
     <svg id="Tags" ></svg>
     <div id="TagsBarChart"></div>
     <div id="WordsBarChart" style=""></div>
+
 </div>
 
-<script src="/public/js/Stat-WordCloud.js"></script>
-
-<script>
-    var radio = document.querySelectorAll('.NameHighlights');
-    for (var i = radio.length; i--;) {
-        (function () {
-            var t;
-            radio[i].onmouseover = function () {
-                hideAll();
-                clearTimeout(t);
-                this.className = 'NameHighlightsHover';
-            };
-            radio[i].onmouseout = function () {
-                var self = this;
-                t = setTimeout(function () {
-                    self.className = 'NameHighlights';
-                }, 300);
-            };
-        })();
-    }
-
-    function hideAll() {
-        for (var i = radio.length; i--;) {
-            radio[i].className = 'NameHighlights';
-        }
-    };
-
-    $(document).ready(function(){
-        var statWordCloudCtrl = new StatWordCloudCtrl();
-    });
-
-</script>
+<div class="alert alert-warning" role="alert" id="msgDataNotAvaible"
+     style="margin-top: 20px;" hidden>
+    <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
+    <span class="sr-only">Error:</span>
+    Data not available <br>
+    Please Sync your project <br>
+    <a href="/view/app#/project/editproject">Sync vocabulary</a>
+</div>

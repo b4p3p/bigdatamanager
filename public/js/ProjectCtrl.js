@@ -1,5 +1,3 @@
-"use strict";
-
 function progressCaption(value, name)
 {
     return  value + "% - " + name;
@@ -34,8 +32,8 @@ function createProgress(name)
 
 }
 
-var ProjectCtrl =
-{
+var ProjectCtrl = {
+
     files: {},
     progress: {},
     username: null,
@@ -347,7 +345,7 @@ var ProjectCtrl =
         }
 
     },
-    
+
     /**
      * Scrive i risultati delle insert sotto le progress bar
      *

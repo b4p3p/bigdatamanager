@@ -9,13 +9,14 @@ var request = require("request");
 var Summary =       require("../model/Summary");
 var Regions =       require("../model/Regions");
 var Datas =         require("../model/Data");
+var Vocabularies =         require("../model/Vocabulary");
 var CrowdPulse =    require("../model/CrowdPulse");
 
 var Project = function (data) {
     this.data = data;
 };
 
-Project.MODEL_NAME = "project";
+Project.MODEL_NAME = "projects";
 
 Project.SCHEMA = new mongoose.Schema({
     projectName: {type : String, required : true },
@@ -82,24 +83,44 @@ Project.addProject = function(dataProject, callback)
     console.log("CALL Project.addProject");
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
-    var Model = connection.model( Project.MODEL_NAME, Project.SCHEMA);
+    var ProjectModel = connection.model( Project.MODEL_NAME, Project.SCHEMA);
+    var SummaryModel = connection.model( Summary.MODEL_NAME, Summary.SCHEMA);
 
-    dataProject = {
-        projectName: dataProject.project,
-        userProject: dataProject.username,
-        description: dataProject.description
-    };
+    async.parallel([
+        function(next){
+            var newProject = new ProjectModel( {
+                    projectName: dataProject.project,
+                    userProject: dataProject.username,
+                    description: dataProject.description
+                }
+            );
+            newProject.save( function(err) { next(err) } );
+        },
+        function(next){
 
-    var newProject = new Model(dataProject);
-
-    newProject.save(
-        function(err)
-        {
-            connection.close();
-            callback(err);
+            var newSummaries = new SummaryModel( {
+                projectName: dataProject.project,
+                username: dataProject.username,
+                lastUpdate: new Date(),
+                data: {
+                    minDate: new Date(),
+                    maxDate: new Date(),
+                    syncTags: [],
+                    allTags: [],
+                    counter: {},
+                    countSync: 0,
+                    countTot: 0,
+                    nations: {}
+                }
+            });
+            newSummaries.save(function(err){
+                next(null);
+            })
         }
-    );
-
+    ], function(err, results){
+        connection.close();
+        callback(err);
+    })
 };
 
 /**
@@ -108,95 +129,73 @@ Project.addProject = function(dataProject, callback)
  */
 Project.delProject = function(projectName, callback)
 {
-    MongoClient.connect(url, function(err, db)
-    {
-        if(err!=null)
-        {
-            callback(
-                {
-                    status:1,
-                    message:err.toString(),
-                    contDeleted: 0
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+
+    var Datas = require('../model/Data');
+
+    var projects = connection.model( Project.MODEL_NAME, Project.SCHEMA);
+    var summaries = connection.model( Summary.MODEL_NAME, Summary.SCHEMA);
+    var datas = connection.model( Datas.MODEL_NAME, Datas.SCHEMA);
+    var vocabularies = connection.model( Vocabularies.MODEL_NAME, Vocabularies.SCHEMA);
+
+    async.parallel({
+
+        //rimuovo i dati
+        deletedCount: function(parallel) {
+            datas.remove( {projectName: projectName},
+                function(err, ris) {
+                    //{status:0, message:"", deletedCount:
+                    if ( err == null )
+                        parallel(null, ris.result.n);
+                    else
+                        parallel(err.toString());
                 }
             );
+        },
+
+        //rimuovo il progetto
+        project: function(parallel) {
+            projects.remove({projectName: projectName},
+                function(err, ris) {
+                    if ( err == null )
+                        parallel(null, ris.result.n);
+                    else
+                        parallel(err.toString());
+                }
+            );
+        },
+
+        //rimuovo la sincronizzazione
+        sync: function(parallel)
+        {
+            summaries.remove(
+                {projectName: projectName},
+                function(err, ris) {
+                    if ( err == null )
+                        parallel(null, ris.result.n);
+                    else
+                        parallel(err.toString());
+                }
+            );
+        },
+
+        vocabulary: function(parallel){
+            vocabularies.remove({project: projectName},
+                function(err, ris) {
+                    if ( err == null ) parallel(null, ris.result.n);
+                    else               parallel(err.toString());
+                })
         }
+    }, function(err, results) {
+
+        if(err == null)
+            callback(null, {status:0, message:"", deletedCount: results.deletedCount});
         else
-        {
-            var datas = db.collection('datas');
-            var projects = db.collection('projects');
-            var summaries = db.collection('summaries');
+            callback(err, {status:1, message:err, deletedCount: 0});
 
-            async.parallel({
-
-                //rimuovo i dati
-                deletedCount: function(parallel)
-                {
-                    setTimeout(function()
-                    {
-                        datas.removeMany(
-                            {projectName: projectName},
-                            function(err, ris)
-                            {
-                                //{status:0, message:"", deletedCount:
-                                if ( err == null )
-                                    parallel(null, ris.deletedCount);
-                                else
-                                    parallel(err.toString());
-                            }
-                        );
-                    }, 1);
-                },
-
-                //rimuovo il progetto
-                project: function(parallel)
-                {
-                    setTimeout(function()
-                    {
-                        projects.removeOne(
-                            {projectName: projectName},
-                            function(err, ris)
-                            {
-                                if ( err == null )
-                                    parallel(null, ris.deletedCount);
-                                else
-                                    parallel(err.toString());
-                            }
-                        );
-                    }, 1);
-                },
-
-                //rimuovo la sincronizzazione
-                sync: function(parallel)
-                {
-                    setTimeout(function()
-                    {
-                        summaries.removeOne(
-                            {project: projectName},
-                            function(err, ris)
-                            {
-                                if ( err == null )
-                                    parallel(null, ris.deletedCount);
-                                else
-                                    parallel(err.toString());
-                            }
-                        );
-                    }, 1);
-                }
-            },
-
-            function(err, results)
-            {
-
-                if(err == null)
-                    callback(null, {status:0, message:"", deletedCount: results.deletedCount});
-                else
-                    callback(err, {status:1, message:err, deletedCount: 0});
-
-                db.close();
-            }
-            );
-        }
+        connection.close();
     });
+
 };
 
 /**
@@ -212,19 +211,32 @@ Project.editProject = function (data, callback) {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var Model = connection.model(Project.MODEL_NAME, Project.SCHEMA);
 
-    var conditions = { projectName: data.projectName }
-        , update = { $set: {
-            description: data.description,
-            projectName: data.projectName
-        }}
-        , options = { multi: false };
-
-    Model.update(conditions, update, options, function(err, numAffected){
-
-        connection.close();
-        callback(err, numAffected);
-
+    Model.findOne( { projectName: data.project } , function(err, doc){
+        doc.description = data.description;
+        doc.save(function(err){
+            connection.close();
+            callback(err);
+        })
     });
+
+    //Model.findOne(
+    //    { projectName: data.projectName },
+    //    { $set:{ description: data.description } },
+    //    { },
+    //    function(err, result){
+    //        connection.close();
+    //        callback(err, numAffected);
+    //    });
+
+    //var conditions = { projectName: data.projectName }
+    //    , update = { $set: {
+    //        description: data.description,
+    //        projectName: data.projectName
+    //    }}
+    //    , options = { multi: false };
+
+    //Model.update(conditions, update, options, function(err, numAffected){
+    //});
 
 };
 
@@ -418,18 +430,9 @@ Project.sync = function(project, username, res, callback)
 
                 console.log("     update project");
 
-                projects.update(
-                    {projectName: project},
-                    {$set: {
-                        dateLastUpdate: docSync.lastUpdate,
-                        size: docSync.data.countTot
-                    }},
-                    { w:1 },
-                    function (err)
-                    {
-                        next(err, docSync);
-                    }
-                )
+                Project.updateLastUpdate(projects, project, docSync.lastUpdate, docSync.data.countTot, function(err){
+                    next(err, docSync);
+                });
             }
         ],
         function(err, doc){
@@ -445,6 +448,21 @@ Project.sync = function(project, username, res, callback)
     )
 };
 
+Project.updateLastUpdate = function(model, project, date, size, callback){
+
+    var edit = {};
+    if ( date != null ) edit.dateLastUpdate = date; else edit.dateLastUpdate = new Date();
+    if ( size != null ) edit.size = size;
+
+    model.update(
+        {projectName: project},
+        {$set: edit },
+        { w:1 },
+        function (err) {
+            callback(err);
+        }
+    )
+};
 
 module.exports = Project;
 

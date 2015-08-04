@@ -36,6 +36,7 @@ ngApp.controller('ngAppCtrl', ['$scope', function($scope) {
             $scopeNgView.resize();
 
         if (toggle){
+            $(".row-footer").addClass("row-footer-collapsed");
             $(".page-container")
                 .addClass("sidebar-collapsed")
                 .removeClass("sidebar-collapsed-back");
@@ -47,6 +48,7 @@ ngApp.controller('ngAppCtrl', ['$scope', function($scope) {
                 .addClass("sidebar-collapsed-back");
             setTimeout(function() {
                 $("#menu span").css({"position":"relative"});
+                $(".row-footer").removeClass("row-footer-collapsed");
             }, 400);
         }
 
@@ -73,16 +75,19 @@ ngApp.controller('ngAppCtrl', ['$scope', function($scope) {
 
     $(window).resize(function () { _self.resizeMenu(); });
 
+    $scope.name = "ngAppCtrl";
+
     $scope.resizeMenu = function(){
         $("#menu>nav").height( $("#content").height() + 120 );
     };
 
-    $scope.collapseStart = function(){ console.log("collapseStart"); }
+    $scope.collapseStart = function(){ console.log("collapseStart"); };
 
     $scope.srcUser = function() {
         return window.ISGUEST == "true" ?
-            "/public/img/guest.png" :
-            "/public/img/icon-user.png";
+            "fa fa-user-secret fa-2x" :
+            "fa fa-user fa-2x"
+
     };
 
     $scope.Username = function(){
@@ -93,6 +98,17 @@ ngApp.controller('ngAppCtrl', ['$scope', function($scope) {
 
     $scope.Project =  window.PROJECT;
 
+    $scope.Refresh = function(project){
+        $scope.$apply(function () {
+            $scope.Project = project
+        });
+    };
+
+    $scope.GetCtrl = function(){
+        var $scope = angular.element($("#ngview")).scope();
+        console.log($scope.name);
+        return $scope;
+    }
 
 }]);
 
@@ -123,9 +139,11 @@ ngApp.config( ['$routeProvider', function ($routeProvider) {
             templateUrl: '/view/project/openproject'
         })
         .when('/project/editproject', {
-            templateUrl: '/view/project/editproject'
+            templateUrl: '/view/project/editproject',
+            controller: 'ngPrjEditCtrl'
         })
         .when('/project/newproject', {
+            controller: 'ngPrjNewCtrl',
             templateUrl: '/view/project/newproject'
         })
         //STATISTICS

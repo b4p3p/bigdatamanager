@@ -33,8 +33,7 @@ Summary.SCHEMA_NATION = new Schema({
     regions: [Summary.SCHEMA_REGIONS]
 });
 
-Summary.SCHEMA = new Schema(
-    {
+Summary.SCHEMA = new Schema( {
         projectName: {type: String, required: true},
         username: {type: String, required: true},
         lastUpdate: Date,
@@ -64,12 +63,11 @@ Array.prototype.indexOfObject = function (key, value) {
 
 Summary.getStat = function (project, callback)
 {
-
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var summaries = connection.model(Summary.MODEL_NAME, Summary.SCHEMA);
 
     summaries.findOne(
-        {project: project},
+        {projectName: project},
         function (err, doc) {
             callback(err, doc);
         }
@@ -83,7 +81,7 @@ Summary.getStatFilter = function (project,username, query, callback)
     Datas = require("../model/Data");
 
     var docSync = {
-        project: project,
+        projectName: project,
         username: username,
         lastUpdate: new Date(),
         data: {
@@ -145,8 +143,6 @@ Summary.getStatFilter = function (project,username, query, callback)
     }
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
-
-
 
     var datas = connection.model(Datas.MODEL_NAME, Datas.SCHEMA);
     var regions = connection.model(Regions.MODEL_NAME, Regions.SCHEMA);
@@ -426,6 +422,58 @@ Summary.getStatFilter = function (project,username, query, callback)
             })
             ;
         });
+};
+
+Summary.updateStat = function(project, username, callback){
+
+    var Datas = require("../model/Data");
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+
+    var datas =     connection.model(Datas.MODEL_NAME, Datas.SCHEMA);
+    var summaries = connection.model(Summary.MODEL_NAME, Summary.SCHEMA);
+
+    datas.aggregate([
+        {$match:{projectName:project}},
+        {$group:{
+            _id:null,
+            min: {$min: "$date" },
+            max: {$max: "$date" },
+            countTot: {$sum:1},
+            allTags: { $addToSet: "$tag"}
+        }}
+    ], function(err, result){
+
+        summaries.findOne({projectName:project}, function(err, doc){
+
+            var s = null;
+
+            if( doc == null)
+                s = new summaries({
+                    projectName : project,
+                    username : username,
+                    data: {
+                        syncTags : [],
+                        counter :  {},
+                        countSync : 0,
+                        nations : []
+                    }
+                });
+            else
+                s = doc;
+
+            s.lastUpdate = new Date();
+            s.data.minDate = result[0].min;
+            s.data.maxDate = result[0].max;
+            s.data.allTags = result[0].allTags;
+            s.data.countTot = result[0].countTot;
+
+            s.save(function(err, result){
+                callback(err);
+                connection.close();
+            });
+
+        });
+    });
 };
 
 module.exports = Summary;

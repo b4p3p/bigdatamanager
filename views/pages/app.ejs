@@ -21,6 +21,7 @@
         window.USERNAME = '<%= user %>';
         window.PROJECT = '<%= project %>';
         window.ISGUEST = '<%= isGuest %>';
+        window.LEVEL = '<%= level %>';
     </script>
 
     <script src="/public/js/DOMUtil.js"></script>
@@ -37,13 +38,14 @@
 
 <body ng-controller="ngAppCtrl">
 
-<div class="page-container">
+    <div class="page-container">
 
     <div class="content" id="content">
         <ng-view onload="resizeMenu()" id="ngview"></ng-view>
     </div>
 
-    <div class="sidebar-menu" id="sidebar-menu">
+    <div class="sidebar-menu" id="sidebar-menu" ng-controller="ngNavCtrl">
+
         <header class="logo">
             <a href="#" class="sidebar-icon"> <span class="fa fa-bars"></span> </a>
             <a href="#">
@@ -58,8 +60,8 @@
                         <i class="fa fa-home"></i><span>Home</span>
                     </a>
                 </li>
-                <li id="menu-database" >
-                    <a href="#">
+                <li id="menu-database" class="canberemoved">
+                    <a href="#" >
                         <i class="fa fa-cogs"></i>
                         <span>Database</span>
                         <span class="fa fa-angle-double-right" style="float: right"></span>
@@ -75,11 +77,11 @@
                         <span>Project</span>
                         <span class="fa fa-angle-right" style="float: right"></span>
                     </a>
-                    <ul id="menu-academico-sub" >
+                    <ul id="menu-project-sub" >
 
-                        <li><a href="#project/newproject" class="link-menu"><i class="fa fa-plus"></i>New project</a></li>
+                        <li class="canberemoved" id="menu-project-newproject"><a href="#project/newproject" class="link-menu"><i class="fa fa-plus"></i>New project</a></li>
                         <li><a href="#project/openproject" class="link-menu"><i class="fa fa-folder-open"></i>Open project</a></li>
-                        <li><a href="#project/editproject" class="link-menu"><i class="fa fa-pencil"></i>Edit project</a></li>
+                        <li class="canberemoved" id="menu-project-edit"><a href="#project/editproject" class="link-menu"><i class="fa fa-pencil"></i>Edit project</a></li>
                     </ul>
                 </li>
 
@@ -98,109 +100,34 @@
                     </ul>
                 </li>
             </ul>
+
         </div>
-        <footer style="position:fixed;bottom: 0;">
-            <div>
-                <i class="fa fa-user" style="height: 50px;width: 50px"></i>
-                Pippo
+
+        <div class="footer">
+
+            <div class="row-footer" title="{{Username()}}">
+                <i class={{srcUser()}}></i>
+                <div class="row-footer-content">
+                    <span>{{Username()}}</span>
+                </div>
             </div>
-            <div>
-                <i class="fa fa-folder"></i>
-                altro progetto
+            <div class="row-footer" title="{{Project}}">
+                <i class="fa fa-folder fa-2x"></i>
+                <div class="row-footer-content">
+                    <span>{{Project}}</span>
+                </div>
             </div>
-        </footer>
+            <div class="row-footer" title="{{Project}}">
+                <a href="/logout" ng-click="Logout()">
+                    <i class="fa fa-sign-out fa-2x"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+
     </div>
 
 </div>
-
-    <!--<div class="navbar navbar-default navbar-fixed-top" id="nav-bar" ng-controller="ngNavCtrl">-->
-
-        <!--<div class="item-nav">-->
-            <!--<img ng-src={{srcUser()}}>-->
-        <!--</div>-->
-
-        <!--<div class="item-nav">-->
-            <!--<div class="label-nav">{{Username()}}</div>-->
-        <!--</div>-->
-
-        <!--<div class="item-nav">-->
-            <!--<img src="/public/img/folder.png">-->
-        <!--</div>-->
-
-        <!--<div class="item-nav">-->
-            <!--<div class="label-nav">{{Project}}</div>-->
-        <!--</div>-->
-
-        <!--<div class="item-nav btn-logout">-->
-            <!--<button class="btn-link" ng-click="Logout()">-->
-                <!--<img src="/public/img/logout-box.png"-->
-                     <!--style="width: 30px;height: 30px">-->
-            <!--</button>-->
-        <!--</div>-->
-    <!--</div>-->
-
-    <!--<% include ../content/multiLevelSlidingSidebar.html %>-->
-
-
-    <!--<div id="menu" >-->
-        <!--<nav>-->
-            <!--<h2><i class="fa fa-reorder"></i>-->
-                <!--<div style="display: inline-block;">-->
-                    <!--<img src="/public/img/bdm-logo.png"-->
-                         <!--class="logo-topmenu">-->
-                <!--</div>-->
-                <!--&lt;!&ndash;BigDataManager&ndash;&gt;-->
-            <!--</h2>-->
-            <!--<ul>-->
-                <!--<li><a href="#/home" ><i class="fa fa-th"></i>Home</a></li>-->
-                <!--&lt;!&ndash; DATABASE &ndash;&gt;-->
-                <!--<li>-->
-                    <!--<a href="#"><i class="fa fa-cogs"></i>Database</a>-->
-                    <!--<h2><i class="fa fa-cogs"></i>Database</h2>-->
-                    <!--<ul>-->
-                        <!--<li><a href="#/db/users"><i class="fa fa-plus"></i>Users</a></li>-->
-                        <!--<li><a href="#/db/nations"><i class="fa fa-folder-open"></i>Nations</a></li>-->
-                    <!--</ul>-->
-                <!--</li>-->
-                <!--&lt;!&ndash; PROJECTS &ndash;&gt;-->
-                <!--<li>-->
-                    <!--<a href="#"><i class="fa fa-database"></i>Projects</a>-->
-                    <!--<h2><i class="fa fa-database"></i>Projects</h2>-->
-                    <!--<ul>-->
-                        <!--<li><a href="#project/newproject"><i class="fa fa-plus"></i>New project</a></li>-->
-                        <!--<li><a href="#project/openproject"><i class="fa fa-folder-open"></i>Open project</a></li>-->
-                        <!--<li><a href="#project/editproject"><i class="fa fa-pencil"></i>Edit project</a></li>-->
-                    <!--</ul>-->
-                <!--</li>-->
-                <!--&lt;!&ndash; STATISTICS &ndash;&gt;-->
-                <!--<li>-->
-                    <!--<a href="#"><i class="fa fa-bar-chart"></i>Statistics</a>-->
-                    <!--<h2><i class="fa fa-bar-chart"></i>Statistics</h2>-->
-                    <!--<ul>-->
-                        <!--<li><a href="#stat/showdata">Show data <img src="/public/img/icon-table.png" class="subMenu-ico"/></a></li>-->
-                        <!--<li><a href="#stat/showmap">Show map <img src="/public/img/icon-osm.png" class="subMenu-ico"/></a></li>-->
-                        <!--<li><a href="#stat/compare">Compare <img src="/public/img/icon-compare.png" class="subMenu-ico"/></a></li>-->
-                        <!--<li><a href="#stat/timeline">Timeline <img src="/public/img/icon-line.png" class="subMenu-ico"/></a></li>-->
-                        <!--<li><a href="#stat/showtag">Word cloud <img src="/public/img/icon-cloud.png" class="subMenu-ico"/></a></li>-->
-                        <!--<li><a href="#stat/showusers">User statistics <img src="/public/img/icon-users.png" class="subMenu-ico"/></a></li>-->
-                    <!--</ul>-->
-                <!--</li>-->
-
-            <!--</ul>-->
-        <!--</nav>-->
-    <!--</div>-->
-
-    <!--<div id="content">-->
-        <!--<ng-view onload="resizeMenu()" id="ngview"></ng-view>-->
-    <!--</div>-->
-
-    <!--<div>-->
-        <!-- -->
-        <!--<div id="subMenu">-->
-
-        <!--</div>-->
-        <!-- -->
-    <!--</div>-->
 
 </body>
 

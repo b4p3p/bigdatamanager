@@ -127,24 +127,23 @@ Data.importFromFile = function (type, file, projectName, cb_ris)
             },
 
             // 4) aggiorno il contatore dei dati
-            function(resultInsert, next){
+            function(resultInsert, next) {
+
                 var connection = mongoose.createConnection('mongodb://localhost/oim');
                 var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
                 var projects = connection.model(Project.MODEL_NAME, Project.SCHEMA);
 
                 projects.findOne({projectName:projectName}, function(err, project){
                     datas.find({projectName:projectName}).count(function(err, cont){
+
                         project.size = cont;
+                        project.dateLastUpdate = new Date();
+
                         project.save(function(err){
                             if(err)console.error(err);
                             connection.close();
                             next(err, resultInsert);
                         });
-
-                        //project.update( {set:{size:cont} }, function(err, result){
-                        //    connection.close();
-                        //    next(err, resultInsert);
-                        //})
 
                     })
                 })
@@ -250,8 +249,7 @@ Data.getDataFilter = function (projectName, query, callback)
  * @param projectName {String}
  * @param callback {function(ERROR, Array)} callback - The callback that handles the response
  */
-Data.loadTags = function (projectName, callback)
-{
+Data.loadTags = function (projectName, callback) {
     MongoClient.connect(url, function (err, db) {
         var datas = db.collection('datas');
         datas.distinct("tag", {projectName: projectName}, function (err, array) {
@@ -264,8 +262,7 @@ Data.loadTags = function (projectName, callback)
     });
 };
 
-Data.getUsers = function(projectName, par, callback)
-{
+Data.getUsers = function(projectName, par, callback) {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
     if(!par) par = {};
@@ -583,7 +580,7 @@ Data.overrideTokensData = function (project, res, callback) {
             contStem++;
             printPercentage( steps, contStem, res );
 
-            doc.update({$set:{tokens:terms}}, function(){
+            doc.update({$set:{tokens:terms}}, function(err){
 
                 contSave++;
                 printPercentage( steps, contSave, res );
@@ -845,9 +842,6 @@ Date.dateByDate_project = function(exec, type){
 };
 
 module.exports = Data;
-
-
-
 
 //Data.getUserData_ = function( project , query, callback){
 //

@@ -17,7 +17,7 @@ ConstantsRouter.argIndex = function(req, page)
     if ( req && req.session )
     {
         //req.session.project = req.session.project ? req.session.project : "oim";
-        req.session.project = req.session.project ? req.session.project : "oim";
+        //req.session.project = req.session.project ? req.session.project : "oim";
     }
 
     var ris = {};
@@ -28,6 +28,7 @@ ConstantsRouter.argIndex = function(req, page)
         req.session.arg = null;
     }
 
+    ris.level     = req.session.level;
     ris.isGuest     = req.session.isGuest;
     ris.page        = page || '';
     ris.status      = { status:0, message: '' };

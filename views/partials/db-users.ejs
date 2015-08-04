@@ -1,15 +1,42 @@
 <link  href="/node_modules/bootstrap-table/dist/bootstrap-table.min.css" rel="stylesheet" >
 
+<style>
+   .level{
+      display: inline-block;
+      width: 25px;  height: 25px;
+      text-align: center;
+      font-size: 20px;   font-weight: bold;
+      border-radius: 5px;
+      color: white;  background: grey;
+   }
+   .admin{
+      background: red;
+   }
+   .user{
+      background: green;
+   }
+   .row{
+      margin-bottom: 5px;
+   }
+</style>
+
+<script>
+   var scope = angular.element( $("#ngview")).scope();
+</script>
+
 <h3>Users</h3>
 
-<table id="table-nations" data-toggle="table"
+<table id="table-users" data-toggle="table"
        data-url="/users/users"
        data-cache="false" data-pagination="true"
        data-sort-name="name" data-sort-order="desc"
        data-search="true">
    <thead>
    <tr>
-      <th data-sortable="true" data-field="username">
+      <th data-sortable="true" data-field="level" data-formatter="scope.formatter.level">
+         Level
+      </th>
+      <th data-sortable="true" data-field="username" >
          Username
       </th>
       <th data-sortable="true" data-field="firstName">
@@ -18,7 +45,7 @@
       <th data-sortable="true" data-field="lastName">
          Last Name
       </th>
-      <th data-sortable="true" data-field="created" data-formatter="toStringDate">
+      <th data-sortable="true" data-field="created" data-formatter="scope.formatter.toStringDate">
          Created
       </th>
       <th data-sortable="true" data-field="lastLogin">
@@ -29,20 +56,18 @@
       </th>
    </tr>
    </thead>
+
 </table>
 
-<script>
-
-   $(document).ready(function(){
-      $("#table-nations").bootstrapTable({});
-      $("#table-nations").bootstrapTable()
-   });
-
-   function toStringDate(value, obj, index) {
-      var date = new Date(value);
-      return date.toStringDate();
-   }
-
-</script>
+<div>
+   <div class="row">
+      <div class="level admin">1</div>
+      Administrator
+   </div>
+   <div class="row">
+      <div class="level user">0</div>
+      User
+   </div>
+</div>
 
 

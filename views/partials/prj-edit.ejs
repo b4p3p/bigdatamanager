@@ -1,125 +1,13 @@
-<!-- prendo le variabili -->
-<style>
-
-    .col_dx{
-        /*float: right;*/
-        /*margin-left: 0;*/
-        /*padding-left: 0;*/
-        padding-right: 0
-    }
-
-    .btn-open > span {
-        position: relative;
-        top: -3px;
-    }
-
-    .form-group{
-        width: 100%;
-        margin-right: 0;
-        margin-left: 0;
-
-        padding-right: 0;
-        padding-left: 0;
-    }
-
-    .row-form{
-        width: 100%;
-        margin-left: 0;
-
-        /*margin-right: -15px;*/
-        /*padding-right: 15px;*/
-        /*padding-left: 0;*/
-    }
-
-    .form-horizontal .form-group {
-        margin-right: 0;
-        margin-left: 0;
-    }
-
-    .button{
-        /*border-radius: 50px;*/
-        /*margin-top: 30px;*/
-        float: right;
-        width: 108px;
-    }
-
-    .progress{
-        margin-bottom: 0;
-    }
-
-    .progress-result
-    {
-        margin-top: 0;
-        padding-top: 0;
-    }
-
-    .progress-badge{
-        margin-left: 10px;
-    }
-
-    #uploadForm{
-        width: 100%;
-    }
-
-    .example-code > pre {
-        /*margin-right: 15px*/
-    }
-
-    #examplecode {
-        padding: 0;
-    }
-
-    #console {
-        padding-left: 10px;
-    }
-
-    .control-label {
-        max-width: 100px;
-        padding-left: 0;
-        padding-right: 0;
-        margin-left: 0;
-        margin-right: 0;
-    }
-
-    .terminal{
-        height: 200px;
-        width: 100%;
-        border: 2px;
-        background: #003580;
-        margin-bottom: 50px;
-    }
-
-    h3{
-        margin-top: 10px;
-        margin-bottom: 10px;
-    }
-
-    .inline {
-        display: inline-block;
-    }
-
-    #divbtnsync{
-        /*position: relative;*/
-        vertical-align: top;
-    }
-
-    .hcenter{
-        position: relative;
-        width: 50%;
-        margin: 0 25%;
-    }
-
-</style>
-
 <link href="/public/css/terminal.css" rel="stylesheet">
+<link href="/public/css/prj-edit.css" rel="stylesheet">
 
-<% if(project==null) {%>
-    <div class="alert alert-danger" role="alert">
-        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-        <span class="sr-only">Error:</span>
-        You must select project.
-    </div>
-<% } else { %>
+<div id="test"></div>
+
+<div class="alert alert-danger" role="alert" hidden>
+    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+    <span class="sr-only">Error:</span>
+    You must select project.
+</div>
 
 <h3>Data</h3>
 
@@ -139,16 +27,16 @@
 
 <form class="form-horizontal" action="/project/editproject"
       method="post"
-      id="newproject_form" >
+      id="form_editproject" >
 
     <div class="form-group">
-        <label for="nameproject"
-               class="col-sm-2">Project name:</label>
+        <label for="nameproject" class="col-sm-2">Project name:</label>
 
         <div class="col-sm-10 col_dx">
             <input type="text" class="form-control" id="project"
                    placeholder="Project Name"
                    name="project"
+                   value="{{ProjectName}}"
                    required>
         </div>
 
@@ -162,24 +50,23 @@
 
          <textarea class="form-control" rows="3"
                    placeholder="Description..."
-                   name="description" id="description"></textarea>
+                   name="description" id="description">{{Description}}</textarea>
 
         </div>
     </div>
 
     <div class="form-group">
-        <button class="btn btn-danger button" type="submit" id="btn_editproject">
+        <button class="btn btn-danger button" type="submit"
+                id="btn_editproject">
             Edit
         </button>
     </div>
 
-    <% if (status && status.status > 0) { %>
-    <div class="alert alert-danger" role="alert">
-        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-        <span class="sr-only">Error:</span>
-        <%= status.message %>
-    </div>
-    <% } %>
+   <div class="alert" role="alert" id="msgEditProject" hidden>
+      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+      <span class="sr-only">Error:</span>
+      <span class="msgText"></span>
+   </div>
 
 </form>
 
@@ -196,8 +83,7 @@
         <label for="cmbType" >Type data:</label>
 
         <div class="col_dx">
-            <select class="selectpicker" name="type" id="cmbType"
-                    change="ProjectCtrl.cmbTypeChange()">
+            <select class="selectpicker" name="type" id="cmbType" >
                 <option value="json-crowdpulse">CrowdPulse Schema</option>
                 <option value="json">JSON</option>
                 <option value="csv">CSV</option>
@@ -210,7 +96,9 @@
 
         <label for="examplecode" >Example:</label>
 
-        <div id="examplecode" class="example-code"><pre></pre></div>
+        <div id="examplecode" class="example-code">
+           <pre>{{Example()}}</pre>
+        </div>
 
     </div>
 
@@ -233,8 +121,7 @@
 
 <div class="form-group row-form" style="min-height: 40px">
     <button class="btn btn-danger button"
-            id="upload_btn"
-            onclick="ProjectCtrl.sendFiles()">
+            id="upload_btn">
         Uploads
     </button>
 </div>
@@ -307,17 +194,14 @@
 
 <script src="/public/js/DOMUtil.js"></script>
 <script src="/public/js/DateUtil.js"></script>
-<script src="/public/js/ProjectCtrl.js"></script>
-<script src="/public/js/Prj-EditCtrl.js"></script>
 
 <script>
 
     $(document).ready(function(){
-        ProjectCtrl.init('<%= user %>', '<%= project %>');
-        ProjectCtrl.getProject( ProjectCtrl.loadEditForm );
-        ProjectCtrl.showExample();
+
+//        ProjectCtrl.init('<%= user %>', '<%= project %>');
+//        ProjectCtrl.getProject( ProjectCtrl.loadEditForm );
+//        ProjectCtrl.showExample();
     });
 
 </script>
-
-<% } %>

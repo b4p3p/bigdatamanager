@@ -1,0 +1,107 @@
+.col_dx{
+    /*float: right;*/
+    /*margin-left: 0;*/
+    /*padding-left: 0;*/
+    padding-right: 0
+}
+
+.btn-open > span {
+    position: relative;
+    top: -3px;
+}
+
+.form-group{
+    width: 100%;
+    margin-right: 0;
+    margin-left: 0;
+
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.row-form{
+    width: 100%;
+    margin-left: 0;
+
+    /*margin-right: -15px;*/
+    /*padding-right: 15px;*/
+    /*padding-left: 0;*/
+}
+
+.form-horizontal .form-group {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+.button{
+    /*border-radius: 50px;*/
+    /*margin-top: 30px;*/
+    float: right;
+    width: 108px;
+}
+
+.progress{
+    margin-bottom: 0;
+}
+
+.progress-result
+{
+    margin-top: 0;
+    padding-top: 0;
+}
+
+.progress-badge{
+    margin-left: 10px;
+}
+
+#uploadForm{
+    width: 100%;
+}
+
+.example-code > pre {
+    /*margin-right: 15px*/
+}
+
+#examplecode {
+    padding: 0;
+}
+
+#console {
+    padding-left: 10px;
+}
+
+.control-label {
+    max-width: 100px;
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.terminal{
+    height: 200px;
+    width: 100%;
+    border: 2px;
+    background: #003580;
+    margin-bottom: 50px;
+}
+
+h3{
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.inline {
+    display: inline-block;
+}
+
+#divbtnsync{
+    /*position: relative;*/
+    vertical-align: top;
+}
+
+.hcenter{
+    position: relative;
+    width: 50%;
+    margin: 0 25%;
+}

@@ -3,6 +3,7 @@
 var bootstrapTableFilter = new BootstrapTableFilter('showdatafilter');
 
 var formatterData = {
+
     tokens: function(value, row, index){
         if(value)
             return value.join(", ");
@@ -48,7 +49,7 @@ ShowDataCtrl.getData = function (callback)
 {
     console.log("CALL: getData");
 
-    async.parallel({
+    async.parallel( {
             stat: function(next)
             {
                 DataCtrl.getField( function(doc){
@@ -75,7 +76,6 @@ ShowDataCtrl.getData = function (callback)
                     next(null, doc);
                 }, DataCtrl.FIELD.WORDCOUNT);
             }},
-
         function(err, results) {
             callback();
         }

@@ -45,13 +45,10 @@ module.exports = function (router, app) {
             if (data == null)
                 next(null);
             else {
-                var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.NEW_PROJECT);
-                arg.error = {
-                    status: 1,
-                    message: "Project already exists"
-                };
-                res.render('../views/pages/index.ejs', arg);
+                var error = ConstantsRouter.status( 1, "Project already exists");
+                res.json(error);
             }
+
         });
 
     });
@@ -63,24 +60,18 @@ module.exports = function (router, app) {
             username: req.session.user,
             description: req.body.description
         };
-
         var Project = require("../model/Project");
         Project.addProject(dataProject, function (err) {
-
-            var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.NEW_PROJECT);
-
             if (err != null) {
                 console.error(err.toString());
-                arg.error =  ConstantsRouter.argError(1, err.toString());
-                res.render('../views/pages/index.ejs', arg);
+                res.json( ConstantsRouter.status(1, err.toString()) );
             }
             else {
                 req.session.project = dataProject.project;
-                arg.error = null;
-                res.redirect("/view/home");
-
+                var result = ConstantsRouter.status(0, "ok" );
+                result.newproject = dataProject.project;
+                res.json( result );
             }
-
         });
     });
 
@@ -90,11 +81,13 @@ module.exports = function (router, app) {
 
         var Project = require('../model/Project');
 
-        Project.editProject(req.body, function (err, numAffect) {
+        Project.editProject(req.body, function (err) {
 
-            var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.EDIT_PROJECT);
-            arg.error = err;
-            res.render('../views/pages/index.ejs', arg);
+            var ris = (err == null)
+                ? ConstantsRouter.status(0, "ok")
+                : ConstantsRouter.status(1, err.toString());
+
+            res.json(ris)
 
         });
 
@@ -149,6 +142,7 @@ module.exports = function (router, app) {
         var ris = {};
 
         async.each(files,
+
             function (f, next) {
 
                 var projectData = {
@@ -166,18 +160,26 @@ module.exports = function (router, app) {
                 });
 
             },
+
             function (err) {
 
-                //effettuo una chiamata in background della sincronizzazione
-                var url = req.headers.origin + '/project/sync';
-                request(url, function (error, response, body) {
-                    if (!error && response.statusCode == 200) {
-                        console.log("### SINCRONIZZAZZIONE EFFETTUATA CON SUCCESSO ###");
-                    } else
-                        console.error("### ERRORE DURANTE LA SINCRONIZZAZIONE ###");
+                Summary.updateStat( project, username, function(err){
+                    res.json(ris);
                 });
 
-                res.json(ris);
+                //costruisco stat il minimo sindacale
+
+
+                //effettuo una chiamata in background della sincronizzazione
+                //var url = req.headers.origin + '/project/sync';
+                //request(url, function (error, response, body) {
+                //    if (!error && response.statusCode == 200) {
+                //        console.log("### SINCRONIZZAZZIONE EFFETTUATA CON SUCCESSO ###");
+                //    } else
+                //        console.error("### ERRORE DURANTE LA SINCRONIZZAZIONE ###");
+                //});
+
+
             }
         );
 
@@ -223,7 +225,7 @@ module.exports = function (router, app) {
                 res.json(data);
             });
         else
-            res.redirect("/view/project/openproject");
+            res.redirect("/view/app/#project/openproject");
     });
 
     router.get('/stat', function (req, res) {
@@ -237,7 +239,7 @@ module.exports = function (router, app) {
                 res.json(data);
             });
         else
-            res.redirect("/view/project/openproject");
+            res.redirect("/view/app/#project/openproject");
     });
 
     router.get('/lastupdate', function (req, res) {

@@ -34,7 +34,7 @@
     "jsonlint": ">=1.6.2",
     "leaflet": ">=1.0.0-beta",
     "mongodb": ">=2.0.39",
-    "mongoose": ">=4.1.0",
+    "mongoose": ">=4.1.1",
     "morgan": "~1.6.1",
     "multer": ">=1.0.1",
     "node-csv": "~0.1.2",

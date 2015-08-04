@@ -41,6 +41,7 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
 
         this.$radioData = $("#radioData");
         this.$radioUser = $("#radioVocabulary");
+
         this.$cmbSelectTags =    $('#cmbTags');
         this.$cmbSelectNations = $('#cmbNations');
         this.$cmbSelectUsers =   $('#cmbUsers');
@@ -105,6 +106,8 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
         this.load = function() {
 
             console.log("CALL: form.load()");
+
+            var test = stat.data;
 
             var min = new Date( stat.data.minDate );
             var max = new Date( stat.data.maxDate );
@@ -184,6 +187,18 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
             else
                 mapCtrl.boundariesCtrl.hide();
         })
+
+        this.reset = function()
+        {
+            this.$cmbSelectNations.attr("title", "Not available");
+            this.$cmbSelectTags.attr("title", "Not available");
+            this.$cmbSelectUsers.attr("title", "Not available");
+            this.$cmbSelectTerms.attr("title", "Not available");
+            $('.selectpicker').selectpicker('refresh');
+
+            btnCtrl.removeWaitFromAllCheck();
+            this.progressCount.$divProgress.hide();
+        }
 
     };
 
@@ -400,7 +415,7 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
             var nation = feature.properties.NAME_0;
             var region = feature.properties.NAME_1;
             var avg = 0;
-            if(stat.data.nations[nation] != null)
+            if(stat.data.nations && stat.data.nations[nation] != null)
                 avg = stat.data.nations[nation].regions[region].avg;
             return avg;
         };
@@ -735,7 +750,7 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
     var filteredRegions = null;
     var users = null;
     var terms = null;
-    var datas = null;
+    var datas = [];
 
     var btnCtrl = new BtnCtrl();
     var formCtrl = new FormCtrl();
@@ -809,6 +824,8 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
 
                 if (_idOp != idOp - 1) return;
 
+                console.log(datas);
+
                 datas = datas.concat(doc);
                 formCtrl.progressCount.setPercentage();
 
@@ -829,6 +846,13 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
         );
     }
 
-    getAllData();
+    var project = window.PROJECT;
+    if(!window.PROJECT){
+        bootbox.alert("You must first select a project<br><a href='/view/project/openproject'>Select project</a>");
+        formCtrl.reset();
+    }else
+    {
+        getAllData();
+    }
 
 }]);

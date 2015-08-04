@@ -165,6 +165,9 @@ Vocabulary.getVocabulary = function(project, callback) {
 /// EFFETTUA LA SINSCRONIZZAZIONE INSERENDO I COUNTER
 
 function updateProjects(docs, connection, project, next) {
+
+    var Project = require("../model/Project");
+
     var projects = connection.model(Project.MODEL_NAME, Project.SCHEMA);
     projects.update(
         { projectName: project },
@@ -301,10 +304,7 @@ function limitConvertResult(arrayRis, num){
 
 Vocabulary.prepareDataTags = function(project, query, res, callback) {
 
-    /**
-     * Costruisco il documento per la sincronizzazione dei token presenti
-     * in datas
-     */
+    var Data = require('../model/Data');
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
@@ -351,7 +351,7 @@ Vocabulary.prepareDataTags = function(project, query, res, callback) {
 
         },function(err){
             var arrayRis = convertPrepareRis(ris);
-            arrayRis = limitConvertResult(arrayRis, 10);
+            arrayRis = limitConvertResult(arrayRis, 30);
             callback(err, arrayRis);
         });
     });
@@ -404,7 +404,7 @@ Vocabulary.prepareUserTags = function(project, res, dict, datas, callback){
 
         }, function(err){
             var arrayRis = convertPrepareRis(dict);
-            arrayRis = limitConvertResult(arrayRis, 10);
+            arrayRis = limitConvertResult(arrayRis, 30);
             callback(err, arrayRis);
         })
 
