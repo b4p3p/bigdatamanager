@@ -1,92 +1,94 @@
+<link href="/public/css/home.css" rel="stylesheet" type="text/css">
+
 <div ng-app ng-controller="ngHomeCtrl">
 
-    <h2>Login as:</h2>
+    <div class="container">
 
-    <div class="row">
-
-        <div style="display: inline-block" >
-            <img src="/public/img/icon-user.png" class="img-circle"
-                 style="background: lightblue;width: 100px;height: 100px">
+        <div class="logo-container">
+            <img class="profile-img" src="/public/img/BigDataManager-logo-slogan.png" alt="">
         </div>
-        <!--class="col-md-9 col-xs-9 col-span-9"-->
-        <div style="display: inline-block">
-            <h3>Username:</h3>
-            <div >
-                <%if(isGuest){%>
-                <p>Guest account</p>
-                <p>To create projects, you must be registered</p>
-                <%} else { %>
-                <div style="display: inline-block;">
-                    <%= user %>
+
+        <section class="hidden-print">
+            <div class="stripe-ad">
+
+                <p class="lead">
+                    BigDataManager gives you the possibility to create projects that contain large amounts of data
+                    and to understand them — through different types of statistics.
+                </p>
+
+            </div>
+        </section>
+
+
+        <section id="why" class="feature-list">
+            <div class="column column-one">
+                <div  class="pages">
+                    <h3><i class="fa fa-database"></i> Projects</h3>
+                    Section dedicated to the management of your projects and those created by others.
                 </div>
-                <%}%>
+                <div class="pages">
+                    <a href="#project/newproject"><h4><i class="fa fa-plus"></i> New project</h4></a>
+                    It gives you the ability to create new projects and to describe them.
+                </div>
+                <div class="pages">
+                    <a href="#project/openproject"><h4><i class="fa fa-folder-open"></i> Open project</h4></a>
+                    List of all projects created in BigDataManager by all users from which you can open one to display its statistics.
+                </div>
+                <div class="pages">
+                    <a href="#project/editproject"><h4><i class="fa fa-pencil"></i> Edit project</h4></a>
+                    It allows you to edit the information of your project, insert data inside the project,
+                    synchronize data with the regions contained in the database, manage eventual tags and tokens.
+                </div>
+
+
             </div>
-        </div>
+
+            <div class="column column-two">
+                <div class="pages">
+                    <h3><i class="fa fa-cogs"></i> Database</h3>
+                    Section reserved for system administrators to change the database information globally.
+                </div>
+                <div class="pages">
+                    <a href="#/db/users"><h4><i class="fa fa-user-plus"></i> Users</h4></a>
+                    List of registered users.
+                </div>
+                <div class="pages">
+                    <a href="#/db/nations"><h4><i class="fa fa-folder-open"></i> Nations</h4></a>
+                    List of European nations already entered into the database necessary for geo-localization data.
+                </div>
+            </div>
+
+            <div class="column column-three">
+                <div class="pages">
+                    <h3><i class="fa fa-bar-chart"></i> Statistics</h3>
+                    Section that allows you to to display different types of statistics on data of the selected project.
+                </div>
+                <div class="pages">
+                    <a href="#stat/showdata"><h4><i class="fa fa-table"></i> Show data</h4></a>
+                    It displays the raw data of the project with the ability to filter them for fields.
+                </div>
+                <div class="pages">
+                    <a href="#stat/showmap"><h4><i class="fa fa-map-marker"></i> Show map</h4></a>
+                    It shows only the georeferenced data on the map in accordance with appropriate filters.
+                </div>
+                <div class="pages">
+                    <a href="#stat/compare"><h4><i class="fa fa-exchange"></i> Compare</h4></a>
+                    Bar chart or radar chart for comparison between nations or regions on the basis of their data.
+                </div>
+                <div class="pages">
+                    <a href="#stat/timeline"><h4><i class="fa fa-calendar"></i> Timeline</h4></a>
+                    It shows the time trend of the data filterable by tags or users.
+                </div>
+                <div class="pages">
+                    <a href="#stat/showtag"><h4><i class="fa fa-cloud"></i> Word cloud</h4></a>
+                    It shows the word cloud of tokens and bar charts that show the occurrences of the tags and tokens.
+                </div>
+                <div class="pages">
+                    <a href="#stat/showusers"><h4><i class="fa fa-group"></i> User statistics</h4></a>
+                    It allows you to view detailed statistics of users.
+                </div>
+            </div>
+        </section>
 
     </div>
-
-    <div class="row" style="margin-top: 20px">
-
-        <div style="display: inline-block">
-            <img src="/public/img/folder.png" class="img-circle"
-                 style="background: lightblue;width: 100px;height: 100px">
-        </div>
-
-        <div style="display: inline-block">
-            <h3>Project:</h3>
-            <div >
-                <%if(!project){%>
-                    <a href="/view/project/openproject">Open project</a>
-                <%} else { %>
-                    <p><%= project %></p>
-                <% } %>
-            </div>
-        </div>
-
-    </div>
-
-    <hr>
-
 </div>
-
-
-
-<!--<div class="row">-->
-
-    <!--<p class="lead">Login as:</p>-->
-
-    <!--<div>-->
-        <!--<img src="/public/img/icon-user.png" class="img-circle"-->
-             <!--style="background: lightblue;float: left;margin-right: 50px;width: 100px;height: 100px">-->
-    <!--</div>-->
-    <!--<div style="padding-left: 20px">-->
-        <!--<p><b>Username:</b></p>-->
-        <!--<%if(isGuest){%>-->
-            <!--<p>Guest account</p>-->
-            <!--<p>To create projects, you must be registered</p>-->
-        <!--<%} else { %>-->
-            <!--<p><%= user %></p>-->
-        <!--<%}%>-->
-    <!--</div>-->
-<!--</div>-->
-
-<!--<div class="row" style="margin-top: 20px">-->
-    <!--<div>-->
-        <!--<img src="/public/img/folder.png" class="img-circle"-->
-             <!--style="background: lightblue;float: left;margin-right: 50px;width: 100px;height: 100px">-->
-    <!--</div>-->
-    <!--<div style="padding-left: 20px">-->
-        <!--<p><b>Project:</b></p>-->
-        <!--<%if(!project){%>-->
-            <!--<a href="/view/project/openproject">Open project</a>-->
-        <!--<%} else { %>-->
-            <!--<p><%= project %></p>-->
-        <!--<% } %>-->
-    <!--</div>-->
-<!--</div>-->
-
-<!--<div class="row" style="margin-top: 20px">-->
-
-    <!--&lt;!&ndash;<p class="lead">Mettere qui alcune statistiche belle</p>&ndash;&gt;-->
-
-<!--</div>-->

@@ -5,6 +5,7 @@
 @colorBack: #333944 /*#3054C0*/;
 @widthExpandedMenu: 280px;
 @widthCollapsedMenu: 40px;
+@borderColor: rgba(69, 74, 84, 0.7);
 
 #menu{
 
@@ -95,8 +96,9 @@
   left: 0;
   -moz-box-shadow: 5px 0 5px -5px #1f4164;
   -webkit-box-shadow: 5px 0 5px -5px #1f4164;
-  box-shadow: 5px 0 5px -5px #1f4164;
+  box-shadow: 5px 0 5px -5px @borderColor;
   filter: progid:DXImageTransform.Microsoft.Shadow(color=#1f4164,direction=90,strength=2);
+  border: 1px solid @borderColor;
 }
 
 .multilevelpushmenu_wrapper .rtl {
@@ -104,7 +106,7 @@
   right: 0;
   -moz-box-shadow: 5px 0 5px 5px #1f4164;
   -webkit-box-shadow: 5px 0 5px 5px #1f4164;
-  box-shadow: 5px 0 5px 5px #1f4164;
+  box-shadow: 5px 0 5px 5px @borderColor;
   filter: progid:DXImageTransform.Microsoft.Shadow(color=#1f4164,direction=270,strength=2);
 }
 
@@ -130,12 +132,12 @@
 
 .multilevelpushmenu_wrapper li {
   cursor: pointer;
-  border-top: 1px solid rgba(69, 74, 84, 0.7);
+  border-top: 1px solid @borderColor;
   padding: .4em .4em .4em .4em;
 }
 
 .multilevelpushmenu_wrapper li:last-child {
-  border-bottom:1px solid rgba(69, 74, 84, 0.7);
+  border-bottom:1px solid @borderColor;
 }
 
 .multilevelpushmenu_wrapper li:hover {
@@ -164,7 +166,7 @@
   display: block;
   padding: .4em .4em .4em .4em;
   background: @colorBack;  /*#2e6196;*/
-  border-top: 1px solid rgba(69, 74, 84, 0.7);
+  border-top: 1px solid @borderColor;
 }
 
 .multilevelpushmenu_wrapper .floatRight {
