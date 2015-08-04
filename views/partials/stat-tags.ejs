@@ -1,10 +1,3 @@
-
-
-<!--<script type="text/javascript" src="https://www.google.com/jsapi"></script>-->
-<!--<script>-->
-<!--    google.load("visualization", "1.1", {packages:[ 'bar', 'corechart' ] }); -->
-<!--</script>-->
-
 <style>
     .NameHighlights {
         position:relative;
@@ -68,43 +61,56 @@
     <p>Loading data...</p>
 </div>
 
-<div id="container" class="hidden">
-    <div class="form-group form-option container">
-        <label class="fix-label">Select tokens from:</label><br>
-        
+<!--<div id="container" class="hidden container">-->
 
-    <label class="fix-label">Select data from:</label><br>
+<div class="form-group form-option container">
 
-            <label style="margin-right: 20px; font-weight: normal">
-                <input class="radioData" id="radioData" name="typeVoc" value="radioData" type="radio" checked>
-                Data
-            </label>
+    <label class="fix-label">Select tokens from:</label>
+
+    <br>
+
+    <div class="optType NameHighlights">
 
         <label style="margin-right: 20px; font-weight: normal">
             <input class="radioData" id="radioData" name="typeVoc" value="radioData" type="radio" checked>
-            From data
+            Data
         </label>
 
-        <div class="optType NameHighlights">
-            <label style="margin-right: 20px; font-weight: normal">
-                <input class="radioUser" id="radioUser" name="typeVoc" value="radioUser" type="radio">
-                User vocabulary
-            </label>
-            <div><i class="fa fa-info-circle" style="margin-right: 5px"></i>
-                I dati sono calcolati sulla base del dizionario inserito dall'utente</div>
-        </div>
+        <div><i class="fa fa-info-circle" style="margin-right: 5px"></i>
+            I dati sono calcolati sulla base dei token presenti dei dati</div>
+
     </div>
 
+    <!--<label style="margin-right: 20px; font-weight: normal">-->
+        <!--<input class="radioData" id="radioData" name="typeVoc" value="radioData" type="radio" checked>-->
+        <!--From data-->
+    <!--</label>-->
+
     <div class="optType NameHighlights">
+
         <label style="margin-right: 20px; font-weight: normal">
             <input class="radioUser" id="radioUser" name="typeVoc" value="radioUser" type="radio">
-            From user vocabulary
+            User vocabulary
         </label>
+
         <div><i class="fa fa-info-circle" style="margin-right: 5px"></i>
             I dati sono calcolati sulla base del dizionario inserito dall'utente</div>
     </div>
 
+    <!--<div class="optType NameHighlights">-->
+    <!--<label style="margin-right: 20px; font-weight: normal">-->
+    <!--<input class="radioUser" id="radioUser" name="typeVoc" value="radioUser" type="radio">-->
+    <!--From user vocabulary-->
+    <!--</label>-->
+    <!--<div><i class="fa fa-info-circle" style="margin-right: 5px"></i>-->
+    <!--I dati sono calcolati sulla base del dizionario inserito dall'utente</div>-->
+    <!--</div>-->
+
 </div>
+
+
+
+<!--</div>-->
 
 <div id="container" class="hidden container">
 

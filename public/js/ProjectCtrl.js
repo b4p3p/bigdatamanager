@@ -223,7 +223,7 @@ var ProjectCtrl = {
             {
                 if(msg.status == 200)
                 {
-                    location.replace("/view/home");
+                    location.replace("/view/app/#home");
                 }
             },
             error: function(xhr, status, error)
