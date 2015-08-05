@@ -848,7 +848,7 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
 
     var project = window.PROJECT;
     if(!window.PROJECT){
-        bootbox.alert("You must first select a project<br><a href='/view/project/openproject'>Select project</a>");
+        bootbox.alert("You must first select a project<br><a href='/view/app/#project/openproject'>Select project</a>");
         formCtrl.reset();
     }else
     {

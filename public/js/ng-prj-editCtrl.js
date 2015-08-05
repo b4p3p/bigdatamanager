@@ -617,12 +617,18 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
 
     $scope.Description = window.DESCRIPTION;
 
-    $scope.Example = function(){ return prjCtrl.getExample(); };
+    $scope.Example = function(){ if(prjCtrl) return prjCtrl.getExample(); };
 
     $(document).ready(function(){
 
-        prjCtrl = new PrjEditCtrl($scope);
-
+        if(!window.PROJECT || window.PROJECT == "")
+        {
+            $("#container").hide();
+            $("#msgProject").show();
+        }else
+        {
+            prjCtrl = new PrjEditCtrl($scope);
+        }
     });
 
 }]);

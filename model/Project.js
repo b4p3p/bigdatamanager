@@ -200,6 +200,24 @@ Project.delProject = function(projectName, callback)
 
 /**
  *
+ * @param arg
+ * @param arg.connection
+ * @param arg.user
+ * @param callback
+ */
+Project.delUserProjects = function(arg, callback){
+
+    var conn = !arg.connection ? mongoose.createConnection('mongodb://localhost/oim') : arg.connection;
+    var projects = conn.model( Project.MODEL_NAME, Project.SCHEMA);
+
+    projects.remove( {userProject:arg.user} , function(err, results){
+        callback(err, results);
+    });
+
+};
+
+/**
+ *
  * @param data
  * @param callback - fn(Err, Data)
  */

@@ -48,6 +48,15 @@
     }
 </style>
 
+<div class="alert alert-warning" role="alert" id="msgProject"
+     style="margin-top: 20px;" hidden>
+    <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
+    <span class="sr-only">Error:</span>
+    No project selected <br>
+    Please select project <br>
+    <a href="/view/app#/project/openproject">Open project</a>
+</div>
+
 <div id="container" style="margin-top: 0px">
 
     <div class="div-inline">
@@ -140,27 +149,11 @@
 </div>
 
 <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
-<script src="/public/js/Stat-Users.js"></script>
 
+<!--<script src="/public/js/Stat-Users.js"></script>-->
 <!--<script src="/public/js/ColorUtil.js"></script>-->
 <!--<script src="/public/js/DOMUtil.js"></script>-->
 
 <script>
 
-    $(document).ready(function ()
-    {
-        UsersCtrl.getUsers();
-    });
-
-    $('.selectpicker').on('change', function(){
-        UsersCtrl.$statButton.prop("disabled", false);
-        var selectedUsers = DomUtil.getSelectedCombo(UsersCtrl.$cmbUsers);
-        if( selectedUsers.length == 0 )
-        {
-            UsersCtrl.$statButton.prop("disabled", true);
-            UsersCtrl.$restoreButton.prop("disabled", true);
-        }
-        else
-            UsersCtrl.$restoreButton.prop("disabled", false);
-    });
 </script>

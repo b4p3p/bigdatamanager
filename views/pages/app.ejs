@@ -13,7 +13,7 @@
     <% include ../imports/charts.ejs %>
 
     <!--<link href="/public/css/navbar-static-top.css" rel="stylesheet">-->
-    <link  href="/public/css/app.less" rel="stylesheet/less" type="text/css">
+
 
     <!--<link href="/public/css/multilevelpushmenu.less" rel="stylesheet/less" type="text/css">-->
 
@@ -30,7 +30,8 @@
     <script src="/public/js/ColorUtil.js"></script>
     <script src="/public/js/DateUtil.js"></script>
 
-    <link rel="stylesheet/less" type="text/css" href="/public/css/multiLevelSlidingSidebar.less">
+    <link rel="stylesheet/less" href="/public/css/app.less"  type="text/css">
+    <link rel="stylesheet/less" href="/public/css/multiLevelSlidingSidebar.less" type="text/css">
 
     <script src="/bower_components/less/dist/less.js"></script>
 
@@ -119,10 +120,10 @@
                     <span>{{Project}}</span>
                 </div>
             </div>
-            <div class="row-footer" title="{{Project}}">
-                <a href="/logout" ng-click="Logout()">
-                    <i class="fa fa-sign-out fa-2x"></i>
-                    Logout
+            <div class="row-footer"  title="{{Project}}">
+                <a href="/logout" ng-click="Logout()" class="logout row-footer-content">
+                    <i class="fa fa-sign-out fa-2x" ></i>
+                    <span >Logout</span>
                 </a>
             </div>
         </div>

@@ -148,7 +148,8 @@ ngApp.config( ['$routeProvider', function ($routeProvider) {
         })
         //STATISTICS
         .when('/stat/showdata', {
-            templateUrl: '/view/stat/showdata'
+            templateUrl: '/view/stat/showdata',
+            controller: 'ngStatDataCtrl'
         })
         .when('/stat/showmap', {
             templateUrl: '/view/stat/showmap',
@@ -159,6 +160,7 @@ ngApp.config( ['$routeProvider', function ($routeProvider) {
             controller: "ngStatCompareCtrl"
         })
         .when('/stat/timeline', {
+            controller: 'ngStatTimeLineCtrl',
             templateUrl: '/view/stat/timeline'
         })
         .when('/stat/showtag', {
@@ -166,7 +168,8 @@ ngApp.config( ['$routeProvider', function ($routeProvider) {
             controller: 'ngStatCloudCtrl'
         })
         .when('/stat/showusers', {
-            templateUrl: '/view/stat/showusers'
+            templateUrl: '/view/stat/showusers',
+            controller: 'ngStatUsersCtrl'
         })
 }]);
 

@@ -65,6 +65,9 @@ module.exports = function (app) {
                 req.session.user = username;
                 req.session.isGuest = false;
                 req.session.level = data.level;
+
+                User.setLastLogin(username)
+
                 res.redirect('/view/app');
             }
 

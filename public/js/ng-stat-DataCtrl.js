@@ -1,6 +1,4 @@
-"use strict";
-
-var bootstrapTableFilter = new BootstrapTableFilter('showdatafilter');
+var bootstrapTableFilter = null;
 
 var formatterData = {
 
@@ -20,7 +18,7 @@ var formatterData = {
     }
 };
 
-function ShowDataCtrl() {};
+function ShowDataCtrl() {}
 
 ShowDataCtrl.$dataTable = null;
 
@@ -45,45 +43,44 @@ ShowDataCtrl.tokens = null;
 ShowDataCtrl.skip = 0;
 ShowDataCtrl.limit = 10;
 
-ShowDataCtrl.getData = function (callback)
-{
-    console.log("CALL: getData");
+//ShowDataCtrl.getData = function (callback)
+//{
+//    console.log("CALL: getData");
+//
+//    async.parallel( {
+//            stat: function(next)
+//            {
+//                DataCtrl.getField( function(doc){
+//                    ShowDataCtrl.stat = doc;
+//                    ShowDataCtrl.tags = doc.data.allTags;
+//                    ShowDataCtrl.count = doc.data.countTot;
+//                    next(null, doc);
+//                }, DataCtrl.FIELD.STAT );
+//            },
+//
+//            users: function (next)
+//            {
+//                DataCtrl.getField( function(doc){
+//                    ShowDataCtrl.users = doc;
+//                    next(null, doc);
+//                }, DataCtrl.FIELD.USERS );
+//            },
+//
+//            wordcount: function (next)
+//            {
+//                DataCtrl.getField( function(doc)
+//                {
+//                    ShowDataCtrl.tokens = doc;
+//                    next(null, doc);
+//                }, DataCtrl.FIELD.WORDCOUNT);
+//            }},
+//        function(err, results) {
+//            callback();
+//        }
+//    );
+//};
 
-    async.parallel( {
-            stat: function(next)
-            {
-                DataCtrl.getField( function(doc){
-                    ShowDataCtrl.stat = doc;
-                    ShowDataCtrl.tags = doc.data.allTags;
-                    ShowDataCtrl.count = doc.data.countTot;
-                    next(null, doc);
-                }, DataCtrl.FIELD.STAT );
-            },
-
-            users: function (next)
-            {
-                DataCtrl.getField( function(doc){
-                    ShowDataCtrl.users = doc;
-                    next(null, doc);
-                }, DataCtrl.FIELD.USERS );
-            },
-
-            wordcount: function (next)
-            {
-                DataCtrl.getField( function(doc)
-                {
-                    ShowDataCtrl.tokens = doc;
-                    next(null, doc);
-                }, DataCtrl.FIELD.WORDCOUNT);
-            }},
-        function(err, results) {
-            callback();
-        }
-    );
-};
-
-ShowDataCtrl.initGui = function ()
-{
+ShowDataCtrl.initGui = function () {
     console.log("CALL: initGui");
 
     ShowDataCtrl.$cmbNations = $('#cmbNations');
@@ -104,8 +101,7 @@ ShowDataCtrl.initGui = function ()
 
 };
 
-ShowDataCtrl.initComboNations = function()
-{
+ShowDataCtrl.initComboNations = function() {
     console.log("CALL: initComboNations");
 
     _.each(ShowDataCtrl.stat.data.nations, function(obj){
@@ -114,8 +110,7 @@ ShowDataCtrl.initComboNations = function()
     });
 };
 
-ShowDataCtrl.initComboRegions = function()
-{
+ShowDataCtrl.initComboRegions = function() {
     console.log("CALL: initComboRegions");
 
     ShowDataCtrl.$cmbRegions.multiselect();
@@ -123,8 +118,7 @@ ShowDataCtrl.initComboRegions = function()
     ShowDataCtrl.$cmbRegions.multiselect( optgroups.length == 0? 'disable' : 'dataprovider', optgroups);
 };
 
-ShowDataCtrl.setComboRegionsData = function()
-{
+ShowDataCtrl.setComboRegionsData = function() {
     console.log("CALL: setComboRegionsData");
 
     var ris = [];
@@ -151,8 +145,7 @@ ShowDataCtrl.setComboRegionsData = function()
     return ris;
 };
 
-ShowDataCtrl.initComboTags = function()
-{
+ShowDataCtrl.initComboTags = function() {
     console.log("CALL: initComboTags");
 
     _.each(ShowDataCtrl.tags, function(obj){
@@ -160,8 +153,7 @@ ShowDataCtrl.initComboTags = function()
     });
 };
 
-ShowDataCtrl.initComboUsers = function()
-{
+ShowDataCtrl.initComboUsers = function() {
     console.log("CALL: initComboUsers");
 
     var obj = null;
@@ -172,8 +164,7 @@ ShowDataCtrl.initComboUsers = function()
     }
 };
 
-ShowDataCtrl.initComboTokens = function()
-{
+ShowDataCtrl.initComboTokens = function() {
     console.log("CALL: initComboTokens");
 
     _.each(ShowDataCtrl.tokens.syncDataTags, function (obj, key) {
@@ -189,8 +180,7 @@ ShowDataCtrl.initComboTokens = function()
     });
 };
 
-ShowDataCtrl.updateTable = function ()
-{
+ShowDataCtrl.updateTable = function () {
     console.log("CALL: updateTable");
     ShowDataCtrl.$dataTable.bootstrapTable('refresh', {silent: true});
 };
@@ -206,8 +196,7 @@ ShowDataCtrl.refreshGui = function() {
     ShowDataCtrl.page = 1;
 };
 
-ShowDataCtrl.refreshTable = function ()
-{
+ShowDataCtrl.refreshTable = function () {
     console.log("CALL: refreshTable");
 
     var date = {};
@@ -243,8 +232,7 @@ ShowDataCtrl.refreshTable = function ()
     });
 };
 
-ShowDataCtrl.deselectCombo = function ()
-{
+ShowDataCtrl.deselectCombo = function () {
     console.log("CALL: deselectCombo");
 
     DomUtil.deselectAll(ShowDataCtrl.$cmbUsers);
@@ -261,8 +249,7 @@ ShowDataCtrl.deselectCombo = function ()
     ShowDataCtrl.refreshGui();
 };
 
-ShowDataCtrl.ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $cmbUsers, $cmbTokens, date, skip, limit)
-{
+ShowDataCtrl.ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $cmbUsers, $cmbTokens, date, skip, limit) {
     this.$cmbNations = $cmbNations;
     this.$cmbRegions = $cmbRegions;
     this.$cmbTags = $cmbTags;
@@ -340,3 +327,140 @@ ShowDataCtrl.ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $cmbUs
     };
 
 };
+
+ngApp.controller('ngStatDataCtrl', ['$scope', function($scope) {
+
+    function CtrlShowData() {
+
+        var bootPagOpt = {
+            total: parseInt(ShowDataCtrl.count / parseInt($($('#menuDataNum li.active')[0]).text()))+1,
+            page: 1,
+            maxVisible: 5,
+            leaps: true,
+            firstLastUse: true,
+            first: '‹',
+            last: '›',
+            wrapClass: 'pagination',
+            activeClass: 'active',
+            disabledClass: 'disabled',
+            nextClass: 'next',
+            prevClass: 'prev',
+            lastClass: 'last',
+            firstClass: 'first'
+        };
+
+        var $table = $('#data-table');
+        var $btnLoad = $('#load');
+        var $container = $('#container');
+        var $spinner = $("#spinner");
+        var $msgproject = $("#msgProject");
+
+        this.showTable = function(){
+            $table.removeClass("hidden");
+            $btnLoad.removeClass("hidden");
+        };
+
+        this.getData = function(callback) {
+
+            console.log("CALL: getData");
+
+            async.parallel( {
+
+                stat: function(next) {
+                    DataCtrl.getField( function(doc){
+                        try {
+                            ShowDataCtrl.stat = doc;
+                            ShowDataCtrl.tags = doc.data.allTags;
+                            ShowDataCtrl.count = doc.data.countTot;
+                            next(null, doc);
+                        } catch (e) {
+                            next(e, null);
+                        }
+                    }, DataCtrl.FIELD.STAT );
+                },
+
+                users: function (next)
+                {
+                    DataCtrl.getField( function(doc){
+                        ShowDataCtrl.users = doc;
+                        next(null, doc);
+                    }, DataCtrl.FIELD.USERS );
+                },
+
+                wordcount: function (next)
+                {
+                    DataCtrl.getField( function(doc) {
+                        ShowDataCtrl.tokens = doc;
+                        next(null, doc);
+                    }, DataCtrl.FIELD.WORDCOUNT);
+                }},
+
+                function(err, results) {
+                    $spinner.hide();
+                    callback(err, results);
+                }
+            );
+        };
+
+        this.initGUI = function() {
+
+            $container.show();
+            this.showTable();
+
+            bootstrapTableFilter = new BootstrapTableFilter('showdatafilter');
+
+            $('.selectpicker').selectpicker({
+                width: '90px'
+            });
+
+            ShowDataCtrl.initGui();
+            $btnLoad.hide();
+
+            ShowDataCtrl.refreshTable();
+
+            $('#paginationTable').removeClass('hidden');
+
+            $('#dataNum').text("Showing 1 to 10 of " + ShowDataCtrl.stat.data.countTot + " rows ");
+
+            $('#pagination').bootpag( bootPagOpt ).on("page", function(event, num){
+
+                var numForPag = $($('#menuDataNum li.active')[0]).text();
+
+                ShowDataCtrl.page = num;
+                ShowDataCtrl.skip = num*numForPag-numForPag;
+                ShowDataCtrl.limit = numForPag;
+
+                console.log("skip: " + ShowDataCtrl.skip + " limit: " + ShowDataCtrl.limit);
+
+                ShowDataCtrl.refreshTable();
+            });
+
+        };
+
+        this.showError = function(){
+
+        };
+
+        this.showErrorProject = function(){
+            $spinner.hide();
+            $msgproject.show();
+        }
+
+    }
+
+    $(document).ready( function () {
+
+        var ctrl = new CtrlShowData();
+
+        if( !window.PROJECT || window.PROJECT == "" ) {
+            ctrl.showErrorProject();
+        } else
+            ctrl.getData(function(err, results){
+                if(err)
+                    ctrl.showError();
+                else
+                    ctrl.initGUI();
+            })
+    });
+
+}]);

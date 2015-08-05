@@ -1,6 +1,7 @@
 "use strict";
 
 var mongoose = require('mongoose');
+var async = require('async');
 
 var User = function (data) {
     this.data = data;
@@ -14,6 +15,7 @@ var USER_SCHEMA = new mongoose.Schema({
     firstName: String,
     lastName: String,
     created: Date,
+    lastLogin: Date,
     level: Number
 }, {strict: false});
 
@@ -67,14 +69,56 @@ User.getUserPsw = function (username, password , callback)
 User.getUsers = function(callback)
 {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
-    var Users = connection.model(MODEL_NAME, USER_SCHEMA);
+    var users = connection.model(MODEL_NAME, USER_SCHEMA);
 
-    Users.find({}, { _id:0, "firstName":1, "lastName":1, "username":1, "created":1, "level":1}
+    users.find({}, { _id:0, "firstName":1, "lastName":1, "username":1, "created":1, "level":1, "lastLogin":1}
     ).sort("-level").lean().exec ( function(err, data){
         connection.close();
         callback(err, data);
     });
 
+};
+
+User.setLastLogin = function(username){
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+    var users = connection.model(MODEL_NAME, USER_SCHEMA);
+
+    users.findOne({username:username}, function(err, doc){
+        doc.lastLogin = new Date();
+        doc.save( function(err){
+            connection.close();
+            if(err) console.error(err.toString());
+        });
+    });
+
+};
+
+User.delUser = function(username, callback){
+
+    var Projects = require('../model/Project');
+
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+    var users = connection.model(MODEL_NAME, USER_SCHEMA);
+
+    async.parallel({
+
+        //users
+        user:function(next){
+            users.remove({username:username}, function(err, result){
+                next(err);
+            })
+        },
+
+        //projects
+        projects:function(next){
+            Projects.delUserProjects( {connection:connection, user:username} , function(err, result){
+                next(err);
+            })
+        }
+
+    }, function(err, result){
+        callback(err)
+    });
 };
 
 module.exports = User;

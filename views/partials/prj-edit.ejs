@@ -3,202 +3,210 @@
 
 <div id="test"></div>
 
-<div class="alert alert-danger" role="alert" hidden>
-    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-    <span class="sr-only">Error:</span>
-    You must select project.
+<div class="alert alert-warning" role="alert" id="msgProject"
+     style="margin-top: 20px;" hidden>
+   <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
+   <span class="sr-only">Error:</span>
+   No project selected <br>
+   Please select project <br>
+   <a href="/view/app#/project/openproject">Open project</a>
 </div>
 
-<h3>Data</h3>
+<div id="container">
 
-<div>
-    <!--Syncronize with exists region-->
-    <div id="piechart" style="width: 400px; height: 200px;" class="inline"></div>
-    <div class="inline" id="divbtnsync">
-        <label style="text-align: center;display: block">Synchronize all regions with stored data</label>
-        <div>
+   <h3>Data</h3>
+
+   <div>
+      <!--Syncronize with exists region-->
+      <div id="piechart" style="width: 400px; height: 200px;" class="inline"></div>
+      <div class="inline" id="divbtnsync">
+         <label style="text-align: center;display: block">Synchronize all regions with stored data</label>
+         <div>
             <button class="btn btn-danger hcenter" type="submit" id="btnsyncproject"
                     style="width: 108px;">Sync</button>
-        </div>
-    </div>
-</div>
+         </div>
+      </div>
+   </div>
 
-<h3>Edit project</h3>
+   <h3>Edit project</h3>
 
-<form class="form-horizontal" action="/project/editproject"
-      method="post"
-      id="form_editproject" >
+   <form class="form-horizontal" action="/project/editproject"
+         method="post"
+         id="form_editproject" >
 
-    <div class="form-group">
-        <label for="nameproject" class="col-sm-2">Project name:</label>
+      <div class="form-group">
+         <label for="nameproject" class="col-sm-2">Project name:</label>
 
-        <div class="col-sm-10 col_dx">
+         <div class="col-sm-10 col_dx">
             <input type="text" class="form-control" id="project"
                    placeholder="Project Name"
                    name="project"
                    value="{{ProjectName}}"
                    required>
-        </div>
+         </div>
 
-    </div>
+      </div>
 
-    <div class="form-group">
-        <label for="description"
-               class="col-sm-2">Description:</label>
+      <div class="form-group">
+         <label for="description"
+                class="col-sm-2">Description:</label>
 
-        <div class="col-sm-10 col_dx">
+         <div class="col-sm-10 col_dx">
 
          <textarea class="form-control" rows="3"
                    placeholder="Description..."
                    name="description" id="description">{{Description}}</textarea>
 
-        </div>
-    </div>
+         </div>
+      </div>
 
-    <div class="form-group">
-        <button class="btn btn-danger button" type="submit"
-                id="btn_editproject">
+      <div class="form-group">
+         <button class="btn btn-danger button" type="submit"
+                 id="btn_editproject">
             Edit
-        </button>
-    </div>
+         </button>
+      </div>
 
-   <div class="alert" role="alert" id="msgEditProject" hidden>
-      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-      <span class="sr-only">Error:</span>
-      <span class="msgText"></span>
+      <div class="alert" role="alert" id="msgEditProject" hidden>
+         <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+         <span class="sr-only">Error:</span>
+         <span class="msgText"></span>
+      </div>
+
+   </form>
+
+   <h3>Edit data</h3>
+
+   <form class="form-horizontal"
+         id="uploadForm"
+         action="/project/uploaddata"
+         method="post"
+         enctype="multipart/form-data">
+
+      <div class="form-group" id="uploadForm">
+
+         <label for="cmbType" >Type data:</label>
+
+         <div class="col_dx">
+            <select class="selectpicker" name="type" id="cmbType" >
+               <option value="json-crowdpulse">CrowdPulse Schema</option>
+               <option value="json">JSON</option>
+               <option value="csv">CSV</option>
+            </select>
+         </div>
+
+      </div>
+
+      <div class="form-group">
+
+         <label for="examplecode" >Example:</label>
+
+         <div id="examplecode" class="example-code">
+            <pre>{{Example()}}</pre>
+         </div>
+
+      </div>
+
+      <div class="form-group">
+
+         <input type="file" class="file"
+                name="datas" id="upload_input"
+                data-show-upload="false"
+                data-show-caption="true"
+                data-show-preview="false"
+                multiple>
+
+      </div>
+
+      <div class="progress-container row-form" id="progress-container">
+
+      </div>
+
+   </form>
+
+   <div class="form-group row-form" style="min-height: 40px">
+      <button class="btn btn-danger button"
+              id="upload_btn">
+         Uploads
+      </button>
    </div>
 
-</form>
+   <h3>Tag</h3>
 
-<h3>Edit data</h3>
+   <div id="tableTagsContainer">
 
-<form class="form-horizontal"
-      id="uploadForm"
-      action="/project/uploaddata"
-      method="post"
-      enctype="multipart/form-data">
-
-    <div class="form-group" id="uploadForm">
-
-        <label for="cmbType" >Type data:</label>
-
-        <div class="col_dx">
-            <select class="selectpicker" name="type" id="cmbType" >
-                <option value="json-crowdpulse">CrowdPulse Schema</option>
-                <option value="json">JSON</option>
-                <option value="csv">CSV</option>
-            </select>
-        </div>
-
-    </div>
-
-    <div class="form-group">
-
-        <label for="examplecode" >Example:</label>
-
-        <div id="examplecode" class="example-code">
-           <pre>{{Example()}}</pre>
-        </div>
-
-    </div>
-
-    <div class="form-group">
-
-        <input type="file" class="file"
-               name="datas" id="upload_input"
-               data-show-upload="false"
-               data-show-caption="true"
-               data-show-preview="false"
-               multiple>
-
-    </div>
-
-    <div class="progress-container row-form" id="progress-container">
-
-    </div>
-
-</form>
-
-<div class="form-group row-form" style="min-height: 40px">
-    <button class="btn btn-danger button"
-            id="upload_btn">
-        Uploads
-    </button>
-</div>
-
-<h3>Tag</h3>
-
-<div id="tableTagsContainer">
-
-    <table id="tagsTable" data-toggle="table"
-           data-url="/vocabulary/getUserTags"
-           data-cache="false" data-pagination="true">
-        <thead>
-        <tr>
+      <table id="tagsTable" data-toggle="table"
+             data-url="/vocabulary/getUserTags"
+             data-cache="false" data-pagination="true">
+         <thead>
+         <tr>
             <th data-sortable="true" data-field="tag"
                 data-formatter="prjEditFormatterTag.tag">
-                Tag
+               Tag
             </th>
             <th data-sortable="false" data-field="tokens"
                 data-formatter="prjEditFormatterTag.vocabulary">
-                Vocabulary
+               Vocabulary
             </th>
             <th data-width="50"
                 data-formatter="prjEditFormatterTag.delete">
-                Delete tag
+               Delete tag
             </th>
-        </tr>
-        </thead>
-    </table>
+         </tr>
+         </thead>
+      </table>
 
-    <div style="height: 65px">
+      <div style="height: 65px">
 
-        <a class="btn btn-default" id= "addButton"
-           style="margin-top: 8px; margin-left: 15px; float: right;"
-           onclick="prjEditCtrl.showInsertTag()">Add tag
-        </a>
+         <a class="btn btn-default" id= "addButton"
+            style="margin-top: 8px; margin-left: 15px; float: right;"
+            onclick="prjEditCtrl.showInsertTag()">Add tag
+         </a>
 
-        <a class="btn btn-default" id= "synUserTag"
-           style="margin-top: 8px; margin-left: 15px; float: right;">
+         <a class="btn btn-default" id= "synUserTag"
+            style="margin-top: 8px; margin-left: 15px; float: right;">
             Sync User Vocabulary
-        </a>
+         </a>
 
-        <a class="btn btn-default" id= "synDataTag"
-           style="margin-top: 8px;  margin-left: 15px; float: right;">
+         <a class="btn btn-default" id= "synDataTag"
+            style="margin-top: 8px;  margin-left: 15px; float: right;">
             Sync Data Vocabulary
-        </a>
+         </a>
 
-        <a class="btn btn-danger" id= "overrideDataTokens"
-           style="margin-top: 8px;  margin-left: 15px; float: right;">
+         <a class="btn btn-danger" id= "overrideDataTokens"
+            style="margin-top: 8px;  margin-left: 15px; float: right;">
             Override data tokens
-        </a>
+         </a>
 
-    </div>
+      </div>
+
+   </div>
+
+   <div>
+
+      <div id="bar">
+         <div id="red">
+         </div>
+         <div id="yellow">
+         </div>
+         <div id="green">
+         </div>
+      </div>
+
+      <iframe id="terminal" class="terminal"> </iframe>
+
+   </div>
 
 </div>
 
-<div>
 
-    <div id="bar">
-        <div id="red">
-        </div>
-        <div id="yellow">
-        </div>
-        <div id="green">
-        </div>
-    </div>
 
-    <iframe id="terminal" class="terminal"> </iframe>
-
-</div>
-
-<script src="/public/js/DOMUtil.js"></script>
-<script src="/public/js/DateUtil.js"></script>
+<!--<script src="/public/js/DOMUtil.js"></script>-->
+<!--<script src="/public/js/DateUtil.js"></script>-->
 
 <script>
 
     $(document).ready(function(){
-
 //        ProjectCtrl.init('<%= user %>', '<%= project %>');
 //        ProjectCtrl.getProject( ProjectCtrl.loadEditForm );
 //        ProjectCtrl.showExample();

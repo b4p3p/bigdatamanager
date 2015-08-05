@@ -1,24 +1,5 @@
-<link  href="/node_modules/bootstrap-table/dist/bootstrap-table.min.css" rel="stylesheet" >
-
-<style>
-   .level{
-      display: inline-block;
-      width: 25px;  height: 25px;
-      text-align: center;
-      font-size: 20px;   font-weight: bold;
-      border-radius: 5px;
-      color: white;  background: grey;
-   }
-   .admin{
-      background: red;
-   }
-   .user{
-      background: green;
-   }
-   .row{
-      margin-bottom: 5px;
-   }
-</style>
+<link rel="stylesheet/less" href="/public/css/db-users.less" type="text/css">
+<script src="/bower_components/less/dist/less.js"></script>
 
 <script>
    var scope = angular.element( $("#ngview")).scope();
@@ -48,11 +29,11 @@
       <th data-sortable="true" data-field="created" data-formatter="scope.formatter.toStringDate">
          Created
       </th>
-      <th data-sortable="true" data-field="lastLogin">
+      <th data-sortable="true" data-field="lastLogin" data-formatter="scope.formatter.toStringDate">
          Last login
       </th>
-      <th data-width="50">
-         Delete users
+      <th data-width="30" data-align="center" data-formatter="scope.formatter.delete">
+         Delete
       </th>
    </tr>
    </thead>

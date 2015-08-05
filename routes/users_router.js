@@ -45,5 +45,13 @@ module.exports = function (router, app) {
 
     });
 
+    router.post('/deluser', function (req, res)
+    {
+        var user = req.body.user;
+        if(!user) res.status(500).end("user missing");
+        Users.delUser(user, function(err) {
+            res.end("ok");
+        });
+    });
 };
 

@@ -119,11 +119,11 @@ UsersCtrl.clickStat = function ()
     }
 
     var conditions = new ObjConditions(
-    null,
-    null,
-    null,
-    null,
-    UsersCtrl.$cmbUsers);
+        null,
+        null,
+        null,
+        null,
+        UsersCtrl.$cmbUsers);
 
     var queryString = conditions.getQueryString();
 
@@ -531,8 +531,8 @@ UsersCtrl.buildMapData = function()
 
             data.push(row);
             row = [];
-            });
         });
+    });
 
     return data;
 };
@@ -629,11 +629,11 @@ UsersCtrl.setDataCloud = function()
 {
     var userTokens = [];
     _.each(UsersCtrl.dataCloud, function(value, key) {
-            var obj = {
-                text: key,
-                size: value.size
-            };
-            userTokens.push(obj);
+        var obj = {
+            text: key,
+            size: value.size
+        };
+        userTokens.push(obj);
     });
     return userTokens;
 };
@@ -647,3 +647,33 @@ UsersCtrl.getUsersOcc = function(text)
     res += 'Total: <b>' + UsersCtrl.dataCloud[text].size + '</b>';
     return res;
 };
+
+ngApp.controller('ngStatUsersCtrl', ['$scope', function($scope) {
+
+    $(document).ready(function ()
+    {
+        if(!window.PROJECT || window.PROJECT == "")
+        {
+            $("#container").hide();
+            $("#msgProject").show();
+        }
+        else
+        {
+            UsersCtrl.getUsers();
+        }
+
+    });
+
+    $('.selectpicker').on('change', function() {
+        UsersCtrl.$statButton.prop("disabled", false);
+        var selectedUsers = DomUtil.getSelectedCombo(UsersCtrl.$cmbUsers);
+        if( selectedUsers.length == 0 )
+        {
+            UsersCtrl.$statButton.prop("disabled", true);
+            UsersCtrl.$restoreButton.prop("disabled", true);
+        }
+        else
+            UsersCtrl.$restoreButton.prop("disabled", false);
+    });
+
+}]);
