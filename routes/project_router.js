@@ -141,12 +141,18 @@ module.exports = function (router, app) {
         var type = req.body.type;
         var ris = {};
 
+        res.end("ok");
+
+        //res.json({status:0});
+
         async.each(files,
 
             function (f, next) {
 
                 var projectData = {
+                    app: app,
                     filePath: f.path,
+                    fileName: f.originalname,
                     username: username,
                     project: project,
                     type: type,
@@ -164,22 +170,9 @@ module.exports = function (router, app) {
             function (err) {
 
                 Summary.updateStat( project, username, function(err){
-                    res.json(ris);
+                    app.io.emit("uploaddata_end", ris);
+                    //res.json(ris);
                 });
-
-                //costruisco stat il minimo sindacale
-
-
-                //effettuo una chiamata in background della sincronizzazione
-                //var url = req.headers.origin + '/project/sync';
-                //request(url, function (error, response, body) {
-                //    if (!error && response.statusCode == 200) {
-                //        console.log("### SINCRONIZZAZZIONE EFFETTUATA CON SUCCESSO ###");
-                //    } else
-                //        console.error("### ERRORE DURANTE LA SINCRONIZZAZIONE ###");
-                //});
-
-
             }
         );
 

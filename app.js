@@ -52,28 +52,6 @@ app.use( session( {
 //DEBUG
 app.use(express.static(__dirname));
 
-//app.use(SocketIOFileUpload.router);
-//
-//var io = socketio.listen(app);
-//
-//io.sockets.on("connection", function(socket){
-//
-//    // Make an instance of SocketIOFileUpload and listen on this socket:
-//    var uploader = new SocketIOFileUpload();
-//    uploader.dir   = "uploads";
-//    uploader.listen(socket);
-//
-//    // Do something when a file is saved:
-//    uploader.on("saved", function(event){
-//        console.log(event.file);
-//    });
-//
-//    // Error handler:
-//    uploader.on("error", function(event){
-//        console.log("Error from uploader", event);
-//    });
-//});
-
 /**********
  * UPLOAD
  **********/
@@ -107,49 +85,16 @@ var upload = multer( {
 app.up_nations = upload.array("nations");
 app.up_datas = upload.array("datas");
 
-//app.use( multer( { dest: './uploads/',
-//
-//    rename: function (fieldname, filename) {
-//        try {
-//            console.log('CALL: app.rename');
-//            app.contFile++;
-//
-//            return Date.now() + "-" + filename;
-//
-//        } catch (e)
-//        {
-//            console.error(e);
-//        }
-//    },
-//
-//    onFileUploadStart: function (file) {
-//        try {
-//            console.log('CALL: app.onFileUploadStart (' + file.originalname + ')');
-//        } catch (e) {
-//            console.error(e);
-//        }
-//    },
-//
-//    onFileUploadComplete: function (file) {
-//
-//        try {
-//            console.log('CALL: app.onFileUploadComplete (' + file.path + ')');
-//            app.fileNames.push(file);
-//        } catch (e) {
-//            console.error(e);
-//        }
-//    }
-//
-//}));
 
 /**************
  * END UPLOAD
  **************/
 
+
 /*******************************
  ******   ROUTER ***************
  *******************************/
-
+var express = require('express');
 var router_vocabulary = express.Router();
 var router_project = express.Router();
 var router_view = express.Router();
@@ -173,12 +118,11 @@ require("./routes/vocabulary")(router_vocabulary);
 require('./routes/project_router')(router_project, app);
 require('./routes/view_router')(router_view);
 require('./routes/users_router')(router_users);
-require('./routes/datas_router')(router_datas);
+require('./routes/datas_router')(router_datas, app);
 
 /********************************
  *** END ROUTER
  ********************************/
-
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

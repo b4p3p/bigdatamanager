@@ -841,6 +841,22 @@ Date.dateByDate_project = function(exec, type){
     //}
 };
 
+/**
+ *
+ * @param arg
+ * @param arg.connection
+ * @param arg.project
+ * @param callback
+ */
+Data.delData = function(arg, callback){
+    var connection = arg.connection == null ? mongoose.createConnection('mongodb://localhost/oim') : arg.connection;
+    var datas = connection.model("datas", Data.SCHEMA);
+    datas.remove({projectName: arg.project}, function(err, result){
+        if(arg.connection != null ) arg.connection.close();
+        callback(err, result)
+    })
+};
+
 module.exports = Data;
 
 //Data.getUserData_ = function( project , query, callback){

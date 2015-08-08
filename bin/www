@@ -21,6 +21,23 @@ app.set('port', port);
 
 var server = http.createServer(app);
 
+//TEST
+var io = require('socket.io')();
+io.listen(server);
+
+app.io = io;
+
+io.sockets.on('connection', function(socket) {
+
+    socket.emit('message', {'message': 'hello world'});
+
+    socket.on('newproject', function(data) {
+        //process.stdout.write("pippo");
+        socket.emit( 'newproject', {project:'pippo'} );
+        socket.emit( 'newproject', {project:'pippo'} );
+    });
+
+});
 
 /**
  *  Create Uploader Controller

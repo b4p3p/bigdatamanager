@@ -45,6 +45,7 @@ Summary.SCHEMA = new Schema( {
             counter: Object,
             countSync: Number,
             countTot: Number,
+            countGeo: Number,
             nations: Object
         }
     },
@@ -433,16 +434,22 @@ Summary.updateStat = function(project, username, callback){
     var summaries = connection.model(Summary.MODEL_NAME, Summary.SCHEMA);
 
     datas.aggregate([
+        //{$project: {
+        //    projectName: 1, username: 1, lastUpdate: 1, data: 1,
+        //    isGeo: { "latitude" : { $ifNull: [0, 1] } }
+        //}},
         {$match:{projectName:project}},
         {$group:{
             _id:null,
             min: {$min: "$date" },
             max: {$max: "$date" },
             countTot: {$sum:1},
-            allTags: { $addToSet: "$tag"}
+            countGeo: {$sum: {
+                "$cond": [ { "$ifNull": ["$latitude", false] }, 1, 0 ]
+            }},
+            allTags: {$addToSet: "$tag"}
         }}
     ], function(err, result){
-
         summaries.findOne({projectName:project}, function(err, doc){
 
             var s = null;
@@ -466,6 +473,7 @@ Summary.updateStat = function(project, username, callback){
             s.data.maxDate = result[0].max;
             s.data.allTags = result[0].allTags;
             s.data.countTot = result[0].countTot;
+            s.data.countGeo = result[0].countGeo;
 
             s.save(function(err, result){
                 callback(err);
@@ -474,6 +482,32 @@ Summary.updateStat = function(project, username, callback){
 
         });
     });
+};
+
+/**
+ *
+ * @param arg
+ * @param arg.connection
+ * @param arg.project
+ * @param callback
+ */
+Summary.setEmptyStat = function(arg, callback){
+
+    var connection =  arg.connection==null ? mongoose.createConnection('mongodb://localhost/oim') : arg.connection;
+    var summaries = connection.model(Summary.MODEL_NAME, Summary.SCHEMA);
+    summaries.update({projectName:arg.project}, {$set: {
+        "lastUpdate" : new Date(),
+        "data" : {
+            "minDate" : new Date(),
+            "maxDate" : new Date(),
+            "countSync" : 0,
+            "countTot" : 0,
+            "allTags" : [ ],
+            "syncTags" : [ ]
+        }}
+    }, function(err, result){
+        callback(err, result);
+    })
 };
 
 module.exports = Summary;

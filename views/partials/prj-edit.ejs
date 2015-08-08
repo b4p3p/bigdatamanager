@@ -14,20 +14,6 @@
 
 <div id="container">
 
-   <h3>Data</h3>
-
-   <div>
-      <!--Syncronize with exists region-->
-      <div id="piechart" style="width: 400px; height: 200px;" class="inline"></div>
-      <div class="inline" id="divbtnsync">
-         <label style="text-align: center;display: block">Synchronize all regions with stored data</label>
-         <div>
-            <button class="btn btn-danger hcenter" type="submit" id="btnsyncproject"
-                    style="width: 108px;">Sync</button>
-         </div>
-      </div>
-   </div>
-
    <h3>Edit project</h3>
 
    <form class="form-horizontal" action="/project/editproject"
@@ -126,10 +112,45 @@
 
    <div class="form-group row-form" style="min-height: 40px">
       <button class="btn btn-danger button"
-              id="upload_btn">
+              id="upload_btn" style="width: 112px;">
          Uploads
       </button>
    </div>
+
+   <hr>
+
+   <h3>Data</h3>
+
+   <div>
+      <!--Syncronize with exists region-->
+      <div id="piechart" style="width: 400px; height: 200px;" class="inline"></div>
+
+      <div class="inline" id="divbtnsync">
+
+         <div style="display: inline-block">
+            <button class="btn btn-danger btn-red" type="submit" id="btnsyncproject">Sync</button>
+         </div>
+
+         <label for="btnsyncproject">Synchronize all regions with stored data</label>
+
+         <br>
+
+         <div style="display: inline-block; margin-top: 20px">
+            <button class="btn btn-danger btn-red" type="submit" id="btndeletedata">
+               <i id="waitdelete" class="fa fa-spinner fa-spin spinner-wait hidden"></i>
+               Delete
+            </button>
+         </div>
+
+         <label for="btndeletedata" >Delete ALL data</label>
+
+         <div id="resultdelete" style="margin-top: 10px"></div>
+
+      </div>
+
+   </div>
+
+
 
    <h3>Tag</h3>
 

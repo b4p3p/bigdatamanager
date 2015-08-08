@@ -4,20 +4,31 @@ var Data = require("../model/Data"),
     readline = require('readline'),
     stream = require('stream'),
     async = require('async'),
-    _ = require('underscore');
+    _ = require('underscore'),
+    mongoose = require('mongoose');
 
 var MongoClient = require('mongodb').MongoClient;
-
 var url = 'mongodb://localhost:27017/oim';
-
 var iconvlite = require('iconv-lite');
 
 var CrowdPulse = function() {
 
-    this.importFromFile = function(filePath, project, callback)
+    /**
+     *
+     * @param arg
+     * @param arg.filePath
+     * @param arg.fileName
+     * @param arg.app
+     * @param callback
+     */
+
+    this.importFromFile = function(arg ,  callback)
     {
         console.log("CALL: CrowdPulse.importFromFile");
 
+        var filePath = arg.filePath;
+        var project = arg.project;
+        var app = arg.app;
         var instream = fs.createReadStream(filePath);
         var outstream = new stream;
         var rl = readline.createInterface(instream, outstream);
@@ -30,16 +41,13 @@ var CrowdPulse = function() {
             try{
                 var obj = JSON.parse(line);
                 docs.push(obj);
-            }catch(e) {
-                contError++;
-            }
+            }catch(e) { contError++; }
             contLine++;
         });
 
         rl.on('close', function() {
             console.log("lette " + contLine + " righe, errori: " + contError);
             async.map( docs , function(obj, next){
-
                 var d = {
                     "id" : obj["oid"],
                     "date" : new Date( obj.date["$date"] ),
@@ -76,7 +84,7 @@ var CrowdPulse = function() {
             } , function(err, results){
 
                 if(!err)
-                    saveDocs(results, function(err, result){
+                    saveDocs({app:app, docs: results, file: arg.fileName} , function(err, result){
                         callback(err, result );
                     });
                 else {
@@ -87,9 +95,20 @@ var CrowdPulse = function() {
         });
     };
 
-    function saveDocs (docs, callback) {
+    /**
+     *
+     * @param arg
+     * @param arg.app
+     * @param arg.docs
+     * @param arg.file
+     * @param callback
+     */
+    function saveDocs (arg, callback) {
 
         var result = {fail: 0, success:0};
+        var docs = arg.docs;
+        var app = arg.app;
+        var file = arg.file;
 
         if(docs.length == 0) {
             callback("doc is empty", result);
@@ -100,29 +119,29 @@ var CrowdPulse = function() {
 
             var datas = db.collection('datas');
             var len = docs.length;
+            var cont = 0;
 
             console.log("Salvo: " + len + " documenti");
 
-            var cont = 0;
-
             async.each(docs, function (doc, next) {
-                datas.insert(doc, function(err, res){
-                    if(err) {
-                        console.error(err.message);
-                        result.fail++;
-                    }else
-                        result.success++;
+                datas.insert(doc, function(err){
 
+                    if(err) result.fail++; else result.success++;
                     cont++;
 
                     if( cont % 2000 == 0)
-                        console.log( ((cont / len) * 100) + " %" ) ;
+                    {
+                        var percentage = ((cont / len) * 100).toFixed(2);
+                        app.io.emit("uploaddata_progress", {tot:len, done:cont, percentage: percentage, file:file});
+                        console.log( percentage + " %" ) ;
+                    }
 
                     next(null);
                 });
+
             }, function (err) {
                 db.close();
-                callback(null, result);
+                callback(err, result)
             });
         });
     }

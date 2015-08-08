@@ -108,6 +108,17 @@ ngApp.controller('ngAppCtrl', ['$scope', function($scope) {
         var $scope = angular.element($("#ngview")).scope();
         console.log($scope.name);
         return $scope;
+    };
+
+    $scope.testClick = function(e){
+
+        var socket = io.connect();
+
+        socket.on('newproject', function(data){
+            $('#test').append( data.project );
+        });
+
+        socket.emit( 'newproject', { project:'pippo' } );
     }
 
 }]);
@@ -136,6 +147,7 @@ ngApp.config( ['$routeProvider', function ($routeProvider) {
         })
         //PROJECTS
         .when('/project/openproject', {
+            controller: 'ngPrjOpenCtrl' ,
             templateUrl: '/view/project/openproject'
         })
         .when('/project/editproject', {

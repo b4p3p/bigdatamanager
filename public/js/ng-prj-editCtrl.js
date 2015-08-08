@@ -1,5 +1,7 @@
 "use strict";
 
+var prjEditCtrl = null;
+
 ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
 
     $(".selectpicker").selectpicker();
@@ -35,6 +37,8 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
         this.$formEditProject = $("#form_editproject");
         this.$formUpload = $("#uploadForm");
         this.$btnUpload = $('#upload_btn');
+        this.$btnDelete = $("#btndeletedata");
+        this.$imgWaitDelete = $('#waitdelete');
 
         //message
         this.$msgEditProject = $("#msgEditProject");
@@ -416,17 +420,45 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
          * @param percentage
          */
         this.updateProgress = function (percentage) {
-
             var keys = _.keys(_self.progress);
             for(var k in keys){
 
                 var p = _self.progress[ keys[k] ];
                 var pc = $(p).find(".progress-bar");
 
-                $(pc).width(percentage + "%");
-                $(pc).attr("aria-valuenow", percentage.toString() );
+                //$(pc).width(percentage + "%");
+                //$(pc).attr("aria-valuenow", percentage.toString() );
+                $(pc).css( "width", percentage.toString() + "%" );
             }
+        };
 
+        /**
+         *
+         * @param progress
+         * @param progress.percentage
+         * @param progress.file
+         * @param progress.done
+         *
+         */
+        this.updateProgress_save = function (progress) {
+            var p = _self.progress[ progress.file ];
+            var pc = $(p).find(".progress-bar");
+
+            //$(pc).width(progress.percentage + "%");
+            //$(pc).attr("aria-valuenow", progress.percentage );
+            $(pc).css( "width", progress.percentage + "%" );
+        };
+
+        this.updateProgress_reset = function() {
+            var keys = _.keys(_self.progress);
+            for(var k in keys){
+
+                var p = _self.progress[ keys[k] ];
+                var pc = $(p).find(".progress-bar");
+                //$(pc).width(0 + "%");
+                //$(pc).attr("aria-valuenow", "0" );
+                $(pc).css( "width", "0%" );
+            }
         };
 
         /**
@@ -441,11 +473,11 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
 
                 var p = _self.progress[ keys[k] ];
                 var pb = $(p).find(".progress-bar");
-                pb.removeClass("active");
+                $(pb).css( "width", "100%" );
+                $(pb).removeClass("active");
                 var resContainer = $(p).find(".progress-result")[0];
 
-                if ( result[keys[k]] == null)
-                {
+                if ( result[keys[k]] == null) {
                     $(resContainer).text('Undefined error...');
                 }
                 else
@@ -458,6 +490,7 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
                     $(resContainer).append('<span class="glyphicon glyphicon-remove" style="color: red" aria-hidden="true"></span>');
                 }
             }
+            _self.loadPie();
         };
 
         this.createProgress = function(name) {
@@ -541,8 +574,7 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
         });
 
         this.$formUpload.submit(
-            function()
-            {
+            function() {
 
                 $(this).ajaxSubmit({
 
@@ -565,8 +597,7 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
                     success: function(response) {
                         console.log("success: " + JSON.stringify(response) );
                         _self.$btnFiles.fileinput('clear');
-                        _self.writeResultProgress(response);
-                        //DomUtil.replaceItSelf( $("#upload_input") );
+                        //_self.writeResultProgress(response);
                     }
                 });
 
@@ -589,17 +620,62 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
             _self.windowSyncDataTags = window.open("/view/terminal#syncproject");
         });
 
-        //carico il pie delle nazioni
-        DataCtrl.getFromUrl(DataCtrl.FIELD.DATANATIONS, null, function(doc) {
-            var data = [];
-            data[0] = ['Nation', 'Count data'];
-            _.each(doc, function(row){
-                data.push([row.nation, row.sum]);
+        this.$btnDelete.click(function(){
+            bootbox.confirm("Are you sure to delete ALL data?", function(confirm){
+                if(confirm){
+                    _self.$imgWaitDelete.removeClass("hidden");
+                    $.ajax({
+                        type: 'post',
+                        url: '/datas/deldata',
+                        data: {project: window.PROJECT},
+                        success: function(res){
+
+                        },
+                        error: function(res){
+                            console.error("error");
+                        }
+                    });
+                }
             });
-            var dataTable = google.visualization.arrayToDataTable(data);
-            var chart = new google.visualization.PieChart(document.getElementById('piechart'));
-            chart.draw(dataTable, _self.optionsPie);
         });
+
+        var socket = io.connect();
+
+        socket.on('deldatas', function(result){
+            _self.$imgWaitDelete.addClass("hidden");
+            var msg = "Deleted: " + result.data + " records";
+            $("#resultdelete").text(msg);
+            _self.loadPie();
+        });
+
+        socket.on('uploaddata_startsave', function(result){
+            _self.updateProgress_reset();
+        });
+
+        socket.on('uploaddata_progress', function(result){
+            _self.updateProgress_save(result);
+        });
+
+        socket.on('uploaddata_end', function(result){
+            _self.writeResultProgress(result);
+        });
+
+        this.loadPie = function()
+        {
+            //carico il pie delle nazioni
+            DataCtrl.getFromUrl(DataCtrl.FIELD.DATANATIONS, null, function(doc) {
+                var data = [];
+                data[0] = ['Nation', 'Count data'];
+                _.each(doc, function(row){
+                    data.push([row.nation, row.sum]);
+                });
+                var dataTable = google.visualization.arrayToDataTable(data);
+                var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+                chart.draw(dataTable, _self.optionsPie);
+            });
+        };
+
+        this.loadPie();
 
         //chiedo il progetto
         this.getProject(function(prj){
@@ -609,7 +685,7 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
         })
     };
 
-    var prjCtrl = null;
+
 
     $scope.name = "ngPrjEditCtrl";
 
@@ -617,7 +693,7 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
 
     $scope.Description = window.DESCRIPTION;
 
-    $scope.Example = function(){ if(prjCtrl) return prjCtrl.getExample(); };
+    $scope.Example = function(){ if(prjEditCtrl) return prjEditCtrl.getExample(); };
 
     $(document).ready(function(){
 
@@ -627,7 +703,7 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
             $("#msgProject").show();
         }else
         {
-            prjCtrl = new PrjEditCtrl($scope);
+            prjEditCtrl = new PrjEditCtrl($scope);
         }
     });
 

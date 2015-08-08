@@ -1,23 +1,12 @@
 <style>
-    .btn-open
-    {
-        height: 20px;
-        border-radius: 20px;
+    .btn-all{
+        width: 30px;
+        height: 30px;
+        border-radius: 15px;
+        padding-left: 7px;
     }
-    .btn-delete
-    {
-        height: 20px;
-        border-radius: 20px;
-    }
-    .img-delete
-    {
-        position: relative;
-        top: -3px;
-    }
-    .selectProj
-    {
-        position: relative;
-        top: -4px;
+    .btn-open{
+        padding-left: 5px;
     }
 </style>
 
@@ -27,25 +16,34 @@
        id="tableProjects" data-pagination="true" data-search="true"
        data-url="/project/projects">
     <thead>
+
+    <!--ProjectCtrl.dateCreationFormatter-->
+    <!--ProjectCtrl.dateLastUpdateFormatter-->
+
     <tr>
         <th data-field="userProject">Username</th>
+
         <th data-field="projectName">Project Name</th>
+
         <th data-field="dateCreation"
-            data-formatter="ProjectCtrl.dateCreationFormatter">Creation Date</th>
+            data-formatter="PrjOpenFormatter.date">Creation Date</th>
+
         <th data-field="dateLastUpdate"
-            data-formatter="ProjectCtrl.dateLastUpdateFormatter">Last Edit</th>
+            data-formatter="PrjOpenFormatter.date">Last Edit</th>
+
         <th data-field="size">Size</th>
+
         <th data-field="Delete project" data-width="60"
-            data-formatter="ProjectCtrl.deleteColumnFormatter">Delete</th>
+            data-formatter="PrjOpenFormatter.delete">Delete</th>
+
         <th data-field="Open project" data-width="60"
-            data-formatter="ProjectCtrl.openColumnFormatter">Open</th>
+            data-formatter="PrjOpenFormatter.open">Open</th>
     </tr>
     </thead>
 </table>
 
 <script src="/public/js/DateUtil.js"></script>
-<script src="/public/js/ProjectCtrl.js"></script>
 
 <script>
-    $("#tableProjects").bootstrapTable({url:"/project/projects"});
+
 </script>

@@ -4,6 +4,11 @@ Util.addWhereClause = function(exec, query)
 {
     if(query == null) return exec;
 
+    if( query.hasOwnProperty("isGeo") )
+    {
+        exec.where({latitude: {$exists:true}});
+    }
+
     if(query.hasOwnProperty("terms"))
     {
         var terms = query.terms.split(',');

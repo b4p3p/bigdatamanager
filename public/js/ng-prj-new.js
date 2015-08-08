@@ -14,6 +14,7 @@ ngApp.controller('ngPrjNewCtrl', ['$scope', function($scope) {
                 });
                 $message.show();
             }else{
+                window.PROJECT = result.newproject;
                 mainCtrl.Refresh(result.newproject);
                 window.location = "/view/app#/project/editproject";
             }

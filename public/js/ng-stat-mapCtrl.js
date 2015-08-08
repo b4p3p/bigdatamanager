@@ -17,12 +17,6 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
         }, 600);
     };
 
-    //var intervalResize = setInterval( function(){
-    //    $(window).trigger('resize');
-    //    if(mapCtrl && mapCtrl.mainMap)
-    //        mapCtrl.mainMap.invalidateSize();
-    //}, 500 );
-
     //quando clicck sul menu devo disattivare sempre il timer dei dati
     $scope.onItemClick = function() {
         idOp = -1000;
@@ -294,13 +288,24 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
         this.$divText = $( '#' + idProgress + " > div > div");
 
         this.setPercentage = function(){
-            var tot = stat.data.countTot;
-            var fatti = datas.length;
-            var percentage = parseInt( (fatti / tot) * 100 ).toFixed(2);
 
-            this.$divProgress.prop("aria-valuenow", percentage );
-            this.$divProgress.css("width", percentage + "%");
-            this.$divText.text(percentage + "% - " + fatti + " / " + tot);
+            var tot = stat.data.countGeo;
+            var all = stat.data.countTot;
+
+            if(tot>0)
+            {
+                var fatti = datas.length;
+                var percentage = parseInt( (fatti / tot) * 100 ).toFixed(2);
+
+                this.$divProgress.prop("aria-valuenow", percentage );
+                this.$divProgress.css("width", percentage + "%");
+                this.$divText.text(percentage + "% - " + fatti + " / " + tot + " of " + all);
+            }
+            else
+            {
+                this.$divText.text("No data available");
+            }
+
         };
 
         this.stopProgress = function(){

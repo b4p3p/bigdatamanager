@@ -4,9 +4,11 @@ var ConstantsRouter = require('./constants_router');
 var Project = require("../model/Project");
 var Data = require("../model/Data");
 var Regions = require("../model/Regions");
+var Summary = require("../model/Summary");
 var async = require('async');
 var requestJson = require('request-json');
 var urlencode = require('urlencode');
+var mongoose = require('mongoose');
 
 module.exports = function (router, app) {
 
@@ -111,6 +113,32 @@ module.exports = function (router, app) {
                 res.status(500).send(err.toString());
             }
         })
+    });
+
+    router.post('/deldata', function(req, res){
+
+        res.end("ok");
+
+        var project = req.body.project || req.session.project;
+        if( project == null || project == "") { res.status(500).end("missing project"); return; }
+
+        var connection = mongoose.createConnection('mongodb://localhost/oim');
+
+        async.parallel({
+            data: function(next){
+                Data.delData({project:project, connection:connection}, function(err, res){
+                    next(err, res);
+                });
+            },
+            summaries: function(next){
+                Summary.setEmptyStat({project:project, connection:connection}, function(err, res){
+                    next(err, res);
+                })
+            }
+        }, function(err, result){
+            connection.close();
+            app.io.emit("deldatas", {data:result.data.result.n});
+        });
     });
 };
 

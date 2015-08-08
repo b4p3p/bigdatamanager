@@ -269,8 +269,7 @@ Project.addData = function (projectData, callback)
     if( projectData.type == "json-crowdpulse" )
     {
         CrowdPulse.importFromFile(
-            projectData.filePath,
-            projectData.project,
+            projectData,
             function(err, result){
                 callback(err, result);
             }
