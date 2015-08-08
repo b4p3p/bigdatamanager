@@ -1,6 +1,10 @@
 <link href="/public/css/terminal.css" rel="stylesheet">
 <link href="/public/css/prj-edit.css" rel="stylesheet">
 
+<script>
+   var scope = angular.element( $("#ngview")).scope();
+</script>
+
 <div id="test"></div>
 
 <div class="alert alert-warning" role="alert" id="msgProject"
@@ -161,17 +165,17 @@
              data-cache="false" data-pagination="true">
          <thead>
          <tr>
+            <!--data-formatter="prjEditFormatterTag.tag"-->
             <th data-sortable="true" data-field="tag"
-                data-formatter="prjEditFormatterTag.tag">
-               Tag
+                data-formatter="scope.formatter.tag"> Tag
             </th>
+            <!---->
             <th data-sortable="false" data-field="tokens"
-                data-formatter="prjEditFormatterTag.vocabulary">
-               Vocabulary
+                data-formatter="scope.formatter.vocabulary"> Vocabulary
             </th>
-            <th data-width="50"
-                data-formatter="prjEditFormatterTag.delete">
-               Delete tag
+            <!---->
+            <th data-formatter="scope.formatter.delete"
+                data-width="30" data-align="center">Delete tag
             </th>
          </tr>
          </thead>
@@ -228,9 +232,8 @@
 <script>
 
     $(document).ready(function(){
-//        ProjectCtrl.init('<%= user %>', '<%= project %>');
-//        ProjectCtrl.getProject( ProjectCtrl.loadEditForm );
-//        ProjectCtrl.showExample();
+       var scope =  $("")
+       $("#tagsTable").bootstrapTable({});
     });
 
 </script>

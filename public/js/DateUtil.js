@@ -26,6 +26,13 @@ Date.prototype.toStringDate = function()
         ].join(':');
 };
 
+Date.prototype.addDays = function (days)
+{
+    var d = new Date();
+    d.setTime(this.getTime() + 1000 * 60 * 60 * 24 * days);
+    return d;
+};
+
 Date.prototype.nextDay = function ()
 {
     var d = new Date();
@@ -47,12 +54,7 @@ Date.prototype.prevWeek = function ()
     return d;
 };
 
-Date.prototype.nextDay = function ()
-{
-    var d = new Date();
-    d.setTime(this.getTime() + 1000 * 60 * 60 * 24 * 1);
-    return d;
-};
+
 
 Date.prototype.toShortDate = function ()
 {

@@ -109,3 +109,11 @@ h3{
 .btn-red{
     width: 120px;
 }
+
+.btn-delete{
+    width: 30px;
+    height: 30px;
+    border-radius: 15px;
+    background: red;
+    padding-left: 7px;
+}

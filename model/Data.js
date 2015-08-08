@@ -134,6 +134,7 @@ Data.importFromFile = function (type, file, projectName, cb_ris)
                 var projects = connection.model(Project.MODEL_NAME, Project.SCHEMA);
 
                 projects.findOne({projectName:projectName}, function(err, project){
+
                     datas.find({projectName:projectName}).count(function(err, cont){
 
                         project.size = cont;
@@ -494,6 +495,7 @@ function addDataArray(arrayData, projectName, callback) {
                 },
 
                 function (err) {
+                    db.close();
                     if (err) {
                         console.error("ERROR addDataArray at row: " + cont);
                         console.error(JSON.stringify(err));
@@ -589,6 +591,7 @@ Data.overrideTokensData = function (project, res, callback) {
             });
 
         }, function(err){
+            connection.close();
             callback(err);
         });
     });
@@ -758,6 +761,7 @@ Data.getNations = function (project, callback) {
                 sum: 1
             }}
     ], function (err, doc) {
+        connection.close();
         callback(err, doc)
     });
 
@@ -783,6 +787,7 @@ Data.dateByDate = function(project, query, callback){
     Date.dateByDate_project(exec, type);
 
     exec.exec(function(err, result){
+        connection.close();
         callback(err, result);
     });
 
@@ -858,54 +863,3 @@ Data.delData = function(arg, callback){
 };
 
 module.exports = Data;
-
-//Data.getUserData_ = function( project , query, callback){
-//
-//    var connection = mongoose.createConnection('mongodb://localhost/oim');
-//    var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
-//
-//    var users = [];
-//    if(query.users != null) users = query.users.split(',');
-//
-//    datas.aggregate()
-//        .match({projectName: project, user: {$in:users}})
-//        .group({
-//            _id:"$user",
-//            minDate:{$min:"$date"},
-//            maxDate:{$max:"$date"},
-//            data:{$push:{
-//                text:"$text",
-//                date:"$date",
-//                tag:"$tag",
-//                tokens:"$tokens",
-//                latitude:"$latitude",
-//                longitude:"$longitude"
-//            }}
-//        })
-//        .project({minDate:1, maxDate:1, data:1, _id:0, user:"$_id"})
-//        .exec(function(err, results){
-//
-//            if(results.length==0) {
-//                callback(err, results);
-//                connection.close();
-//                return;
-//            }
-//
-//            var minDate = results[0].minDate;
-//            var maxDate = results[0].maxDate;
-//
-//            _.each(results, function(doc){
-//                if(doc.minDate < minDate) minDate = doc.minDate;
-//                if(doc.maxDate > minDate) maxDate = doc.maxDate;
-//            });
-//
-//            callback(err, {
-//                properties:{
-//                    maxDate:maxDate,
-//                    minDate:minDate
-//                },
-//                data:results
-//            });
-//            connection.close();
-//        })
-//};

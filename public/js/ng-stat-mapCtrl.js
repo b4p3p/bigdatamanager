@@ -88,13 +88,17 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
         };
 
         this.setIntervalSlider = function(min, max) {
+
+            min = min.addDays(-1);
+            max = min.addDays(+1);
+
             this.$sliderTimer.dateRangeSlider( {
                 enabled : true ,
                 bounds:{ min: min, max: max},
                 defaultValues:{ min: min, max: max }
             });
-            this.$sliderTimer.dateRangeSlider("min", min);
-            this.$sliderTimer.dateRangeSlider("max", max);
+            this.$sliderTimer.dateRangeSlider("min", min - 1);
+            this.$sliderTimer.dateRangeSlider("max", max + 1);
         };
 
         this.load = function() {
