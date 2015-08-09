@@ -178,11 +178,12 @@ function updateProjects(docs, connection, project, next) {
     );
 }
 
+/**
+ * Sincronizzo SOLO i tokens presenti nella collections data
+ */
 Vocabulary.syncUserTags = function (project, res,  callback) {
 
-    /**
-     * Sincronizzo SOLO i tokens presenti nella collections data
-     */
+    var Data = require('../model/Data');
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var vocabularies = connection.model(Vocabulary.MODEL_NAME, Vocabulary.SCHEMA);
@@ -358,6 +359,8 @@ Vocabulary.prepareDataTags = function(project, query, res, callback) {
 };
 
 Vocabulary.prepareUserTags = function(project, res, dict, datas, callback){
+
+    var Data = require('../model/Data');
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);

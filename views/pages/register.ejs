@@ -19,11 +19,11 @@
                     <input name="lastName" id="lastname" type="text" class="form-control" placeholder="Last Name" required autofocus>
                     <input id="username" name="username" type="text" class="form-control" placeholder="Username" required autofocus>
                     <input id="password" name="password" type="password" class="form-control" placeholder="Password" required>
-                    <% if ( status && status.error > 0 ) { %>
+                    <% if (  status > 0 ) { %>
                     <div class="alert alert-danger" role="alert">
                     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                     <span class="sr-only">Error:</span>
-                    <%= status.message %>
+                    <%= message %>
                     </div>
                     <% } %>
                     <button class="btn btn-lg btn-primary btn-block" type="submit">

@@ -10,13 +10,13 @@ var User = function (data) {
 var MODEL_NAME = "users";
 
 var USER_SCHEMA = new mongoose.Schema({
-    username: String,
+    username: {type:String , required: true},
     password: String,
     firstName: String,
     lastName: String,
     created: Date,
     lastLogin: Date,
-    level: Number
+    level: {type: Number, default: 0}
 }, {strict: false});
 
 User.prototype.data = {};    //json

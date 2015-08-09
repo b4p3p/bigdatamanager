@@ -21,7 +21,7 @@ module.exports = function (router, app) {
     router.post('/adduser', function (req, res)
     {
         var obj = {
-            username : req.body.user,
+            username : req.body.username,
             password : req.body.password,
             firstName : req.body.firstName,
             lastName : req.body.lastName,
@@ -33,14 +33,14 @@ module.exports = function (router, app) {
             if(err) {
                 var arg = null;
                 if(err.code == 11000)
-                    arg = ConstantsRouter.argError(err.code, "Username already exists")
+                    arg = ConstantsRouter.status(err.code, "Username already exists");
                 else
-                    arg = ConstantsRouter.argError(1, err.message);
+                    arg = ConstantsRouter.status(1, err.message);
 
-                res.render('../views/pages/register.ejs', arg );
+                res.render('../view/pages/register.ejs', arg );
             }
             else
-                res.redirect('/views/pages/login.ejs');
+                res.redirect('/view/app#/');
         })
 
     });
