@@ -51,6 +51,10 @@ Util.addWhereClause = function(exec, query)
 
 Util.addMatchClause = function(exec, query)
 {
+    if(query.projectName){
+        exec.match({projectName: query.projectName });
+    }
+
     if(query.tags){
         var tags = query.tags.split(',');
         exec.match({tag: {$in:tags}});

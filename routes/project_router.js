@@ -30,6 +30,12 @@ module.exports = function (router, app) {
             next(null);
     });
 
+    router.get('/projects', function (req, res) {
+        Project.getProjects(function (err, data) {
+            res.json(data);
+        })
+    });
+
     router.post('/newproject', function (req, res, next) {
         console.log("PAGE: /newproject");
 
@@ -108,12 +114,6 @@ module.exports = function (router, app) {
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.end(JSON.stringify({status: 200}));
 
-    });
-
-    router.get('/projects', function (req, res) {
-        Project.getProjects(function (err, data) {
-            res.json(data);
-        })
     });
 
     router.get('/getproject', function (req, res) {

@@ -331,6 +331,7 @@ Project.sync = function(project, username, res, callback)
     var regions   =     connection.model( Regions.MODEL_NAME, Regions.SCHEMA);
     var datas   =       connection.model( Datas.MODEL_NAME, Datas.SCHEMA);
     var projects   =    connection.model( Project.MODEL_NAME, Project.SCHEMA);
+    var countGeo = 0;
 
     var docSync = {};
 
@@ -385,21 +386,18 @@ Project.sync = function(project, username, res, callback)
 
                         function (region, next) {
 
-                            datas.update(
-                                {
+                            datas.update({
                                     projectName: project,
                                     loc: {$geoWithin: {$geometry: region._doc.geometry}}
                                 },
-                                {
-                                    $set:
-                                    {
-                                        nation: region._doc.properties.NAME_0,
-                                        region: region._doc.properties.NAME_1
-                                    }
-                                },
+                                { $set: {
+                                    nation: region._doc.properties.NAME_0,
+                                    region: region._doc.properties.NAME_1
+                                }},
                                 {multi: true, w: 1},
                                 function (err, result) {
                                     res.write( divInline(cont + "/" + len, "countRes") + " - Modified " + divInline(result.result.nModified, "countDocs") + " docs in " + region._doc.properties.NAME_1 + "@" + region._doc.properties.NAME_0 + "<br>");
+                                    countGeo += result.result.nModified;
                                     console.log("   fatto " + cont + "/" + len + " - " + region._doc.properties.NAME_0 + ":" + region._doc.properties.NAME_1);
                                     cont++;
                                     next(null);

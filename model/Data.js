@@ -862,4 +862,51 @@ Data.delData = function(arg, callback){
     })
 };
 
+/**
+ *
+ * @param arg
+ * @param arg.connection
+ * @param arg.query
+ * @param callback
+ */
+Data.getInfoCount = function(arg, callback){
+
+    var conn = arg.connection ? mongoose.createConnection('mongodb://localhost/oim') : arg.connection;
+    var datas = conn.model(Data.MODEL_NAME, Data.SCHEMA);
+
+    var exec = datas.aggregate();
+    Util.addMatchClause(exec, arg.query);
+    exec.group({
+        _id:null,
+        min: {$min: "$date" },
+        max: {$max: "$date" },
+        countTot: {$sum:1},
+        countGeo: {$sum: {
+            "$cond": [ { "$ifNull": ["$latitude", false] }, 1, 0 ]
+        }},
+        allTags: {$addToSet: "$tag"}
+    });
+    exec.exec(function(err, result){
+        if(arg.connection == null) conn.close();
+        callback(err, result);
+    });
+
+    //datas.aggregate([
+    //    {$match:{projectName:project}},
+    //    {$group:{
+    //        _id:null,
+    //        min: {$min: "$date" },
+    //        max: {$max: "$date" },
+    //        countTot: {$sum:1},
+    //        countGeo: {$sum: {
+    //            "$cond": [ { "$ifNull": ["$latitude", false] }, 1, 0 ]
+    //        }},
+    //        allTags: {$addToSet: "$tag"}
+    //    }}
+    //], function(err, result){
+    //
+    //});
+
+};
+
 module.exports = Data;

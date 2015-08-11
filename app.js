@@ -6,11 +6,6 @@ var express = require('express'),
     session = require('client-sessions'),
     multer  = require('multer');
 
-    //path = require('path');
-    //var socketio = require('socket.io');
-    //formidable = require('formidable'),
-    //sys = require('sys');
-
 var app = express();
 
 // view engine setup
@@ -28,12 +23,6 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 }));
 
 app.use(cookieParser());
-
-//app.use( bodyParser( {
-//    keepExtensions: true,
-//    uploadDir: __dirname + '/uploads',
-//    limit: '2mb'
-//}));
 
 /**
  *  Utilizzo dei cookie per le sessioni dell'utente
@@ -94,7 +83,7 @@ app.up_datas = upload.array("datas");
 /*******************************
  ******   ROUTER ***************
  *******************************/
-var express = require('express');
+
 var router_vocabulary = express.Router();
 var router_project = express.Router();
 var router_view = express.Router();

@@ -179,23 +179,17 @@ Summary.getStatFilter = function (project,username, query, callback)
             {
                 datas.aggregate(
                     [
-                        {
-                            $match: {
-                                projectName: project,
-                                nation: {$exists: true},
-                                $and: queryAgg
-                            }
-                        },
-
-                        {
-                            $group: {
-                                _id: {nation: "$nation", region: "$region", tag: "$tag"},
-                                count: {$sum: 1},
-                                minDate: {$min: "$date"},
-                                maxDate: {$max: "$date"}
-                            }
-                        }
-
+                        { $match: {
+                            projectName: project,
+                            nation: {$exists: true},
+                            $and: queryAgg
+                        }},
+                        { $group: {
+                            _id: {nation: "$nation", region: "$region", tag: "$tag"},
+                            count: {$sum: 1},
+                            minDate: {$min: "$date"},
+                            maxDate: {$max: "$date"}
+                        }}
                     ],
 
                     function (err, result) {
@@ -297,42 +291,23 @@ Summary.getStatFilter = function (project,username, query, callback)
             },
 
             max: function(callback) {
-
                 datas.aggregate(
-                    [
-                        {
-                            $match: {
-                                projectName: project,
-                                nation: {$exists: true},
-                                $and: queryAgg
-                            }
-                        },
-
-                        {
-                            $group: {
-                                _id: {nation: "$nation", region: "$region" },
-                                sum: {$sum: 1}
-                            }
-                        },
-
-                        {
-                            $group: {
-                                _id: "$_id.nation" ,
-                                sum: {$sum: "$sum" },
-                                regions: {$push: {region: "$_id.region", sum:"$sum" } }
-                            }
-                        },
-
-                        {
-                            $project: { _id: 0, nation: "$_id", sum: 1, regions:1 }
-                        },
-
-                        {
-                            $sort: { count: -1 }
-                        }
-
-                    ],
-
+                    [{$match: {
+                        projectName: project,
+                        nation: {$exists: true},
+                        $and: queryAgg
+                    }},
+                    {$group: {
+                        _id: {nation: "$nation", region: "$region" },
+                        sum: {$sum: 1}
+                    }},
+                    {$group: {
+                        _id: "$_id.nation" ,
+                        sum: {$sum: "$sum" },
+                        regions: {$push: {region: "$_id.region", sum:"$sum" } }
+                    }},
+                    {$project: { _id: 0, nation: "$_id", sum: 1, regions:1 }},
+                    {$sort: { count: -1 }}],
                     function (err, result) {
 
                         if (result.length == 0){
@@ -355,19 +330,13 @@ Summary.getStatFilter = function (project,username, query, callback)
 
                     }
                 );
-
             },
-            
-            allTags: function(callback){
-                datas.distinct("tag", {projectName: project}, function (err, result) {
-                    callback(err, result);
-                })
-            },
-
             count: function(callback){
-                var exec = datas.find( {projectName: project} );
-                exec = Util.addWhereClause(exec, query);
-                exec.count( function (err, result) {
+                var arg = {
+                    query: {projectName: project},
+                    connection: connection
+                };
+                Datas.getInfoCount(arg, function(err, result){
                     callback(err, result);
                 });
             }
@@ -378,8 +347,15 @@ Summary.getStatFilter = function (project,username, query, callback)
 
             connection.close();
 
-            docSync.data.allTags = results.allTags;
-            docSync.data.countTot = results.count;
+            if(results.count && results.count.length > 0) {
+                docSync.data.allTags = results.count[0].allTags;
+                docSync.data.countTot = results.count[0].countTot;
+                docSync.data.countGeo = results.count[0].countGeo;
+            }else {
+                docSync.data.allTags = [];
+                docSync.data.countTot = 0;
+                docSync.data.countGeo = 0;
+            }
 
             async.each(results.regions,
 
@@ -393,8 +369,7 @@ Summary.getStatFilter = function (project,username, query, callback)
 
                     docSync.data.nations[obj.nation].avg = docSync.data.nations[obj.nation].count / results.max.nation;
 
-                    async.each(obj.regions, function(region, next)
-                    {
+                    async.each(obj.regions, function(region, next) {
 
                         //add empty region
                         if(!docSync.data.nations[obj.nation].regions[region])
@@ -415,13 +390,10 @@ Summary.getStatFilter = function (project,username, query, callback)
                         next(err);
                     })
                 }
-
                 , function(err){ //end
-
-                callback(err, docSync);
-
-            })
-            ;
+                    callback(err, docSync);
+                }
+            );
         });
 };
 
@@ -432,24 +404,10 @@ Summary.updateStat = function(project, username, callback){
 
     var datas =     connection.model(Datas.MODEL_NAME, Datas.SCHEMA);
     var summaries = connection.model(Summary.MODEL_NAME, Summary.SCHEMA);
+    var query = {projectName: project};
 
-    datas.aggregate([
-        //{$project: {
-        //    projectName: 1, username: 1, lastUpdate: 1, data: 1,
-        //    isGeo: { "latitude" : { $ifNull: [0, 1] } }
-        //}},
-        {$match:{projectName:project}},
-        {$group:{
-            _id:null,
-            min: {$min: "$date" },
-            max: {$max: "$date" },
-            countTot: {$sum:1},
-            countGeo: {$sum: {
-                "$cond": [ { "$ifNull": ["$latitude", false] }, 1, 0 ]
-            }},
-            allTags: {$addToSet: "$tag"}
-        }}
-    ], function(err, result){
+    Datas.getInfoCount( {connection: connection, query:query} , function(err, result){
+
         summaries.findOne({projectName:project}, function(err, doc){
 
             var s = null;
