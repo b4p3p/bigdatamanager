@@ -337,133 +337,134 @@ Project.sync = function(project, username, res, callback)
 
     async.waterfall([
 
-            //cancello la precendente sincronizzazione
-            function(next)
-            {
-                res.write("DELETE previous synchronization<br>");
-                console.log("     DELETE previous synchronization");
+        //cancello la precendente sincronizzazione
+        function(next)
+        {
+            res.write("DELETE previous synchronization<br>");
+            console.log("     DELETE previous synchronization");
 
-                datas.update(
-                    { projectName: project } ,
-                    { $unset: { region:'', nation:'' } },
-                    {multi:true} ,
-                    function(err, result){
+            datas.update(
+                { projectName: project } ,
+                { $unset: { region:'', nation:'' } },
+                {multi:true} ,
+                function(err, result){
+                    next(null);
+                }
+            );
+
+        },
+
+        //get regions
+        function(next){
+
+            console.log("     FETCH nations");
+            res.write("FETCH nations<br>");
+
+            regions.find( {},
+                function(err, regions) {
+                    next(err, regions);
+                }
+            );
+
+        },
+
+        //per ogni regione sincronizzo i dati
+        function(regions, next){
+
+            console.log("     set regions/nations data - #" + regions.length);
+            res.write("FOUND " + regions.length + " nations<br>");
+
+            var cont=0;
+            var len = regions.length;
+
+            //uso i driver nativi (bug mongoose)
+            MongoClient.connect( url, function (err, db)
+            {
+                var datas = db.collection('datas');
+
+                async.each(regions,
+
+                    function (region, next) {
+
+                        datas.update({
+                                projectName: project,
+                                loc: {$geoWithin: {$geometry: region._doc.geometry}}
+                            },
+                            { $set: {
+                                nation: region._doc.properties.NAME_0,
+                                region: region._doc.properties.NAME_1
+                            }},
+                            {multi: true, w: 1},
+                            function (err, result) {
+
+                                if(result && result.result && result.result.nModified)
+                                {
+                                    res.write( divInline(cont + "/" + len, "countRes") +
+                                        " - Modified " + divInline(result.result.nModified, "countDocs") +
+                                        " docs in " + region._doc.properties.NAME_1 + "@" + region._doc.properties.NAME_0 + "<br>");
+                                    countGeo += result.result.nModified;
+                                } else
+                                    res.write( divInline(cont + "/" + len, "countRes") +
+                                        " - Modified " + divInline(0, "countDocs") +
+                                        " docs in " + region._doc.properties.NAME_1 + "@" + region._doc.properties.NAME_0 + "<br>");
+
+
+                                console.log("   fatto " + cont + "/" + len + " - " + region._doc.properties.NAME_0 + ":" + region._doc.properties.NAME_1);
+                                cont++;
+                                next(null);
+                            }
+                        );
+                    },
+
+                    function (err) {
+                        db.close();
                         next(null);
                     }
-                );
+                )
+            });
+        },
 
-            },
+        //costruisco il docSync dai dati sincronizzati
+        function (next)
+        {
+            console.log("     get new stat filter");
+            Summary.getStatFilter( project, username, null, function(err, doc){
+                next(null, doc)
+            });
+        },
 
-            //get regions
-            function(next){
+        //salvo il nuovo docSync
+        function(docSync, next)
+        {
+            console.log("     save docSync");
 
-                console.log("     FETCH nations");
-                res.write("FETCH nations<br>");
+            summaries.findOne({projectName:project}, function (err, doc) {
 
-                regions.find( {},
-                    function(err, regions) {
-                        next(err, regions);
-                    }
-                );
-
-            },
-
-            //per ogni regione sincronizzo i dati
-            function(regions, next){
-
-                console.log("     set regions/nations data - #" + regions.length);
-                res.write("FOUND " + regions.length + " nations<br>");
-
-                var cont=0;
-                var len = regions.length;
-
-                //uso i driver nativi (bug mongoose)
-                MongoClient.connect( url, function (err, db)
+                if(doc!=null)
                 {
-                    var datas = db.collection('datas');
+                    doc.data = docSync.data;
+                    doc.lastUpdate = new Date();
+                }else
+                {
+                    docSync.lastUpdate = new Date();
+                    doc = new summaries(docSync);
+                }
 
-                    async.each(regions,
-
-                        function (region, next) {
-
-                            datas.update({
-                                    projectName: project,
-                                    loc: {$geoWithin: {$geometry: region._doc.geometry}}
-                                },
-                                { $set: {
-                                    nation: region._doc.properties.NAME_0,
-                                    region: region._doc.properties.NAME_1
-                                }},
-                                {multi: true, w: 1},
-                                function (err, result) {
-
-                                    if(result && result.result && result.result.nModified)
-                                    {
-                                        res.write( divInline(cont + "/" + len, "countRes") +
-                                            " - Modified " + divInline(result.result.nModified, "countDocs") +
-                                            " docs in " + region._doc.properties.NAME_1 + "@" + region._doc.properties.NAME_0 + "<br>");
-                                        countGeo += result.result.nModified;
-                                    } else
-                                        res.write( divInline(cont + "/" + len, "countRes") +
-                                            " - Modified 0 " + divInline(0, "countDocs") +
-                                            " docs in " + region._doc.properties.NAME_1 + "@" + region._doc.properties.NAME_0 + "<br>");
-
-
-                                    console.log("   fatto " + cont + "/" + len + " - " + region._doc.properties.NAME_0 + ":" + region._doc.properties.NAME_1);
-                                    cont++;
-                                    next(null);
-                                }
-                            );
-                        },
-
-                        function (err) {
-                            db.close();
-                            next(null);
-                        }
-                    )
-                });
-            },
-
-            //costruisco il docSync dai dati sincronizzati
-            function (next)
-            {
-                console.log("     get new stat filter");
-                Summary.getStatFilter( project, username, null, function(err, doc){
-                    next(null, doc)
-                });
-            },
-
-            //salvo il nuovo docSync
-            function(docSync, next)
-            {
-                console.log("     save docSync");
-
-                docSync.lastUpdate = new Date();
-
-                summaries.update(
-                    { project : project, username: username } ,
-                    docSync,
-                    { upsert:true, w:1 },
-                    function (err)
-                    {
-                        next(err, docSync);
-                    }
-                );
-            },
-
-            //aggiorno il lastUpdate e il size del progetto
-            function (docSync, next) {
-
-                console.log("     update project");
-
-                Project.updateLastUpdate(projects, project, docSync.lastUpdate, docSync.data.countTot, function(err){
+                doc.save(function(err, res){
                     next(err, docSync);
                 });
-            }
-        ],
+            });
+        },
+
+        //aggiorno il lastUpdate e il size del progetto
+        function (docSync, next) {
+            console.log("     update project");
+            Project.updateLastUpdate(projects, project, docSync.lastUpdate, docSync.data.countTot, function(err){
+                next(err, docSync);
+            });
+        }],
         function(err, doc){
-            connection
-                .close();
+            connection.close();
             if(err){
                 console.error(JSON.stringify(err));
                 callback(err, {});
