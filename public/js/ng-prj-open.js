@@ -50,7 +50,7 @@ var PrjOpenCtrl = function(){
             type: "POST",
             crossDomain:true,
             dataType: "json",
-            url: "http://localhost:8080/project/delproject",
+            url: "/project/delproject",
             data: { project: project } ,
             success: function(msg)
             {
