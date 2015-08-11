@@ -396,8 +396,19 @@ Project.sync = function(project, username, res, callback)
                                 }},
                                 {multi: true, w: 1},
                                 function (err, result) {
-                                    res.write( divInline(cont + "/" + len, "countRes") + " - Modified " + divInline(result.result.nModified, "countDocs") + " docs in " + region._doc.properties.NAME_1 + "@" + region._doc.properties.NAME_0 + "<br>");
-                                    countGeo += result.result.nModified;
+
+                                    if(result && result.result && result.result.nModified)
+                                    {
+                                        res.write( divInline(cont + "/" + len, "countRes") +
+                                            " - Modified " + divInline(result.result.nModified, "countDocs") +
+                                            " docs in " + region._doc.properties.NAME_1 + "@" + region._doc.properties.NAME_0 + "<br>");
+                                        countGeo += result.result.nModified;
+                                    } else
+                                        res.write( divInline(cont + "/" + len, "countRes") +
+                                            " - Modified 0 " + divInline(0, "countDocs") +
+                                            " docs in " + region._doc.properties.NAME_1 + "@" + region._doc.properties.NAME_0 + "<br>");
+
+
                                     console.log("   fatto " + cont + "/" + len + " - " + region._doc.properties.NAME_0 + ":" + region._doc.properties.NAME_1);
                                     cont++;
                                     next(null);
