@@ -154,8 +154,7 @@ Summary.getStatFilter = function (project,username, query, callback)
 
     async.parallel( {
 
-            regions: function (callback)
-            {
+            regions: function (callback) {
                 regions.aggregate( [
 
                     { $group: {
@@ -175,8 +174,7 @@ Summary.getStatFilter = function (project,username, query, callback)
                 });
             },
 
-            docSync: function (callback)
-            {
+            docSync: function (callback) {
                 datas.aggregate(
                     [
                         { $match: {
@@ -331,6 +329,7 @@ Summary.getStatFilter = function (project,username, query, callback)
                     }
                 );
             },
+
             count: function(callback){
                 var arg = {
                     query: {projectName: project},
