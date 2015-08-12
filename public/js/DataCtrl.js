@@ -159,31 +159,55 @@ DataCtrl.requireRefresh = function(field, callback)
     );
 };
 
-DataCtrl.getFromUrl = function(field, queryString,  callback)
+/**
+ *
+ * @param field
+ * @param queryString
+ * @param callback
+ * @param arg
+ * @param arg.query {ObjConditions}
+ * @param arg.type
+ */
+DataCtrl.getFromUrl = function(field, queryString,  callback, arg)
 {
+    var type = "get";
 
     if( !queryString ) queryString = "";
+
+    if(arg) {
+        type = arg.type == null ? "get" : arg.type;
+    }
 
     console.log("CALL: DataCtrl.getFromUrl\n" +
         "      url: " + field.URL + queryString + " key: " + field.KEY );
 
-    $.ajax({
-        type: "get",
-        url: field.URL + queryString,
-        timeout: 5000 * 60, //2m
+    function success(data){
+        callback(data);
+    }
 
-        success: function(data){
-            //console.log("    success");
-            callback(data);
-        },
+    function error(error){
+        alert(error.responseText);
+        console.error("error getFromUrl:\n", error, field.URL + queryString);
+        callback(null);
+    }
 
-        error:function(error){
-            alert(error.responseText);
-            console.error("error getFromUrl:\n", error, field.URL + queryString);
-            callback(null);
-        }
-
-    });
+    if(type == "get")
+        $.ajax({
+            type: type,
+            url: field.URL + queryString,
+            timeout: 5000 * 60, //2m
+            success: success,
+            error:error
+        });
+    else
+        $.ajax({
+            type: type,
+            url: field.URL,
+            data: arg.query.conditions,
+            timeout: 5000 * 60, //2m
+            success: success,
+            error:error
+        });
 };
 
 DataCtrl.getField = function(callback, field, limit)

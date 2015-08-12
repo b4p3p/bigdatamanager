@@ -27,7 +27,7 @@ var TerminalCtrl = function(idFrame) {
             if (_self.$frameTerminal.contents().find("head") != undefined) {
                 _self.addStyleFrame('body{font-family: monospace;color:#fff;font-size:15px;text-align:left;position:static;word-wrap:break-word}');
                 _self.appendStyleFrame('.countDocs{display:inline-block;width:45px}');
-                _self.appendStyleFrame('.countRes{display:inline-block;width:60px}');
+                _self.appendStyleFrame('.countRes{display:inline-block;width:80px}');
                 _self.resetStyleBody();
                 clearInterval(addCssInterval);
             }

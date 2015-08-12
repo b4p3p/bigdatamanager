@@ -235,6 +235,21 @@ module.exports = function (router, app) {
             res.redirect("/view/app/#project/openproject");
     });
 
+    router.post('/stat', function (req, res) {
+
+        console.log("CALL: filter stat");
+
+        var project = req.session.project || req.query.project;
+        var username = req.session.user;
+
+        if (req.session.project)
+            Summary.getStatFilter(project, username, req.body, function (err, data) {
+                res.json(data);
+            });
+        else
+            res.redirect("/view/app/#project/openproject");
+    });
+
     router.get('/lastupdate', function (req, res) {
         var project = req.session.project || req.query.project;
 

@@ -28,12 +28,30 @@ app.io = io;
 
 io.sockets.on('connection', function(socket) {
 
+    var Summary = require('../model/Summary');
+
     socket.emit('message', {'message': 'hello world'});
 
     socket.on('newproject', function(data) {
         //process.stdout.write("pippo");
         socket.emit( 'newproject', {project:'pippo'} );
         socket.emit( 'newproject', {project:'pippo'} );
+    });
+
+    socket.on('filteredstat', function(data) {
+
+        var store = app.store;
+        var project = store.get('project');
+
+        console.log("CALL: socket.on -> filteredstat");
+
+        if(data.queryString == "")
+        {
+            if (req.session.project)
+                Summary.getStat(req.session.project, function (err, data) {
+                    socket.emit( 'filteredstat', data );
+                });
+        }
     });
 
 });

@@ -2,7 +2,7 @@
 <html lang="it">
     <head>
         <meta charset="UTF-8">
-        <% include ../partials/bootstrap.ejs %>
+        <% include ../imports/bootstrap.ejs %>
     </head>
 
     <body>
@@ -14,14 +14,14 @@
         <h4>Error:</h4>
 
         <p>
-             <%= status %>
+             <%= message %>
         </p>
 
         <hr>
 
         <h4>Message:</h4>
         <p>
-            <%= message %>
+            <%= error %>
         </p>
 
     </body>

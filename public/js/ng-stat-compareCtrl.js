@@ -1,6 +1,7 @@
 "use strict";
+function CompareCtrl() {}
 
-function CompareCtrl() {};
+var socket = null;
 
 CompareCtrl.selectedRegions = null;
 CompareCtrl.selectedNations = null;
@@ -124,6 +125,7 @@ CompareCtrl.getFilteredStat = function(callback)
         CompareCtrl.$sliderTimer);
 
     DataCtrl.getFromUrl(DataCtrl.FIELD.STAT, conditions.getQueryString(), function(docStat){
+
         if(docStat.data.syncTags.length == 0)
         {
             $('#error').removeClass('hidden');
@@ -136,8 +138,10 @@ CompareCtrl.getFilteredStat = function(callback)
             callback();
         }
 
-    });
+    }, {type:"post", query:conditions.value});
 };
+
+
 
 CompareCtrl.clickFilter = function()
 {
@@ -739,8 +743,9 @@ ngApp.controller('ngStatCompareCtrl', ['$scope', function($scope) {
         //clearInterval(intervalResize);
     };
 
-
     $(document).ready(function () {
+
+        socket = io.connect();
 
         if(!window.PROJECT || window.PROJECT == "")
         {

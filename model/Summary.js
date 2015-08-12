@@ -121,6 +121,11 @@ Summary.getStatFilter = function (project,username, query, callback)
 
         if (query) {
 
+            if(query.interval){
+                if (query.interval.min) ris.push({date: {$gte: new Date(query.interval.min)}});
+                if (query.interval.max) ris.push({date: {$lte: new Date(query.interval.max)}});
+            }
+
             if (query.start) ris.push({date: {$gte: new Date(query.start)}});
             if (query.end)   ris.push({date: {$lte: new Date(query.end)}});
 
@@ -130,17 +135,26 @@ Summary.getStatFilter = function (project,username, query, callback)
             }
 
             if (query.nations) {
-                var nations = query.nations.split(',');
-                ris.push({nation: {$in: nations}});
+                if(_.isArray(query.nations)){
+                    ris.push({nation: {$in: query.nations}});
+                }
+                else
+                {
+                    var nations = query.nations.split(',');
+                    ris.push({nation: {$in: nations}});
+                }
             }
 
             if (query.regions) {
-                var regions = query.regions.split(',');
-                ris.push({region: {$in: regions}});
+                if(_.isArray(query.regions)){
+                    ris.push({region: {$in: query.regions}});
+                }else {
+                    var regions = query.regions.split(',');
+                    ris.push({region: {$in: regions}});
+                }
             }
         }
         if (ris.length > 0) return ris; else return [{}];
-
     }
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
