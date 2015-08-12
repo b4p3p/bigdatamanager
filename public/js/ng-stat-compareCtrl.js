@@ -141,8 +141,6 @@ CompareCtrl.getFilteredStat = function(callback)
     }, {type:"post", query:conditions.value});
 };
 
-
-
 CompareCtrl.clickFilter = function()
 {
     console.log("CALL: clickFilter");
@@ -339,7 +337,7 @@ CompareCtrl.drawBar = function()
 
     var chartAreaHeight = dataTable.getNumberOfRows() * 30;
     var chartHeight = chartAreaHeight + 80;
-    var heightBar = 60;
+    var heightBar = 70;
 
     var options = {
         width: "100%",
@@ -347,7 +345,7 @@ CompareCtrl.drawBar = function()
         legend: { position: 'top',  maxLines: 3, textStyle: {fontSize: 13}},
         bar:    { groupWidth: heightBar + "%" },
         annotations: {
-            alwaysOutside: false,
+            alwaysOutside: true,
             textStyle:  { color: "black"}
         },
         chartArea: {'height': chartAreaHeight, 'right':0, 'left':'300'},
@@ -647,8 +645,16 @@ CompareCtrl.drawRadar = function()
         //Number - Pixel width of dataset stroke
         datasetStrokeWidth : 2,
         //Boolean - Whether to fill the dataset with a colour
-        datasetFill : true
+        datasetFill : true,
+
         //String - A legend template
+        legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\">" +
+                            "<% for (var i=0; i<datasets.length; i++){%>" +
+                            "<li><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span>" +
+                                "<%if(datasets[i].label){%><%=datasets[i].label%><%}%>" +
+                            "</li>" +
+                            "<%}%>" +
+                        "</ul>"
     };
     CompareCtrl.insertLegend(CompareCtrl.radarData);
     var ctx = document.getElementById(CompareCtrl.radarChartID).getContext("2d");
@@ -714,9 +720,23 @@ CompareCtrl.insertLegend = function(data)
             .css("margin-right", "10px" );
 
         var $label = $("<div/>")
-            .text(data[i].label)
-            .css("margin-left", "10px" );
-        $row.append($box).append($label);
+            .text(data[i].label + " ")
+            .css("margin-left", "10px" )
+            .css("display", "inline-block");
+
+        var $value = $("<div/>")
+            .css("display", "inline-block")
+            .css("margin-left", "5px" );
+
+        var sum = _.reduce( data[i].data, function(memo, num){
+            return memo + num;
+            }, 0);
+        $value.text( " - " + sum.toString() );
+
+        $row.append($box)
+            .append($label)
+            .append($value);
+
         legend.append($row);
     }
 
