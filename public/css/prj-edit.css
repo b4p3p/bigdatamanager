@@ -117,3 +117,7 @@ h3{
     background: red;
     padding-left: 7px;
 }
+
+.btn-operation{
+    width: 200px;
+}

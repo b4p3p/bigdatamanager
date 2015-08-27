@@ -342,14 +342,14 @@ CompareCtrl.drawBar = function()
 
     var options = {
         width: "100%",
-        height: chartHeight, //dataTable.getNumberOfRows() * 30,
+        height: chartHeight + 50, //dataTable.getNumberOfRows() * 30,
         legend: { position: 'top',  maxLines: 3, textStyle: {fontSize: 13}},
         bar:    { groupWidth: heightBar + "%" },
         annotations: {
             alwaysOutside: true,
-            textStyle:  { color: "black"}
+            textStyle:  { color: "black", fontSize: 13 }
         },
-        chartArea: {'height': chartAreaHeight, 'right':0, 'left':'300'},
+        chartArea: {'height': chartAreaHeight - 50 , 'right':0, 'left':'300'},
         isStacked: true,
         backgroundColor: 'transparent',
         hAxis: { title: CompareCtrl.$radioByNumber.is(':checked')? "Data by tags": "Percentage of data than the maximum",

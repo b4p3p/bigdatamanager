@@ -181,33 +181,48 @@
          </thead>
       </table>
 
-      <div style="height: 65px">
-
+      <div class="row">
          <a class="btn btn-default" id= "addButton"
             style="margin-top: 8px; margin-left: 15px; float: right;"
             onclick="prjEditCtrl.showInsertTag()">Add tag
          </a>
+      </div>
 
-         <a class="btn btn-default" id= "synUserTag"
-            style="margin-top: 8px; margin-left: 15px; float: right;">
-            Sync User Vocabulary
-         </a>
+      <hr>
 
-         <a class="btn btn-default" id= "synDataTag"
-            style="margin-top: 8px;  margin-left: 15px; float: right;">
-            Sync Data Vocabulary
-         </a>
+      <div>
 
-         <a class="btn btn-danger" id= "overrideDataTokens"
-            style="margin-top: 8px;  margin-left: 15px; float: right;">
-            Override data tokens
-         </a>
+         <div class="row">
+
+            <div class="panel panel-default">
+
+            </div>
+
+            <a class="btn btn-default btn-operation" id= "synUserTag"
+               style="margin-top: 8px; margin-left: 15px; float: right;">
+               Wordcount by tokens data
+            </a>
+         </div>
+
+         <div class="row">
+            <a class="btn btn-default btn-operation" id= "synDataTag"
+               style="margin-top: 8px;  margin-left: 15px; float: right;">
+               Wordcount by user vocabulary
+            </a>
+         </div>
+
+         <div class="row">
+            <a class="btn btn-danger btn-operation" id= "overrideDataTokens"
+               style="margin-top: 8px;  margin-left: 15px; float: right;">
+               Override data tokens
+            </a>
+         </div>
 
       </div>
 
    </div>
 
-   <div>
+   <div class="row" style="margin-top: 20px">
 
       <div id="bar">
          <div id="red">
