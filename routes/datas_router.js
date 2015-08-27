@@ -90,6 +90,7 @@ module.exports = function (router, app) {
         var project = req.session.project || req.query.project;
 
         Data.overrideTokensData(project, res, function(err) {
+            app.io.emit('overrideDataTokens_end', {});
             res.end("fatto!")
         });
 
@@ -139,6 +140,13 @@ module.exports = function (router, app) {
             connection.close();
             app.io.emit("deldatas", {data:result.data.result.n});
         });
+    });
+
+    router.get('/info', function(req, res){
+        var project = req.session.project || req.query.project;
+        Data.getInfo(project, function(err, result){
+            if(!err) res.json(result); else res.status(500).send(err.toString());
+        })
     });
 };
 

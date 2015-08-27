@@ -5,6 +5,7 @@ var prjEditCtrl = null;
 ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
 
     $(".selectpicker").selectpicker();
+    var tableTag = $("#tagsTable");
 
     var PrjEditCtrl = function() {
 
@@ -86,7 +87,8 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
                                 contentType: "application/json; charset=utf-8",
                                 type: 'put', data: JSON.stringify(data), dataType: "json",
                                 success: function() {
-                                    _self.$tableTag.bootstrapTable('refresh');
+                                    getUserTag();
+                                    //_self.$tableTag.bootstrapTable('refresh');
                                 },
                                 error: function(xhr, status, error){
                                     alert("Error: " + error);
@@ -497,6 +499,10 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
             _self.writeResultProgress(result);
         });
 
+        socket.on("overrideDataTokens_end", function(){
+            getInfoData();
+        });
+
         /// TABLE TAG CLICK
         this.cmdDeleteTagClick = function(tag){
 
@@ -509,7 +515,8 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
                             contentType: "application/json; charset=utf-8",
                             data: JSON.stringify({tag:tag}),
                             success: function(html) {
-                                _self.$tableTag.bootstrapTable('refresh');
+                                getUserTag();
+                                //_self.$tableTag.bootstrapTable('refresh');
                             },
                             error: function(xhr, status, error){
                                 alert("Error: " + error);
@@ -539,7 +546,8 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
                             contentType: "application/json; charset=utf-8",
                             data: JSON.stringify(data), dataType: "json",
                             success: function () {
-                                _self.$tableTag.bootstrapTable('refresh');
+                                getUserTag();
+                                //_self.$tableTag.bootstrapTable('refresh');
                             },
                             error: function (xhr, status, error) {
                                 alert("Error: " + error);
@@ -573,7 +581,8 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
                             contentType: "application/json; charset=utf-8",
                             type: 'PUT', data: JSON.stringify(data),
                             success: function() {
-                                _self.$tableTag.bootstrapTable("refresh");
+                                getUserTag();
+                                //_self.$tableTag.bootstrapTable("refresh");
                             },
                             error: function(xhr, status, error){
                                 alert("Error: " + error);
@@ -661,13 +670,46 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
 
     };
 
+    $scope.infodata = null;
+
+    $scope.uservocabulary = null;
+
+    function getInfoData(){
+        $.ajax({
+            url: '/datas/info',
+            success:function(res){
+                $scope.infodata = res;
+                $scope.$apply();
+            },
+            error: function(err){
+                console.error(JSON.stringify(err));
+            }
+        });
+    }
+
+    function getUserTag(){
+        $.ajax({
+            url: '/vocabulary/getUserTags',
+            success:function(res){
+                $scope.$apply(function(){
+                    $scope.uservocabulary = res;
+                    tableTag.bootstrapTable('load', res);
+                });
+            },
+            error: function(err){
+                console.error(JSON.stringify(err));
+            }
+        });
+    }
+
     $(document).ready(function(){
         if(!window.PROJECT || window.PROJECT == "") {
             $("#container").hide();
             $("#msgProject").show();
-        }else
-        {
+        }else {
             prjEditCtrl = new PrjEditCtrl($scope);
+            getInfoData();
+            getUserTag();
         }
     });
 

@@ -165,7 +165,7 @@ CompareCtrl.clickFilter = function()
             CompareCtrl.$AZbutton.removeAttr("disabled");
             CompareCtrl.$ZAbutton.removeAttr("disabled");
 
-            CompareCtrl.$barChart.replaceWith('<div id="barChart" style="margin-top: 50px"></div>');
+            CompareCtrl.$barChart.replaceWith('<div id="barChart"></div>');
             CompareCtrl.$barChart = $('#barChart');
             CompareCtrl.$radarLegend.replaceWith('<div class="col-md-3" id="radarLegend"></div>');
             CompareCtrl.$radarLegend = $('#radarLegend');
@@ -229,7 +229,7 @@ CompareCtrl.clickRestore = function()
     CompareCtrl.$sliderTimer.dateRangeSlider("min", CompareCtrl.minData);
     CompareCtrl.$sliderTimer.dateRangeSlider("max",  CompareCtrl.maxData);
 
-    CompareCtrl.$barChart.replaceWith('<div id="barChart" style="margin-top: 50px"></div>');
+    CompareCtrl.$barChart.replaceWith('<div id="barChart" ></div>');
     CompareCtrl.$barChart = $('#barChart');
     CompareCtrl.$radarLegend.replaceWith('<div class="col-md-3" id="radarLegend"></div>');
     CompareCtrl.$radarLegend = $('#radarLegend');

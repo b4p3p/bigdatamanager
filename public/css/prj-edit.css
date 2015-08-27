@@ -119,5 +119,15 @@ h3{
 }
 
 .btn-operation{
-    width: 200px;
+    width: 220px;
+}
+
+.row{
+    margin-right: 0;
+}
+
+.riga{
+    display: inline-block;
+    height: 100%;
+    vertical-align: top;
 }

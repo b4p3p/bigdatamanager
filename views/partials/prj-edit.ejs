@@ -16,7 +16,7 @@
    <a href="/view/app#/project/openproject">Open project</a>
 </div>
 
-<div id="container">
+<div id="container content">
 
    <h3>Edit project</h3>
 
@@ -161,7 +161,6 @@
    <div id="tableTagsContainer">
 
       <table id="tagsTable" data-toggle="table"
-             data-url="/vocabulary/getUserTags"
              data-cache="false" data-pagination="true">
          <thead>
          <tr>
@@ -192,30 +191,107 @@
 
       <div>
 
-         <div class="row">
+         <div class="row panel panel-default" style="padding: 20px 0" >
 
-            <div class="panel panel-default">
+            <div class="riga" style="width:100%;">
+
+               <div class="riga" style="margin-left: 10px">
+                  <img src="/img/info-icon.png" width="50" height="50">
+               </div>
+
+               <div class="riga">
+                  <p>Calcola il wordcount utilizzando soltanto i token presenti nei dati</p>
+                  <p>Se i token non sono disponibili, è necessario utilizzare la funzione "Override Data Tokens" </p>
+               </div>
+
+               <div style="float: right;margin-right: 10px;margin-top: 8px;">
+                  <button class="btn btn-default btn-operation" id= "synUserTag"
+                          ng-disabled="infodata == null || infodata.countTokens == 0">
+                     Wordcount by tokens data
+                  </button>
+               </div>
 
             </div>
 
-            <a class="btn btn-default btn-operation" id= "synUserTag"
-               style="margin-top: 8px; margin-left: 15px; float: right;">
-               Wordcount by tokens data
-            </a>
          </div>
 
-         <div class="row">
-            <a class="btn btn-default btn-operation" id= "synDataTag"
-               style="margin-top: 8px;  margin-left: 15px; float: right;">
-               Wordcount by user vocabulary
-            </a>
+         <div class="row panel panel-default" style="padding: 20px 0" >
+
+            <div class="riga" style="width:100%;">
+
+               <div class="riga" style="margin-left: 10px">
+                  <img src="/img/info-icon.png" width="50" height="50">
+               </div>
+
+               <div class="riga">
+                  <p>Calcola il wordcount utilizzando i token nei dati, filtrando i risultati con il vocabolario dell'utente</p>
+                  <p>Se i token non sono disponibili, è necessario utilizzare la funzione "Override Data Tokens" </p>
+               </div>
+
+               <!--
+                  Disabilito il pulsante se:
+                   - il vocabolario dell'utente è vuoto
+                   - non ci sono token
+               -->
+
+               <div style="float: right;margin-right: 10px;margin-top: 8px;">
+                  <button class="btn btn-default btn-operation" id= "synDataTag"
+                          ng-disabled="uservocabulary == null || uservocabulary.length == 0 ||
+                                       infodata == null || infodata.countTokens == 0">
+                     Wordcount by user vocabulary
+                  </button>
+               </div>
+
+            </div>
+
          </div>
 
-         <div class="row">
-            <a class="btn btn-danger btn-operation" id= "overrideDataTokens"
-               style="margin-top: 8px;  margin-left: 15px; float: right;">
-               Override data tokens
-            </a>
+         <div class="row panel panel-default" style="padding: 20px 0" >
+
+            <div class="riga" style="width:100%;">
+
+               <div class="riga" style="margin-left: 10px">
+                  <img src="/img/info-icon.png" width="50" height="50">
+               </div>
+
+               <div class="riga">
+                  <p>Utilizzare questa funzione per sovrascrivere i token presenti nei dati</p>
+                  <p>N.B.<br>Questa operazione non è reversibile. Per utilizzare i token originali, è necessario reimportare i dati nel progetto.</p>
+               </div>
+
+               <div style="float: right;margin-right: 10px;margin-top: 8px;">
+
+                  <div>
+                     <button class="btn btn-danger btn-operation" id= "overrideDataTokens"
+                             ng-disabled="infodata == null">
+                        Override data tokens
+                     </button>
+                  </div>
+
+                  <div style="text-align: center;margin-top: 5px">
+
+                     <div  hidden>
+                        <img src="/img/icons/danger.png" width="25px" height="25px">
+                        <div class="riga" style="vertical-align: middle">
+                           <p style="margin-bottom: 0">No tokens avaible</p>
+                        </div>
+                     </div>
+
+                     <div ng-if="infodata != null">
+                        <div class="riga" style="vertical-align: middle">
+                           <p style="margin-bottom: 0">Number of tokens: {{infodata.countTokens}}</p>
+                        </div>
+                     </div>
+
+                     <div ng-if="infodata == null">
+                        <i class="fa fa-lg fa fa-spinner fa-spin" ></i>
+                     </div>
+
+                  </div>
+               </div>
+
+            </div>
+
          </div>
 
       </div>
@@ -236,6 +312,8 @@
       <iframe id="terminal" class="terminal"> </iframe>
 
    </div>
+
+</div>
 
 </div>
 

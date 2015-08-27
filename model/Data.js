@@ -891,21 +891,23 @@ Data.getInfoCount = function(arg, callback){
         callback(err, result);
     });
 
-    //datas.aggregate([
-    //    {$match:{projectName:project}},
-    //    {$group:{
-    //        _id:null,
-    //        min: {$min: "$date" },
-    //        max: {$max: "$date" },
-    //        countTot: {$sum:1},
-    //        countGeo: {$sum: {
-    //            "$cond": [ { "$ifNull": ["$latitude", false] }, 1, 0 ]
-    //        }},
-    //        allTags: {$addToSet: "$tag"}
-    //    }}
-    //], function(err, result){
-    //
-    //});
+};
+
+Data.getInfo = function(project, callback){
+
+    var conn = mongoose.createConnection('mongodb://localhost/oim');
+    var datas = conn.model(Data.MODEL_NAME, Data.SCHEMA);
+
+    async.parallel({
+        countTokens: function(next){
+            datas.distinct('tokens', {projectName:project}, function(err, docs){
+                next(null, docs.length);
+            });
+        }
+    }, function(err, result){
+        conn.close();
+        callback(err, result)
+    });
 
 };
 
