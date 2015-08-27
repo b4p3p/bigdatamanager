@@ -118,6 +118,7 @@ CompareCtrl.setSlider = function()
 
 CompareCtrl.getFilteredStat = function(callback)
 {
+    console.log("CALL: getFilteredStat");
     var conditions = new ObjConditions(
         CompareCtrl.$cmbNations,
         CompareCtrl.$cmbRegions,
@@ -417,10 +418,17 @@ CompareCtrl.enableCombo = function()
 {
     console.log("CALL: enableCombo");
 
-    if (CompareCtrl.filteredStat.data.nations.length == 0) {
+    if (CompareCtrl.filteredStat.data.nations == null) {
         CompareCtrl.$cmbNations.attr('disabled', true);
-        //CompareCtrl.$cmbNations.selectpicker('refresh');
+        CompareCtrl.$cmbNations.selectpicker('refresh');
         CompareCtrl.$cmbRegions.multiselect('disable');
+        CompareCtrl.$sliderTimer.dateRangeSlider("disable");
+        $('#radioBar').attr('disabled', true);
+        $('#radioRadar').attr('disabled', true);
+        $('#radioByNumber').attr('disabled', true);
+        $('#radioByPercentage').attr('disabled', true);
+        $('#radioNations').attr('disabled', true);
+        $('#radioRegions').attr('disabled', true);
         $('#warning').removeClass('hidden');
     }
     else

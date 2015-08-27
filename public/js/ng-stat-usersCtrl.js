@@ -133,7 +133,10 @@ UsersCtrl.clickStat = function ()
         UsersCtrl.colors = colorUtil.generateColor(UsersCtrl.filteredUserData.length);
         UsersCtrl.maxDate = new Date(doc.properties.maxDate);
         UsersCtrl.minDate = new Date(doc.properties.minDate);
-        UsersCtrl.dataCloud = doc.wordcount;
+        if(_.keys(doc.wordcount).length == 0)
+            UsersCtrl.dataCloud = null;
+        else
+            UsersCtrl.dataCloud = doc.wordcount;
 
         DataCtrl.getField( function(docStat){
             UsersCtrl.filteredStat = docStat;
@@ -176,8 +179,26 @@ UsersCtrl.drawCharts = function()
     UsersCtrl.$mapContainer.removeClass('hidden');
     UsersCtrl.drawMap();
 
-    UsersCtrl.$divCloud.removeClass('hidden');
-    UsersCtrl.drawWordCloud();
+    if(UsersCtrl.dataCloud != null)
+    {
+        $('#msgProject').addClass('hidden');
+        UsersCtrl.$divCloud.removeClass('hidden');
+        UsersCtrl.drawWordCloud();
+    }
+    else
+    {
+        UsersCtrl.$divCloud.replaceWith(
+            '<div id="divCloud" class="form-group">' +
+            '<div id="line"></div>' +
+            '<label id="labelID" class="fix-label" style="margin-left: 3px">Word cloud token users</label><br>' +
+            '<div class="alert alert-warning" role="alert" id="msgProject" style="margin-top: 20px;">' +
+            '<span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>' +
+            '<span class="sr-only">Error:</span>' +
+            " Project's data not are synchronized with tags <br>" +
+            'Please synchronize the project <br>' +
+            '<a href="/view/app#/project/editproject">Edit project</a></div></div>');
+        UsersCtrl.$divCloud = $('#divCloud');
+    }
 };
 
 UsersCtrl.clearDiv = function()
