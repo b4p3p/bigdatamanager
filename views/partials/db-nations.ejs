@@ -2,6 +2,11 @@
 <!--<script src="/node_modules/underscore/underscore.js"></script>-->
 <!--<script src="/public/js/JQueryUtil.js"></script>-->
 
+<!-- bootstrap file input -->
+<link href="/bower_components/bootstrap-fileinput/css/fileinput.css" rel="stylesheet" />
+<script src="/bower_components/bootstrap-fileinput/js/fileinput.js"></script>
+<script src="/bower_components/bootstrap-fileinput/js/fileinput_locale_it.js"></script>
+
 <style>
    .btn-delete {
       position: relative;
@@ -123,10 +128,11 @@
       <div class="form-group">
          <label for="fileNation">Load files</label>
 
-         <input id="btnFilesNations" type="file" class="file" name="nations" multiple
+         <input id="btnFilesNations"
+                type="file" class="file" name="nations"
                 data-show-caption="true"
                 data-show-preview="false"
-                data-show-upload="false">
+                data-show-upload="false" multiple>
       </div>
 
       <div class="progress-container row-form" id="progress-container">
@@ -162,7 +168,7 @@
    <button id="btnClick"
            class="btn btn-danger" aria-label="Right Align"
            style="position: relative; left: calc(100% - 108px); width: 108px; margin-top: 10px"
-           onclick="uploaderCtrl.upload();">
+           ng-click="uploadNation()">
       <span class="glyphicon glyphicon-upload" aria-hidden="true"></span>
       Upload
    </button>
@@ -199,13 +205,6 @@
    $(document).ready(function(){
       $("#table-nations").bootstrapTable({url: '/regions/nations'});
    });
-
-   DBNationsCtrl.init();
-   uploaderCtrl = new UploaderCtrl(
-           $("#uploadNationsForm"),
-           $("#btnFilesNations"),
-           $("#progress-container"),
-           optionsCtrl, submitFn);
 
 </script>
 

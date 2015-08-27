@@ -324,6 +324,7 @@ Project.sync = function(project, username, res, callback)
     console.log("CALL: Project.sync");
 
     var connection  = mongoose.createConnection('mongodb://localhost/oim');
+    var Utils = require('../controller/nodeUtil');
 
     Datas = require("../model/Data");
 
@@ -453,6 +454,7 @@ Project.sync = function(project, username, res, callback)
                 doc.save(function(err, res){
                     next(err, docSync);
                 });
+
             });
         },
 

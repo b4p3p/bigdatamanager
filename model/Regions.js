@@ -37,7 +37,9 @@ Regions.MODEL_NAME = "region";
  * @param callback - fn(err, { keyfile: {insert:{Number}, discard:{Number} }
  */
 Regions.importFromFile = function (fileNames, callback) {
+
     var ris = {};
+    var Utils = require('../controller/nodeUtil');
 
     MongoClient.connect(url, function (err, db) {
 
@@ -91,11 +93,21 @@ Regions.importFromFile = function (fileNames, callback) {
                             async.each(nationJson.features,
 
                                 function (features, cb) {
+
+                                    if( features.properties.NAME_1.indexOf('.') >= 0 )
+                                    {
+                                        features.properties.NAME_1 = Utils.replaceDot(features.properties.NAME_1);
+                                    }
+
                                     regions.save(features, function (err) {
-                                        err ? contDiscard++ : contInsert++;
+                                        if( err ){
+                                            console.error(err.toString());
+                                            contDiscard++;
+                                        }else {
+                                            contInsert++
+                                        }
                                         cb(null);
                                     });
-
                                 },
 
                                 //end each save
@@ -152,84 +164,6 @@ Regions.importFromFile = function (fileNames, callback) {
 
 };
 
-//MongoClient.connect(url, function (err, db) {
-//        var regions = db.collection('regions');
-//        var datas = db.collection('datas');
-//        var cont = 0;
-//        var ris = {};
-//        var first = true;
-//
-//        regions.find(
-//            {},
-//            {"geometry": 1, "properties.NAME_0": 1, "properties.NAME_1": 1}
-//        ).each(
-//            function (err, region) {
-//
-//                if (!region && cont == 0 && first)  //non ci sono regioni
-//                {
-//                    callback(null, {});
-//                    return;
-//                }
-//
-//                first = false;
-//
-//                if (!region) return;
-//
-//                cont++;
-//
-//                datas.aggregate(
-//                    {"$match": {loc: {$geoWithin: {$geometry: region.geometry}}}},
-//                    {"$group": {"_id": "$nation", "sum": {"$sum": 1}}},
-//                    {
-//                        "$project": {
-//                            _id: 0,
-//                            nation: {$literal: region.properties.NAME_0},
-//                            region: {$literal: region.properties.NAME_1},
-//                            sum: "$sum"
-//                        }
-//                    },
-//                    function (err, doc) {
-//                        if (!doc || doc.length == 0) {
-//
-//                            cont--;
-//
-//                            if (cont == 0) {
-//                                var keys = _.keys(ris);
-//                                ris = _.map(keys, function (k) {
-//                                    return {nation: ris[k].nation, sum: ris[k].sum}
-//                                });
-//                                db.close();
-//                                callback(null, ris);
-//                            }
-//
-//                            return;
-//                        }
-//
-//                        cont--;
-//                        //console.log(doc[0].nation + " " + doc[0].nation + " " + doc[0].sum);
-//
-//                        if (!ris[doc[0].nation])
-//                            ris[doc[0].nation] = {nation: doc[0].nation, sum: doc[0].sum};
-//                        else
-//                            ris[doc[0].nation].sum += doc[0].sum;
-//
-//                        if (cont == 0) {
-//                            console.log("FINE");
-//                            var keys = _.keys(ris);
-//                            ris = _.map(keys, function (k) {
-//                                return {nation: ris[k].nation, sum: ris[k].sum}
-//                            });
-//                            db.close();
-//                            callback(null, ris);
-//                        }
-//                    }
-//                )
-//            }
-//        )
-//    }
-//);
-
-
 /**
  * @param callback  - fn({Err},{Data[]})
  */
@@ -254,9 +188,13 @@ Regions.getNations = function (project, callback) {
  * @param callback  - fn({Err},{Data[]})
  */
 Regions.removeNation = function (nation, callback) {
+
+    var Datas = require('../model/Data');
+
     var connection = mongoose.createConnection('mongodb://localhost/oim');
-    var Regions = connection.model("regions", Regions.SCHEMA);
-    var Datas = connection.model("datas", SchemaData);
+    var regionsModel = connection.model("regions", this.SCHEMA);
+    var datasModel = connection.model("datas", Datas.SCHEMA);
+
     var ris = {
         deletedRegion: 0,
         updatedData: 0
@@ -266,17 +204,16 @@ Regions.removeNation = function (nation, callback) {
         [
             //rimuovo le regioni della nazione selezionata
             function (next) {
-                Regions.remove({"properties.NAME_0": nation}, function (err, result) {
+                regionsModel.remove({"properties.NAME_0": nation}, function (err, result) {
                     ris.deletedRegion = result.result.n;
                     next(null);
                 });
             },
 
-
             //rimuovo dai dati il riferimento delle regioni
             function (next) {
 
-                Datas.update(
+                datasModel.update(
                     {nation: nation},
                     {$unset: {nation: true, region: true}},
                     {multi: true, safe: false},

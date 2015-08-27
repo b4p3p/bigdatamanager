@@ -66,4 +66,8 @@ Util.addMatchClause = function(exec, query)
     }
 };
 
+Util.replaceDot = function(string){
+    return string.replace(/\./g, '\uff0E');
+};
+
 module.exports = Util;
