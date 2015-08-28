@@ -19,6 +19,7 @@ var CrowdPulse = function() {
      * @param arg.filePath
      * @param arg.fileName
      * @param arg.app
+     * @param arg.project
      * @param callback
      */
 
@@ -46,52 +47,81 @@ var CrowdPulse = function() {
         });
 
         rl.on('close', function() {
+
             console.log("lette " + contLine + " righe, errori: " + contError);
-            async.map( docs , function(obj, next){
-                var d = {
-                    "id" : obj["oid"],
-                    "date" : new Date( obj.date["$date"] ),
-                    "projectName" : project,
-                    "source" : obj.source,
-                    "text" : obj["text"],
-                    "user" : obj["fromUser"],
-                    tokens : []
-                };
 
-                if( obj.latitude ) d.latitude = obj.latitude;
-                if( obj.longitude ) d.longitude = obj.longitude;
+            async.waterfall([
 
-                if(obj['customTags'] && obj['customTags'].length > 0 && obj['customTags'][0])
-                {
-                    d.tag = obj['customTags'][0];
-                }
+                //costruisco il dataset da salvare
+                function(next){
 
-                if(obj.latitude && obj.longitude)
-                {
-                    d.loc = {
-                        "type" : "Point",
-                        "coordinates" : [ obj.longitude, obj.latitude ]
-                    }
-                }
+                    async.map( docs , function(obj, next){
+                        var d = {
+                            "id" : obj["oid"],
+                            "date" : new Date( obj.date["$date"] ),
+                            "projectName" : project,
+                            "source" : obj.source,
+                            "text" : obj["text"],
+                            "user" : obj["fromUser"],
+                            tokens : []
+                        };
 
-                _.each(obj['tokens'], function(token){
-                    if(!token['stopWord'])
-                        d.tokens.push(token.text )
-                });
+                        if( obj.latitude ) d.latitude = obj.latitude;
+                        if( obj.longitude ) d.longitude = obj.longitude;
 
-                next(null, d);
+                        if(obj['customTags'] && obj['customTags'].length > 0 && obj['customTags'][0]) {
+                            d.tag = obj['customTags'][0];
+                        }
 
-            } , function(err, results){
+                        if(obj.latitude && obj.longitude) {
+                            d.loc = {
+                                "type" : "Point",
+                                "coordinates" : [ obj.longitude, obj.latitude ]
+                            }
+                        }
 
-                if(!err)
-                    saveDocs({app:app, docs: results, file: arg.fileName} , function(err, result){
-                        callback(err, result );
+                        //processo i token
+                        _.each(obj['tokens'], function(token){
+                            if(!token['stopWord'])
+                                d.tokens.push(token.text )
+                        });
+
+                        next(null, d);
+
+                    } , function(err, results){
+                        next(err, results);
+                    })
+                },
+
+                //salvo i documenti
+                function(results, next){
+
+                    saveDocs({app:app, docs: results, file: arg.fileName} , function(err, resultSave){
+                        next(err, resultSave);
                     });
-                else {
-                    callback(err, {success: 0, fail: 9999} );
+
+                },
+
+                //aggiorno il contatore
+                function(next, resultSave){
+
+                    var Project = require('../model/Project');
+
+                    Project.setSize({project: arg.project}, function(err){
+                        next(err, resultSave);
+                    })
+
                 }
 
-            })
+            ], function(err, resultSave){
+
+                if(err)
+                    callback(err, {success: 0, fail: 9999} );
+                else
+                    callback(err, resultSave );
+
+            });
+
         });
     };
 

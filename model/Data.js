@@ -65,8 +65,7 @@ Data.prototype.data = {};
  * @param projectName {String}
  * @param cb_ris - callback({Error},{Result})
  */
-Data.importFromFile = function (type, file, projectName, cb_ris)
-{
+Data.importFromFile = function (type, file, projectName, cb_ris) {
     async.waterfall( [
 
             // 1) leggo il file
@@ -129,25 +128,10 @@ Data.importFromFile = function (type, file, projectName, cb_ris)
             // 4) aggiorno il contatore dei dati
             function(resultInsert, next) {
 
-                var connection = mongoose.createConnection('mongodb://localhost/oim');
-                var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
-                var projects = connection.model(Project.MODEL_NAME, Project.SCHEMA);
+                Project.setSize({project: projectName}, function(err){
+                    next(err, resultInsert);
+                });
 
-                projects.findOne({projectName:projectName}, function(err, project){
-
-                    datas.find({projectName:projectName}).count(function(err, cont){
-
-                        project.size = cont;
-                        project.dateLastUpdate = new Date();
-
-                        project.save(function(err){
-                            if(err)console.error(err);
-                            connection.close();
-                            next(err, resultInsert);
-                        });
-
-                    })
-                })
             }
 
         ],
@@ -175,8 +159,7 @@ Data.importFromFile = function (type, file, projectName, cb_ris)
 
 };
 
-Data.getDatas = function (projectName, query, callback)
-{
+Data.getDatas = function (projectName, query, callback) {
     //query.limit = 50;
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
@@ -201,8 +184,7 @@ Data.getDatas = function (projectName, query, callback)
     });
 };
 
-Data.getDataFilter = function (projectName, query, callback)
-{
+Data.getDataFilter = function (projectName, query, callback) {
     //query.limit = 50;
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
