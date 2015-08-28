@@ -75,7 +75,7 @@ ngApp.controller('ngDbNormalizationCtrl', ['$scope', function($scope) {
             var region = feature.properties.NAME_1;
             var avg = 0;
             if($scope.stat.data.nations && $scope.stat.data.nations[nation] != null)
-                avg = $scope.stat.data.nations[nation].regions[region].avg;
+                avg = $scope.stat.data.nations[nation].regions[region].avgWeighed[1];
             return avg;
         }
 

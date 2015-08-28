@@ -62,6 +62,12 @@ Array.prototype.indexOfObject = function (key, value) {
     return -1;
 };
 
+/**
+ * Restituisce il documento stat memorizato all'interno del database
+ * E' piu veloce, ma i risultati non sono in tempo reale
+ * @param project
+ * @param callback
+ */
 Summary.getStat = function (project, callback)
 {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
@@ -75,6 +81,17 @@ Summary.getStat = function (project, callback)
     );
 };
 
+/**
+ * Si calcola il documento stat sulla base dei dati memorizzati.
+ * E' piu lenta, ma serve per costruire il documento stat da salvare nel db
+ * N.B.
+ * In fase di debug è utile richiamare /project/stat con un parametro nell'URL in modo tale da richiamare questa funzione.
+ * E.S. /project/stat?pippo=1
+ * @param project
+ * @param username
+ * @param query
+ * @param callback
+ */
 Summary.getStatFilter = function (project,username, query, callback)
 {
     console.log("CALL Summary.getStatFilter of " + project);
@@ -82,81 +99,12 @@ Summary.getStatFilter = function (project,username, query, callback)
     Datas = require("../model/Data");
 
     var docSync = {
-        projectName: project,
-        username: username,
-        lastUpdate: new Date(),
+        projectName: project,   username: username,    lastUpdate: new Date(),
         data: {
-            minDate: null,
-            maxDate: null,
-            countSync: 0,
-            countTot: 0,
-            syncTags: {},
-            allTags: {},
-            counter: {},
-            nations: {}
+            minDate: null,  maxDate: null,    countSync: 0,   countTot: 0,
+            syncTags: {},   allTags: {},      counter: {},    nations: {}
         }
     };
-
-    function _setDate(date) {
-
-        if (!docSync.data.minDate)
-            docSync.data.minDate = date;
-        if (!docSync.data.maxDate)
-            docSync.data.maxDate = date;
-
-        if (date < docSync.data.minDate)
-            docSync.data.minDate = date;
-        if (date > docSync.data.maxDate)
-            docSync.data.maxDate = date;
-    }
-
-    function setDate(minDate, maxDate) {
-        _setDate(minDate);
-        _setDate(maxDate);
-    }
-
-    function buildQuery(query) {
-
-        var ris = [];
-
-        if (query) {
-
-            if(query.interval){
-                if (query.interval.min) ris.push({date: {$gte: new Date(query.interval.min)}});
-                if (query.interval.max) ris.push({date: {$lte: new Date(query.interval.max)}});
-            }
-
-            if (query.start) ris.push({date: {$gte: new Date(query.start)}});
-            if (query.end)   ris.push({date: {$lte: new Date(query.end)}});
-
-            if (query.tags) {
-                var tags = query.tags.split(',');
-                ris.push({tag: {$in: tags}});
-            }
-
-            if (query.nations) {
-                if(_.isArray(query.nations)){
-                    ris.push({nation: {$in: query.nations}});
-                }
-                else
-                {
-                    var nations = query.nations.split(',');
-                    ris.push({nation: {$in: nations}});
-                }
-            }
-
-            if (query.regions) {
-                if(_.isArray(query.regions)){
-                    ris.push({region: {$in: query.regions}});
-                }else {
-                    var regions = query.regions.split(',');
-                    ris.push({region: {$in: regions}});
-                }
-            }
-        }
-
-        if (ris.length > 0) return ris; else return [{}];
-    }
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
 
@@ -169,51 +117,37 @@ Summary.getStatFilter = function (project,username, query, callback)
 
     async.parallel( {
 
+            //ottengo le regioni associate alla nazione. Solo stringe
             regions: function (callback) {
                 regions.aggregate( [
-
                     { $group: {
                         _id: "$properties.NAME_0",
-                        regions: { $addToSet: "$properties.NAME_1" }
+                        //regions: { $addToSet: "$properties.NAME_1" }
+                        regions: { $addToSet: {
+                            region: "$properties.NAME_1",
+                            baseNorm: "$properties.baseNorm"
+                        } }
                     }},
-
-                    {$project: {
-                        _id: 0,
-                        nation: "$_id",
-                        regions: 1
-                    }}
+                    {$project: { _id: 0,  nation: "$_id",  regions: 1 }}
                 ], function(err, result) {
-
                     callback(err, result);
-
                 });
             },
 
             docSync: function (callback) {
                 datas.aggregate(
                     [
-                        { $match: {
-                            projectName: project,
-                            nation: {$exists: true},
-                            $and: queryAgg
-                        }},
+                        { $match: { projectName: project, nation: {$exists: true}, $and: queryAgg }},
                         { $group: {
                             _id: {nation: "$nation", region: "$region", tag: "$tag"},
-                            count: {$sum: 1},
-                            minDate: {$min: "$date"},
-                            maxDate: {$max: "$date"}
+                            count: {$sum: 1},  minDate: {$min: "$date"}, maxDate: {$max: "$date"}
                         }}
                     ],
 
                     function (err, result) {
-                        var nation = "",
-                            region = "",
-                            tag = "",
-                            count = 0;
+                        var nation = "", region = "", tag = "", count = 0;
 
-                        async.each(result,
-
-                            function (item, next) {
+                        async.each(result, function (item, next) {
 
                                 nation = item._id.nation;
                                 region = item._id.region;
@@ -221,7 +155,7 @@ Summary.getStatFilter = function (project,username, query, callback)
                                 count = item.count;
 
                                 //min e max date
-                                setDate(item.minDate, item.maxDate);
+                                setDate(docSync, item.minDate, item.maxDate);
 
                                 //count tot
                                 docSync.data.countTot += item.count;
@@ -302,49 +236,6 @@ Summary.getStatFilter = function (project,username, query, callback)
                     }
                 );
             },
-
-            max: function(callback) {
-                datas.aggregate(
-                    [{$match: {
-                        projectName: project,
-                        nation: {$exists: true},
-                        $and: queryAgg
-                    }},
-                    {$group: {
-                        _id: {nation: "$nation", region: "$region" },
-                        sum: {$sum: 1}
-                    }},
-                    {$group: {
-                        _id: "$_id.nation" ,
-                        sum: {$sum: "$sum" },
-                        regions: {$push: {region: "$_id.region", sum:"$sum" } }
-                    }},
-                    {$project: { _id: 0, nation: "$_id", sum: 1, regions:1 }},
-                    {$sort: { count: -1 }}],
-                    function (err, result) {
-
-                        if (result.length == 0){
-                            callback(null, 0);
-                            return;
-                        }
-
-                        var ris = {nation : 0, region : 0};
-
-                        _.each(result, function(nation) {
-
-                            ris.nation = Math.max( ris.nation, nation.sum);
-                            _.each(nation.regions, function(region) {
-                                ris.region = Math.max( ris.region, region.sum);
-                            });
-                        });
-
-
-                        callback(null, ris);
-
-                    }
-                );
-            },
-
             count: function(callback){
                 var arg = {
                     query: {projectName: project},
@@ -371,9 +262,8 @@ Summary.getStatFilter = function (project,username, query, callback)
                 docSync.data.countGeo = 0;
             }
 
-            async.each(results.regions,
-
-                function(obj, next){
+            //obj: {region:String, baseIndex: Number}
+            async.each(results.regions,  function(obj, next) {
 
                     //nation == null
                     if(!docSync.data.nations[obj.nation]) {
@@ -381,25 +271,31 @@ Summary.getStatFilter = function (project,username, query, callback)
                         return;
                     }
 
-                    docSync.data.nations[obj.nation].avgWeighed = [];
-                    docSync.data.nations[obj.nation].avg = docSync.data.nations[obj.nation].count / results.max.nation;
+                    //calcolo l'avg per la nazione
+                    //docSync.data.nations[obj.nation].avg = docSync.data.nations[obj.nation].count / results.max.nation;
+                    docSync.data.nations[obj.nation].avg = docSync.data.nations[obj.nation].count;
 
+                    //calcolo l'avg per le regioni e aggiungo le regioni mancanti
                     async.each(obj.regions, function(region, next) {
 
                         //add empty region
-                        if(!docSync.data.nations[obj.nation].regions[region])
-                        {
-                            docSync.data.nations[obj.nation].regions[region] = {
-                                name: region,
-                                count: 0,
-                                counter: {}
+                        if(!docSync.data.nations[obj.nation].regions[region.region]) {
+                            docSync.data.nations[obj.nation].regions[region.region] = {
+                                name: region.region, count: 0, counter: {}
                             };
                         }
 
-                        docSync.data.nations[obj.nation].regions[region].avg =
-                            docSync.data.nations[obj.nation].regions[region].count / results.max.region;
-                        docSync.data.nations[obj.nation].regions[region].avgWeighed = [];
+                        docSync.data.nations[obj.nation].regions[region.region].baseNorm = region.baseNorm;
 
+                        //calcolo dell'AVG basato sul min-max
+
+                        var count = docSync.data.nations[obj.nation].regions[region.region].count;
+
+                        //var max = results.max.region
+                        docSync.data.nations[obj.nation].regions[region.region].avg = count;
+
+                        //calcolo dell'indice normalizzato
+                        docSync.data.nations[obj.nation].regions[region.region].avgWeighed = calculateAvgWeight(region.baseNorm, count);
 
                         next(null);
 
@@ -408,11 +304,112 @@ Summary.getStatFilter = function (project,username, query, callback)
                     })
                 }
                 , function(err){ //end
+                    docSync = normalizationMaxMin(docSync);
                     callback(err, docSync);
                 }
             );
         });
 };
+
+function _setDate(docSync, date) {
+    if (!docSync.data.minDate)  docSync.data.minDate = date;
+    if (!docSync.data.maxDate)  docSync.data.maxDate = date;
+    if (date < docSync.data.minDate)    docSync.data.minDate = date;
+    if (date > docSync.data.maxDate)    docSync.data.maxDate = date;
+}
+
+function setDate(docSync, minDate, maxDate) {
+    _setDate(docSync, minDate);
+    _setDate(docSync, maxDate);
+}
+
+function buildQuery(query) {
+
+    var ris = [];
+
+    if (query) {
+
+        if(query.interval){
+            if (query.interval.min) ris.push({date: {$gte: new Date(query.interval.min)}});
+            if (query.interval.max) ris.push({date: {$lte: new Date(query.interval.max)}});
+        }
+
+        if (query.start) ris.push({date: {$gte: new Date(query.start)}});
+        if (query.end)   ris.push({date: {$lte: new Date(query.end)}});
+
+        if (query.tags) {
+            var tags = query.tags.split(',');
+            ris.push({tag: {$in: tags}});
+        }
+
+        if (query.nations) {
+            if(_.isArray(query.nations)){
+                ris.push({nation: {$in: query.nations}});
+            }
+            else
+            {
+                var nations = query.nations.split(',');
+                ris.push({nation: {$in: nations}});
+            }
+        }
+
+        if (query.regions) {
+            if(_.isArray(query.regions)){
+                ris.push({region: {$in: query.regions}});
+            }else {
+                var regions = query.regions.split(',');
+                ris.push({region: {$in: regions}});
+            }
+        }
+    }
+
+    if (ris.length > 0) return ris; else return [{}];
+}
+
+function calculateAvgWeight(baseNorm, count){
+    return [
+        count / ( baseNorm + 1),
+        count / ( Math.log(baseNorm + Math.E ) )
+    ];
+}
+
+function normalizationMaxMin(docSync){
+
+    //var max = { avg: 0, avgWeighed: [] };
+    var maxCountNation = 0;
+    var maxCountRegion = 0;
+    var maxWeight = [];
+
+    //trovo il max per tutti i valori
+    _.each(docSync.data.nations, function(nation, key_N){
+        maxCountNation = Math.max(nation.count , maxCountNation);
+
+        _.each(nation.regions, function(region, key_R){
+
+            maxCountRegion = Math.max( region.count, maxCountRegion );
+            if( maxWeight.length == 0)
+                for(var i = 0; i < region.avgWeighed.length; i++) maxWeight.push(0);
+
+            _.each(region.avgWeighed, function(value, index){
+                maxWeight[index] = Math.max( maxWeight[index], value );
+            });
+        });
+    });
+
+    //normalizzo
+    _.each(docSync.data.nations, function(nation, key_N){
+        nation.avg = nation.count / maxCountNation;
+        _.each(nation.regions, function(region, key_R){
+            region.avg = region.count / maxCountRegion;
+            _.each(region.avgWeighed, function(value, index){
+                region.avgWeighed[index] = region.avgWeighed[index] / maxWeight[index];
+            });
+        });
+    });
+
+    return docSync;
+
+}
 
 Summary.updateStat = function(project, username, callback){
 
@@ -486,3 +483,46 @@ Summary.setEmptyStat = function(arg, callback){
 };
 
 module.exports = Summary;
+
+
+//max: function(callback) {
+//    datas.aggregate(
+//        [{$match: {
+//            projectName: project,
+//            nation: {$exists: true},
+//            $and: queryAgg
+//        }},
+//        {$group: {
+//            _id: {nation: "$nation", region: "$region" },
+//            sum: {$sum: 1}
+//        }},
+//        {$group: {
+//            _id: "$_id.nation" ,
+//            sum: {$sum: "$sum" },
+//            regions: {$push: {region: "$_id.region", sum:"$sum" } }
+//        }},
+//        {$project: { _id: 0, nation: "$_id", sum: 1, regions:1 }},
+//        {$sort: { count: -1 }}],
+//        function (err, result) {
+//
+//            if (result.length == 0){
+//                callback(null, 0);
+//                return;
+//            }
+//
+//            var ris = {nation : 0, region : 0};
+//
+//            _.each(result, function(nation) {
+//
+//                ris.nation = Math.max( ris.nation, nation.sum);
+//                _.each(nation.regions, function(region) {
+//                    ris.region = Math.max( ris.region, region.sum);
+//                });
+//            });
+//
+//
+//            callback(null, ris);
+//
+//        }
+//    );
+//},
