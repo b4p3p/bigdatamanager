@@ -154,6 +154,7 @@ Summary.getStatFilter = function (project,username, query, callback)
                 }
             }
         }
+
         if (ris.length > 0) return ris; else return [{}];
     }
 
@@ -380,6 +381,7 @@ Summary.getStatFilter = function (project,username, query, callback)
                         return;
                     }
 
+                    docSync.data.nations[obj.nation].avgWeighed = [];
                     docSync.data.nations[obj.nation].avg = docSync.data.nations[obj.nation].count / results.max.nation;
 
                     async.each(obj.regions, function(region, next) {
@@ -396,6 +398,8 @@ Summary.getStatFilter = function (project,username, query, callback)
 
                         docSync.data.nations[obj.nation].regions[region].avg =
                             docSync.data.nations[obj.nation].regions[region].count / results.max.region;
+                        docSync.data.nations[obj.nation].regions[region].avgWeighed = [];
+
 
                         next(null);
 

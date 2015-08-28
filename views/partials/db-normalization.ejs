@@ -1,0 +1,73 @@
+<link href="/public/css/normalization.less" rel="stylesheet/less">
+<script src="/node_modules/less/dist/less.js"></script>
+
+<!-- bootstrap file input -->
+<link href="/bower_components/bootstrap-fileinput/css/fileinput.css" rel="stylesheet" />
+<script src="/bower_components/bootstrap-fileinput/js/fileinput.js"></script>
+<script src="/bower_components/bootstrap-fileinput/js/fileinput_locale_it.js"></script>
+
+<div id="container">
+
+   <div class="panel panel-default" style="padding: 10px">
+      <div class="row" style="margin-top:0">
+         <p>In questa schermata è possibile inserire un dataset per normalizzare i dati nelle rispettive regioni.</p>
+         <p>La normalizzazione viene effettuata calcolando la cardinalità dei dati in una data regione,
+            quindi il risultato viene utilizzato per pesare l'indice dei tweet medi per una data regione.</p>
+         <p>Un buon dataset deve copripre allo stesso modo tutte le regioni ed essere il più generico possibile</p>
+      </div>
+   </div>
+
+   <form method="post"
+         enctype="multipart/form-data"
+         id="upload_form"
+         action="/database/normalization">
+
+      <div class="row">
+         <div>
+            <label for="cmbType">Type</label>
+         </div>
+         <select class="selectpicker" name="type" id="cmbType" >
+            <option value="json-crowdpulse">CrowdPulse Schema</option>
+            <option value="json">JSON</option>
+            <option value="csv">CSV</option>
+         </select>
+      </div>
+
+      <div class="row">
+         <label for="upload_button">Insert dataset</label>
+         <input type="file" class="file"
+                name="normalization"
+                id="upload_button"
+                data-show-upload="false"
+                data-show-caption="true"
+                data-show-preview="false">
+      </div>
+
+   </form>
+
+   <div class="row" style="text-align: right;">
+
+      <button class="btn btn-danger button"
+              id="upload_btn" style="width: 112px;"
+              ng-click="upload()">
+         Upload
+      </button>
+
+   </div>
+
+   <div id="map-container">
+      <div id="map"></div>
+      <div id="wait" ng-if="regions == null">
+         <div id="fountainTextG"><div id="fountainTextG_1" class="fountainTextG">L</div><div id="fountainTextG_2" class="fountainTextG">o</div><div id="fountainTextG_3" class="fountainTextG">a</div><div id="fountainTextG_4" class="fountainTextG">d</div><div id="fountainTextG_5" class="fountainTextG">i</div><div id="fountainTextG_6" class="fountainTextG">n</div><div id="fountainTextG_7" class="fountainTextG">g</div><div id="fountainTextG_8" class="fountainTextG">.</div><div id="fountainTextG_9" class="fountainTextG">.</div><div id="fountainTextG_10" class="fountainTextG">.</div></div>
+      </div>
+   </div>
+
+</div>
+
+<script>
+
+//    $(document).ready(function(){
+//       $("#normalizationTable").bootstrapTable({});
+//    });
+
+</script>

@@ -163,7 +163,7 @@ DataCtrl.requireRefresh = function(field, callback)
  *
  * @param field
  * @param queryString
- * @param callback
+ * @param callback({Object})
  * @param arg
  * @param arg.query {ObjConditions}
  * @param arg.type

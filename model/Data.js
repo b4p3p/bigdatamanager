@@ -25,9 +25,10 @@ Data.ResultFile = {
     fail: 0
 };
 
-Data.MODEL_NAME = "datas";
+var MODEL_NAME = "datas";
+Data.MODEL_NAME = MODEL_NAME;
 
-Data.SCHEMA = new mongoose.Schema({
+var SCHEMA = new mongoose.Schema({
     projectName: {type: String, required: true},
     id: {type: String, required: true},
     date: Date,
@@ -47,6 +48,7 @@ Data.SCHEMA = new mongoose.Schema({
 },{
     strict: false
 });
+Data.SCHEMA = SCHEMA;
 
 //Data.SCHEMA.index({ loc: '2dsphere' });
 
@@ -66,6 +68,7 @@ Data.prototype.data = {};
  * @param cb_ris - callback({Error},{Result})
  */
 Data.importFromFile = function (type, file, projectName, cb_ris) {
+
     async.waterfall( [
 
             // 1) leggo il file
@@ -891,6 +894,22 @@ Data.getInfo = function(project, callback){
         callback(err, result)
     });
 
+};
+
+/**
+ * Restituisce solo il numero dei documenti
+ * @param arg
+ * @param arg.project
+ * @param callback
+ */
+Data.getSize = function(arg, callback){
+
+    var conn = mongoose.createConnection('mongodb://localhost/oim');
+    var datas =      conn.model(MODEL_NAME, SCHEMA);
+
+    datas.find({projectName: arg.project}).count(function(err, result){
+        callback(err, result)
+    });
 };
 
 module.exports = Data;

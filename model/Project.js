@@ -16,9 +16,10 @@ var Project = function (data) {
     this.data = data;
 };
 
-Project.MODEL_NAME = "projects";
+var MODEL_NAME = "projects";
+Project.MODEL_NAME = MODEL_NAME;
 
-Project.SCHEMA = new mongoose.Schema({
+var SCHEMA = new mongoose.Schema({
     projectName: {type : String, required : true },
     userProject: { type : String, required : true },
     dateCreation: {type: Date, default: Date.now()},
@@ -26,16 +27,17 @@ Project.SCHEMA = new mongoose.Schema({
     description : {type : String, default:""} ,
     size : Number
 }, {strict:false});
+Project.SCHEMA = SCHEMA;
 
 Project.prototype.data = {};    //json
 
 /**
  *
  * @param projectName
+ * @param username
  * @param callback - fn({Data})
  */
-Project.getProject = function (projectName, username, callback)
-{
+Project.getProject = function (projectName, username, callback) {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var Projects = connection.model(Project.MODEL_NAME, Project.SCHEMA);
 
@@ -49,8 +51,7 @@ Project.getProject = function (projectName, username, callback)
     );
 };
 
-Project.getProjects = function(callback)
-{
+Project.getProjects = function(callback) {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var projects = connection.model(Project.MODEL_NAME, Project.SCHEMA);
 
@@ -78,8 +79,7 @@ Project.getProjects = function(callback)
  * @param dataProject
  * @param callback - fn(Err)
  */
-Project.addProject = function(dataProject, callback)
-{
+Project.addProject = function(dataProject, callback) {
     console.log("CALL Project.addProject");
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
@@ -127,8 +127,7 @@ Project.addProject = function(dataProject, callback)
  * @param projectName
  * @param callback - { fn(  {status:Number, message:String, deletedCount:Number}  )
  */
-Project.delProject = function(projectName, callback)
-{
+Project.delProject = function(projectName, callback) {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
 
     var Datas = require('../model/Data');
@@ -262,8 +261,7 @@ Project.editProject = function (data, callback) {
  * @param projectData - { file: {String} }
  * @param callback - fn({Error}, {Ris})
  */
-Project.addData = function (projectData, callback)
-{
+Project.addData = function (projectData, callback) {
     var Data = require("../model/Data");
 
     if( projectData.type == "json-crowdpulse" )
@@ -288,8 +286,7 @@ Project.addData = function (projectData, callback)
 
 };
 
-Project.getLastUpdate = function(project , callback)
-{
+Project.getLastUpdate = function(project , callback) {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var projects = connection.model( Project.MODEL_NAME, Project.SCHEMA);
 
@@ -319,8 +316,7 @@ function divInline(text, divClass ){
  * @param username
  * @param callback
  */
-Project.sync = function(project, username, res, callback)
-{
+Project.sync = function(project, username, res, callback) {
     console.log("CALL: Project.sync");
 
     var connection  = mongoose.createConnection('mongodb://localhost/oim');
@@ -383,39 +379,36 @@ Project.sync = function(project, username, res, callback)
             {
                 var datas = db.collection('datas');
 
-                async.each(regions,
+                async.each(regions, function (region, next) {
 
-                    function (region, next) {
+                    datas.update({
+                            projectName: project,
+                            loc: {$geoWithin: {$geometry: region._doc.geometry}}
+                        },
+                        { $set: {
+                            nation: region._doc.properties.NAME_0,
+                            region: region._doc.properties.NAME_1
+                        }},
+                        {multi: true, w: 1},
+                        function (err, result) {
 
-                        datas.update({
-                                projectName: project,
-                                loc: {$geoWithin: {$geometry: region._doc.geometry}}
-                            },
-                            { $set: {
-                                nation: region._doc.properties.NAME_0,
-                                region: region._doc.properties.NAME_1
-                            }},
-                            {multi: true, w: 1},
-                            function (err, result) {
-
-                                if(result && result.result && result.result.nModified)
-                                {
-                                    res.write( divInline(cont + "/" + len, "countRes") +
-                                        " - Modified " + divInline(result.result.nModified, "countDocs") +
-                                        " docs in " + region._doc.properties.NAME_1 + "@" + region._doc.properties.NAME_0 + "<br>");
-                                    countGeo += result.result.nModified;
-                                } else
-                                    res.write( divInline(cont + "/" + len, "countRes") +
-                                        " - Modified " + divInline(0, "countDocs") +
-                                        " docs in " + region._doc.properties.NAME_1 + "@" + region._doc.properties.NAME_0 + "<br>");
+                            if(result && result.result && result.result.nModified)
+                            {
+                                res.write( divInline(cont + "/" + len, "countRes") +
+                                    " - Modified " + divInline(result.result.nModified, "countDocs") +
+                                    " docs in " + region._doc.properties.NAME_1 + "@" + region._doc.properties.NAME_0 + "<br>");
+                                countGeo += result.result.nModified;
+                            } else
+                                res.write( divInline(cont + "/" + len, "countRes") +
+                                    " - Modified " + divInline(0, "countDocs") +
+                                    " docs in " + region._doc.properties.NAME_1 + "@" + region._doc.properties.NAME_0 + "<br>");
 
 
-                                console.log("   fatto " + cont + "/" + len + " - " + region._doc.properties.NAME_0 + ":" + region._doc.properties.NAME_1);
-                                cont++;
-                                next(null);
-                            }
-                        );
-                    },
+                            console.log("   fatto " + cont + "/" + len + " - " + region._doc.properties.NAME_0 + ":" + region._doc.properties.NAME_1);
+                            cont++;
+                            next(null);
+                        }
+                    )},
 
                     function (err) {
                         db.close();
@@ -493,7 +486,6 @@ Project.updateLastUpdate = function(model, project, date, size, callback){
     )
 };
 
-
 /**
  * Imposta il contatore size del progetto
  * @param arg
@@ -503,7 +495,7 @@ Project.updateLastUpdate = function(model, project, date, size, callback){
  */
 Project.setSize = function(arg, callback){
 
-    var Datas = require('../model/Data');
+    var Datas =   require('../model/Data');
     var Project = require('../model/Project');
 
     var conn =          !arg.connection

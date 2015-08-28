@@ -71,6 +71,7 @@ app.getUploadedFiles = function()
 var upload = multer( {
     dest: 'uploads/'
 } );
+app.upload = upload;
 app.up_nations = upload.array("nations");
 app.up_datas = upload.array("datas");
 
@@ -90,6 +91,7 @@ var router_view = express.Router();
 var router_regions = express.Router();
 var router_users = express.Router();
 var router_datas = express.Router();
+var router_database = express.Router();
 
 app.use('/vocabulary', router_vocabulary);
 app.use('/project', router_project);
@@ -97,9 +99,10 @@ app.use('/view', router_view);
 app.use('/regions', router_regions);
 app.use('/users', router_users);
 app.use('/datas', router_datas);
+app.use('/database', router_database);
 
 require('./routes/router')(app);
-require('./routes/database_router')(app);
+//require('./routes/database_router')(app);
 require('./routes/statistics_router')(app);
 
 require('./routes/regions_router')(router_regions, app, upload);
@@ -108,6 +111,7 @@ require('./routes/project_router')(router_project, app);
 require('./routes/view_router')(router_view);
 require('./routes/users_router')(router_users);
 require('./routes/datas_router')(router_datas, app);
+require('./routes/database_router')(router_database, app);
 
 /********************************
  *** END ROUTER

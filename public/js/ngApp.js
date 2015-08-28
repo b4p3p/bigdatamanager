@@ -145,6 +145,10 @@ ngApp.config( ['$routeProvider', function ($routeProvider) {
             templateUrl: '/view/db/nations',
             controller: 'ngDbNationsCtrl'
         })
+        .when('/db/normalization', {
+            templateUrl: '/view/db/normalization',
+            controller: 'ngDbNormalizationCtrl'
+        })
         //PROJECTS
         .when('/project/openproject', {
             controller: 'ngPrjOpenCtrl' ,

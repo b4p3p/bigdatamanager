@@ -828,31 +828,29 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
         var queryString = condictions.getQueryString();
         cont++;
 
-        DataCtrl.getFromUrl(DataCtrl.FIELD.DATA, queryString,
-            function (doc) {
+        DataCtrl.getFromUrl(DataCtrl.FIELD.DATA, queryString, function (doc) {
 
-                if (_idOp != idOp - 1) return;
+            if (_idOp != idOp - 1) return;
 
-                console.log(datas);
+            console.log(datas);
 
-                datas = datas.concat(doc);
-                formCtrl.progressCount.setPercentage();
+            datas = datas.concat(doc);
+            formCtrl.progressCount.setPercentage();
 
-                mapCtrl.heatmapCtrl.setData();
-                mapCtrl.markerCtrl.appendData(doc);
-                cont++;
-                //&& cont < 1
-                if (doc.length > 0) {
-                    start += step;
-                    var newTimeout = setTimeout(function () {
-                        _getDataAsync(_idOp, condictions, newTimeout, step, start);
-                    }, 0);
-                } else {
-                    clearTimeout(timeout);
-                    formCtrl.progressCount.stopProgress();
-                }
+            mapCtrl.heatmapCtrl.setData();
+            mapCtrl.markerCtrl.appendData(doc);
+            cont++;
+            //&& cont < 1
+            if (doc.length > 0) {
+                start += step;
+                var newTimeout = setTimeout(function () {
+                    _getDataAsync(_idOp, condictions, newTimeout, step, start);
+                }, 0);
+            } else {
+                clearTimeout(timeout);
+                formCtrl.progressCount.stopProgress();
             }
-        );
+        });
     }
 
     var project = window.PROJECT;

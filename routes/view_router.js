@@ -4,8 +4,8 @@ var ConstantsRouter = require('./constants_router');
 var Project = require("../model/Project");
 var Data = require("../model/Data");
 var async = require('async');
-var requestJson = require('request-json');
-var urlencode = require('urlencode');
+//var requestJson = require('request-json');
+//var urlencode = require('urlencode');
 
 module.exports = function (router) {
 
@@ -74,6 +74,12 @@ module.exports = function (router) {
         res.render('../views/partials/db-users.ejs', arg);
     });
 
+    router.get('/db/normalization', function (req, res)
+    {
+        var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.DB_NORMALIZATION);
+        res.render('../views/partials/db-normalization.ejs', arg);
+    });
+
     ///PROJECT
     router.get('/project/newproject', function (req, res)
     {
@@ -136,16 +142,3 @@ module.exports = function (router) {
     });
 
 };
-
-//
-//if (req.session.arg)                    // uso  i paramenti presenti nella variabile di sessione
-//{
-//    arg = req.session.arg;
-//    req.session.arg = null;
-//}
-//else                                    // mi costruisco la variabile usando le variabili di sessione
-//{
-//    arg.user = req.session.user;
-//    arg.project = req.session.project;
-//    arg.page = ConstantsRouter.PAGE.OPEN_PROJECT;
-//}

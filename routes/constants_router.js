@@ -71,6 +71,7 @@ ConstantsRouter.PAGE =
     //NATIONS
     DB_USERS: "db-users",
     DB_NATIONS: "db-nations",
+    DB_NORMALIZATION: "db-normalization",
 
     //STAT
     STAT_DATA: "stat-data",

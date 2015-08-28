@@ -29,13 +29,11 @@ module.exports = function (router, app, upload) {
         });
     });
 
-    router.get("/putnation", function (req, res)
-    {
+    router.get("/putnation", function (req, res) {
         res.redirect('/view/db/nations')
     });
 
-    app.post("/regions/putnation", app.up_nations , function (req, res)
-    {
+    app.post("/regions/putnation", app.up_nations , function (req, res) {
         var files = req.files;
         var username = req.session.user;
         var project = req.session.project;
@@ -64,14 +62,25 @@ module.exports = function (router, app, upload) {
     /**
      *  @return: { deletedRegion: {Number}, updatedData: {Number}
      */
-    router.delete("/nation", function (req, res)
-    {
+    router.delete("/nation", function (req, res) {
         var nation = req.body.nation;
         Regions.removeNation(nation, function(err, data){
             res.json(data);
         });
 
     });
+
+    router.post("/syncnorm", function (req, res){
+
+        Regions.updateCountNormalization(function(err){
+            if(err)
+                res.status(500).end(JSON.stringify(err));
+            else
+                res.json(err);
+        });
+
+    });
+
 };
 
 

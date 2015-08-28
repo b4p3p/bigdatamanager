@@ -6,9 +6,15 @@ var async = require("async");
 var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://localhost:27017/oim';
 var _ = require("underscore");
+
 var Datas = require("../model/Data");
+var Normalization = require("../model/Normalization");
+
 var iconvlite = require('iconv-lite');
 var mongoose = require('mongoose');
+var stream = require('stream');
+var readline = require('readline');
+
 var Schema = mongoose.Schema;
 var SchemaData = require("../model/Data").SCHEMA;
 
@@ -57,7 +63,6 @@ Regions.importFromFile = function (fileNames, callback) {
 
                 async.waterfall(
                     [
-
                         //read file
                         function (callback) {
 
@@ -264,6 +269,126 @@ Regions.getRegions = function (arg_nations, isLight, callback) {
             callback(null, regions);
         }
     );
+};
+
+/**
+ *
+ * @param arg
+ * @param arg.file
+ * @param callback
+ */
+Regions.setNormalization = function(arg, callback){
+
+    var contAccepted = 0;
+    var contUnaccepted = 0;
+    var contError = 0;
+    var filePath = arg.file.path;
+
+    var instream = fs.createReadStream(filePath);
+    var outstream = new stream;
+    var rl = readline.createInterface(instream, outstream);
+    var docs = [];
+
+    rl.on('line', function(line) {
+        try{
+            var obj = JSON.parse(line);
+
+            if(obj.latitude && obj.longitude) {
+                var loc = {
+                    "type" : "Point",
+                    "coordinates" : [ obj.longitude, obj.latitude ]
+                };
+                docs.push({loc:loc});
+                contAccepted++;
+            }else
+                contUnaccepted++;
+        }catch(e) {
+            contError++;
+        }
+    });
+
+    rl.on('close', function() {
+        fs.unlinkSync(filePath);
+
+        async.waterfall([
+
+            //salvo i documenti
+            function(next){
+                Normalization.overwriteDocs(docs, function(err, result){
+                    next(err);
+                })
+            },
+
+            //aggiorno le regioni con i documenti salvati
+            function(next){
+                Regions.updateCountNormalization(function(err, result){
+                    next(null);
+                });
+            }
+
+        ], function(err){
+            callback({accepted: contAccepted, unaccepted: contUnaccepted, error: contError});
+        });
+    });
+
+};
+
+Regions.updateCountNormalization = function(callback){
+
+    //uso i driver nativi (bug mongoose)
+    MongoClient.connect( url, function (err, db)
+    {
+        var normColl = db.collection('normalization');
+        var regionsColl = db.collection('regions');
+
+        async.waterfall([
+
+            //prendo le regioni
+            function(next){
+                console.log("     FETCH nations");
+                regionsColl.find( {}).toArray( function(err, regions) {
+                    next(err, regions);
+                });
+            },
+
+            //per ogni regione sincronizzo i dati
+            function(regions, next){
+
+                async.each(regions, function (region, next){
+
+                    //trovo tutti i dati all'inteerno della regione
+                    normColl.find({
+                        loc: {$geoWithin: {$geometry: region.geometry}}
+                    }).count(function(err, cont){
+
+                        //aggiorno la regione
+                        regionsColl.updateOne(
+                            {_id: region._id},
+                            {$set:{"properties.baseNorm": cont}},
+                            function(err, res){
+                                next(null);
+                            }
+                        );
+
+                    });
+
+                }, function(err){
+                    next(null);
+                })
+
+            }
+
+        ], function(err){
+
+            db.close();
+            callback(err);
+
+        });
+
+
+
+
+    });
 };
 
 module.exports = Regions;

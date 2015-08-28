@@ -148,5 +148,13 @@ module.exports = function (router, app) {
             if(!err) res.json(result); else res.status(500).send(err.toString());
         })
     });
+
+    router.get('/size', function (req, res){
+        var project = req.session.project || req.query.project;
+        Data.getSize({project: project}, function(err, size){
+            res.json({size:size});
+        })
+    });
+
 };
 
