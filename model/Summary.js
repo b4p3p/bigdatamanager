@@ -367,9 +367,14 @@ function buildQuery(query) {
 }
 
 function calculateAvgWeight(baseNorm, count){
+
+    //count / ( baseNorm + 1),
+    //count / ( Math.log(baseNorm + Math.E ) )
+
     return [
-        count / ( baseNorm + 1),
-        count / ( Math.log(baseNorm + Math.E ) )
+        baseNorm == 0 ? 0 : count / baseNorm ,
+        baseNorm == 0 ? 0 : count / Math.log(baseNorm + Math.E ),
+        baseNorm == 0 ? 0 : Math.log( count / baseNorm ),
     ];
 }
 

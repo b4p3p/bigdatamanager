@@ -112,6 +112,27 @@
             </label>
         </div>
 
+        <div class="checkbox" style="margin-right: 10px;">
+
+            <img src="/public/img/icons/balance.png" class="img-chk">
+            <label>
+                <input type="checkbox" id="chk_normalize"
+                       ng-disabled="IsBoudariesChecked == false">
+                    Normalize boundaries
+                <div style="display: inline-block">
+                    <select class="selectpicker" id="cmbTypeNormalization" title="Loading..."
+                            ng-disabled="IsNormalizeBoudariesChecked == false">
+                        <option value="0">Simple: count / baseNorm </option>
+                        <option value="1">Logarithmic: count / Ln(baseNorm + e) </option>
+                        <option value="2">Logarithmic: Ln( count / baseNorm ) </option>
+                    </select>
+                </div>
+
+            </label>
+        </div>
+
+
+
     </form>
 
     <div class="" style="margin-top: 10px;margin-right: 50px;height: 500px">

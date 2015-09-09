@@ -200,12 +200,14 @@
                </div>
 
                <div class="riga">
-                  <p>Calcola il wordcount utilizzando soltanto i token presenti nei dati</p>
+                  <p>Calcola il wordcount utilizzando i token nei dati, filtrando i risultati con il vocabolario dell'utente</p>
                   <p>Se i token non sono disponibili, è necessario utilizzare la funzione "Override Data Tokens" </p>
                </div>
 
+
+
                <div style="float: right;margin-right: 10px;margin-top: 8px;">
-                  <button class="btn btn-default btn-operation" id= "synUserTag"
+                  <button class="btn btn-default btn-operation"  id="synDataTag"
                           ng-disabled="infodata == null || infodata.countTokens == 0">
                      Wordcount by tokens data
                   </button>
@@ -224,7 +226,7 @@
                </div>
 
                <div class="riga">
-                  <p>Calcola il wordcount utilizzando i token nei dati, filtrando i risultati con il vocabolario dell'utente</p>
+                  <p>Calcola il wordcount utilizzando soltanto i token presenti nei dati</p>
                   <p>Se i token non sono disponibili, è necessario utilizzare la funzione "Override Data Tokens" </p>
                </div>
 
@@ -235,7 +237,7 @@
                -->
 
                <div style="float: right;margin-right: 10px;margin-top: 8px;">
-                  <button class="btn btn-default btn-operation" id= "synDataTag"
+                  <button class="btn btn-default btn-operation" id= "synUserTag"
                           ng-disabled="uservocabulary == null || uservocabulary.length == 0 ||
                                        infodata == null || infodata.countTokens == 0">
                      Wordcount by user vocabulary

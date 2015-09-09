@@ -7,9 +7,10 @@
 ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
 
     $scope.name = "ngStatMapCtrl";
+    $scope.IsNormalizeBoudariesChecked = false;
+    $scope.IsBoudariesChecked = false;
 
-    $scope.resize = function()
-    {
+    $scope.resize = function() {
         setTimeout(function() {
             $(window).trigger('resize');
             if (mapCtrl && mapCtrl.mainMap)
@@ -40,10 +41,12 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
         this.$cmbSelectNations = $('#cmbNations');
         this.$cmbSelectUsers =   $('#cmbUsers');
         this.$cmbSelectTerms =   $('#cmbTerms');
+        this.$cmbTypeNormalization =   $("#cmbTypeNormalization");
 
         this.$chkHeatmap = $('#chk_heatmap');
         this.$chkMarkercluster = $('#chk_markerCluster');
         this.$chkBoudaries = $('#chk_boundaries');
+        this.$chkNormalize = $("#chk_normalize");           //all'inizio è null
 
         this.$sliderTimer = $("#slider");
 
@@ -180,14 +183,19 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
 
         this.$chkBoudaries.click(function(){
 
-            if( _self.$chkBoudaries.prop("checked") )
+            var isChecked = _self.$chkBoudaries.prop("checked");
+
+            $scope.$apply(function(){
+                $scope.IsBoudariesChecked = isChecked;
+            });
+
+            if( isChecked )
                 mapCtrl.boundariesCtrl.show();
             else
                 mapCtrl.boundariesCtrl.hide();
-        })
+        });
 
-        this.reset = function()
-        {
+        this.reset = function() {
             this.$cmbSelectNations.attr("title", "Not available");
             this.$cmbSelectTags.attr("title", "Not available");
             this.$cmbSelectUsers.attr("title", "Not available");
@@ -196,8 +204,32 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
 
             btnCtrl.removeWaitFromAllCheck();
             this.progressCount.$divProgress.hide();
-        }
+        };
 
+        this.$chkNormalize.change(function()
+        {
+            var value =  $(this).is(':checked');
+            console.log("$chkNormalize: " + value);
+
+            $scope.$apply(function(){
+                $scope.IsNormalizeBoudariesChecked = value;
+                _self.$cmbTypeNormalization.attr('disabled', !value);
+                _self.$cmbTypeNormalization.selectpicker('refresh');
+            });
+            mapCtrl.boundariesCtrl.updateColorBoundaries();
+        });
+
+        this.$cmbTypeNormalization.change(function(){
+            mapCtrl.boundariesCtrl.updateColorBoundaries();
+        });
+
+        this.getTypeNormalization = function()
+        {
+            if( !_self.$chkNormalize.is(':checked') )
+                return -1;
+            else
+                return _self.$cmbTypeNormalization.val();
+        }
     };
 
     // Button controller
@@ -424,8 +456,18 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
             var nation = feature.properties.NAME_0;
             var region = feature.properties.NAME_1;
             var avg = 0;
-            if(stat.data.nations && stat.data.nations[nation] != null)
-                avg = stat.data.nations[nation].regions[region].avg;
+            if(stat.data.nations && stat.data.nations[nation] != null) {
+
+                var type = formCtrl.getTypeNormalization();
+
+                /**
+                 *  Nessuna normalizzazione
+                 */
+                if (type == -1)
+                    avg = stat.data.nations[nation].regions[region].avg;
+                else
+                    avg = stat.data.nations[nation].regions[region].avgWeighed[type];
+            }
             return avg;
         };
 
@@ -433,8 +475,11 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
             var avg = _self.getAvg( feature );
             return {
                 fillColor: _self.getColorBoundaries( avg ),
-                fillOpacity: 0.5,  weight: 2,
-                opacity: 0.5,  color: 'white', dashArray: '3'
+                fillOpacity: 0.5,
+                weight: 2,
+                opacity: 0.5,
+                color: 'white',
+                dashArray: '3'
             }
         };
 
@@ -480,6 +525,9 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
             var nation = e.target.feature.properties.NAME_0;
             var region = e.target.feature.properties.NAME_1;
 
+            var avg = stat.data.nations[nation].regions[region].avg;
+            var avgWeighed = stat.data.nations[nation].regions[region].avgWeighed;
+
             var tot_tweet = 0;
             var counter = {};
             if( stat.data.nations[nation] != null &&
@@ -509,13 +557,38 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
             pop +=
                 '<div class="row-popup">' +
                 '<div class="label-popup-left">Tot:</div>' +
-                '<div class="label-popup-right">' + tot_tweet + '</div>' +
+                '<div class="label-popup-right">' + tot_tweet + '</div>';
+
+            pop += "<hr class='separator'>";
+
+            pop += '<div class="row-popup">' +
+                        '<div class="label-popup-left">Avg:</div>' +
+                        '<div class="label-popup-right">' + avg.toFixed(2) +
+                    '</div>';
+
+            pop += '<div class="row-popup">' +
+                '<div class="label-popup-left">AvgWeighed[0]:</div>' +
+                '<div class="label-popup-right">' + avgWeighed[0].toFixed(2) +
                 '</div>';
+
+            pop += '<div class="row-popup">' +
+                '<div class="label-popup-left">AvgWeighed[1]:</div>' +
+                '<div class="label-popup-right">' + avgWeighed[1].toFixed(2) +
+                '</div>';
+
+            pop += "</div>";
 
             console.log("Popup " + e.target.feature.properties.NAME_1);
             e.target.bindPopup(pop).openPopup();
             //mainMap.fitBounds(e.target.getBounds());
         }
+
+        this.updateColorBoundaries = function(){
+            console.log("CALL: updateColorBoundaries");
+            _.each( _self.layer.getLayers(), function(layer){
+                _self.layer.resetStyle(layer);
+            });
+        };
 
     };
 
@@ -832,8 +905,6 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
 
             if (_idOp != idOp - 1) return;
 
-            console.log(datas);
-
             datas = datas.concat(doc);
             formCtrl.progressCount.setPercentage();
 
@@ -853,6 +924,9 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
         });
     }
 
+    //EVENT
+
+
     var project = window.PROJECT;
     if(!window.PROJECT){
         bootbox.alert("You must first select a project<br><a href='/view/app/#project/openproject'>Select project</a>");
@@ -861,5 +935,7 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
     {
         getAllData();
     }
+
+
 
 }]);

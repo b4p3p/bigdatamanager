@@ -97,28 +97,44 @@
             I dati sono calcolati sulla base del dizionario inserito dall'utente</div>
     </div>
 
-    <!--<div class="optType NameHighlights">-->
-    <!--<label style="margin-right: 20px; font-weight: normal">-->
-    <!--<input class="radioUser" id="radioUser" name="typeVoc" value="radioUser" type="radio">-->
-    <!--From user vocabulary-->
-    <!--</label>-->
-    <!--<div><i class="fa fa-info-circle" style="margin-right: 5px"></i>-->
-    <!--I dati sono calcolati sulla base del dizionario inserito dall'utente</div>-->
-    <!--</div>-->
-
 </div>
 
+<!-- GRAFICI -->
 
-
-<!--</div>-->
-
-<div id="container" class="hidden container">
+<div id="container" class="hidden container" style="margin-bottom: 30px">
 
     <svg id="Tags" ></svg>
     <div id="TagsBarChart"></div>
     <div id="WordsBarChart" style=""></div>
 
+    <div class="panel panel-default" style="margin-top: 20px">
+        <div class="panel-heading">Bigram Analysis</div>
+    </div>
+
+    <form class="form-inline">
+
+        <div class="form-group">
+            <label></label>
+            <select class="selectpicker" name="selectWord"
+                    id="selectWord" title="Select word"
+                    data-live-search="true">
+            </select>
+        </div>
+
+        <button type="button" class="btn btn-success"
+                id="cmbAnalyzeWord"
+                ng-click="cmbAnalyzeWord_Click()">
+            <span id="img-filter" class="glyphicon glyphicon-search" aria-hidden="true"></span>
+            Analyze
+        </button>
+
+    </form>
+
+    <div id="BigramAnalysisChart" style="margin-top: 10px"></div>
+
 </div>
+
+
 
 <div class="alert alert-warning" role="alert" id="msgDataNotAvaible"
      style="margin-top: 20px;" hidden>
@@ -128,3 +144,4 @@
     Please Sync your project <br>
     <a href="/view/app#/project/editproject">Sync vocabulary</a>
 </div>
+

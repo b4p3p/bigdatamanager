@@ -24,6 +24,7 @@
     "bootbox": "~4.4.0",
     "less": "~2.5.1",
     "multilevelpushmenu": "~2.1.4",
-    "modernizr": "~2.8.3"
+    "modernizr": "~2.8.3",
+    "jquery-numberformatter": "~1.2.2"
   }
 }

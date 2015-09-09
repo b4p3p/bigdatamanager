@@ -912,4 +912,39 @@ Data.getSize = function(arg, callback){
     });
 };
 
+/**
+ * Restituisce l'analisi dei brigrammi con la parola trovata
+ * @param arg
+ * @param arg.word
+ * @param arg.project
+ * @param callback
+ */
+Data.getBigram = function(arg, callback){
+
+    var conn = mongoose.createConnection('mongodb://localhost/oim');
+    var datas =      conn.model(MODEL_NAME, SCHEMA);
+
+    //richiede solo quei dati che hanno almeno la parola all'interno dei token
+    datas.aggregate()
+        .match({
+            projectName: arg.project,
+            tokens: {$in:[ arg.word ]}
+        })
+        .unwind("tokens")
+        .match({tokens: {$ne: arg.word}})
+        .project({ _id:0,  tokens:1 })
+        .group({
+            "_id": "$tokens",
+            "size": {"$sum": 1}
+        })
+        .project({ _id:0, text:'$_id', size:1 })
+        .sort({'size':-1})
+        .exec(function(err, results)
+        {
+            conn.close();
+            callback(err, results);
+        });
+};
+
+
 module.exports = Data;

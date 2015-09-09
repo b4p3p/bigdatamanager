@@ -1,9 +1,16 @@
+/**
+ *  Mostra a video le regioni normalizzate con il dataset di normalizzazione
+ *  Dato che nella collection regions è memorizzato un intero che rappresenta il numero dei tweet
+ *  all'interno della regione, è necessario normalizzare questo valore (max-min) per poter apprezzare
+ *  il diverso colore sulla mappa
+ */
 ngApp.controller('ngDbNormalizationCtrl', ['$scope', function($scope) {
 
     $(".selectpicker").selectpicker();
 
     $scope.name = 'ngDbNormalizationCtrl';
 
+    var $cmbTypeNorm = $("#cmbTypeNorm");
     var $form = $("#upload_form");
     var $btnInput = $("#upload_button");
     var IDMap = "map";
@@ -11,8 +18,10 @@ ngApp.controller('ngDbNormalizationCtrl', ['$scope', function($scope) {
     var map = null;
     var layerBoudaries = null;
 
+    $scope.showLoading = true;
     $scope.regions = null;
-    $scope.stat = null;
+    $scope.maxmin = {max: null, min:null};
+    $scope.typeNormalization = 0;
 
     $form.ajaxForm({
         success: function(result){
@@ -28,15 +37,23 @@ ngApp.controller('ngDbNormalizationCtrl', ['$scope', function($scope) {
         $form.submit();
     };
 
+    $scope.typeNormalization_Changed = function(){
+        console.log( $scope.typeNormalization );
+    };
+
+    /**
+     *  Chiede i dati al server
+     *  Sono necessarie soltanto le regioni con i loro confini
+     */
     function getData(){
 
         async.parallel({
 
-            stat: function(next){
-                DataCtrl.getFromUrl( DataCtrl.FIELD.STAT, "" ,  function(stat){
-                    next(null, stat);
-                })
-            },
+            //stat: function(next){
+            //    DataCtrl.getFromUrl( DataCtrl.FIELD.STAT, "" ,  function(stat){
+            //        next(null, stat);
+            //    })
+            //},
 
             regions: function(next){
                 DataCtrl.getFromUrl( DataCtrl.FIELD.REGIONSJSON, "" ,  function(docs){
@@ -46,10 +63,21 @@ ngApp.controller('ngDbNormalizationCtrl', ['$scope', function($scope) {
 
         }, function(err, result){
 
-            $scope.$apply(function(){
-                $scope.regions = result.regions;
-                $scope.stat =    result.stat;
+            //inizializza i campi
+            $scope.maxmin.max = result.regions[0].properties.baseNorm;
+            $scope.maxmin.min = result.regions[0].properties.baseNorm;
+
+            //Prende il minimo e il massimo di baseNorm
+            _.each( result.regions , function(region){
+                $scope.maxmin.max = Math.max( region.properties.baseNorm, $scope.maxmin.max );
+                $scope.maxmin.min = Math.min( region.properties.baseNorm, $scope.maxmin.min );
             });
+
+            //Salva i dati e disegna i confini
+            $scope.regions = result.regions;
+            $scope.showLoading = false;
+            $scope.$apply();
+
             refreshBoundaries();
 
         })
@@ -57,9 +85,15 @@ ngApp.controller('ngDbNormalizationCtrl', ['$scope', function($scope) {
     }
 
     function refreshBoundaries(){
+
+        if( layerBoudaries != null )
+        {
+            map.removeLayer( layerBoudaries );
+        }
+
         layerBoudaries = L.geoJson( $scope.regions, {
-            style: styleFeature
-            //onEachFeature: _self.onEachFeature
+            style: styleFeature,
+            onEachFeature: onEachFeature
         });
 
         layerBoudaries.addTo( map );
@@ -68,16 +102,37 @@ ngApp.controller('ngDbNormalizationCtrl', ['$scope', function($scope) {
         //this.insertLegend();
     }
 
-    function styleFeature(feature){
+    /**
+     * Data una feature, calcola l'indice normalizzato con il max-min
+     * @param getAvg
+     * @returns {number}
+     */
+    function getAvg(feature){
 
-        function getAvg(getAvg){
-            var nation = feature.properties.NAME_0;
-            var region = feature.properties.NAME_1;
-            var avg = 0;
-            if($scope.stat.data.nations && $scope.stat.data.nations[nation] != null)
-                avg = $scope.stat.data.nations[nation].regions[region].avgWeighed[1];
-            return avg;
-        }
+        var nation = feature.properties.NAME_0;
+        var region = feature.properties.NAME_1;
+
+        /**
+         *  type = 0
+         *  L'indice è calcolato secondo la formula
+         *  baseNorm / max
+         */
+        if( $scope.typeNormalization == 0)
+            avg = feature.properties.baseNorm / $scope.maxmin.max;
+
+        /**
+         *  type = 1
+         *  L'indice è calcolato secondo la formula
+         *  Ln( baseNorm + e ) / Ln( max + e)
+         */
+        else
+            avg = Math.log( feature.properties.baseNorm + Math.E ) /
+                Math.log( $scope.maxmin.max + Math.E );
+
+        return avg;
+    }
+
+    function styleFeature(feature){
 
         function getColorBoundaries(percentage) {
             return percentage > 0.8 ? '#800026' :
@@ -99,6 +154,50 @@ ngApp.controller('ngDbNormalizationCtrl', ['$scope', function($scope) {
         }
     }
 
+    function onEachFeature(feature, layer){
+
+        function mouseOver(e){
+            var layer = e.target;
+            map.dragging.disable();
+            layer.setStyle({
+                weight: 5, color: '#666',
+                dashArray: '', fillOpacity: 0.7
+            });
+            if (!L.Browser.ie && !L.Browser.opera) { layer.bringToFront(); }
+        }
+
+        function mouseOut(e){
+            map.dragging.enable();
+            layerBoudaries.resetStyle(e.target);
+        }
+
+        function mouseClick(e)
+        {
+            var nation = e.target.feature.properties.NAME_0;
+            var region = e.target.feature.properties.NAME_1;
+            var baseNorm = e.target.feature.properties.baseNorm;
+
+            var pop = '<div class="popup">' +
+                    '<h3>' + nation + '</h3>' +
+                    '<h4>' + region + '</h4>' +
+                    '<p>Count: ' + baseNorm + '</p>' +
+                    '<p>Value: ' + getAvg(e.target.feature).toFixed(2) + '</p>' +
+                '</div>';
+
+            e.target.bindPopup(pop).openPopup();
+        }
+
+        layer.on({
+            mouseover: mouseOver,
+            mouseout: mouseOut,
+            click: mouseClick
+        });
+
+    }
+
+    /**
+     *  Crea la mappa
+     */
     function initMap(){
 
         function createMap(){
@@ -133,20 +232,30 @@ ngApp.controller('ngDbNormalizationCtrl', ['$scope', function($scope) {
         });
     }
 
+    // Eventi
+
+    $cmbTypeNorm.change( function(e){
+        $scope.typeNormalization = $( this ).val();
+        refreshBoundaries();
+    });
+
     $(document).ready(function() {
+
+        //crea la mappa
         initMap();
 
+        //bub leaflet
         setTimeout(function(){
             map.invalidateSize();
         }, 500);
 
+        //chiedo i dati
         setTimeout(function(){
             getData();
         }, 600);
 
+        //bug leaflet
         $(window).trigger('resize');
     });
-
-
 
 }]);

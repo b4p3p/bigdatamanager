@@ -156,5 +156,20 @@ module.exports = function (router, app) {
         })
     });
 
+    router.get('/bigram', function (req, res){
+        var project = req.session.project || req.query.project;
+        var word = req.query.word;
+
+        if(!word)
+        {
+            res.status(500).end("No word selected");
+            return;
+        }
+
+        Data.getBigram({project: project, word:word}, function(err, result){
+            res.json(result);
+        })
+    });
+
 };
 

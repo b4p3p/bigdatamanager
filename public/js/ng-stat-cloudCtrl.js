@@ -2,52 +2,12 @@
 
 ngApp.controller('ngStatCloudCtrl', ['$scope', function($scope) {
 
-    $scope.name = "ngStatCloudCtrl";
+    var $cmbSelectWord = $("#selectWord");
+    var $radioUser = $("#radioUser")[0];
+    var $radioData = $("#radioData")[0];
+    var $radios = $("div.optType input");
 
-    $scope.resize = function()
-    {
-        setTimeout(function() {
-            $(window).trigger('resize');
-            if (mapCtrl && mapCtrl.mainMap)
-                mapCtrl.mainMap.invalidateSize();
-        }, 600);
-    };
-
-    //quando clicck sul menu devo disattivare sempre il timer dei dati
-    $scope.onItemClick = function() {
-        //clearInterval(intervalResize);
-    };
-
-    var FormCtrl = function(statWordCloudCtrl) {
-
-        var _self = this;
-
-        this.$radioUser = $("#radioUser")[0];
-        this.$radioData = $("#radioData")[0];
-        this.$radios = $("div.optType input");
-
-        //evento per il cambio della legenda
-        this.$radios.each(function() {
-            $(this).click(function(e) {
-                var selClass = this.className;
-                $("p.optType").each(function() {
-                    if($(this).hasClass(selClass) )
-                        $(this).removeClass("hidden");
-                    else
-                        $(this).addClass("hidden");
-                })
-            })
-        });
-
-        this.$radios.change(function() {
-            statWordCloudCtrl.setData(_self.getTypeData());
-        });
-
-        this.getTypeData = function() {
-            return this.$radioUser.checked ? "syncUserTags" : "syncDataTags"
-        }
-
-    };
+    var statWordCloudCtrl = null;
 
     var StatWordCloudCtrl = function() {
 
@@ -62,9 +22,8 @@ ngApp.controller('ngStatCloudCtrl', ['$scope', function($scope) {
         this.$tagsBarChart = $("#TagsBarChart");
         this.dictKey = {};
 
-        this.formCtrl = new FormCtrl(this);
-
         this.loadData = function() {
+
             this.fill = d3.scale.category20();
 
             $.ajax({
@@ -75,7 +34,7 @@ ngApp.controller('ngStatCloudCtrl', ['$scope', function($scope) {
                 success: function (data) {
                     _self.removeWait();
                     _self.vocabulary = data;
-                    _self.setData( _self.formCtrl.getTypeData() );
+                    _self.setData( getTypeData() );
                 },
                 error: function (xhr, status, error) {
                     console.error("ERR: StatWordCloudCtrl.loadData " + status + " " + xhr.status);
@@ -86,11 +45,14 @@ ngApp.controller('ngStatCloudCtrl', ['$scope', function($scope) {
         };
 
         this.setData = function(type) {
+
             var data = this.vocabulary;
 
             this.wordCloudData = this.toWordCloudData(data, type);
             this.tagsBarData = this.toTagsBarData(data, type);
             this.wordBarData = this.toWordBarData(data, type);
+
+            loadWords( data[getTypeData()] );
 
             if(this.wordCloudData.length == 0){
                 $("#container").hide();
@@ -382,36 +344,150 @@ ngApp.controller('ngStatCloudCtrl', ['$scope', function($scope) {
             return sum;
         };
 
+        /**
+         *  Richiede i dati al server
+         */
         this.loadData();
     };
 
-    var radio = document.querySelectorAll('.NameHighlights');
+    /**
+     *  Imposta i popup delle option button
+     */
+    function setPopupOption(){
 
-    for (var i = radio.length; i--;) {
-        (function () {
-            var t;
-            radio[i].onmouseover = function () {
-                hideAll();
-                clearTimeout(t);
-                this.className = 'NameHighlightsHover';
-            };
-            radio[i].onmouseout = function () {
-                var self = this;
-                t = setTimeout(function () {
-                    self.className = 'NameHighlights';
-                }, 300);
-            };
-        })();
+        var radio = document.querySelectorAll('.NameHighlights');
+
+        for (var i = radio.length; i--;) {
+            (function () {
+                var t;
+                radio[i].onmouseover = function () {
+                    hideAll();
+                    clearTimeout(t);
+                    this.className = 'NameHighlightsHover';
+                };
+                radio[i].onmouseout = function () {
+                    var self = this;
+                    t = setTimeout(function () {
+                        self.className = 'NameHighlights';
+                    }, 300);
+                };
+            })();
+        }
+
+        function hideAll() {
+            for (var i = radio.length; i--;) {
+                radio[i].className = 'NameHighlights';
+            }
+        }
     }
 
-    function hideAll() {
-        for (var i = radio.length; i--;) {
-            radio[i].className = 'NameHighlights';
-        }
+    /**
+     *  In base alla option selezionata restituisce la chiava da cui prendere i dati
+     * @returns {string}
+     */
+    function getTypeData(){
+        return $radioUser.checked ? "syncUserTags" : "syncDataTags"
+    }
+
+    /**
+     *  Carica le parole per l'analisi dei bigrammi
+     */
+    function loadWords(data) {
+        _.each( data , function(objTag){
+            _.each( objTag.counter , function(objCounter) {
+                DomUtil.addOptionValue($cmbSelectWord, objCounter.token);
+            });
+        });
+        $cmbSelectWord.selectpicker("refresh");
+    }
+
+    /**
+     *  EVENTI
+     */
+
+    /**
+     *  Cambio della legenda
+     */
+    $radios.each(function() {
+        $(this).click(function(e) {
+            var selClass = this.className;
+            $("p.optType").each(function() {
+                if($(this).hasClass(selClass) )
+                    $(this).removeClass("hidden");
+                else
+                    $(this).addClass("hidden");
+            })
+        })
+    });
+
+    /**
+     *  Imposta nuovamente tutti i dati
+     */
+    $radios.change(function() {
+        statWordCloudCtrl.setData( getTypeData() );
+    });
+
+    /**
+     *  Analizzo la parola cliccata con le altre parole nel dizionario
+     */
+    $scope.cmbAnalyzeWord_Click = function(){
+
+        var word = $cmbSelectWord.val();
+        word = encodeURIComponent(word);
+
+        DataCtrl.getFromUrl( DataCtrl.FIELD.DATABIGRAM, "?word=" + word, function(result){
+            var w = $("#container").width();
+            var data = google.visualization.arrayToDataTable( toBigramAnalysisdata(result) );
+            var chartAreaHeight = data.getNumberOfRows() * 30;
+            var chartHeight = chartAreaHeight + 80;
+            var heightBar = 60;
+            var options = {
+                title: 'Bigram Analysis',
+                titleTextStyle: {fontSize: '15'},
+                height: chartHeight,
+                chartArea: {
+                    'height': chartAreaHeight,
+                    'width': '100%',
+                    'right':'0%' ,
+                    'top': '3%',
+                    'left':100
+                },
+                width: "100%",
+                bar: { groupWidth: heightBar + "%" },
+                legend: 'none',
+                vAxis: {
+                    title:'Words',
+                    textStyle:{ color: 'grey', fontSize: 13},
+                    titleTextStyle:{fontSize: 14}
+                },
+                hAxis: {
+                    title:'Occurrences', textStyle:{
+                    color: 'grey',
+                    fontSize: 13},
+                    titleTextStyle:{fontSize: 14}
+                },
+                backgroundColor: 'transparent',
+                tooltip: { textStyle: {fontSize: 13}}
+            };
+            var chart = new google.visualization.BarChart(document.getElementById("BigramAnalysisChart"));
+            chart.draw(data, options);
+        })
     };
 
+    function toBigramAnalysisdata(rowdata){
+        var ris = [];
+        ris[0] = ["Words", "Occurrences" ];
+        for(var i = 0; i<20 && i<rowdata.length; i++)
+        {
+            ris.push( [ rowdata[i].text, rowdata[i].size ]);
+        }
+        return ris;
+    }
+
     $(document).ready(function(){
-        var statWordCloudCtrl = new StatWordCloudCtrl();
+        statWordCloudCtrl = new StatWordCloudCtrl();
+        setPopupOption();
+        $(".selectpicker").selectpicker();
     });
 
 }]);

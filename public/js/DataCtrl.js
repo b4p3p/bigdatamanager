@@ -41,6 +41,11 @@ DataCtrl.FIELD = {
         URL: "/datas/datas",
         LASTUPDATE: "data-lastupdate"
     },
+    DATABIGRAM: {
+        KEY: "databigram",
+        URL: "/datas/bigram",
+        LASTUPDATE: "databigram-lastupdate"
+    },
     REGIONSJSON: {
         KEY: "regionsjson",
         URL: "/regions/regions",
