@@ -185,11 +185,11 @@ module.exports = function (router, app) {
 
         res.setHeader('Connection', 'Transfer-Encoding');
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Transfer-Encoding', 'chunked');
+        //res.setHeader('Transfer-Encoding', 'chunked');
 
         var start = new Date();
 
-        res.write('<body style="color:dimgrey;font-family: monospace;font-size: 15px;text-align: left;position: static;">');
+        res.write('<body style="color:black;font-family: monospace;font-size: 15px;text-align: left;position: static;">');
 
         res.write('###########################################<br>');
         res.write('###### Synchronize datas in regions  ######<br>');
@@ -199,9 +199,15 @@ module.exports = function (router, app) {
 
         res.write("Project: " + project + "<br>");
 
-        Project.sync(project, username, res, function (err, result) {
-            res.end('Finish in ' + (new Date().getTime() - start.getTime()) / 1000 + " s");
-        });
+        console.log("Header scritto");
+
+        setTimeout(function(){
+            console.log("Start sincronizzazione");
+            Project.sync(project, username, res, function (err, result) {
+                res.end('Finish in ' + (new Date().getTime() - start.getTime()) / 1000 + " s");
+            });
+        }, 500);
+
     });
 
     router.get('/stat', function (req, res, next) {
