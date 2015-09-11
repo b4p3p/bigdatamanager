@@ -1,8 +1,24 @@
 #BigDataManager#
 
-* Avvio mongo
+##Installazione##
+* Effettuare una pull dal repository
+* Lanciare i seguenti comandi
 
- mongod --setParameter textSearchEnabled=true
+```
+bower install
+npm install
+```
+
+N.B.
+prima di lanciare npm install verificare che mongo db sia spento (bug riscontrato)
+
+##Primo Avvio##
+
+* Avviare mongo
+
+```
+mongod --setParameter textSearchEnabled=true
+```
 
 * Indexes
 
@@ -28,6 +44,9 @@ db.regions.createIndex( { 'properties.NAME_1': 1, 'properties.NAME_0': 1  }, { u
 db.tags.createIndex( { tag: 1, projectName: 1 }, { unique: true } )
 
 ```
+
+##Installazione##
+Effettuare 
 
 
 

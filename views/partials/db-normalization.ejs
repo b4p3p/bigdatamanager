@@ -55,6 +55,21 @@
 
    </div>
 
+   <!--active-->
+   <div class="row">
+      <div class="progress">
+         <div class="progress-bar progress-bar-striped" id="progress"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="45" style="width: 0%">
+            <!--<span class="sr-only" style="color: black">45% Complete</span>-->
+         </div>
+         {{percentageUpload}} %
+      </div>
+   </div>
+
+
    <div class="row">
       <div>
          <label for="cmbType">Index type </label>
@@ -70,6 +85,11 @@
       <div id="wait" ng-if="showLoading == true">
          <div id="fountainTextG"><div id="fountainTextG_1" class="fountainTextG">L</div><div id="fountainTextG_2" class="fountainTextG">o</div><div id="fountainTextG_3" class="fountainTextG">a</div><div id="fountainTextG_4" class="fountainTextG">d</div><div id="fountainTextG_5" class="fountainTextG">i</div><div id="fountainTextG_6" class="fountainTextG">n</div><div id="fountainTextG_7" class="fountainTextG">g</div><div id="fountainTextG_8" class="fountainTextG">.</div><div id="fountainTextG_9" class="fountainTextG">.</div><div id="fountainTextG_10" class="fountainTextG">.</div></div>
       </div>
+   </div>
+
+   <div>
+      <label>Count data: </label>
+      <div style="display: inline-block">{{count}}</div>
    </div>
 
 </div>

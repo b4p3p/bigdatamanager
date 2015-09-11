@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  *  Mostra a video le regioni normalizzate con il dataset di normalizzazione
  *  Dato che nella collection regions è memorizzato un intero che rappresenta il numero dei tweet
@@ -10,6 +12,7 @@ ngApp.controller('ngDbNormalizationCtrl', ['$scope', function($scope) {
 
     $scope.name = 'ngDbNormalizationCtrl';
 
+    var $progress = $("#progress");
     var $cmbTypeNorm = $("#cmbTypeNorm");
     var $form = $("#upload_form");
     var $btnInput = $("#upload_button");
@@ -22,18 +25,36 @@ ngApp.controller('ngDbNormalizationCtrl', ['$scope', function($scope) {
     $scope.regions = null;
     $scope.maxmin = {max: null, min:null};
     $scope.typeNormalization = 0;
+    $scope.count = 0;
+    $scope.percentageUpload = 0;
 
     $form.ajaxForm({
         success: function(result){
-            //$btnInput.fileinput('clear');
+            $progress.removeClass("active");
+            $btnInput.fileinput('clear');
             alert(JSON.stringify(result));
+            getData();
         },
         error: function(err){
+            $progress.removeClass("active");
             alert(JSON.stringify(err));
+        },
+        uploadProgress: function(event, position, total, percentage, file)
+        {
+            console.log("percentage: " + percentage);
+
+            $progress.attr("aria-valuenow", percentage);
+            $progress.css("width", percentage + "%");
+            $scope.$apply(function(){
+                $scope.percentageUpload = percentage;
+            })
         }
     });
 
     $scope.upload = function() {
+        $progress.addClass("active");
+        $progress.attr("aria-valuenow", "0");
+        $progress.css("width", "0%");
         $form.submit();
     };
 
@@ -66,28 +87,34 @@ ngApp.controller('ngDbNormalizationCtrl', ['$scope', function($scope) {
             //inizializza i campi
             $scope.maxmin.max = result.regions[0].properties.baseNorm;
             $scope.maxmin.min = result.regions[0].properties.baseNorm;
+            $scope.count = 0;
 
             //Prende il minimo e il massimo di baseNorm
             _.each( result.regions , function(region){
-                $scope.maxmin.max = Math.max( region.properties.baseNorm, $scope.maxmin.max );
-                $scope.maxmin.min = Math.min( region.properties.baseNorm, $scope.maxmin.min );
+                if ( region.properties.baseNorm )
+                {
+                    $scope.maxmin.max = Math.max( region.properties.baseNorm, $scope.maxmin.max );
+                    $scope.maxmin.min = Math.min( region.properties.baseNorm, $scope.maxmin.min );
+                    $scope.count += region.properties.baseNorm;
+                }
             });
 
             //Salva i dati e disegna i confini
             $scope.regions = result.regions;
             $scope.showLoading = false;
+
             $scope.$apply();
 
             refreshBoundaries();
 
         })
-
     }
 
     function refreshBoundaries(){
 
         if( layerBoudaries != null )
         {
+            console.log("reset map");
             map.removeLayer( layerBoudaries );
         }
 
@@ -111,6 +138,7 @@ ngApp.controller('ngDbNormalizationCtrl', ['$scope', function($scope) {
 
         var nation = feature.properties.NAME_0;
         var region = feature.properties.NAME_1;
+        var avg = 0;
 
         /**
          *  type = 0
