@@ -741,7 +741,7 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
      * Messaggio della sync con i token nei dati
      */
     socket.on("syncDataTags_msg", function(msg){
-        if( message != '.' )
+        if( msg != '.' )
             $terminal.append(msg + '<br>');
         else
             $terminal.append(msg);
