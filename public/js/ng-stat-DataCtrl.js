@@ -180,11 +180,6 @@ ShowDataCtrl.initComboTokens = function() {
     });
 };
 
-ShowDataCtrl.updateTable = function () {
-    console.log("CALL: updateTable");
-    ShowDataCtrl.$dataTable.bootstrapTable('refresh', {silent: true});
-};
-
 ShowDataCtrl.refreshGui = function() {
     ShowDataCtrl.skip = 0;
     ShowDataCtrl.limit = $($('#menuDataNum li.active')[0]).text();
@@ -196,7 +191,11 @@ ShowDataCtrl.refreshGui = function() {
     ShowDataCtrl.page = 1;
 };
 
+/**
+ *  Funzione chiamata anche dal click sul filtro
+ */
 ShowDataCtrl.refreshTable = function () {
+
     console.log("CALL: refreshTable");
 
     var date = {};
@@ -215,7 +214,8 @@ ShowDataCtrl.refreshTable = function () {
         ShowDataCtrl.$cmbTokens,
         date,
         ShowDataCtrl.skip,
-        ShowDataCtrl.limit
+        ShowDataCtrl.limit,
+        $('#txtText').val()
     );
 
     var queryString = conditions.getQueryString();
@@ -249,7 +249,10 @@ ShowDataCtrl.deselectCombo = function () {
     ShowDataCtrl.refreshGui();
 };
 
-ShowDataCtrl.ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $cmbUsers, $cmbTokens, date, skip, limit) {
+ShowDataCtrl.ObjConditions = function(
+    $cmbNations, $cmbRegions, $cmbTags, $cmbUsers,
+    $cmbTokens, date, skip, limit, text) {
+
     this.$cmbNations = $cmbNations;
     this.$cmbRegions = $cmbRegions;
     this.$cmbTags = $cmbTags;
@@ -294,6 +297,9 @@ ShowDataCtrl.ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $cmbUs
         if(this.date.hasOwnProperty('eq'))
             arrayQueryString.push("eq=" + this.date['eq']);
 
+        if(text != null && text != '' )
+            arrayQueryString.push("text=" + encodeURIComponent( text ) );
+
         arrayQueryString.push("limit=" + this.limit);
         arrayQueryString.push("skip=" + this.skip);
 
@@ -308,7 +314,8 @@ ShowDataCtrl.ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $cmbUs
                 tags: tags,
                 users: users,
                 tokens: tokens,
-                interval: this.date
+                interval: this.date,
+                text: text
             }
         };
 
@@ -330,41 +337,39 @@ ShowDataCtrl.ObjConditions = function($cmbNations, $cmbRegions, $cmbTags, $cmbUs
 
 ngApp.controller('ngStatDataCtrl', ['$scope', function($scope) {
 
-    function CtrlShowData() {
+    var bootPagOpt = {
+        total: parseInt(ShowDataCtrl.count / parseInt($($('#menuDataNum li.active')[0]).text()))+1,
+        page: 1,
+        maxVisible: 5,
+        leaps: true,
+        firstLastUse: true,
+        first: '‹',
+        last: '›',
+        wrapClass: 'pagination',
+        activeClass: 'active',
+        disabledClass: 'disabled',
+        nextClass: 'next',
+        prevClass: 'prev',
+        lastClass: 'last',
+        firstClass: 'first'
+    };
 
-        var bootPagOpt = {
-            total: parseInt(ShowDataCtrl.count / parseInt($($('#menuDataNum li.active')[0]).text()))+1,
-            page: 1,
-            maxVisible: 5,
-            leaps: true,
-            firstLastUse: true,
-            first: '‹',
-            last: '›',
-            wrapClass: 'pagination',
-            activeClass: 'active',
-            disabledClass: 'disabled',
-            nextClass: 'next',
-            prevClass: 'prev',
-            lastClass: 'last',
-            firstClass: 'first'
-        };
+    var $table = $('#data-table');
+    var $btnLoad = $('#load');
+    var $container = $('#container');
+    var $spinner = $("#spinner");
+    var $msgproject = $("#msgProject");
 
-        var $table = $('#data-table');
-        var $btnLoad = $('#load');
-        var $container = $('#container');
-        var $spinner = $("#spinner");
-        var $msgproject = $("#msgProject");
+    function showTable (){
+        $table.removeClass("hidden");
+        $btnLoad.removeClass("hidden");
+    }
 
-        this.showTable = function(){
-            $table.removeClass("hidden");
-            $btnLoad.removeClass("hidden");
-        };
+    function getData (callback) {
 
-        this.getData = function(callback) {
+        console.log("CALL: getData");
 
-            console.log("CALL: getData");
-
-            async.parallel( {
+        async.parallel( {
 
                 stat: function(next) {
                     DataCtrl.getField( function(doc){
@@ -395,72 +400,65 @@ ngApp.controller('ngStatDataCtrl', ['$scope', function($scope) {
                     }, DataCtrl.FIELD.WORDCOUNT);
                 }},
 
-                function(err, results) {
-                    $spinner.hide();
-                    callback(err, results);
-                }
-            );
-        };
+            function(err, results) {
+                $spinner.hide();
+                callback(err, results);
+            }
+        );
+    }
 
-        this.initGUI = function() {
+    function initGUI () {
 
-            $container.show();
-            this.showTable();
+        $container.show();
 
-            bootstrapTableFilter = new BootstrapTableFilter('showdatafilter');
+        showTable();
 
-            $('.selectpicker').selectpicker({
-                width: '90px'
-            });
+        bootstrapTableFilter = new BootstrapTableFilter('showdatafilter');
 
-            ShowDataCtrl.initGui();
-            $btnLoad.hide();
+        $('.selectpicker').selectpicker({
+            width: '90px'
+        });
+
+        ShowDataCtrl.initGui();
+        $btnLoad.hide();
+
+        ShowDataCtrl.refreshTable();
+
+        $('#paginationTable').removeClass('hidden');
+
+        $('#dataNum').text("Showing 1 to 10 of " + ShowDataCtrl.stat.data.countTot + " rows ");
+
+        $('#pagination').bootpag( bootPagOpt ).on("page", function(event, num){
+
+            var numForPag = $($('#menuDataNum li.active')[0]).text();
+
+            ShowDataCtrl.page = num;
+            ShowDataCtrl.skip = num*numForPag-numForPag;
+            ShowDataCtrl.limit = numForPag;
+
+            console.log("skip: " + ShowDataCtrl.skip + " limit: " + ShowDataCtrl.limit);
 
             ShowDataCtrl.refreshTable();
+        });
 
-            $('#paginationTable').removeClass('hidden');
+    }
 
-            $('#dataNum').text("Showing 1 to 10 of " + ShowDataCtrl.stat.data.countTot + " rows ");
-
-            $('#pagination').bootpag( bootPagOpt ).on("page", function(event, num){
-
-                var numForPag = $($('#menuDataNum li.active')[0]).text();
-
-                ShowDataCtrl.page = num;
-                ShowDataCtrl.skip = num*numForPag-numForPag;
-                ShowDataCtrl.limit = numForPag;
-
-                console.log("skip: " + ShowDataCtrl.skip + " limit: " + ShowDataCtrl.limit);
-
-                ShowDataCtrl.refreshTable();
-            });
-
-        };
-
-        this.showError = function(){
-
-        };
-
-        this.showErrorProject = function(){
-            $spinner.hide();
-            $msgproject.show();
-        }
-
+    function showErrorProject(){
+        $spinner.hide();
+        $msgproject.show();
     }
 
     $(document).ready( function () {
 
-        var ctrl = new CtrlShowData();
-
         if( !window.PROJECT || window.PROJECT == "" ) {
-            ctrl.showErrorProject();
+            showErrorProject();
         } else
-            ctrl.getData(function(err, results){
+            getData(function(err, results){
                 if(err)
-                    ctrl.showError();
+                    alert(JSON.stringify(err));
                 else
-                    ctrl.initGUI();
+                    initGUI();
             })
-    });
+    })
 
 }]);

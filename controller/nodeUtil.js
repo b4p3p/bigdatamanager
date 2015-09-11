@@ -18,11 +18,18 @@ Util.addWhereClause = function(exec, query)
     if(query.hasOwnProperty("nations"))
         exec.where('nation').in( query.nations.split(",") );
 
+    if(query.hasOwnProperty("text"))
+    {
+        var reg = new RegExp( query.text, "i");
+        exec.where( {text: reg } );
+    }
+
+
     if(query.hasOwnProperty("regions"))
         exec.where('region').in( query.regions.split(","));
 
     if(query.hasOwnProperty("users"))
-        exec.where('user').in(query.users.split(","));
+        exec.where( 'user').in(query.users.split(","));
 
     if(query.hasOwnProperty("tags"))
         exec.where('tag').in(query.tags.split(","));

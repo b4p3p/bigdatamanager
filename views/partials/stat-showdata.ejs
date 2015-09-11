@@ -49,47 +49,53 @@
     <div id="showdatafilter" class="btn-toolbar hidden">
 
         <div class="btn-group btn-group-filter-main">
-        <button type="button" class="btn btn-default dropdown-toggle btn-filter"
-                data-toggle="dropdown"><span class="glyphicon glyphicon-filter"></span></button>
+
+            <button type="button"
+                    class="btn btn-default dropdown-toggle btn-filter"
+                    data-toggle="dropdown"><span class="glyphicon glyphicon-filter"></span>
+            </button>
 
             <ul class="dropdown-menu" role="menu">
 
-            <li class="remove-filters">
-                <a><span class="glyphicon glyphicon-remove"></span> Remove all filters</a>
-            </li>
+                <li class="remove-filters">
+                    <a><span class="glyphicon glyphicon-remove"></span> Remove all filters</a>
+                </li>
 
-            <li class="divider"></li>
+                <li class="divider"></li>
 
-            <li data-filter-field="user">
-                <a><input type="checkbox"> Users</a>
-            </li>
+                <li data-filter-field="user">
+                    <a><input type="checkbox"> Users</a>
+                </li>
 
-            <li data-filter-field="date">
-                <a><input type="checkbox"> Date</a>
-            </li>
+                <li data-filter-field="date">
+                    <a><input type="checkbox"> Date</a>
+                </li>
 
-            <li data-filter-field="nation">
-                <a><input type="checkbox"> Nations</a>
-            </li>
+                <li data-filter-field="nation">
+                    <a><input type="checkbox"> Nations</a>
+                </li>
 
-            <li data-filter-field="region">
-                <a><input type="checkbox"> Regions</a>
-            </li>
-            <li data-filter-field="tag">
-                <a><input type="checkbox"> Tags</a>
-            </li>
+                <li data-filter-field="region">
+                    <a><input type="checkbox"> Regions</a>
+                </li>
+                <li data-filter-field="tag">
+                    <a><input type="checkbox"> Tags</a>
+                </li>
 
-            <li data-filter-field="tokens">
-                <a><input type="checkbox"> Tokens</a>
-            </li>
+                <li data-filter-field="tokens">
+                    <a><input type="checkbox"> Tokens</a>
+                </li>
 
-        </ul>
+                <li data-filter-field="text">
+                    <a><input type="checkbox"> Text</a>
+                </li>
+            </ul>
+
         </div>
 
         <div class="btn-group btn-group-filters">
             <div class="btn-group hidden" data-filter-field="user">
-                <select class="selectpicker" id="cmbUsers" title="Users" data-live-search="true"
-                        multiple></select>
+                <select class="selectpicker" id="cmbUsers" title="Users" data-live-search="true" multiple> </select>
             </div>
             <div class="btn-group hidden" data-filter-field="date">
                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Date <span class="caret"></span></button>
@@ -115,20 +121,24 @@
             <div class="btn-group hidden" data-filter-field="tokens">
                 <select class="selectpicker" id="cmbTokens" data-live-search="true" title="Tokens" multiple></select>
             </div>
-
+            <div class="btn-group hidden" data-filter-field="text">
+                <input type="text" id="txtText" title="text">
+            </div>
         </div>
 
         <div id="refresh" class="btn-group btn-group-filter-refresh hidden">
             <button id='refreshButton' type="button" class="btn btn-default btn-primary btn-refresh" data-toggle="dropdown"
-                    style="display: block;" onclick="ShowDataCtrl.refreshGui()"><span class="glyphicon glyphicon-ok"></span>
+                    style="display: block;"
+                    onclick="ShowDataCtrl.refreshGui()">
+                <span class="glyphicon glyphicon-ok"></span>
             </button>
         </div>
     </div>
 
+    <!--data-search="true"-->
     <table id="data-table" class="hidden" data-toggle="table"
            data-cache="true"
            data-sort-name="name" data-sort-order="desc"
-           data-search="true"
            data-show-columns="true"
            data-show-filter="true">
         <thead>
