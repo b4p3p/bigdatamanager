@@ -183,31 +183,30 @@ module.exports = function (router, app) {
         var project =  req.session.project || req.query.project;
         var username = req.session.user || req.query.user;
 
-        res.setHeader('Connection', 'Transfer-Encoding');
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        //res.setHeader('Transfer-Encoding', 'chunked');
-
         var start = new Date();
 
-        res.write('<body style="color:black;font-family: monospace;font-size: 15px;text-align: left;position: static;">');
+        app.io.emit("projectsync_msg", "###########################################");
+        app.io.emit("projectsync_msg", "###### Synchronize datas in regions  ######");
+        app.io.emit("projectsync_msg", "###########################################");
 
-        res.write('###########################################<br>');
-        res.write('###### Synchronize datas in regions  ######<br>');
-        res.write('###########################################<br>');
+        if( !project ) {
+            //res.write("Error: no project<br>");
+            res.status(200).end("Nessun progetto selezionato");
+            app.io.emit("Nessun progetto selezionato");
+            return;
+        }
 
-        if( !project ) { res.write("Error: no project<br>"); return; }
+        /**
+         *  Restiruisce subito lo status
+         *  I messaggi verranno scambiati con le socket.io
+         */
+        console.log("CALL: /project/sync - project: " + project);
+        res.status(200).end("Sincronizzazione di " + project + " in corso...");
+        app.io.emit("projectsync_msg", "Project: " + project);
 
-        res.write("Project: " + project + "<br>");
-
-        console.log("Header scritto");
-
-        setTimeout(function(){
-            console.log("Start sincronizzazione");
-            Project.sync(project, username, res, function (err, result) {
-                res.end('Finish in ' + (new Date().getTime() - start.getTime()) / 1000 + " s");
-            });
-        }, 500);
-
+        Project.sync(project, username, app, function (err, result) {
+            app.io.emit("projectsync_msg", 'Finish in ' + (new Date().getTime() - start.getTime()) / 1000 + " s");
+        });
     });
 
     router.get('/stat', function (req, res, next) {

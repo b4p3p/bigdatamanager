@@ -73,25 +73,32 @@ module.exports = function (router, app) {
 
     });
 
+    /**
+     * Funzione per sovrascrivere i token nei dati
+     * La funzione è asincrona, quindi verrà restituito lo status 200 immediatamente
+     * Tutta la comunicazione è gestita con socket.io
+     * - overrideDataTokens_msg: manda un messaggio generico
+     * - overrideDataTokens_end: avvisa della fine
+     */
     router.get('/overrideTokensData', function (req, res) {
 
-        res.setHeader('Connection', 'Transfer-Encoding');
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Transfer-Encoding', 'chunked');
-
         var start = new Date();
-
-        res.write('<body style="color:dimgrey;font-family: monospace;font-size: 15px;text-align: left;position: static;">');
-
-        res.write('########################################<br>');
-        res.write('###### Override tokens data start ######<br>');
-        res.write('########################################<br>');
-
         var project = req.session.project || req.query.project;
 
-        Data.overrideTokensData(project, res, function(err) {
-            app.io.emit('overrideDataTokens_end', {});
-            res.end("fatto!")
+        if(!project)
+            res.status(500).end("No project selected");
+        else
+            res.status(200).end("Override tokens data start...")
+
+        app.io.emit("overrideDataTokens_msg",
+            '########################################<br>' +
+            '###### Override tokens data start ######<br>' +
+            '########################################<br>');
+
+        Data.overrideTokensData(project, app, function(err) {
+            var msg = 'Finish in ' + (new Date().getTime() - start.getTime()) / 1000 + " s";
+            console.log(msg);
+            app.io.emit("overrideDataTokens_end", msg );
         });
 
     });

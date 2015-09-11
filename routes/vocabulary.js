@@ -3,7 +3,7 @@
 var Vocabulary = require("../model/Vocabulary");
 var _ = require("underscore");
 
-module.exports = function (router) {
+module.exports = function (router, app) {
 
     router.get('/sync*', function (req, res, next) {
         var project = req.session.project || req.query.project;
@@ -26,75 +26,74 @@ module.exports = function (router) {
     });
 
 
-    function writeResult(res, doc, start) {
+    function writeResult(app, doc, start) {
 
-        res.write('<hr>');
-        res.write('Result:<br>');
+        var msg = '';
+
+        msg += '<hr>';
+        msg += 'Result:<br>';
 
         _.each(doc, function(item){
-            res.write('<b>Tag:</b>' + item.tag + '</br>');
-            res.write('<b>Counter:</b><br>');
-            res.write('<ui>');
+            msg += '<b>Tag:</b>' + item.tag + '</br>';
+            msg += '<b>Counter:</b><br>';
+            msg += '<ui>';
             _.each(item.counter, function(item){
-                res.write('<li>' + item.token + ":" + item.count + '</li>');
+                msg += '<li>' + item.token + ":" + item.count + '</li>';
             });
-            res.write('</ul>');
+            msg += '</ul>'
         });
-
-        res.write('Finish in ' + (new Date().getTime() - start.getTime()) / 1000 + " s");
-
-        res.end('</body>');
-
+        msg += 'Finish in ' + (new Date().getTime() - start.getTime()) / 1000 + " s";
+        return msg;
     }
 
     router.get('/syncUserTags', function (req, res) {
 
-        res.setHeader('Connection', 'Transfer-Encoding');
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Transfer-Encoding', 'chunked');
-
         var start = new Date();
-
-        res.write('<body style="color:dimgrey;font-family: monospace;font-size: 15px;text-align: left;position: static;">');
-
-        res.write('##################################<br>');
-        res.write('###### Sync User Tags start ######<br>');
-        res.write('##################################<br>');
-
         var project = req.session.project || req.query.project;
 
-        Vocabulary.syncUserTags(project, res, function(err, doc){
-            //res.json(doc);
-            writeResult(res, doc, start);
-            var diff = new Date().getTime() - start.getTime();
-            res.end("Process complete in " + diff / 1000 + " sec." );
+        if(project)
+            res.status(200).end("Sync Data tags start...");
+        else
+        {
+            res.status(500).end("No project selected");
+            return;
+        }
+
+        app.io.emit("syncUserTags_msg",
+            "##################################<br>" +
+            '###### Sync User Tags start ######<br>' +
+            '##################################<br>'
+        );
+
+
+        Vocabulary.syncUserTags(project, app, function(err, doc){
+            app.io.emit("syncUserTags_end", writeResult(app, doc, start) );
         });
 
     } );
 
     router.get('/syncDataTags', function (req, res) {
 
-        res.setHeader('Connection', 'Transfer-Encoding');
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Transfer-Encoding', 'chunked');
-
         var start = new Date();
-
-        res.write('<body style="color:dimgrey;font-family: monospace;font-size: 15px;text-align: left;position: static;">');
-
-        res.write('##################################<br>');
-        res.write('###### Sync Data tags start ######<br>');
-        res.write('##################################<br>');
-
         var project = req.session.project || req.query.project;
 
-        Vocabulary.syncDataTags(
-            project,
-            {},
-            res,
+        if(project)
+            res.status(200).end("Sync Data tags start...");
+        else
+        {
+            res.status(500).end("No project selected");
+            return;
+        }
+
+        app.io.emit("syncDataTags_msg",
+            "##################################<br>" +
+            '###### Sync Data tags start ######<br>' +
+            '##################################<br>'
+        );
+
+        Vocabulary.syncDataTags( project, {}, app,
             function(err, doc) {
-                //res.json(docs);
-                writeResult(res, doc, start);
+                app.io.emit("syncDataTags_end", writeResult(app, doc, start) );
             }
         );
     });

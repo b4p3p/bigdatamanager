@@ -6,12 +6,17 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
 
     $(".selectpicker").selectpicker();
     var tableTag = $("#tagsTable");
+    var socket = io.connect();
+    var $btnOverrideDataTokens = $("#overrideDataTokens");
+    var $btnSyncUserTags = $("#synUserTag");
+    var $btnSyncDataTags = $("#synDataTag");
+    var $terminal = $("#terminal");
 
     var PrjEditCtrl = function() {
 
         var _self = this;
 
-        this.intervalScroll = null;
+        //this.intervalScroll = null;
         this.optionsPie = {
             title: null,
             pieSliceText: 'label',
@@ -34,11 +39,7 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
             allowedFileExtensions: ["json"]
         });
         this.$cmbExample = $('#cmbType');
-        this.$btnSyncUserTags = $("#synUserTag");
-        this.$btnSyncDataTags = $("#synDataTag");
-        this.$btnOverrideDataTokens = $("#overrideDataTokens");
         this.$btnSyncProject = $("#btnsyncproject");
-        this.$terminal = $("#terminal");
         this.$tableTag = $('#tagsTable');
         this.$formEditProject = $("#form_editproject");
         this.$formUpload = $("#uploadForm");
@@ -107,28 +108,28 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
 
         };
 
-        this.setIntervalScroll = function () {
-            clearInterval(_self.intervalScroll);
-            _self.intervalScroll = setInterval(function() {
-
-                try {
-                    _self.$terminal.contents().scrollTop(
-                        _self.$terminal.contents().height() + 200
-                    );
-
-                    _self.$terminal.contents().find("body")
-                        .css('color', '#fff')
-                        .css('font-family', 'monospace')
-                        .css('font-size', '15px')
-                        .css('text-align', 'left')
-                        .css('position', 'static')
-                        .css('word-wrap', 'break-word');
-                } catch (e) {
-                    clearInterval(_self.intervalScroll);
-                }
-
-            } , 500);
-        };
+        //this.setIntervalScroll = function () {
+        //    clearInterval(_self.intervalScroll);
+        //    _self.intervalScroll = setInterval(function() {
+        //
+        //        try {
+        //            _self.$terminal.contents().scrollTop(
+        //                _self.$terminal.contents().height() + 200
+        //            );
+        //
+        //            _self.$terminal.contents().find("body")
+        //                .css('color', '#fff')
+        //                .css('font-family', 'monospace')
+        //                .css('font-size', '15px')
+        //                .css('text-align', 'left')
+        //                .css('position', 'static')
+        //                .css('word-wrap', 'break-word');
+        //        } catch (e) {
+        //            clearInterval(_self.intervalScroll);
+        //        }
+        //
+        //    } , 500);
+        //};
 
         this.getProject = function(callback) {
             console.log("CALL: getProject - project=" + $scope.Project);
@@ -366,32 +367,6 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
 
         };
 
-        ///EVENT
-
-        //click user tag sync
-        this.$btnSyncUserTags.click( function(){
-            _self.$terminal.attr("src", "/vocabulary/syncUserTags" );
-            _self.setIntervalScroll();
-        });
-
-        //click data tag sync
-        this.$btnSyncDataTags.click( function(){
-            _self.$terminal.attr("src", "/vocabulary/syncDataTags" );
-            _self.setIntervalScroll();
-        });
-
-        //override tokens in data
-        this.$btnOverrideDataTokens.click( function(){
-            _self.$terminal.attr("src", "/datas/overrideTokensData" );
-            _self.setIntervalScroll();
-        });
-
-        //cancello l'evento dello scroll
-        this.$terminal.on("load", function() {
-            _self.$terminal.contents().scrollTop( _self.$terminal.contents().height() + 200);
-            clearInterval(_self.intervalScroll);
-        });
-
         ////evento della combo
         this.$cmbExample.on('change', function () {
             $scope.$apply();
@@ -479,7 +454,7 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
         });
 
         /// socket.io
-        var socket = io.connect();
+
         socket.on('deldatas', function(result){
             _self.$imgWaitDelete.addClass("hidden");
             var msg = "Deleted: " + result.data + " records";
@@ -497,10 +472,6 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
 
         socket.on('uploaddata_end', function(result){
             _self.writeResultProgress(result);
-        });
-
-        socket.on("overrideDataTokens_end", function(){
-            getInfoData();
         });
 
         /// TABLE TAG CLICK
@@ -701,6 +672,101 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
             }
         });
     }
+
+    /**
+     *  ####  EVENTI  ####
+     */
+
+    /**
+     * CLICK override tokens in data
+     */
+    $btnOverrideDataTokens.click( function(){
+        $terminal.text('');
+        $.ajax({
+            type:'get',
+            url: "/datas/overrideTokensData",
+            error: function(err){
+                alert(err)
+            }
+        });
+    });
+
+    /**
+     * Click data tag sync
+     */
+    $btnSyncDataTags.click( function(){
+        $terminal.text('');
+        $.ajax({
+            type:'get',
+            url: "/vocabulary/syncDataTags",
+            error: function(err){
+                alert(err)
+            }
+        });
+    });
+
+    /**
+     * Click user tag sync
+     */
+    $btnSyncUserTags.click( function(){
+        $terminal.text('');
+        $.ajax({
+            type:'get',
+            url: "/vocabulary/syncUserTags",
+            error: function(err){
+                alert(err)
+            }
+        });
+    });
+
+    /**
+     * Messaggio da parte della sincronizzazione
+     */
+    socket.on("overrideDataTokens_msg", function(message){
+        if( message != '.' )
+            $terminal.append(message + '<br>');
+        else
+            $terminal.append(message);
+    });
+
+    /**
+     * Fine della sincronizzazione data tokens
+     */
+    socket.on("overrideDataTokens_end", function(msg){
+        $terminal.append(msg + "<br>");
+        getInfoData();
+    });
+
+    /**
+     * Messaggio della sync con i token nei dati
+     */
+    socket.on("syncDataTags_msg", function(msg){
+        if( message != '.' )
+            $terminal.append(message + '<br>');
+        else
+            $terminal.append(message);
+    });
+
+    /**
+     * Fine Messaggio della sync con i token nei dati
+     */
+    socket.on("syncDataTags_end", function(msg){
+        $terminal.append(msg + "<br>");
+    });
+
+    /**
+     * Messaggio della sync con i token nei dati usando il vocabolario dell'utente
+     */
+    socket.on("syncUserTags_msg", function(msg){
+        $terminal.append(msg + "<br>");
+    });
+
+    /**
+     * Fine Messaggio della sync con i token nei dati usando il vocabolario dell'utente
+     */
+    socket.on("syncUserTags_end", function(msg){
+        $terminal.append(msg + "<br>");
+    });
 
     $(document).ready(function(){
         if(!window.PROJECT || window.PROJECT == "") {

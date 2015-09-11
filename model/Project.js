@@ -235,26 +235,6 @@ Project.editProject = function (data, callback) {
             callback(err);
         })
     });
-
-    //Model.findOne(
-    //    { projectName: data.projectName },
-    //    { $set:{ description: data.description } },
-    //    { },
-    //    function(err, result){
-    //        connection.close();
-    //        callback(err, numAffected);
-    //    });
-
-    //var conditions = { projectName: data.projectName }
-    //    , update = { $set: {
-    //        description: data.description,
-    //        projectName: data.projectName
-    //    }}
-    //    , options = { multi: false };
-
-    //Model.update(conditions, update, options, function(err, numAffected){
-    //});
-
 };
 
 /**
@@ -301,22 +281,14 @@ Project.getLastUpdate = function(project , callback) {
     );
 };
 
-function divInline(text, divClass ){
-
-    //var div = '<div style="display:inline-block;width: ' + width +'">';
-    var div = '<div class="' + divClass + '" style="display:inline-block">';
-    div += text;
-    div += "</div>";
-    return div;
-}
-
 /**
  * Crea e salva il documento di stat in summaries
  * @param project
  * @param username
  * @param callback
  */
-Project.sync = function(project, username, res, callback) {
+Project.sync = function(project, username, app, callback) {
+
     console.log("CALL: Project.sync");
 
     var connection  = mongoose.createConnection('mongodb://localhost/oim');
@@ -337,8 +309,8 @@ Project.sync = function(project, username, res, callback) {
         //cancello la precendente sincronizzazione
         function(next)
         {
-            res.write("DELETE previous synchronization<br>");
             console.log("     DELETE previous synchronization");
+            app.io.emit("projectsync_msg", "DELETE previous synchronization");
 
             datas.update(
                 { projectName: project } ,
@@ -355,7 +327,7 @@ Project.sync = function(project, username, res, callback) {
         function(next){
 
             console.log("     FETCH nations");
-            res.write("FETCH nations<br>");
+            app.io.emit("projectsync_msg", "FETCH nations");
 
             regions.find( {},
                 function(err, regions) {
@@ -369,7 +341,7 @@ Project.sync = function(project, username, res, callback) {
         function(regions, next){
 
             console.log("     set regions/nations data - #" + regions.length);
-            res.write("FOUND " + regions.length + " nations<br>");
+            app.io.emit("projectsync_msg", "FOUND " + regions.length + " nations");
 
             var cont=0;
             var len = regions.length;
@@ -394,15 +366,28 @@ Project.sync = function(project, username, res, callback) {
 
                             if(result && result.result && result.result.nModified)
                             {
-                                res.write( divInline(cont + "/" + len, "countRes") +
-                                    " - Modified " + divInline(result.result.nModified, "countDocs") +
-                                    " docs in " + region._doc.properties.NAME_1 + "@" + region._doc.properties.NAME_0 + "<br>");
+                                app.io.emit("projectsync_res", {
+                                    cont:cont, tot:len, modified: result.result.nModified,
+                                    nation: region._doc.properties.NAME_0,
+                                    region: region._doc.properties.NAME_1
+                                });
+                                //res.write( divInline(cont + "/" + len, "countRes") +
+                                //    " - Modified " + divInline(result.result.nModified, "countDocs") +
+                                //    " docs in " + region._doc.properties.NAME_1 + "@" +
+                                // region._doc.properties.NAME_0 + "<br>");
                                 countGeo += result.result.nModified;
                             } else
-                                res.write( divInline(cont + "/" + len, "countRes") +
-                                    " - Modified " + divInline(0, "countDocs") +
-                                    " docs in " + region._doc.properties.NAME_1 + "@" + region._doc.properties.NAME_0 + "<br>");
+                            {
+                                app.io.emit("projectsync_res", {
+                                    cont:cont, tot:len, modified: 0,
+                                    nation: region._doc.properties.NAME_0,
+                                    region: region._doc.properties.NAME_1
+                                });
 
+                                //res.write( divInline(cont + "/" + len, "countRes") +
+                                //    " - Modified " + divInline(0, "countDocs") +
+                                //    " docs in " + region._doc.properties.NAME_1 + "@" + region._doc.properties.NAME_0 + "<br>");
+                            }
 
                             console.log("   fatto " + cont + "/" + len + " - " + region._doc.properties.NAME_0 + ":" + region._doc.properties.NAME_1);
                             cont++;
@@ -422,6 +407,7 @@ Project.sync = function(project, username, res, callback) {
         function (next)
         {
             console.log("     get new stat filter");
+            app.io.emit("projectsync_msg", "BUILD stat filter");
             Summary.getStatFilter( project, username, null, function(err, doc){
                 next(null, doc)
             });
@@ -431,7 +417,7 @@ Project.sync = function(project, username, res, callback) {
         function(docSync, next)
         {
             console.log("     save docSync");
-
+            app.io.emit("projectsync_msg", "SAVE docsync");
             summaries.findOne({projectName:project}, function (err, doc) {
 
                 if(doc!=null)
@@ -454,6 +440,7 @@ Project.sync = function(project, username, res, callback) {
         //aggiorno il lastUpdate e il size del progetto
         function (docSync, next) {
             console.log("     update project");
+            app.io.emit("projectsync_msg", "UPDATE project");
             Project.updateLastUpdate(projects, project, docSync.lastUpdate, docSync.data.countTot, function(err){
                 next(err, docSync);
             });

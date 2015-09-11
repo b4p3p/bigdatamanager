@@ -106,7 +106,7 @@ require('./routes/router')(app);
 require('./routes/statistics_router')(app);
 
 require('./routes/regions_router')(router_regions, app, upload);
-require("./routes/vocabulary")(router_vocabulary);
+require("./routes/vocabulary")(router_vocabulary, app);
 require('./routes/project_router')(router_project, app);
 require('./routes/view_router')(router_view);
 require('./routes/users_router')(router_users);
@@ -131,25 +131,25 @@ app.use(function(req, res, next) {
 
 // development error handler
 // will print stacktrace
-if (app.get('env') === 'development') {
-  app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-
-      res.render('pages/error.ejs', {
-      message: err.message,
-      error: err.stack
-    });
-  });
-}
+//if (app.get('env') === 'development') {
+//  app.use(function(err, req, res, next) {
+//    res.status(err.status || 500);
+//
+//      res.render('pages/error.ejs', {
+//      message: err.message,
+//      error: err.stack
+//    });
+//  });
+//}
 
 // production error handler
 // no stacktraces leaked to user
-app.use( function(err, req, res, next) {
-  res.status(err.status || 500);
-  res.render('pages/error', {
-    message: err.message,
-    error: {}
-  });
-});
+//app.use( function(err, req, res, next) {
+//  res.status(err.status || 500);
+//  res.render('pages/error', {
+//    message: err.message,
+//    error: {}
+//  });
+//});
 
 module.exports = app;

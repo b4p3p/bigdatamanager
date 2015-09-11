@@ -131,3 +131,30 @@ h3{
     height: 100%;
     vertical-align: top;
 }
+
+
+
+.terminal{
+    height: 100%;
+    width: 100%;
+    border: 2px;
+
+    margin-bottom: 20px;
+    padding-top: 20px;
+
+    color: whitesmoke;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 20px;
+    text-align: left;
+    overflow-y: scroll;
+}
+
+.countDocs {
+    display: inline-block;
+    width: 45px
+}
+
+.countRes{
+    display:inline-block;
+    width:80px;
+}

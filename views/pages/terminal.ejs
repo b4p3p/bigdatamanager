@@ -16,15 +16,35 @@
          height: 100%;
          width: 100%;
          border: 2px;
+
          margin-bottom: 0;
+         padding-top: 20px;
+
+         color: whitesmoke;
+         font-family: "Courier New", Courier, monospace;
+         font-size: 20px;
+         text-align: left;
+      }
+
+      .countDocs {
+         display: inline-block;
+         width: 45px
+      }
+
+      .countRes{
+         display:inline-block;
+         width:80px;
       }
 
    </style>
 
    <script src="/bower_components/jquery/dist/jquery.js"></script>
+   <script src="/node_modules/socket.io/node_modules/socket.io-client/socket.io.js"></script>
+   <script src="/bower_components/angular/angular.min.js"></script>
+   <script src="/public/js/ngTerminalCtrl.js"></script>
 
 </head>
-<body>
+<body ng-app="bigDataManager" ng-controller="ngAppCtrl">
 
    <div id="bar">
       <div id="red">
@@ -35,12 +55,14 @@
       </div>
    </div>
 
-   <iframe class="terminal" id="terminal"> </iframe>
+   <div class="terminal" id="terminal">
+
+   </div>
 
 </body>
 
-<script src="/public/js/TerminalCtrl.js"></script>
+
 
 <script>
-   var tCtrl = new TerminalCtrl("terminal");
+   //var tCtrl = new TerminalCtrl("terminal");
 </script>

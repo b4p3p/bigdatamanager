@@ -20,6 +20,13 @@ prima di lanciare npm install verificare che mongo db sia spento (bug riscontrat
 mongod --setParameter textSearchEnabled=true
 ```
 
+* In fase di debug molto utile settare:
+
+```
+db.setProfilingLevel(0, 10000)
+```
+
+
 * Indexes
 
 ```

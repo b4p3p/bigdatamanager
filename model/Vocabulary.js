@@ -180,8 +180,9 @@ function updateProjects(docs, connection, project, next) {
 
 /**
  * Sincronizzo SOLO i tokens presenti nella collections data
+ * La funzione è asincrona, si usa socket.io
  */
-Vocabulary.syncUserTags = function (project, res,  callback) {
+Vocabulary.syncUserTags = function (project, app, callback) {
 
     var Data = require('../model/Data');
 
@@ -193,21 +194,22 @@ Vocabulary.syncUserTags = function (project, res,  callback) {
 
         if(doc == null)
         {
-            res.write("Create new document<br>");
+            app.io.emit("syncUserTags_msg", 'Create new document');
             doc = new vocabularies();
             doc.project = project;
         }
 
         var dict = {};
-        res.write("Get userTags<br>");
+        app.io.emit("syncUserTags_msg", 'Get userTags');
+
         _.each(doc.userTags, function(item){
             var tag = item.tag == "" || item.tag == null ? null : item.tag;
             dict[tag] = { tag: tag, tokens: item.tokens };
         });
 
-        res.write('Update vocabulary<br>');
+        app.io.emit("syncUserTags_msg", 'Update vocabulary');
 
-        Vocabulary.prepareUserTags( project, res, dict, datas, function(err, docs) {
+        Vocabulary.prepareUserTags( project, app, dict, datas, function(err, docs) {
             vocabularies.update(
                 { project: project },
                 { $set: {
@@ -218,15 +220,14 @@ Vocabulary.syncUserTags = function (project, res,  callback) {
                 function (err) {
                     if(!err)
                     {
-                        res.write('Update project');
+                        app.io.emit("syncUserTags_msg", 'Update project');
                         updateProjects(docs, connection , project,  callback);
                     }
                     else
                     {
-                        res.write('Errore!!!');
+                        app.io.emit("syncUserTags_msg", 'Error: ' + err.toString());
                         callback(err, {} );
                     }
-
                 }
             );
         })
@@ -234,7 +235,15 @@ Vocabulary.syncUserTags = function (project, res,  callback) {
 
 };
 
-Vocabulary.syncDataTags = function (project, query, res, callback) {
+/**
+ * Funzione per sincronizzare ed effettuare il word count dei tokens presenti nei dati
+ * La funzione è asincrona, si usa socket.io
+ * @param project
+ * @param query
+ * @param app
+ * @param callback
+ */
+Vocabulary.syncDataTags = function (project, query, app, callback) {
 
     /**
      * Sincronizzo SOLO i tokens presenti in user tags in vocabularies
@@ -243,9 +252,10 @@ Vocabulary.syncDataTags = function (project, query, res, callback) {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var vocabularies = connection.model(Vocabulary.MODEL_NAME, Vocabulary.SCHEMA);
 
-    Vocabulary.prepareDataTags(project, query, res, function(err, docs){
+    Vocabulary.prepareDataTags(project, query, app, function(err, docs){
 
-        res.write("Update vocabulary<br>");
+        app.io.emit("syncDataTags_msg", "Update vocabulary");
+        console.log("Update vocabulary");
 
         var dataTags = _.map(docs, function(item){
             var tokens = _.map(item.counter, function(item){
@@ -267,12 +277,12 @@ Vocabulary.syncDataTags = function (project, query, res, callback) {
             function (err) {
                 if(!err)
                 {
-                    res.write("Update project<br>");
+                    app.io.emit("syncDataTags_msg", "Update project");
                     updateProjects(docs, connection , project,  callback);
                 }
                 else
                 {
-                    res.write("Error!!!<br>");
+                    app.io.emit("syncDataTags_msg", "Error: " + err.toString());
                     callback(err, null);
                 }
             }
@@ -303,23 +313,26 @@ function limitConvertResult(arrayRis, num){
 
 /// LEGGE I TOKENS DA DATAS E COSRUISCE I DOCSYNC E  DATATAGS IN VOCABULARY
 
-Vocabulary.prepareDataTags = function(project, query, res, callback) {
+Vocabulary.prepareDataTags = function(project, query, app, callback) {
 
     var Data = require('../model/Data');
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
 
-    res.write("Fetch data");
+    app.io.emit("syncDataTags_msg", "Fetch data");
+    console.log("Fetch data");
 
-    var wait = new WaitController(res);
+    var wait = new WaitController(app, "syncDataTags_msg");
     wait.start();
 
     var ris = {};
 
     datas.find({projectName:project},{text:1, tag:1, tokens:1}, function(err, docs){
         wait.stop();
-        res.write("Group data<br>");
+
+        app.io.emit("syncDataTags_msg", "Group data");
+
         async.each(docs, function(doc, next){
 
             //fix tag null
@@ -328,7 +341,7 @@ Vocabulary.prepareDataTags = function(project, query, res, callback) {
 
             if(ris[tag]==null){
                 ris[tag] = {tag: tag, counter: {} };
-                res.write("Found " + tag + "<br>");
+                app.io.emit("syncDataTags_msg", "Found " + tag);
             }
 
             //prepare data text
@@ -358,16 +371,17 @@ Vocabulary.prepareDataTags = function(project, query, res, callback) {
     });
 };
 
-Vocabulary.prepareUserTags = function(project, res, dict, datas, callback){
+Vocabulary.prepareUserTags = function(project, app, dict, datas, callback){
 
     var Data = require('../model/Data');
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
 
-    res.write("Fetch data");
+    app.io.emit("syncUserTags_msg", "Fetch data");
 
-    var wait = new WaitController(res);
+    //comincia  astampare puntini ...
+    var wait = new WaitController(app, "syncUserTags_msg");
     wait.start();
 
     //fix dict
@@ -381,8 +395,10 @@ Vocabulary.prepareUserTags = function(project, res, dict, datas, callback){
     delete dict["tokens"];
 
     datas.find({projectName:project},{text:1, tag:1, tokens:1}, function(err, docs){
+
         wait.stop();
-        res.write("Group data<br>");
+        app.io.emit("syncUserTags_msg", "Group data");
+
         async.each(docs, function(doc, next){
 
             //fix tag null
@@ -391,7 +407,7 @@ Vocabulary.prepareUserTags = function(project, res, dict, datas, callback){
 
             if(dict[tag]==null){
                 dict[tag] = {tag: tag, counter: {} };
-                res.write("Found " + tag + "<br>");
+                app.io.emit("syncUserTags_msg","Found " + tag);
             }
 
             //prepare data text

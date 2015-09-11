@@ -58,9 +58,12 @@
     /*height: 200px;*/
     border-radius: 2%;
     margin: 0 auto;
-    padding: 1px;
-
+    padding: 10px;
 }
+.terminal li{
+    padding-left: 20px;
+}
+
 .font {
     color: #fff;
     font-family: monospace;

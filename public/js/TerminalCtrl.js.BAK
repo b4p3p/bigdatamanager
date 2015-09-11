@@ -65,6 +65,7 @@ var TerminalCtrl = function(idFrame) {
         _self.intervalScroll = setInterval( _self.fnIntervalScroll , 500);
     };
 
+    //richiesta alla specifica pagina in base all' hashtag
     switch(document.location.hash){
         case "#syncproject":
             this.setSrcFrame("/project/sync");
