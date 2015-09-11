@@ -3,20 +3,22 @@
 <head lang="en">
 
    <link href="/public/css/terminal.css" rel="stylesheet">
+
    <style>
 
-      html{
-         height: 100%;
+      #terminalContainer{
+         /*width: 100%;*/
+         /*overflow-x: hidden;*/
       }
 
-      body{
-         height: calc(100% - 40px);
-      }
-      .terminal{
-         height: 100%;
-         width: 100%;
+      #terminal{
+
+         /*min-height: 500px;*/
+         /*max-height: 500px;*/
+         /*width: 100%;*/
+         /*height: 100%;*/
+
          border: 2px;
-
          margin-bottom: 0;
          padding-top: 20px;
 
@@ -24,6 +26,8 @@
          font-family: "Courier New", Courier, monospace;
          font-size: 20px;
          text-align: left;
+         overflow-y: visible;
+
       }
 
       .countDocs {
@@ -55,14 +59,14 @@
       </div>
    </div>
 
-   <div class="terminal" id="terminal">
+   <!--<div class="terminal" id="terminal">-->
 
+   <!--</div>-->
+
+   <div id="terminalContainer">
+      <div class="terminal" id="terminal">
+
+      </div>
    </div>
 
 </body>
-
-
-
-<script>
-   //var tCtrl = new TerminalCtrl("terminal");
-</script>

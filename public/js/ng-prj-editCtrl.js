@@ -722,11 +722,11 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
     /**
      * Messaggio da parte della sincronizzazione
      */
-    socket.on("overrideDataTokens_msg", function(message){
-        if( message != '.' )
-            $terminal.append(message + '<br>');
+    socket.on("overrideDataTokens_msg", function(msg){
+        if( msg != '.' )
+            $terminal.append(msg + '<br>');
         else
-            $terminal.append(message);
+            $terminal.append(msg);
     });
 
     /**
@@ -742,9 +742,9 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
      */
     socket.on("syncDataTags_msg", function(msg){
         if( message != '.' )
-            $terminal.append(message + '<br>');
+            $terminal.append(msg + '<br>');
         else
-            $terminal.append(message);
+            $terminal.append(msg);
     });
 
     /**
