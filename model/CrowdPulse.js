@@ -88,22 +88,26 @@ var CrowdPulse = function() {
 
                         next(null, d);
 
-                    } , function(err, results){
-                        next(err, results);
-                    })
+                    } ,
+                        function(err, results){
+                            next(err, results);
+                        }
+                    )
                 },
 
                 //salvo i documenti
                 function(results, next){
 
-                    saveDocs({app:app, docs: results, file: arg.fileName} , function(err, resultSave){
-                        next(err, resultSave);
-                    });
+                    saveDocs({app:app, docs: results, file: arg.fileName} ,
+                        function(err, resultSave){
+                            next(err, resultSave);
+                        }
+                    );
 
                 },
 
                 //aggiorno il contatore
-                function(next, resultSave){
+                function(resultSave, next){
 
                     var Project = require('../model/Project');
 
@@ -114,6 +118,7 @@ var CrowdPulse = function() {
                 }
 
             ], function(err, resultSave){
+
 
                 if(err)
                     callback(err, {success: 0, fail: 9999} );
@@ -170,8 +175,10 @@ var CrowdPulse = function() {
                 });
 
             }, function (err) {
+
                 db.close();
                 callback(err, result)
+
             });
         });
     }
