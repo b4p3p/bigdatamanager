@@ -153,19 +153,6 @@ Summary.getStatFilter = function (project,username, query, callback)
                     count: {$sum: 1},  minDate: {$min: "$date"}, maxDate: {$max: "$date"}
                 });
 
-                //datas.aggregate(
-                //    [
-                //        { $match: {
-                //            projectName: project,
-                //            nation: {$exists: true},
-                //            $and: queryAgg
-                //        }},
-                //        { $group: {
-                //            _id: {nation: "$nation", region: "$region", tag: "$tag"},
-                //            count: {$sum: 1},  minDate: {$min: "$date"}, maxDate: {$max: "$date"}
-                //        }}
-                //    ],
-
                 exec.exec(
                     function (err, result) {
                         var nation = "", region = "", tag = "", count = 0;
@@ -183,8 +170,12 @@ Summary.getStatFilter = function (project,username, query, callback)
                                 //count tot
                                 docSync.data.countTot += item.count;
 
+                                //per ragioni di efficenza, inserisco un true in un oggetto, che alla fine sarà trasformato in un array
+                                //con questa soluzione riesco a prendere anche i tag nulli
                                 if (!docSync.data.allTags[tag])
                                     docSync.data.allTags[tag] = true;
+                                if (!docSync.data.syncTags[tag])
+                                    docSync.data.syncTags[tag] = true;
 
                                 if (!nation) {
                                     next(null);
@@ -193,9 +184,6 @@ Summary.getStatFilter = function (project,username, query, callback)
 
                                 //count tot
                                 docSync.data.countSync += item.count;
-
-                                if (!docSync.data.syncTags[tag])
-                                    docSync.data.syncTags[tag] = true;
 
                                 //counter TOT
                                 if (!docSync.data.counter[tag]) {
@@ -278,11 +266,9 @@ Summary.getStatFilter = function (project,username, query, callback)
             connection.close();
 
             if(results.count && results.count.length > 0) {
-                docSync.data.allTags = results.count[0].allTags;
                 docSync.data.countTot = results.count[0].countTot;
                 docSync.data.countGeo = results.count[0].countGeo;
             }else {
-                docSync.data.allTags = [];
                 docSync.data.countTot = 0;
                 docSync.data.countGeo = 0;
             }
@@ -348,49 +334,6 @@ function setDate(docSync, minDate, maxDate) {
     _setDate(docSync, maxDate);
 }
 
-function buildQuery(query) {
-
-    var ris = [];
-
-    if (query) {
-
-        if(query.interval){
-            if (query.interval.min) ris.push({date: {$gte: new Date(query.interval.min)}});
-            if (query.interval.max) ris.push({date: {$lte: new Date(query.interval.max)}});
-        }
-
-        if (query.start) ris.push({date: {$gte: new Date(query.start)}});
-        if (query.end)   ris.push({date: {$lte: new Date(query.end)}});
-
-        if (query.tags) {
-            var tags = query.tags.split(',');
-            ris.push({tag: {$in: tags}});
-        }
-
-        if (query.nations) {
-            if(_.isArray(query.nations)){
-                ris.push({nation: {$in: query.nations}});
-            }
-            else
-            {
-                var nations = query.nations.split(',');
-                ris.push({nation: {$in: nations}});
-            }
-        }
-
-        if (query.regions) {
-            if(_.isArray(query.regions)){
-                ris.push({region: {$in: query.regions}});
-            }else {
-                var regions = query.regions.split(',');
-                ris.push({region: {$in: regions}});
-            }
-        }
-    }
-
-    if (ris.length > 0) return ris; else return [{}];
-}
-
 function calculateAvgWeight(baseNorm, count){
 
     //count / ( baseNorm + 1),
@@ -398,7 +341,7 @@ function calculateAvgWeight(baseNorm, count){
 
     if( baseNorm != null)
     {
-        console.log('baseNorm: ' + baseNorm);
+        //console.log('baseNorm: ' + baseNorm);
     }
 
     var ris = [
@@ -541,46 +484,3 @@ Summary.setEmptyStat = function(arg, callback){
 };
 
 module.exports = Summary;
-
-
-//max: function(callback) {
-//    datas.aggregate(
-//        [{$match: {
-//            projectName: project,
-//            nation: {$exists: true},
-//            $and: queryAgg
-//        }},
-//        {$group: {
-//            _id: {nation: "$nation", region: "$region" },
-//            sum: {$sum: 1}
-//        }},
-//        {$group: {
-//            _id: "$_id.nation" ,
-//            sum: {$sum: "$sum" },
-//            regions: {$push: {region: "$_id.region", sum:"$sum" } }
-//        }},
-//        {$project: { _id: 0, nation: "$_id", sum: 1, regions:1 }},
-//        {$sort: { count: -1 }}],
-//        function (err, result) {
-//
-//            if (result.length == 0){
-//                callback(null, 0);
-//                return;
-//            }
-//
-//            var ris = {nation : 0, region : 0};
-//
-//            _.each(result, function(nation) {
-//
-//                ris.nation = Math.max( ris.nation, nation.sum);
-//                _.each(nation.regions, function(region) {
-//                    ris.region = Math.max( ris.region, region.sum);
-//                });
-//            });
-//
-//
-//            callback(null, ris);
-//
-//        }
-//    );
-//},

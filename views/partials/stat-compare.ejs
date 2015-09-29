@@ -72,24 +72,23 @@
                               onclick="CompareCtrl.handleClick(this);" value="regions"> Regions</label>
             </div>
         </div>
-
-        <div id="formRegions" class="form-group hidden" style="position: absolute">
-            <div class="form-group form-combo">
-                <label class="fix-label" for="cmbRegions">Regions</label><br>
-                <select id="cmbRegions"
-                        multiple="multiple">
-                </select>
-            </div>
+        <!--class="form-group form-combo"-->
+        <div id="formRegions" class="form-group form-option hidden">
+            <label class="fix-label" for="cmbRegions">Regions</label><br>
+            <select id="cmbRegions"
+                    multiple="multiple">
+            </select>
         </div>
 
-        <div id="formNations" class="form-group">
-            <div class="form-group form-combo">
-                <label class="fix-label" for="cmbNations">Nations</label><br>
-                <select class="selectpicker" id="cmbNations"
-                        data-live-search="true" title="Select nations"
-                        multiple>
-                </select>
-            </div>
+        <div id="formNations" class="form-group form-option">
+
+            <label class="fix-label" for="cmbNations">Nations</label><br>
+            <select class="selectpicker" id="cmbNations"
+                    data-live-search="true" title="Select nations"
+                    multiple>
+            </select>
+            <div>*Only nations with data</div>
+
         </div>
 
         <div id="formButtons" class="form-group"

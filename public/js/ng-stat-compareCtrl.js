@@ -119,27 +119,42 @@ CompareCtrl.setSlider = function()
 CompareCtrl.getFilteredStat = function(callback)
 {
     console.log("CALL: getFilteredStat");
-    var conditions = new ObjConditions(
-        CompareCtrl.$cmbNations,
-        CompareCtrl.$cmbRegions,
-        null,
-        CompareCtrl.$sliderTimer);
 
-    DataCtrl.getFromUrl(DataCtrl.FIELD.STAT, conditions.getQueryString(), function(docStat){
+    var conditions = null;
 
-        if(docStat.data.syncTags.length == 0)
-        {
-            $('#error').removeClass('hidden');
-            CompareCtrl.$restoreButton.removeAttr("disabled");
-            CompareCtrl.$filterButton.prop("disabled", true);
-        }
-        else
-        {
-            CompareCtrl.filteredStat = docStat;
-            callback();
-        }
+    if(CompareCtrl.$radioRegions.is(':checked'))
+    {
+        conditions = new ObjConditions(
+            null,
+            CompareCtrl.$cmbRegions,
+            null,
+            CompareCtrl.$sliderTimer);
+    }else{
+        conditions = new ObjConditions(
+            CompareCtrl.$cmbNations,
+            null,
+            null,
+            CompareCtrl.$sliderTimer);
+    }
 
-    }, {type:"post", query:conditions.value});
+    DataCtrl.getFromUrl(DataCtrl.FIELD.STAT, conditions.getQueryString(),
+        function(docStat){
+
+            if(docStat.data.syncTags.length == 0)
+            {
+                $('#error').removeClass('hidden');
+                CompareCtrl.$restoreButton.removeAttr("disabled");
+                CompareCtrl.$filterButton.prop("disabled", true);
+            }
+            else
+            {
+                CompareCtrl.filteredStat = docStat;
+                callback();
+            }
+
+    },
+        {type:"post", query:conditions.value}
+    );
 };
 
 CompareCtrl.clickFilter = function()
@@ -336,20 +351,20 @@ CompareCtrl.drawBar = function()
     if(CompareCtrl.$NumButton.hasClass("active"))
         dataTable.sort([{column: CompareCtrl.BarData[0].length - 1, desc: desc}]);
 
-    var chartAreaHeight = dataTable.getNumberOfRows() * 30;
-    var chartHeight = chartAreaHeight + 80;
+    var chartHeight = dataTable.getNumberOfRows() * 35 + 100;
     var heightBar = 70;
+    var heightLegend = 50;
 
     var options = {
         width: "100%",
-        height: chartHeight + 50, //dataTable.getNumberOfRows() * 30,
+        height: chartHeight + heightLegend, //dataTable.getNumberOfRows() * 30,
         legend: { position: 'top',  maxLines: 3, textStyle: {fontSize: 13}},
         bar:    { groupWidth: heightBar + "%" },
         annotations: {
             alwaysOutside: true,
             textStyle:  { color: "black", fontSize: 13 }
         },
-        chartArea: {'height': chartAreaHeight - 50 , 'right':0, 'left':'300'},
+        chartArea: {'height': chartHeight - heightLegend , 'right':0, 'left':'300'},
         isStacked: true,
         backgroundColor: 'transparent',
         hAxis: { title: CompareCtrl.$radioByNumber.is(':checked')? "Data by tags": "Percentage of data than the maximum",
@@ -467,21 +482,24 @@ CompareCtrl.setComboRegionsData = function()
     var ris = [];
     var cont = 0;
     _.each(CompareCtrl.filteredStat.data.nations, function(obj){
-        if(obj.count > 0) {
+        // rimuove solo le nazioni che non hanno dati
+        // prende tutte le regioni della nazione
+        if(obj.count) {
             var nation = {
                 label: obj.name,
                 children: []
             };
 
             _.each(obj.regions, function (region) {
-                if (region.count > 0) {
-                    var child = {
-                        label: region.name,
-                        value: cont++
-                    };
-                    nation.children.push(child);
-                }
+
+                var child = {
+                    label: region.name,
+                    value: cont++
+                };
+                nation.children.push(child);
+
             });
+
             ris.push(nation);
         }
     });

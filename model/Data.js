@@ -852,8 +852,13 @@ Data.getInfoCount = function(arg, callback){
         }},
         allTags: {$addToSet: "$tag"}
     });
+
     exec.exec(function(err, result){
         if(arg.connection == null) conn.close();
+
+        //se non ho trovato nessun tag, ne aggiungo uno di default
+        if( !result.allTags || result.allTags.length == 0 )
+            result.allTags = ["undefined"];
         callback(err, result);
     });
 

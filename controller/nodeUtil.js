@@ -1,5 +1,5 @@
 var Util = function () {};
-
+var _ = require('underscore');
 /**
  * Funzione usata nelle find
  */
@@ -66,9 +66,10 @@ Util.addWhereClause = function(exec, query)
  */
 Util.addMatchClause = function(exec, query)
 {
-    if(query.projectName){
+    if( !query ) return;
+
+    if(query.projectName)
         exec.match({projectName: query.projectName });
-    }
 
     if(query.tags){
         var tags = query.tags.split(',');
@@ -80,18 +81,39 @@ Util.addMatchClause = function(exec, query)
         exec.match({user: {$in:users}});
     }
     if(query.hasOwnProperty("nations"))
-    {
-        exec.match({nation: {$in: query.nations.split(",")}});
-    }
+        if(_.isArray(query.nations))
+            exec.match({nation: {$in: query.nations}});
+        else
+            exec.match({nation: {$in: query.nations.split(",")}});
+
     if(query.hasOwnProperty("regions"))
-    {
-        exec.match({region: {$in: query.regions.split(",")} });
-    }
+        if(_.isArray(query.regions))
+            exec.match({region: {$in: query.regions}});
+        else
+            exec.match({region: {$in: query.regions.split(",")} });
+
     if(query.hasOwnProperty("tags"))
-    {
         exec.match({tag: {$in: query.tags.split(",") } });
+
+    if(query.interval)
+    {
+        if(query.interval.min)
+            exec.match({date: {$gte: new Date(query.interval.min)}});
+
+        if(query.interval.max)
+            exec.match({date: {$lte: new Date(query.interval.max)}});
+
+        if(query.interval.start)
+            exec.match({date: {$gte: new Date(query.interval.start)}});
+
+        if(query.interval.end)
+            exec.match({date: {$lte: new Date(query.interval.end)}});
     }
 
+    if( query.start )
+        exec.match({date: {$gte: new Date(query.start)}});
+    if( query.end )
+        exec.match({date: {$lte: new Date(query.end)}});
 
 
 };
