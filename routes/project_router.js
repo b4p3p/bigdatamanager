@@ -226,6 +226,9 @@ module.exports = function (router, app) {
             res.redirect("/view/app/#project/openproject");
     });
 
+    /**
+     * Stat calcolato a runtime
+     */
     router.get('/stat', function (req, res) {
         console.log("CALL: filter stat");
 

@@ -204,12 +204,18 @@ ngApp.controller('ngDbNormalizationCtrl', ['$scope', function($scope) {
             var nation = e.target.feature.properties.NAME_0;
             var region = e.target.feature.properties.NAME_1;
             var baseNorm = e.target.feature.properties.baseNorm;
+            var value = 0;
+
+            if( !baseNorm )
+                baseNorm = 0;
+            else
+                value = getAvg(e.target.feature).toFixed(2);
 
             var pop = '<div class="popup">' +
                     '<h3>' + nation + '</h3>' +
                     '<h4>' + region + '</h4>' +
                     '<p>Count: ' + baseNorm + '</p>' +
-                    '<p>Value: ' + getAvg(e.target.feature).toFixed(2) + '</p>' +
+                    '<p>Value: ' + value + '</p>' +
                 '</div>';
 
             e.target.bindPopup(pop).openPopup();

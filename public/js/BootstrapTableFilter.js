@@ -56,6 +56,7 @@ var BootstrapTableFilter = function(idFilter) {
     $(btnRemoveFilters).click( function (e) {
 
         ShowDataCtrl.deselectCombo();
+
         $('#refresh').addClass('hidden');
         bootstrapTableFilter.contFilter = 0;
 

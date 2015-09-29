@@ -1,3 +1,5 @@
+"use strict";
+
 var bootstrapTableFilter = null;
 
 var formatterData = {
@@ -194,31 +196,49 @@ ShowDataCtrl.refreshGui = function() {
 /**
  *  Funzione chiamata anche dal click sul filtro
  */
-ShowDataCtrl.refreshTable = function () {
+ShowDataCtrl.refreshTable = function (noCondictions) {
 
-    console.log("CALL: refreshTable");
+    console.log("CALL: refreshTable - noCondictions=" + noCondictions);
 
-    var date = {};
-    if( $('#lteCh').is(':checked') && $('#lte').val()!="" )
-        date['max'] = $('#lte').val();
-    if( $('#gteCh').is(':checked') && $('#gte').val()!="" )
-        date['min'] = $('#gte').val();
-    if( $('#eqCh').is(':checked') && $('#eq').val()!="" )
-        date['eq'] =  $('#eq').val();
+    var queryString = "";
 
-    var conditions = new ShowDataCtrl.ObjConditions(
-        ShowDataCtrl.$cmbNations,
-        ShowDataCtrl.$cmbRegions,
-        ShowDataCtrl.$cmbTags,
-        ShowDataCtrl.$cmbUsers,
-        ShowDataCtrl.$cmbTokens,
-        date,
-        ShowDataCtrl.skip,
-        ShowDataCtrl.limit,
-        $('#txtText').val()
-    );
+    if( !noCondictions )
+    {
+        var date = {};
+        if( $('#lteCh').is(':checked') && $('#lte').val()!="" )
+            date['max'] = $('#lte').val();
+        if( $('#gteCh').is(':checked') && $('#gte').val()!="" )
+            date['min'] = $('#gte').val();
+        if( $('#eqCh').is(':checked') && $('#eq').val()!="" )
+            date['eq'] =  $('#eq').val();
 
-    var queryString = conditions.getQueryString();
+        var conditions = new ShowDataCtrl.ObjConditions(
+            ShowDataCtrl.$cmbNations,
+            ShowDataCtrl.$cmbRegions,
+            ShowDataCtrl.$cmbTags,
+            ShowDataCtrl.$cmbUsers,
+            ShowDataCtrl.$cmbTokens,
+            date,
+            ShowDataCtrl.skip,
+            ShowDataCtrl.limit,
+            $('#txtText').val()
+        );
+        queryString = conditions.getQueryString();
+    }else{
+
+        var conditions = new ShowDataCtrl.ObjConditions(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            ShowDataCtrl.skip,
+            ShowDataCtrl.limit,
+            null
+        );
+        queryString = conditions.getQueryString();
+    }
 
     DataCtrl.getFromUrl(DataCtrl.FIELD.DATAFILTER, queryString, function(doc) {
         ShowDataCtrl.count = doc.count;
@@ -288,14 +308,17 @@ ShowDataCtrl.ObjConditions = function(
         if(users.length > 0)
             arrayQueryString.push("users=" + users.join(","));
 
-        if(this.date.hasOwnProperty('min'))
-            arrayQueryString.push("start=" + this.date['min']);
+        if( this.date )
+        {
+            if(this.date.hasOwnProperty('min'))
+                arrayQueryString.push("start=" + this.date['min']);
 
-        if(this.date.hasOwnProperty('max'))
-            arrayQueryString.push("end=" + this.date['max']);
+            if(this.date.hasOwnProperty('max'))
+                arrayQueryString.push("end=" + this.date['max']);
 
-        if(this.date.hasOwnProperty('eq'))
-            arrayQueryString.push("eq=" + this.date['eq']);
+            if(this.date.hasOwnProperty('eq'))
+                arrayQueryString.push("eq=" + this.date['eq']);
+        }
 
         if(text != null && text != '' )
             arrayQueryString.push("text=" + encodeURIComponent( text ) );
@@ -359,6 +382,7 @@ ngApp.controller('ngStatDataCtrl', ['$scope', function($scope) {
     var $container = $('#container');
     var $spinner = $("#spinner");
     var $msgproject = $("#msgProject");
+    var $removeFilter = $("#removeFilters");
 
     function showTable (){
         $table.removeClass("hidden");

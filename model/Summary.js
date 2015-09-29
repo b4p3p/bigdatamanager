@@ -97,6 +97,7 @@ Summary.getStatFilter = function (project,username, query, callback)
     console.log("CALL Summary.getStatFilter of " + project);
 
     Datas = require("../model/Data");
+    Util = require("../controller/nodeUtil");
 
     var docSync = {
         projectName: project,   username: username,    lastUpdate: new Date(),
@@ -113,7 +114,12 @@ Summary.getStatFilter = function (project,username, query, callback)
     var maxRegionCount = 0;
     var maxNationCount = 0;
 
-    var queryAgg = buildQuery(query);
+    //assegno il progetto alla query
+    if( !query ) query = {};
+    query.projectName = project;
+
+    //var queryAgg = buildQuery(query);
+    //queryAgg.projectName = project;     //aggiungo la query sul progetto
 
     async.parallel( {
 
@@ -135,15 +141,32 @@ Summary.getStatFilter = function (project,username, query, callback)
             },
 
             docSync: function (callback) {
-                datas.aggregate(
-                    [
-                        { $match: { projectName: project, nation: {$exists: true}, $and: queryAgg }},
-                        { $group: {
-                            _id: {nation: "$nation", region: "$region", tag: "$tag"},
-                            count: {$sum: 1},  minDate: {$min: "$date"}, maxDate: {$max: "$date"}
-                        }}
-                    ],
 
+                var exec = datas.aggregate();
+
+                Util.addMatchClause(exec, query);
+
+                exec.match( { nation: {$exists: true} });
+
+                exec.group({
+                    _id: {nation: "$nation", region: "$region", tag: "$tag"},
+                    count: {$sum: 1},  minDate: {$min: "$date"}, maxDate: {$max: "$date"}
+                });
+
+                //datas.aggregate(
+                //    [
+                //        { $match: {
+                //            projectName: project,
+                //            nation: {$exists: true},
+                //            $and: queryAgg
+                //        }},
+                //        { $group: {
+                //            _id: {nation: "$nation", region: "$region", tag: "$tag"},
+                //            count: {$sum: 1},  minDate: {$min: "$date"}, maxDate: {$max: "$date"}
+                //        }}
+                //    ],
+
+                exec.exec(
                     function (err, result) {
                         var nation = "", region = "", tag = "", count = 0;
 
@@ -236,9 +259,11 @@ Summary.getStatFilter = function (project,username, query, callback)
                     }
                 );
             },
+
             count: function(callback){
+
                 var arg = {
-                    query: {projectName: project},
+                    query: query,
                     connection: connection
                 };
                 Datas.getInfoCount(arg, function(err, result){
@@ -371,13 +396,23 @@ function calculateAvgWeight(baseNorm, count){
     //count / ( baseNorm + 1),
     //count / ( Math.log(baseNorm + Math.E ) )
 
-    return [
+    if( baseNorm != null)
+    {
+        console.log('baseNorm: ' + baseNorm);
+    }
+
+    var ris = [
         baseNorm == 0 ? 0 : count / baseNorm ,
         baseNorm == 0 ? 0 : count / Math.log(baseNorm + Math.E ),
-        baseNorm == 0 ? 0 : Math.log( count / baseNorm ),
+        baseNorm == 0 ? 0 : Math.log( count / baseNorm + Math.E ),
     ];
+
+    return ris;
 }
 
+/**
+ * Trova il massimo tra tutte le nazioni e normalizza secondo il min-max
+ */
 function normalizationMaxMin(docSync){
 
     //var max = { avg: 0, avgWeighed: [] };
@@ -385,18 +420,31 @@ function normalizationMaxMin(docSync){
     var maxCountRegion = 0;
     var maxWeight = [];
 
-    //trovo il max per tutti i valori
+    //...per ogni nazione
     _.each(docSync.data.nations, function(nation, key_N){
-        maxCountNation = Math.max(nation.count , maxCountNation);
 
+        //se esiste prenso il massimo per la nazione
+        if( nation.count )
+            maxCountNation = Math.max(nation.count , maxCountNation);
+
+        //...per ogni regione
         _.each(nation.regions, function(region, key_R){
 
-            maxCountRegion = Math.max( region.count, maxCountRegion );
-            if( maxWeight.length == 0)
-                for(var i = 0; i < region.avgWeighed.length; i++) maxWeight.push(0);
+            //se esiste prendo il massimo per la regione
+            if( region.count )
+                maxCountRegion = Math.max( region.count, maxCountRegion );
 
+            //la prima volta inizializzo l'array con tutti 0
+            if( maxWeight.length == 0)
+                for(var i = 0; i < region.avgWeighed.length; i++)
+                    maxWeight.push(0);
+
+            //...per ogni indice di media per la regione
             _.each(region.avgWeighed, function(value, index){
-                maxWeight[index] = Math.max( maxWeight[index], value );
+
+                //se esiste prendo il massimo
+                if( value )
+                    maxWeight[index] = Math.max( maxWeight[index], value );
             });
         });
     });
@@ -407,7 +455,12 @@ function normalizationMaxMin(docSync){
         _.each(nation.regions, function(region, key_R){
             region.avg = region.count / maxCountRegion;
             _.each(region.avgWeighed, function(value, index){
-                region.avgWeighed[index] = region.avgWeighed[index] / maxWeight[index];
+
+                //se esiste, lo normalizzo, altrimenti 0
+                if( region.avgWeighed[index] )
+                    region.avgWeighed[index] = region.avgWeighed[index] / maxWeight[index];
+                else
+                    region.avgWeighed[index] = 0;
             });
         });
     });

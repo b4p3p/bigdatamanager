@@ -1,5 +1,8 @@
 var Util = function () {};
 
+/**
+ * Funzione usata nelle find
+ */
 Util.addWhereClause = function(exec, query)
 {
     if(query == null) return exec;
@@ -15,15 +18,17 @@ Util.addWhereClause = function(exec, query)
         var reg = new RegExp( terms.join("|"), "i");
         exec.where({text: reg})
     }
+
     if(query.hasOwnProperty("nations"))
+    {
         exec.where('nation').in( query.nations.split(",") );
+    }
 
     if(query.hasOwnProperty("text"))
     {
         var reg = new RegExp( query.text, "i");
         exec.where( {text: reg } );
     }
-
 
     if(query.hasOwnProperty("regions"))
         exec.where('region').in( query.regions.split(","));
@@ -56,6 +61,9 @@ Util.addWhereClause = function(exec, query)
     return exec;
 };
 
+/**
+ * Funzione usata nelle aggregate
+ */
 Util.addMatchClause = function(exec, query)
 {
     if(query.projectName){
@@ -71,6 +79,21 @@ Util.addMatchClause = function(exec, query)
         var users = query.users.split(',');
         exec.match({user: {$in:users}});
     }
+    if(query.hasOwnProperty("nations"))
+    {
+        exec.match({nation: {$in: query.nations.split(",")}});
+    }
+    if(query.hasOwnProperty("regions"))
+    {
+        exec.match({region: {$in: query.regions.split(",")} });
+    }
+    if(query.hasOwnProperty("tags"))
+    {
+        exec.match({tag: {$in: query.tags.split(",") } });
+    }
+
+
+
 };
 
 Util.replaceDot = function(string){

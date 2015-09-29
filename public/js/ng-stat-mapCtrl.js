@@ -10,6 +10,14 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
     $scope.IsNormalizeBoudariesChecked = false;
     $scope.IsBoudariesChecked = false;
 
+    //variable
+    var stat = null;
+    var regions = null;
+    var filteredRegions = null;
+    var users = null;
+    var terms = null;
+    var datas = [];
+
     $scope.resize = function() {
         setTimeout(function() {
             $(window).trigger('resize');
@@ -93,12 +101,17 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
         this.setIntervalSlider = function(min, max) {
 
             min = min.addDays(-1);
-            max = min.addDays(+1);
+            max = max.addDays(+1);
 
             this.$sliderTimer.dateRangeSlider( {
                 enabled : true ,
-                bounds:{ min: min, max: max},
-                defaultValues:{ min: min, max: max }
+                bounds:{
+                    min: min, max: max
+                },
+                defaultValues:{
+                    min: min,
+                    max: max
+                }
             });
             this.$sliderTimer.dateRangeSlider("min", min - 1);
             this.$sliderTimer.dateRangeSlider("max", max + 1);
@@ -305,8 +318,8 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
                         getDataAsync(conditions);
                         next(null);
 
-                    }], function() {
-
+                    }], function()
+            {
                 mapCtrl.refreshLayers();
                 btnCtrl.enableFilterButton();
                 btnCtrl.removeImgWaitFilterButton();
@@ -325,8 +338,17 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
 
         this.setPercentage = function(){
 
-            var tot = stat.data.countGeo;
-            var all = stat.data.countTot;
+            var tot = 0;
+            var all = 0;
+            if( stat && stat.data )
+            {
+                tot = stat.data.countGeo;
+                all = stat.data.countTot;
+            }else
+            {
+                tot = 0;
+                all = 0;
+            }
 
             if(tot>0)
             {
@@ -527,6 +549,7 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
 
             var avg = stat.data.nations[nation].regions[region].avg;
             var avgWeighed = stat.data.nations[nation].regions[region].avgWeighed;
+            var baseNorm = stat.data.nations[nation].regions[region].baseNorm;
 
             var tot_tweet = 0;
             var counter = {};
@@ -566,15 +589,40 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
                         '<div class="label-popup-right">' + avg.toFixed(2) +
                     '</div>';
 
-            pop += '<div class="row-popup">' +
-                '<div class="label-popup-left">AvgWeighed[0]:</div>' +
-                '<div class="label-popup-right">' + avgWeighed[0].toFixed(2) +
-                '</div>';
+            //potrebbero esserci delle nazioni che non compaiono nel dataset per la normalizzazione
+            if( avgWeighed[0] != null && baseNorm )
+            {
+                pop += '<div class="row-popup">' +
+                    '<div class="label-popup-left">BaseNorm:</div>' +
+                    '<div class="label-popup-right">' + baseNorm +
+                    '</div>';
 
-            pop += '<div class="row-popup">' +
-                '<div class="label-popup-left">AvgWeighed[1]:</div>' +
-                '<div class="label-popup-right">' + avgWeighed[1].toFixed(2) +
-                '</div>';
+                pop += '<div class="row-popup">' +
+                    '<div class="label-popup-left">Simple:</div>' +
+                    '<div class="label-popup-right">' + avgWeighed[0].toFixed(2) +
+                    '</div>';
+
+                pop += '<div class="row-popup">' +
+                    '<div class="label-popup-left">Logarithmic:</div>' +
+                    '<div class="label-popup-right">' + avgWeighed[1].toFixed(2) +
+                    '</div>';
+            }else{
+
+                pop += '<div class="row-popup">' +
+                    '<div class="label-popup-left">BaseNorm:</div>' +
+                    '<div class="label-popup-right">' + 0 +
+                    '</div>';
+
+                pop += '<div class="row-popup">' +
+                    '<div class="label-popup-left">Simple:</div>' +
+                    '<div class="label-popup-right">-' +
+                    '</div>';
+
+                pop += '<div class="row-popup">' +
+                    '<div class="label-popup-left">Logarithmic:</div>' +
+                    '<div class="label-popup-right">-'
+                    '</div>';
+            }
 
             pop += "</div>";
 
@@ -825,15 +873,6 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
 
     };
     var mapCtrl = new MapCtrl('map');
-
-    //variable
-    var stat = null;
-    var regions = null;
-    var filteredRegions = null;
-    var users = null;
-    var terms = null;
-    var datas = [];
-
     var btnCtrl = new BtnCtrl();
     var formCtrl = new FormCtrl();
 
@@ -890,6 +929,7 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
         } , 0 );
     }
 
+    //funzione asincrona che viene richiamata dal timer
     function _getDataAsync(_idOp, condictions, timeout, step, start) {
 
         if (_idOp != idOp - 1) return;

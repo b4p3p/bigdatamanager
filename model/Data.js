@@ -796,10 +796,34 @@ Date.dateByDate_project = function(exec, type){
 Data.delData = function(arg, callback){
     var connection = arg.connection == null ? mongoose.createConnection('mongodb://localhost/oim') : arg.connection;
     var datas = connection.model("datas", Data.SCHEMA);
-    datas.remove({projectName: arg.project}, function(err, result){
-        if(arg.connection != null ) arg.connection.close();
-        callback(err, result)
+
+    async.parallel({
+
+        //cancello tutti i dati
+        deleteData : function(next){
+            datas.remove({projectName: arg.project}, function(err, result){
+                next(null, result);
+            });
+        },
+        //azzero il contatore
+        cont : function(next){
+            Project.setSize({
+                connection: connection,
+                project:arg.project
+            }, function(err, res){
+                next(err, res);
+            })
+        }
+    }, function(err, res){
+
+        if(arg.connection != null )
+            arg.connection.close();
+
+        callback(err, res.deleteData)
+
     })
+
+
 };
 
 /**
@@ -815,7 +839,9 @@ Data.getInfoCount = function(arg, callback){
     var datas = conn.model(Data.MODEL_NAME, Data.SCHEMA);
 
     var exec = datas.aggregate();
+
     Util.addMatchClause(exec, arg.query);
+
     exec.group({
         _id:null,
         min: {$min: "$date" },
