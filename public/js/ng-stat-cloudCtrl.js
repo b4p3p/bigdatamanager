@@ -48,13 +48,15 @@ ngApp.controller('ngStatCloudCtrl', ['$scope', function($scope) {
 
             var data = this.vocabulary;
 
-            this.wordCloudData = this.toWordCloudData(data, type);
-            this.tagsBarData = this.toTagsBarData(data, type);
-            this.wordBarData = this.toWordBarData(data, type);
+            if( data )
+            {
+                this.wordCloudData = this.toWordCloudData(data, type);
+                this.tagsBarData = this.toTagsBarData(data, type);
+                this.wordBarData = this.toWordBarData(data, type);
+                loadWords( data[getTypeData()] );
+            }
 
-            loadWords( data[getTypeData()] );
-
-            if(this.wordCloudData.length == 0){
+            if(!data || this.wordCloudData.length == 0){
                 $("#container").hide();
                 $("#msgDataNotAvaible").show();
             }else

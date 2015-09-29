@@ -758,7 +758,10 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
      * Messaggio della sync con i token nei dati usando il vocabolario dell'utente
      */
     socket.on("syncUserTags_msg", function(msg){
-        $terminal.append(msg + "<br>");
+        if( msg != '.' )
+            $terminal.append(msg + "<br>");
+        else
+            $terminal.append(msg);
     });
 
     /**

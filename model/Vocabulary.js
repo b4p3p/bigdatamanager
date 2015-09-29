@@ -331,7 +331,7 @@ Vocabulary.prepareDataTags = function(project, query, app, callback) {
     datas.find({projectName:project},{text:1, tag:1, tokens:1}, function(err, docs){
         wait.stop();
 
-        app.io.emit("syncDataTags_msg", "Group data");
+        app.io.emit("syncDataTags_msg", "<br>Group data");
 
         async.each(docs, function(doc, next){
 
