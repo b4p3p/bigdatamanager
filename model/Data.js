@@ -827,7 +827,11 @@ Data.delData = function(arg, callback){
 };
 
 /**
- *
+ * Calcola i contatori dei dati
+ * - max: data massima
+ * - min: data minima
+ * - countTot: numero totale dei dati memorizzati
+ * - countGeo: numero dei dati che hanno una geolocalizzazione (anche non sincronizzata)
  * @param arg
  * @param arg.connection
  * @param arg.query
@@ -840,26 +844,80 @@ Data.getInfoCount = function(arg, callback){
 
     var exec = datas.aggregate();
 
+    //filtro con le condizioni specificate
     Util.addMatchClause(exec, arg.query);
 
+    //i dati che non hanno un tag li tratto come se avessero tag undefined
+    exec.project({
+        date: 1,
+        latitude: 1,
+        nation: 1,
+        tag: { $ifNull: [ "$tag", "undefined" ] }
+    });
+
+    //trovo la data minima e massima dei dati filtrati
     exec.group({
         _id:null,
         min: {$min: "$date" },
         max: {$max: "$date" },
+
+        //contatore totale
         countTot: {$sum:1},
+
+        //contatore dei dati che hanno almeno una latitudine
         countGeo: {$sum: {
             "$cond": [ { "$ifNull": ["$latitude", false] }, 1, 0 ]
         }},
-        allTags: {$addToSet: "$tag"}
+
+        //contatore dei dati che sono stati inseriti all'interno di una regione (sincronizzati)
+        countSync: {$sum: {
+            "$cond": [ { "$ifNull": ["$nation", false] }, 1, 0 ]
+        }},
+
+        //array dei tag
+        allTags: {$addToSet: "$tag"},
+
+        geoTags: {$addToSet: {
+            "$cond": [ { "$ifNull": ["$latitude", false] }, "$tag", null ]
+        }},
+
+        syncTags: {$addToSet: {
+            "$cond": [ { "$ifNull": ["$nation", false] }, "$tag", null ]
+        }}
+
     });
 
     exec.exec(function(err, result){
         if(arg.connection == null) conn.close();
 
+        if( result && result.length > 0 )
+        {
+            var index = result[0].geoTags.indexOf(null);
+            if (index > -1)
+                result[0].geoTags.splice(index, 1);
+
+            index = result[0].syncTags.indexOf(null);
+            if (index > -1)
+                result[0].syncTags.splice(index, 1);
+
+            callback(err, result[0]);
+        }
+        else
+        {
+            callback(err, {
+                allTags: ["undefined"],
+                countTot: 0,
+                countGeo: 0,
+                countSync: 0,
+                min: null,
+                max: null
+            });
+        }
+
         //se non ho trovato nessun tag, ne aggiungo uno di default
-        if( !result.allTags || result.allTags.length == 0 )
-            result.allTags = ["undefined"];
-        callback(err, result);
+        //if( !result.allTags || result.allTags.length == 0 )
+        //    result.allTags = ["undefined"];
+        //callback(err, result);
     });
 
 };

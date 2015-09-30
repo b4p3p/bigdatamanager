@@ -154,14 +154,32 @@
 
    </div>
 
-
-
    <h3>Tag</h3>
+
+   <div style="vertical-align: middle;height: 40px">
+
+      <div style="display: inline-block">
+         <h4>Available tags: </h4>
+      </div>
+
+      <div style="display: inline-block">
+
+         <ul class="tags">
+            <li ng-repeat="tag in stat.data.allTags">
+               <span>{{tag}}</span>
+            </li>
+
+            <!--<li><span>Diversità</span></li>-->
+         </ul>
+
+      </div>
+   </div>
+
 
    <div>
       <br>
-      *Il tag deve essere presente all'interno dei dati. <br>
-      Se non esiste nessun tag associato ai dati, lasciare il campo tag vuoto.
+      *Il tag deve essere presente tra i tag disponibili. <br>
+      Per inserire il tag undefined, lasciare il campo 'tag' vuoto.
    </div>
 
    <div id="tableTagsContainer">

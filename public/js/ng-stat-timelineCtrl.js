@@ -260,10 +260,12 @@ ngApp.controller('ngStatTimeLineCtrl', ['$scope', function($scope) {
             //GVE - non si vede bene il time line
             ris.push( this.graphBuilder.selectLabelDate(min) );
             min = this.graphBuilder.selectStepDate(min);
-            if(this.$radioDays.is(':checked')){
-                ris.push( this.graphBuilder.selectLabelDate(min) );
-                min = this.graphBuilder.selectStepDate(min);
-            }
+            ris.push( this.graphBuilder.selectLabelDate(min) );
+
+            //if(this.$radioDays.is(':checked')){
+            //    ris.push( this.graphBuilder.selectLabelDate(min) );
+            //    min = this.graphBuilder.selectStepDate(min);
+            //}
 
             return ris;
         };
@@ -313,9 +315,18 @@ ngApp.controller('ngStatTimeLineCtrl', ['$scope', function($scope) {
                     ris.push(dataset[key]);
                 min = _self.graphBuilder.selectStepDate(min);
             }
+
+            //lo rifaccio un'altra volta
+            var key = _self.graphBuilder.selectLabelDate(min);
+            if (dataset[key] == null)
+                ris.push(0);
+            else
+                ris.push(dataset[key]);
+
+            //min = _self.graphBuilder.selectStepDate(min);
             //GVE
-            ris.push(0);
-            if(this.$radioDays.is(':checked')) ris.push(0);
+            //ris.push(0);
+            //if(this.$radioDays.is(':checked')) ris.push(0);
 
             return ris;
         };

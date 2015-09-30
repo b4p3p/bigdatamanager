@@ -37,7 +37,21 @@ Util.addWhereClause = function(exec, query)
         exec.where( 'user').in(query.users.split(","));
 
     if(query.hasOwnProperty("tags"))
-        exec.where('tag').in(query.tags.split(","));
+    {
+        var tags = query.tags.split(",");
+        var condictions = [];
+        for ( var i = 0; i < tags.length; i++)
+        {
+            //cerco i dati che non hanno un tag
+            if( tags[i] == 'undefined')
+                condictions.push({tag:{$exists:false}});
+            //prendo i dati specificati nella query
+            else
+                condictions.push({tag:{$eq:tags[i]}});
+        }
+        //metto tutte queste condizioni in or tra loro
+        exec.where({$or: condictions});
+    }
 
     if(query.hasOwnProperty("tokens"))
         exec.where('tokens').in(query.tokens.split(","));
@@ -71,11 +85,6 @@ Util.addMatchClause = function(exec, query)
     if(query.projectName)
         exec.match({projectName: query.projectName });
 
-    if(query.tags){
-        var tags = query.tags.split(',');
-        exec.match({tag: {$in:tags}});
-    }
-
     if(query.users){
         var users = query.users.split(',');
         exec.match({user: {$in:users}});
@@ -93,7 +102,24 @@ Util.addMatchClause = function(exec, query)
             exec.match({region: {$in: query.regions.split(",")} });
 
     if(query.hasOwnProperty("tags"))
-        exec.match({tag: {$in: query.tags.split(",") } });
+    {
+        var tags = query.tags.split(",");
+        var condictions = [];
+        for ( var i = 0; i < tags.length; i++)
+        {
+            //cerco i dati che non hanno un tag
+            if( tags[i] == 'undefined')
+                condictions.push({tag:{$exists:false}});
+            //prendo i dati specificati nella query
+            else
+                condictions.push({tag:{$eq:tags[i]}});
+        }
+        //metto tutte queste condizioni in or tra loro
+        exec.match({$or: condictions});
+
+        //exec.match({tag: {$in: query.tags.split(",") } });
+    }
+
 
     if(query.interval)
     {

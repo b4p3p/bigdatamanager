@@ -565,8 +565,8 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
 
         };
 
-        this.loadPie = function()
-        {
+        //carico le regioni nel grafico
+        this.loadPie = function() {
             DataCtrl.getFromUrl(DataCtrl.FIELD.DATANATIONS, null, function(doc) {
                 var data = [];
                 data[0] = ['Nation', 'Count data'];
@@ -645,6 +645,8 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
 
     $scope.uservocabulary = null;
 
+    $scope.stat = null;
+
     function getInfoData(){
         $.ajax({
             url: '/datas/info',
@@ -673,9 +675,22 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
         });
     }
 
-    /**
-     *  ####  EVENTI  ####
-     */
+    //chiedo stat per i tag memorizzati nei dati
+    function getStat() {
+        $.ajax({
+            url: '/project/stat',
+            success:function(res){
+                $scope.$apply(function(){
+                    $scope.stat = res;
+                });
+            },
+            error: function(err){
+                console.error(JSON.stringify(err));
+            }
+        });
+    }
+
+    /// ####  EVENTI  ####
 
     /**
      * CLICK override tokens in data
@@ -779,6 +794,7 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
             prjEditCtrl = new PrjEditCtrl($scope);
             getInfoData();
             getUserTag();
+            getStat();
         }
     });
 

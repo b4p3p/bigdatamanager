@@ -219,8 +219,7 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
             this.progressCount.$divProgress.hide();
         };
 
-        this.$chkNormalize.change(function()
-        {
+        this.$chkNormalize.change(function() {
             var value =  $(this).is(':checked');
             console.log("$chkNormalize: " + value);
 
@@ -236,8 +235,7 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
             mapCtrl.boundariesCtrl.updateColorBoundaries();
         });
 
-        this.getTypeNormalization = function()
-        {
+        this.getTypeNormalization = function() {
             if( !_self.$chkNormalize.is(':checked') )
                 return -1;
             else
@@ -298,27 +296,26 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
             var queryString = conditions.getQueryString();
 
             async.waterfall([
-                    function(next){
-                        // chiedo il nuvo stat filtrato
-                        DataCtrl.getFromUrl(DataCtrl.FIELD.STAT, queryString, function(docStat){
-                            stat = docStat;
-                            next(null);
-                        });
-                    },
-                    function(next){
-
-                        filteredRegions = _.filter(regions, function(obj){
-                            return conditions.containNation(obj.properties.NAME_0);
-                        });
+                // chiedo il nuvo stat filtrato
+                function(next){
+                    DataCtrl.getFromUrl(DataCtrl.FIELD.STAT, queryString, function(docStat){
+                        stat = docStat;
                         next(null);
-                    },
-                    function(next){
-
-                        //chiedo i nuovi dati
-                        getDataAsync(conditions);
-                        next(null);
-
-                    }], function()
+                    });
+                },
+                //filtra le regioni selezionate
+                function(next){
+                    filteredRegions = _.filter(regions, function(obj){
+                        return conditions.containNation(obj.properties.NAME_0);
+                    });
+                    next(null);
+                },
+                //chiedo i nuovi dati in maniera asincrona
+                function(next){
+                    getDataAsync(conditions);
+                    next(null);
+                }
+            ], function()
             {
                 mapCtrl.refreshLayers();
                 btnCtrl.enableFilterButton();
@@ -976,17 +973,15 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
     }
 
     //EVENT
-
-
     var project = window.PROJECT;
-    if(!window.PROJECT){
+    if(!window.PROJECT)
+    {
         bootbox.alert("You must first select a project<br><a href='/view/app/#project/openproject'>Select project</a>");
         formCtrl.reset();
-    }else
+    }
+    else
     {
         getAllData();
     }
-
-
 
 }]);

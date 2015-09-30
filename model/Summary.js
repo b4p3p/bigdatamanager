@@ -100,10 +100,20 @@ Summary.getStatFilter = function (project,username, query, callback)
     Util = require("../controller/nodeUtil");
 
     var docSync = {
-        projectName: project,   username: username,    lastUpdate: new Date(),
+        projectName: project,
+        username: username,
+        lastUpdate: new Date(),
         data: {
-            minDate: null,  maxDate: null,    countSync: 0,   countTot: 0,
-            syncTags: {},   allTags: {},      counter: {},    nations: {}
+            minDate: null,
+            maxDate: null,
+            countSync: 0,
+            countTot: 0,
+            countGeo: 0,
+            syncTags: [],
+            allTags: [],
+            geoTags: [],
+            counter: {},
+            nations: {}
         }
     };
 
@@ -123,7 +133,7 @@ Summary.getStatFilter = function (project,username, query, callback)
 
     async.parallel( {
 
-            //ottengo le regioni associate alla nazione. Solo stringe
+            //ottengo le regioni associate alla nazione. Solo stringhe
             regions: function (callback) {
                 regions.aggregate( [
                     { $group: {
@@ -140,22 +150,38 @@ Summary.getStatFilter = function (project,username, query, callback)
                 });
             },
 
+            //imposto i counter delle regioni che ha trovato
             docSync: function (callback) {
 
                 var exec = datas.aggregate();
 
                 Util.addMatchClause(exec, query);
 
-                exec.match( { nation: {$exists: true} });
+                //prende solo i dati sincronizzati (i contatori sono calcolati a parte)
+                //exec.match( { nation: {$exists: true} });
+
+                exec.project({
+                    nation: 1,
+                    region: 1,
+                    tag: { $ifNull: [ "$tag", "undefined" ] },
+                    date: 1,
+                    latitude: 1
+                });
 
                 exec.group({
-                    _id: {nation: "$nation", region: "$region", tag: "$tag"},
-                    count: {$sum: 1},  minDate: {$min: "$date"}, maxDate: {$max: "$date"}
+                    _id: {
+                        nation: "$nation",
+                        region: "$region",
+                        tag: "$tag"},
+                    count: {$sum: 1}
                 });
 
                 exec.exec(
                     function (err, result) {
-                        var nation = "", region = "", tag = "", count = 0;
+                        var nation = "",
+                            region = "",
+                            tag = "",
+                            count = 0;
 
                         async.each(result, function (item, next) {
 
@@ -164,26 +190,10 @@ Summary.getStatFilter = function (project,username, query, callback)
                                 tag = item._id.tag;
                                 count = item.count;
 
-                                //min e max date
-                                setDate(docSync, item.minDate, item.maxDate);
-
-                                //count tot
-                                docSync.data.countTot += item.count;
-
-                                //per ragioni di efficenza, inserisco un true in un oggetto, che alla fine sarà trasformato in un array
-                                //con questa soluzione riesco a prendere anche i tag nulli
-                                if (!docSync.data.allTags[tag])
-                                    docSync.data.allTags[tag] = true;
-                                if (!docSync.data.syncTags[tag])
-                                    docSync.data.syncTags[tag] = true;
-
                                 if (!nation) {
                                     next(null);
                                     return;
                                 }
-
-                                //count tot
-                                docSync.data.countSync += item.count;
 
                                 //counter TOT
                                 if (!docSync.data.counter[tag]) {
@@ -194,7 +204,7 @@ Summary.getStatFilter = function (project,username, query, callback)
                                 }
                                 docSync.data.counter[tag].count += count;
 
-                                //nations
+                                //counter tot nations
                                 if (!docSync.data.nations[nation]) {
                                     docSync.data.nations[nation] = {
                                         name: nation,
@@ -203,10 +213,9 @@ Summary.getStatFilter = function (project,username, query, callback)
                                         counter: {}
                                     }
                                 }
-
                                 docSync.data.nations[nation].count += count;
 
-                                //COUNTER NATION
+                                //counter  nations
                                 if (!docSync.data.nations[nation].counter[tag]) {
                                     docSync.data.nations[nation].counter[tag] = {
                                         tag: tag,
@@ -215,7 +224,7 @@ Summary.getStatFilter = function (project,username, query, callback)
                                 }
                                 docSync.data.nations[nation].counter[tag].count += count;
 
-                                //REGIONS
+                                //counter tot regions
                                 if (!docSync.data.nations[nation].regions[region]) {
                                     docSync.data.nations[nation].regions[region] = {
                                         name: region,
@@ -225,7 +234,7 @@ Summary.getStatFilter = function (project,username, query, callback)
                                 }
                                 docSync.data.nations[nation].regions[region].count += count;
 
-                                //COUNTER REGIONS
+                                //counter regions
                                 if (!docSync.data.nations[nation].regions[region].counter[tag]) {
                                     docSync.data.nations[nation].regions[region].counter[tag] = {
                                         tag: tag,
@@ -234,12 +243,23 @@ Summary.getStatFilter = function (project,username, query, callback)
                                 }
                                 docSync.data.nations[nation].regions[region].counter[tag].count += count;
 
+                                //docSync.data.syncTags[tag] = tag;
+
+                                //min e max date
+                                //setDate(docSync, item.minDate, item.maxDate);
+
+                                //count tot
+                                //docSync.data.countTot += item.count;
+
+                                //count tot
+                                //docSync.data.countSync += item.count;
+
                                 next(null);
                             },
 
                             function (err) {
-                                docSync.data.allTags = _.keys(docSync.data.allTags);
-                                docSync.data.syncTags = _.keys(docSync.data.syncTags);
+
+                                //docSync.data.syncTags = _.keys(docSync.data.syncTags);
 
                                 callback(err, true);
                             }
@@ -260,18 +280,22 @@ Summary.getStatFilter = function (project,username, query, callback)
             }
         },
 
-        //add missing region - add avg
+        //Aggiunge le regioni mancanti che non sono state prese (no tweet)
+        //Aggiunge le informazioni sul contatore e i tag
         function (err, results) {
 
             connection.close();
 
-            if(results.count && results.count.length > 0) {
-                docSync.data.countTot = results.count[0].countTot;
-                docSync.data.countGeo = results.count[0].countGeo;
-            }else {
-                docSync.data.countTot = 0;
-                docSync.data.countGeo = 0;
-            }
+            //imposto i contatori
+            //i tag sincronizzati vengono calcolati in docsync
+            docSync.data.countTot = results.count.countTot;
+            docSync.data.countGeo = results.count.countGeo;
+            docSync.data.countSync = results.count.countSync;
+            docSync.data.allTags =  results.count.allTags;
+            docSync.data.syncTags =  results.count.syncTags;
+            docSync.data.geoTags =  results.count.geoTags;
+            docSync.data.minDate =  results.count.min;
+            docSync.data.maxDate = results.count.max;
 
             //obj: {region:String, baseIndex: Number}
             async.each(results.regions,  function(obj, next) {
@@ -442,11 +466,11 @@ Summary.updateStat = function(project, username, callback){
                 s = doc;
 
             s.lastUpdate = new Date();
-            s.data.minDate = result[0].min;
-            s.data.maxDate = result[0].max;
-            s.data.allTags = result[0].allTags;
-            s.data.countTot = result[0].countTot;
-            s.data.countGeo = result[0].countGeo;
+            s.data.minDate = result.min;
+            s.data.maxDate = result.max;
+            s.data.allTags = result.allTags;
+            s.data.countTot = result.countTot;
+            s.data.countGeo = result.countGeo;
 
             s.save(function(err, result){
                 callback(err);
