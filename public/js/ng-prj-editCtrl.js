@@ -217,7 +217,7 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
                     "    [fromUser: String],\n" +
                     "    text:  String,\n" +
                     "    [user: String,\n" +
-                    "    [tag:  String\n" +
+                    "    [customTags:  [String] ]\n" +
                     "    [tokens: String\n" +
                     "  },{\n" +
                     "    id: '<unique_id>',\n" +
@@ -227,7 +227,7 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
                     "    [fromUser: String],\n" +
                     "    text:  String,\n" +
                     "    [user: String,\n" +
-                    "    [tag:  String\n" +
+                    "    [customTags:  [String] ]\n" +
                     "    [tokens: String\n" +
                     "  },\n" +
                     "  ...\n" +

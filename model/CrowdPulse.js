@@ -41,6 +41,8 @@ var CrowdPulse = function() {
         rl.on('line', function(line) {
             try{
                 var obj = JSON.parse(line);
+                if( obj && obj.customTags && obj.customTags )
+                    obj.tag = obj.customTags[0];
                 docs.push(obj);
             }catch(e) { contError++; }
             contLine++;
