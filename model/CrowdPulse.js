@@ -41,8 +41,6 @@ var CrowdPulse = function() {
         rl.on('line', function(line) {
             try{
                 var obj = JSON.parse(line);
-                if( obj && obj.customTags && obj.customTags )
-                    obj.tag = obj.customTags[0];
                 docs.push(obj);
             }catch(e) { contError++; }
             contLine++;
@@ -55,9 +53,8 @@ var CrowdPulse = function() {
             async.waterfall([
 
                 //costruisco il dataset da salvare
-                function(next){
+                function(next){ async.map( docs , function(obj, next) {
 
-                    async.map( docs , function(obj, next){
                         var d = {
                             "id" : obj["oid"],
                             "date" : new Date( obj.date["$date"] ),
@@ -65,16 +62,23 @@ var CrowdPulse = function() {
                             "source" : obj.source,
                             "text" : obj["text"],
                             "user" : obj["fromUser"],
+                            "tag" : '',
+                            "loc" : {},
                             tokens : []
                         };
 
                         if( obj.latitude ) d.latitude = obj.latitude;
                         if( obj.longitude ) d.longitude = obj.longitude;
 
-                        if(obj['customTags'] && obj['customTags'].length > 0 && obj['customTags'][0]) {
+                        //prende il tag dalla prima posizione di custom tags
+                        if( obj['customTags'] &&
+                            obj['customTags'].length > 0 &&
+                            obj['customTags'][0]) {
+
                             d.tag = obj['customTags'][0];
                         }
 
+                        //costruisce l'attributo punto
                         if(obj.latitude && obj.longitude) {
                             d.loc = {
                                 "type" : "Point",
