@@ -129,24 +129,24 @@
       <!--Syncronize with exists region-->
       <div id="piechart" style="width: 400px; height: 200px;" class="inline"></div>
 
-      <div class="inline" id="divbtnsync">
+      <div class="inline" id="divbtnsync" style="width: 200px">
 
          <div style="display: inline-block">
-            <button class="btn btn-danger btn-red" type="submit" id="btnsyncproject">Sync</button>
+            <button class="btn btn-danger btn-red" type="submit" id="btnsyncproject">Synchronize with nations</button>
          </div>
 
-         <label for="btnsyncproject">Synchronize all regions with stored data</label>
+         <!--<label for="btnsyncproject">Synchronize all regions with stored data</label>-->
 
          <br>
 
          <div style="display: inline-block; margin-top: 20px">
             <button class="btn btn-danger btn-red" type="submit" id="btndeletedata">
                <i id="waitdelete" class="fa fa-spinner fa-spin spinner-wait hidden"></i>
-               Delete
+               Delete ALL data
             </button>
          </div>
 
-         <label for="btndeletedata" >Delete ALL data</label>
+         <!--<label for="btndeletedata" >Delete ALL data</label>-->
 
          <div id="resultdelete" style="margin-top: 10px"></div>
 
@@ -176,10 +176,10 @@
    </div>
 
 
-   <div>
+   <div style="font-size:80%; margin-bottom: 10px">
       <br>
-      *Il tag deve essere presente tra i tag disponibili. <br>
-      Per inserire il tag undefined, lasciare il campo 'tag' vuoto.
+      I tag da inserire nella tabella <b>devono</b> corrispondere ai tag disponibili all'interno dei dati. <br>
+      Per inserire un vocabolario associato al tag <i>undefined</i>, lasciare il campo "tag" della tabella vuoto.
    </div>
 
    <div id="tableTagsContainer">
@@ -219,16 +219,14 @@
 
             <div class="riga" style="width:100%;">
 
-               <div class="riga" style="margin-left: 10px">
-                  <img src="/img/info-icon.png" width="50" height="50">
+               <div class="riga" style="font-size:90%; margin-left: 10px">
+
+                  <div style="display: inline-block; vertical-align:top"><i class="fa fa-info-circle" style="margin-right: 5px"></i></div>
+                  <div style="display: inline-block">
+                     Calcola il wordcount utilizzando i token nei dati, filtrando i risultati con il vocabolario dell'utente.<br>
+                     Se i token non sono disponibili, è necessario utilizzare la funzione <i>Override Data Tokens</i>
+                  </div>
                </div>
-
-               <div class="riga">
-                  <p>Calcola il wordcount utilizzando i token nei dati, filtrando i risultati con il vocabolario dell'utente</p>
-                  <p>Se i token non sono disponibili, è necessario utilizzare la funzione "Override Data Tokens" </p>
-               </div>
-
-
 
                <div style="float: right;margin-right: 10px;margin-top: 8px;">
                   <button class="btn btn-default btn-operation"  id="synDataTag"
@@ -245,13 +243,13 @@
 
             <div class="riga" style="width:100%;">
 
-               <div class="riga" style="margin-left: 10px">
-                  <img src="/img/info-icon.png" width="50" height="50">
-               </div>
+               <div class="riga" style="font-size:90%; margin-left: 10px">
 
-               <div class="riga">
-                  <p>Calcola il wordcount utilizzando soltanto i token presenti nei dati</p>
-                  <p>Se i token non sono disponibili, è necessario utilizzare la funzione "Override Data Tokens" </p>
+                  <div style="display: inline-block; vertical-align:top"><i class="fa fa-info-circle" style="margin-right: 5px"></i></div>
+                  <div style="display: inline-block">
+                     Calcola il wordcount utilizzando soltanto i token presenti nei dati.<br>
+                  Se i token non sono disponibili, è necessario utilizzare la funzione <i>Override Data Tokens</i>
+                  </div>
                </div>
 
                <!--
@@ -276,13 +274,13 @@
 
             <div class="riga" style="width:100%;">
 
-               <div class="riga" style="margin-left: 10px">
-                  <img src="/img/info-icon.png" width="50" height="50">
-               </div>
+               <div class="riga" style="font-size:90%; margin-left: 10px">
 
-               <div class="riga">
-                  <p>Utilizzare questa funzione per sovrascrivere i token presenti nei dati</p>
-                  <p>N.B.<br>Questa operazione non è reversibile. Per utilizzare i token originali, è necessario reimportare i dati nel progetto.</p>
+                  <div style="display: inline-block; vertical-align:top"><i class="fa fa-info-circle" style="margin-right: 5px"></i></div>
+                  <div style="display: inline-block">
+                     Utilizzare questa funzione per sovrascrivere i token presenti nei dati.<br>
+                     N.B. Questa operazione non è reversibile. Per utilizzare i token originali, è necessario reimportare i dati nel progetto.
+                  </div>
                </div>
 
                <div style="float: right;margin-right: 10px;margin-top: 8px;">
