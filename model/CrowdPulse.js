@@ -87,10 +87,18 @@ var CrowdPulse = function() {
                         }
 
                         //processo i token
-                        _.each(obj['tokens'], function(token){
-                            if(!token['stopWord'])
-                                d.tokens.push(token.text )
-                        });
+                        if( obj.tokens )
+                        for(var i = 0; i< obj.tokens.length; i++)
+                        {
+                            //per diversi bug in crowdpulse, le stringhe piccole sono considerate irrilevanti
+                            if( obj.tokens[i].text.length <= 2 ) continue;
+
+                            //prendo solo le non stopword
+                            if(obj.tokens[i].stopWord == false)
+                            {
+                                d.tokens.push(obj.tokens[i].text);
+                            }
+                        }
 
                         next(null, d);
 
