@@ -59,6 +59,9 @@ function getFilter(req)
 
 module.exports = function (app) {
 
+    /**
+     * Restituisce statistiche basi dell'utente selezionato
+     */
     app.get('/getdata', function (req, res)
     {
         try {
@@ -204,14 +207,12 @@ module.exports = function (app) {
         }
     });
 
+    /**
+     * Restituisce i tag utilizzati nei dati
+     */
     app.get('/gettags', function (req, res)
     {
         var project = req.session.project;
-
-        //TODO debug
-        if(req.session.project == null)
-            project = "oim";
-
         if(project == null)
             res.json({status:1,error:"you MUST select a project first"});
         else
@@ -225,6 +226,9 @@ module.exports = function (app) {
         }
     });
 
+    /**
+     * Effettua un conteggio dei dati raggruppandoli per giorno
+     */
     app.get('/gettimeline', function (req, res)
     {
         console.log("GET: /gettimeline");
@@ -259,7 +263,6 @@ module.exports = function (app) {
                 }
             },
             function(err, data){
-
                 if(err || data == null )
                 {
                     res.json({status:1, error: err.toString()});

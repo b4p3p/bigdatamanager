@@ -40,6 +40,14 @@ Vocabulary.SCHEMA = new mongoose.Schema({
     syncDataTags: [Vocabulary.SCHEMA_RISSYNC]
 });
 
+/**
+ * Inserisce un nuovo elemento nel vocabolario dell'utente
+ * @param project
+ * @param data
+ * @param data.tag - nuovo tag da aggiungere
+ * @param data.tokens - tokens da aggiungere nel tag
+ * @param callback
+ */
 Vocabulary.insertTags =  function(project, data, callback) {
 
     console.log("data: " + JSON.stringify(data));
@@ -76,6 +84,14 @@ Vocabulary.insertTags =  function(project, data, callback) {
     });
 };
 
+/**
+ * Rinomina un tag nel vocavolario dell'utente
+ * @param project
+ * @param data
+ * @param data.newTag - nuovo nome
+ * @param data.oldTag - vecchio nome
+ * @param callback
+ */
 Vocabulary.renameTag = function(project, data, callback) {
 
     console.log("data: " + JSON.stringify(data));
@@ -91,7 +107,11 @@ Vocabulary.renameTag = function(project, data, callback) {
             return item.tag == data.newTag
         });
 
-        if(i_new > -1) { callback("Tag already exists"); return; }
+        //se il tag esiste blocco l'operazione
+        if(i_new > -1) {
+            callback("Tag already exists");
+            return;
+        }
 
         var i_old = _.findIndex( doc.userTags, function(item){
             return item.tag == data.oldTag
@@ -104,6 +124,12 @@ Vocabulary.renameTag = function(project, data, callback) {
     });
 };
 
+/**
+ * Elimina un tag dal vocabolario dell'utente
+ * @param project
+ * @param tag
+ * @param callback
+ */
 Vocabulary.deleteTag = function(project, tag, callback) {
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
@@ -123,6 +149,14 @@ Vocabulary.deleteTag = function(project, tag, callback) {
     });
 };
 
+/**
+ * Cambia i tokens nel tag specificato
+ * @param project
+ * @param data
+ * @param data.words - parole da aggiungere/modificare nel tag specificato
+ * @param data.tag - tag da modificare
+ * @param callback
+ */
 Vocabulary.renameWords = function(project, data, callback) {
 
     data.words = data.words.split(",");
@@ -144,12 +178,12 @@ Vocabulary.renameWords = function(project, data, callback) {
     });
 };
 
+/**
+ * Restituisce il vocabolario memorizzato nella collection
+ * @param project
+ * @param callback
+ */
 Vocabulary.getVocabulary = function(project, callback) {
-
-    /**
-     * Sincronizzo il vocabolario con i token inseriti dall'utente e i token
-     * calcolati automaticamente (datas.tokens)
-     */
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var vocabularies = connection.model(Vocabulary.MODEL_NAME, Vocabulary.SCHEMA);
@@ -162,8 +196,13 @@ Vocabulary.getVocabulary = function(project, callback) {
     )
 };
 
-/// EFFETTUA LA SINSCRONIZZAZIONE INSERENDO I COUNTER
-
+/**
+ * EFFETTUA LA SINSCRONIZZAZIONE INSERENDO I COUNTER
+ * @param docs
+ * @param connection
+ * @param project
+ * @param next
+ */
 function updateProjects(docs, connection, project, next) {
 
     var Project = require("../model/Project");
@@ -179,8 +218,7 @@ function updateProjects(docs, connection, project, next) {
 }
 
 /**
- * Sincronizzo SOLO i tokens presenti nella collections data
- * La funzione è asincrona, si usa socket.io
+ * [Asincrona]Calcola il wordcount utilizzando il vocabolario dell'utente
  */
 Vocabulary.syncUserTags = function (project, app, callback) {
 
@@ -236,18 +274,13 @@ Vocabulary.syncUserTags = function (project, app, callback) {
 };
 
 /**
- * Funzione per sincronizzare ed effettuare il word count dei tokens presenti nei dati
- * La funzione è asincrona, si usa socket.io
+ * [Asincrona]Calcola il wordcount utilizzando SOLO i token nei dati
  * @param project
  * @param query
  * @param app
  * @param callback
  */
 Vocabulary.syncDataTags = function (project, query, app, callback) {
-
-    /**
-     * Sincronizzo SOLO i tokens presenti in user tags in vocabularies
-     */
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var vocabularies = connection.model(Vocabulary.MODEL_NAME, Vocabulary.SCHEMA);
@@ -480,9 +513,11 @@ Vocabulary.prepareUserTags__ = function(project, res, dict, datas, callback){
 
 };
 
-
-/// SOLO VISUALIZZAZIONE ///
-
+/**
+ * Per ogni tag inserito nel vocabolario dell'utente, restituisce il token count
+ * @param project
+ * @param callback
+ */
 Vocabulary.getUserTags = function (project, callback) {
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
@@ -504,14 +539,18 @@ Vocabulary.getUserTags = function (project, callback) {
     });
 };
 
+/**
+ * Richede i tag nei dati con i rispettivi tokens
+ * @param project
+ * @param callback
+ */
 Vocabulary.getDataTags = function (project, callback) {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var vocabularies = connection.model(Vocabulary.MODEL_NAME, Vocabulary.SCHEMA);
 
-    vocabularies.findOne({project:project},{dataTags:1, _id:0 },  function(err, doc){
-
+    vocabularies.findOne({project:project},{dataTags:1, _id:0 },  function(err, doc)
+    {
         var ris = [];
-
         if(doc!=null)
             _.each(doc.dataTags, function(item){
                 ris.push({
@@ -524,6 +563,11 @@ Vocabulary.getDataTags = function (project, callback) {
     });
 };
 
+/**
+ * Restituisce dataTags e userTags
+ * @param project
+ * @param callback
+ */
 Vocabulary.getWordCount = function(project, callback){
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');

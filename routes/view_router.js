@@ -9,13 +9,18 @@ var async = require('async');
 
 module.exports = function (router) {
 
-    // LOGIN
+    /**
+     * Mostra la schermata di login
+     */
     router.get('/login', function (req, res)
     {
         //var message = { error:false, message: '' };
         res.render('../views/pages/login.ejs', ConstantsRouter.argIndex(req) );
     });
 
+    /**
+     * Mostra la schermata per la ragistrazione dell'utente
+     */
     router.get('/register', function (req, res)
     {
         var arg = ConstantsRouter.argIndex(req);
@@ -33,6 +38,10 @@ module.exports = function (router) {
 
     });
 
+    /**
+     * Mostra il principale e unico contenitore grafico dell'applicazione
+     * Tutte le diverse schermate sarranno contenute all'interno della view di angular
+     */
     router.get('/app', function (req, res)
     {
         var arg = ConstantsRouter.argIndex(req, ConstantsRouter.PAGE.HOME);

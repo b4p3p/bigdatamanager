@@ -9,8 +9,10 @@ module.exports = function (app) {
         res.redirect('/view/login');
     });
 
-    app.get('/guest', function (req, res)
-    {
+    /**
+     * Imposta le variabili di sessione per l'utente ospite
+     */
+    app.get('/guest', function (req, res) {
         console.log("CALL: /guest");
 
         req.session.destroy();
@@ -21,8 +23,10 @@ module.exports = function (app) {
 
     });
 
-    app.get('/logout', function (req, res)
-    {
+    /**
+     * Effettua il logout distruggendo le variabili di sessione
+     */
+    app.get('/logout', function (req, res) {
         console.log("CALL: /logout");
 
         req.session.destroy();
@@ -32,8 +36,10 @@ module.exports = function (app) {
 
     });
 
-    app.post('/login', function (req, res)
-    {
+    /**
+     * Effettua il login impostando le variabili di sessione
+     */
+    app.post('/login', function (req, res){
         console.log("CALL: login");
 
         req.session.destroy();
@@ -73,37 +79,6 @@ module.exports = function (app) {
 
         });
 
-    });
-
-    var cont = 0;
-
-    function writeLine(res){
-        res.write("test -" + cont + "<br>");
-    }
-
-    function loop(res){
-        setTimeout(function(){
-            cont++;
-            if(cont<15) {
-                writeLine(res);
-                loop(res)
-            }
-            else
-            {
-                res.end("fine");
-                //res.end("<p>");
-            }
-        },400);
-    }
-
-    app.get('/test', function (req, res){
-
-        res.setHeader('Connection', 'Transfer-Encoding');
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Transfer-Encoding', 'chunked');
-        cont = 0;
-        //res.write("<p>");
-        loop(res);
     });
 
 };

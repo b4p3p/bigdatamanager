@@ -11,6 +11,9 @@ var urlencode = require('urlencode');
 
 module.exports = function (router, app) {
 
+    /**
+     * Restituisce tuttI gli utenti registrati
+     */
     router.get('/users', function (req, res)
     {
         Users.getUsers(function(err, users){
@@ -18,6 +21,9 @@ module.exports = function (router, app) {
         });
     });
 
+    /**
+     * Aggiunge un nuovo utente
+     */
     router.post('/adduser', function (req, res)
     {
         var obj = {
@@ -30,13 +36,13 @@ module.exports = function (router, app) {
 
         Users.addUser(obj, function(err){
 
-            if(err) {
+            if(err)
+            {
                 var arg = null;
                 if(err.code == 11000)
                     arg = ConstantsRouter.status(err.code, "Username already exists");
                 else
                     arg = ConstantsRouter.status(1, err.message);
-
                 res.render('../view/pages/register.ejs', arg );
             }
             else
@@ -45,8 +51,10 @@ module.exports = function (router, app) {
 
     });
 
-    router.post('/deluser', function (req, res)
-    {
+    /**
+     * Cancella l'utente selezionato
+     */
+    router.post('/deluser', function (req, res) {
         var user = req.body.user;
         if(!user) res.status(500).end("user missing");
         Users.delUser(user, function(err) {

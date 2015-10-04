@@ -5,7 +5,7 @@ var Project = require("../model/Project");
 var Data = require("../model/Data");
 var Summary = require("../model/Summary");
 var async = require('async');
-var requestJson = require('request-json');
+//var requestJson = require('request-json');
 var request = require('request');
 var _ = require("underscore");
 //var urlencode = require('urlencode');
@@ -30,11 +30,15 @@ module.exports = function (router, app) {
             next(null);
     });
 
+    /**
+     * Restituisce tutti i progetti
+     */
     router.get('/projects', function (req, res) {
         Project.getProjects(function (err, data) {
             res.json(data);
         })
     });
+
 
     router.post('/newproject', function (req, res, next) {
         console.log("PAGE: /newproject");
@@ -46,19 +50,26 @@ module.exports = function (router, app) {
         };
 
         var Project = require("../model/Project");
-        Project.getProject(dataProject.project, dataProject.username, function (data) {
+        Project.getProject(dataProject.project, dataProject.username,
+            function (data) {
+                if (data == null)
+                    next(null);
+                else {
+                    var error = ConstantsRouter.status( 1, "Project already exists");
+                    res.json(error);
+                }
 
-            if (data == null)
-                next(null);
-            else {
-                var error = ConstantsRouter.status( 1, "Project already exists");
-                res.json(error);
             }
-
-        });
-
+        );
     });
 
+    /**
+     * Aggiunge un nuovo progetto
+     * @param dataProject
+     * @param dataProject.project
+     * @param dataProject.username
+     * @param dataProject.description
+     */
     router.post('/newproject', function (req, res, next) {
 
         var dataProject = {
@@ -81,6 +92,11 @@ module.exports = function (router, app) {
         });
     });
 
+    /**
+     * Modifica il progetto selezionato
+     * @param data
+     * @param data.description - descrizione del progetto
+     */
     router.post('/editproject', function (req, res) {
 
         console.log("CALL: POST editprojects");
@@ -99,23 +115,35 @@ module.exports = function (router, app) {
 
     });
 
+    /**
+     * Rimuove un progetto
+     * @param projectName
+     * @param callback - { fn(  {status:Number, message:String, deletedCount:Number}  )
+    */
     router.post('/delproject', function (req, res) {
         var project = req.body.project;
         Project.delProject(project, function (err, ris) {
             res.json(ris);
         });
-
     });
 
+    /**
+     * Imposta la sessione dell'utente impostandone il progetto
+     */
     router.post('/setproject', function (req, res) {
         req.session.project = req.body.project;
-
         res.setHeader("Content-Type", "text/json");
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.end(JSON.stringify({status: 200}));
 
     });
 
+    /**
+     * Restituisce il documento del progetto selezionato
+     * @param projectName
+     * @param username
+     * @param callback - fn({Data})
+     */
     router.get('/getproject', function (req, res) {
         var project = req.query.project;
         var username = req.session.user || req.query.user;
@@ -133,8 +161,15 @@ module.exports = function (router, app) {
         res.redirect("/project/editproject");
     });
 
-    app.post('/project/uploaddata', app.up_datas, function (req, res) {
-
+    /**
+     * Aggiunge i dati nel progetto selezionato
+     * i file devono avere l'attributo type:
+     * - json-crowdpulse
+     * - json
+     * - csv
+     */
+    app.post('/project/uploaddata', app.up_datas, function (req, res)
+    {
         var files = req.files;
         var username = req.session.user;
         var project = req.session.project;
@@ -143,12 +178,10 @@ module.exports = function (router, app) {
 
         res.end("ok");
 
-        //res.json({status:0});
-
         async.each(files,
 
+            //prende il file e lo aggiunge nel progetto
             function (f, next) {
-
                 var projectData = {
                     app: app,
                     filePath: f.path,
@@ -164,20 +197,18 @@ module.exports = function (router, app) {
                     fs.unlinkSync(f.path);
                     next(err);
                 });
-
             },
-
             function (err) {
-
                 Summary.updateStat( project, username, function(err){
                     app.io.emit("uploaddata_end", ris);
-                    //res.json(ris);
                 });
             }
         );
-
     });
 
+    /**
+     *
+     */
     router.get('/sync', function (req, res) {
 
         var project =  req.session.project || req.query.project;
@@ -209,6 +240,10 @@ module.exports = function (router, app) {
         });
     });
 
+    /**
+     * Se non ci sono parametri legge il documento in summaries
+     * Se ci sono dei parametri, calcola a runtime il documento di summaries
+     */
     router.get('/stat', function (req, res, next) {
 
         if (_.keys(req.query).length > 0) {
@@ -258,6 +293,9 @@ module.exports = function (router, app) {
             res.redirect("/view/app/#project/openproject");
     });
 
+    /**
+     * Restituisce l'ultima modifica del progetto memorizzata nel documento
+     */
     router.get('/lastupdate', function (req, res) {
         var project = req.session.project || req.query.project;
 

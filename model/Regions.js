@@ -38,7 +38,7 @@ Regions.SCHEMA = new mongoose.Schema({any: Schema.Types.Mixed});
 Regions.MODEL_NAME = "region";
 
 /**
- *
+ * Inserisce una nuova nazione all'interno del db
  * @param fileNames
  * @param callback - fn(err, { keyfile: {insert:{Number}, discard:{Number} }
  */
@@ -170,6 +170,7 @@ Regions.importFromFile = function (fileNames, callback) {
 };
 
 /**
+ * Restituisce solo il nome delle nazioni
  * @param callback  - fn({Err},{Data[]})
  */
 Regions.getNations = function (project, callback) {
@@ -189,6 +190,7 @@ Regions.getNations = function (project, callback) {
 };
 
 /**
+ * Cancella la nazione specificata
  * @param region    - {String}
  * @param callback  - fn({Err},{Data[]})
  */
@@ -240,7 +242,9 @@ Regions.removeNation = function (nation, callback) {
 };
 
 /**
- *
+ * Restituisce le regioni memorizzate
+ * @param isLight:{bool} - se true, restituisce solo le properties
+ * @param arg_nations:[string] - nazioni da filtrare
  * @param callback
  */
 Regions.getRegions = function (arg_nations, isLight, callback) {
@@ -333,6 +337,10 @@ Regions.setNormalization = function(arg, callback){
 
 };
 
+/**
+ * Sincronizza i il database di normalizzazione con le regioni inserite
+ * @param callback
+ */
 Regions.updateCountNormalization = function(callback){
 
     //uso i driver nativi (bug mongoose)

@@ -1,13 +1,10 @@
 "use strict";
 
-var ConstantsRouter = require('./constants_router');
 var Project = require("../model/Project");
 var Data = require("../model/Data");
 var Regions = require("../model/Regions");
 var Summary = require("../model/Summary");
 var async = require('async');
-var requestJson = require('request-json');
-var urlencode = require('urlencode');
 var mongoose = require('mongoose');
 
 module.exports = function (router, app) {
@@ -27,15 +24,28 @@ module.exports = function (router, app) {
         next(null);
     });
 
+    /**
+     * Restituisce gli utenti presenti nei dati
+     * @param project
+     * @param arg
+     * @param arg.sort:{String}  - campo che si vuole ordinare
+     * @param arg.order:{String} - (opzionale) 'desc' per effettuare un prdinamento descrescente
+     * @param callback
+     */
     router.get('/users', function (req, res) {
         var project = req.session.project || req.query.project;
-
         Data.getUsers( project , req.query, function(err, docs){
             if(!docs) docs = {};
             res.json(docs);
         });
     });
 
+    /**
+     * Restituisce tutti i dati memorizzati del progetto selezionato
+     * @param project
+     * @param query:{Object} - query da passare al componente di mongo
+     * @param callback
+     */
     router.get('/datas', function (req, res) {
         var project = req.session.project || req.query.project;
         var query = req.query;
@@ -46,6 +56,12 @@ module.exports = function (router, app) {
 
     });
 
+    /**
+     * Restituisce tutti i dati memorizzati del progetto selezionato
+     * @param projectName
+     * @param query:{Object} - query da passare al componente di mongo
+     * @param callback
+     */
     router.get('/datafilter', function (req, res) {
         var project = req.session.project || req.query.project;
         var query = req.query;
@@ -56,21 +72,26 @@ module.exports = function (router, app) {
 
     });
 
+    /**
+     * Restituisce le informazioni sui dati degli utenti specificati
+     * - Intervallo temporale
+     * - Wordcount dei dati
+     * @param project
+     * @param query
+     * @param query.users
+     * @param callback
+     */
     router.get('/userdata', function (req, res) {
+
         var project = req.session.project || req.query.project;
         var query = req.query;
 
         Data.getUserData( project , query, function(err, docs){
             if(err)
-            {
                 res.status(500).end( err.toString() );
-            }else
-            {
+            else
                 res.json(docs);
-            }
-
         });
-
     });
 
     /**
@@ -103,6 +124,10 @@ module.exports = function (router, app) {
 
     });
 
+    /**
+     * Restituisce la lista delle sole nazioni presenti nei dati selezionati
+     * @param project
+     */
     router.get('/nations', function (req, res) {
         var project = req.session.project || req.query.project;
         Data.getNations( project, function(err, data) {
@@ -110,10 +135,15 @@ module.exports = function (router, app) {
         });
     });
 
+    /**
+     * Effettua un count dei dati, raggruppando per giorno/settimana/mese
+     * @param project
+     * @param query
+     * @param query.type:{string} - tipo di raggruppamento (day|week|month)
+     * @param callback
+     */
     router.get('/databydate', function(req, res){
-
         var project = req.session.project || req.query.project;
-
         Data.dateByDate(project, req.query, function(err, docs){
             if(!err) {
                 res.json(docs);
@@ -123,6 +153,11 @@ module.exports = function (router, app) {
         })
     });
 
+    /**
+     * Cancella tutti i dati del progetto selezionato
+     * - azzera il contatore dei dati sul progetto
+     * - cancella il relativo documento di summaries
+     */
     router.post('/deldata', function(req, res){
 
         res.end("ok");
@@ -149,13 +184,22 @@ module.exports = function (router, app) {
         });
     });
 
+    /**
+     * Calcola il numero dei token distinti nei dati del progetto
+     */
     router.get('/info', function(req, res){
         var project = req.session.project || req.query.project;
         Data.getInfo(project, function(err, result){
-            if(!err) res.json(result); else res.status(500).send(err.toString());
+            if(!err)
+                res.json(result);
+            else
+                res.status(500).send(err.toString());
         })
     });
 
+    /**
+     * Calcola la dimensione del progetto
+     */
     router.get('/size', function (req, res){
         var project = req.session.project || req.query.project;
         Data.getSize({project: project}, function(err, size){
@@ -163,6 +207,9 @@ module.exports = function (router, app) {
         })
     });
 
+    /**
+     * Restituisce l'analisi dei bigrammi con la parola trovata
+     */
     router.get('/bigram', function (req, res){
         var project = req.session.project || req.query.project;
         var word = req.query.word;

@@ -162,8 +162,13 @@ Data.importFromFile = function (type, file, projectName, cb_ris) {
 
 };
 
+/**
+ * Restituisce tutti i dati memorizzati del progetto selezionato
+ * @param projectName
+ * @param query:{Object} - query da passare al componente di mongo
+ * @param callback
+ */
 Data.getDatas = function (projectName, query, callback) {
-    //query.limit = 50;
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
@@ -187,22 +192,27 @@ Data.getDatas = function (projectName, query, callback) {
     });
 };
 
+/**
+ * Restituisce tutti i dati memorizzati del progetto selezionato
+ * @param projectName
+ * @param query:{Object} - query da passare al componente di mongo
+ * @param callback
+ */
 Data.getDataFilter = function (projectName, query, callback) {
-    //query.limit = 50;
+
+    //TODO: è possibile ottimizzare usando un aggregate
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
 
     async.parallel({
 
+        //prende i dati
         data: function(next)
         {
             var exec = datas.find({projectName: projectName});
-
             exec = Util.addWhereClause(exec, query);
-
             exec.exec(function (err, docs) {
-
                 _.each(docs, function(doc){
                     if(doc["nation"] == null) {
                         doc["nation"] = "-";
@@ -213,25 +223,28 @@ Data.getDataFilter = function (projectName, query, callback) {
                 next(null, docs);
             });
         },
+        //calcola una count sui dati
         count: function(next)
         {
             var exec = datas.find({projectName: projectName});
-
             exec = Util.addWhereClause(exec, query);
-
             exec.count(function(err, count){
                 next(null, count);
             });
         }
+
     },function(err, result){
         connection.close();
-        callback(err, {count: result.count, data: result.data });
+        callback(err, {
+            count: result.count,
+            data: result.data
+        });
     });
 
 };
 
 /**
- *
+ * Restituisce i tag utilizzati nei dati
  * @param projectName {String}
  * @param callback {function(ERROR, Array)} callback - The callback that handles the response
  */
@@ -248,14 +261,19 @@ Data.loadTags = function (projectName, callback) {
     });
 };
 
-Data.getUsers = function(projectName, par, callback) {
+/**
+ * Restituisce gli utenti presenti nei dati
+ * @param projectName
+ * @param arg
+ * @param arg.sort:{String}     - campo che si vuole ordinare
+ * @param arg.order:{String}    - (opzionale) 'desc' per effettuare un prdinamento descrescente
+ * @param callback
+ */
+Data.getUsers = function(projectName, arg, callback) {
+
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
-    if(!par) par = {};
-
-    //sort=name&order=desc&limit=10&offset=0&_=1435244766146
-
-    //
+    if(!arg) arg = {};
 
     var query = datas.aggregate()
         .match({
@@ -282,16 +300,19 @@ Data.getUsers = function(projectName, par, callback) {
         });
 
     // ordinamento di default
-    if( !par.sort ){ par.sort = "sum"; par.order = "desc"; }
+    if( !arg.sort ){
+        arg.sort = "sum";
+        arg.order = "desc";
+    }
 
-    var sort = par.sort;
-    if(par.order)
-        sort = par.order == "desc" ? "-" + sort : sort;
+    var sort = arg.sort;
+    if(arg.order)
+        sort = arg.order == "desc" ? "-" + sort : sort;
 
     query.sort(sort);
 
-    if( par.limit )
-        query.limit( parseInt(par.limit) );
+    if( arg.limit )
+        query.limit( parseInt(arg.limit) );
 
     query.exec( function(err, docs){
         connection.close();
@@ -299,6 +320,15 @@ Data.getUsers = function(projectName, par, callback) {
     });
 };
 
+/**
+ * Restituisce le informazioni sui dati degli utenti specificati
+ * - Intervallo temporale
+ * - Wordcount dei dati
+ * @param project
+ * @param query
+ * @param query.users
+ * @param callback
+ */
 Data.getUserData = function( project , query, callback){
 
     var connection = mongoose.createConnection('mongodb://localhost/oim');
@@ -309,14 +339,20 @@ Data.getUserData = function( project , query, callback){
 
     async.parallel({
 
-        data:function(next){
-            getUserData_data(datas, project, users, function(err, result){
-                next(err, result) })
+        data:function(next)
+        {
+            getUserData_data(datas, project, users,
+                function(err, result){
+                    next(err, result)
+                })
         },
 
         wordcount: function(next){
-            getUserData_wordcount(datas, project, users, function(err, result){
-                next(err, result) })
+            getUserData_wordcount(datas, project, users,
+                function(err, result)
+                {
+                    next(err, result)
+                })
         }
 
     }, function(err, results){
@@ -326,6 +362,13 @@ Data.getUserData = function( project , query, callback){
     });
 };
 
+/**
+ * Restituisce l'intervallo temporale dei dati appartenenti agli utenti selezionati
+ * @param datas:{Collection}
+ * @param project
+ * @param users:[string]
+ * @param callback
+ */
 function getUserData_data(datas, project, users, callback) {
     datas.aggregate()
         .match({projectName: project, user: {$in:users}})
@@ -364,6 +407,13 @@ function getUserData_data(datas, project, users, callback) {
         });
 }
 
+/**
+ * Calcola il wordcount degli utenti selezionati
+ * @param datas
+ * @param project
+ * @param users
+ * @param callback
+ */
 function getUserData_wordcount(datas, project, users, callback) {
 
     datas.aggregate()
@@ -510,7 +560,13 @@ function getSteps(steps, tot){
     return ris;
 }
 
-// Sovrascrivo i token in data
+/**
+ * Funzione per sovrascrivere i token nei dati
+ * La funzione è asincrona, quindi verrà restituito lo status 200 immediatamente
+ * Tutta la comunicazione è gestita con socket.io
+ * - overrideDataTokens_msg: manda un messaggio generico
+ * - overrideDataTokens_end: avvisa della fine
+ */
 Data.overrideTokensData = function (project, app, callback) {
 
     /**
@@ -682,6 +738,11 @@ Data.cleanText = function(text){
     return text;
 };
 
+/**
+ * Restituisce la lista delle sole nazioni presenti nei dati selezionati
+ * @param project
+ * @param callback
+ */
 Data.getNations = function (project, callback) {
 
     console.log("CALL: Data.getNations");
@@ -707,6 +768,13 @@ Data.getNations = function (project, callback) {
 
 };
 
+/**
+ * Effettua un count dei dati, raggruppando per giorno/settimana/mese
+ * @param project
+ * @param query
+ * @param query.type:{string} - tipo di raggruppamento
+ * @param callback
+ */
 Data.dateByDate = function(project, query, callback){
 
     var type = query.type || "day";
@@ -769,25 +837,8 @@ Date.dateByDate_group = function(exec, type) {
     }
 };
 
-Date.dateByDate_project = function(exec, type){
-
-    //switch (type){
-    //    case "day":
-    //        exec.project({
-    //            _id:1, ts:1,
-    //            date: {$concat:[
-    //                {$substr:["$_id.year",0,10]} , "-",
-    //                {$substr:["$_id.month",0,10]}, "-",
-    //                {$substr:["$_id.day",0,10]}
-    //            ]},
-    //            count:1
-    //        });
-    //        break;
-    //}
-};
-
 /**
- *
+ * Cancella tutti i dati del progetto selezionato
  * @param arg
  * @param arg.connection
  * @param arg.project
@@ -805,6 +856,7 @@ Data.delData = function(arg, callback){
                 next(null, result);
             });
         },
+
         //azzero il contatore
         cont : function(next){
             Project.setSize({
@@ -815,15 +867,9 @@ Data.delData = function(arg, callback){
             })
         }
     }, function(err, res){
-
-        if(arg.connection != null )
-            arg.connection.close();
-
+        if(arg.connection != null )  arg.connection.close();
         callback(err, res.deleteData)
-
     })
-
-
 };
 
 /**
@@ -922,6 +968,11 @@ Data.getInfoCount = function(arg, callback){
 
 };
 
+/**
+ * Calcola il numero dei token distinti nei dati del progetto
+ * @param project
+ * @param callback
+ */
 Data.getInfo = function(project, callback){
 
     var conn = mongoose.createConnection('mongodb://localhost/oim');
@@ -957,7 +1008,7 @@ Data.getSize = function(arg, callback){
 };
 
 /**
- * Restituisce l'analisi dei brigrammi con la parola trovata
+ * Restituisce l'analisi dei bigrammi con la parola trovata
  * @param arg
  * @param arg.word
  * @param arg.project

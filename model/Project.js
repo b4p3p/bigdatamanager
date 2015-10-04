@@ -32,7 +32,7 @@ Project.SCHEMA = SCHEMA;
 Project.prototype.data = {};    //json
 
 /**
- *
+ * Restituisce il documento del progetto selezionato
  * @param projectName
  * @param username
  * @param callback - fn({Data})
@@ -51,6 +51,10 @@ Project.getProject = function (projectName, username, callback) {
     );
 };
 
+/**
+ * Restituisce tutti i progetti
+ * @param callback
+ */
 Project.getProjects = function(callback) {
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var projects = connection.model(Project.MODEL_NAME, Project.SCHEMA);
@@ -75,8 +79,11 @@ Project.getProjects = function(callback) {
 };
 
 /**
- *
+ * Aggiunge un nuovo progetto
  * @param dataProject
+ * @param dataProject.project
+ * @param dataProject.username
+ * @param dataProject.description
  * @param callback - fn(Err)
  */
 Project.addProject = function(dataProject, callback) {
@@ -124,6 +131,7 @@ Project.addProject = function(dataProject, callback) {
 };
 
 /**
+ * Rimuove un progetto
  * @param projectName
  * @param callback - { fn(  {status:Number, message:String, deletedCount:Number}  )
  */
@@ -216,8 +224,9 @@ Project.delUserProjects = function(arg, callback){
 };
 
 /**
- *
+ * Modifica il progetto selezionato
  * @param data
+ * @param data.description - descrizione del progetto
  * @param callback - fn(Err, Data)
  */
 Project.editProject = function (data, callback) {
@@ -238,10 +247,13 @@ Project.editProject = function (data, callback) {
 };
 
 /**
+ * Aggiunge i dati nel progetto selezionato con i seguenti schemi
+ * -
  * @param projectData - { file: {String} }
  * @param callback - fn({Error}, {Ris})
  */
 Project.addData = function (projectData, callback) {
+
     var Data = require("../model/Data");
 
     if( projectData.type == "json-crowdpulse" )
@@ -252,7 +264,8 @@ Project.addData = function (projectData, callback) {
                 callback(err, result);
             }
         )
-    }else
+    }
+    else
     {
         Data.importFromFile(
             projectData.type,
@@ -282,6 +295,7 @@ Project.getLastUpdate = function(project , callback) {
 };
 
 /**
+ * Sincronizza il progetto con le regioni memorizzate
  * Crea e salva il documento di stat in summaries
  * @param project
  * @param username

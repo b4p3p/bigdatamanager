@@ -26,6 +26,11 @@ User.prototype.getUsername = function()
     return this.data.username;
 };
 
+/**
+ * Aggiunge un nuovo utente
+ * @param user
+ * @param callback
+ */
 User.addUser = function(user, callback){
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var UserModel = connection.model("users", USER_SCHEMA);
@@ -63,7 +68,7 @@ User.getUserPsw = function (username, password , callback)
 };
 
 /**
- * Get users
+ * Restituisce tuttI gli utenti registrati
  * @param callback  - fn({Error}, {Users})
  */
 User.getUsers = function(callback)
@@ -93,6 +98,11 @@ User.setLastLogin = function(username){
 
 };
 
+/**
+ * Cancella l'utente selezionato
+ * @param username
+ * @param callback
+ */
 User.delUser = function(username, callback){
 
     var Projects = require('../model/Project');
