@@ -1,109 +1,63 @@
-<style>
-    .NameHighlights {
-        position:relative;
-    }
-    .NameHighlights div {
-        display: none;
-    }
-    .NameHighlightsHover {
-        position:relative;
-    }
-    .NameHighlightsHover div {
-        display:inline;
-        position:absolute;
-        /*width: 30em;*/
-        /*top:1.3em;*/
-        /**top:20px;*/
-        /*left:100px;*/
-        z-index:1000;
-        background: rgba(224, 224, 224, 0.5);
-        padding:5px 15px 5px 10px;
-        border-radius: 4px;
-        font-size: 12px;
-        text-align: center;
-        background-opacity: 0.4;
-    }
-    #TagsBarChart
-    {
-        width:100%;
-        height:100%;
-        margin-top:3%;
-    }
-    #WordsBarChart
-    {
-        width:100%;
-        height:100%;
-        margin-top:3%;
-    }
-    #indexContent{
-        margin-left: 0;
-        padding-left: 0;
-    }
-    .tip{
-        display: block;
-        background: #333;
-        background: rgba(0,0,0,.8);
-        border-radius: 5px;
-        bottom: 26px;
-        color: #fff;
-        content: attr(title);
-        left: 20%;
-        padding: 5px 15px;
-        position: relative;
-        z-index: 98;
-        text-align:left;
-    }
-
-</style>
-
-<div id="spinner" style="text-align: center">
-    <img src="/public/img/ajax-loader.gif" alt="Loading" class="spinnerImage"/>
-    <p>Loading data...</p>
-</div>
+<link href="/public/css/stat-cloud.css" rel="stylesheet">
 
 <!--<div id="container" class="hidden container">-->
 
-<div class="form-group form-option container">
+<div style="display: inline-block;vertical-align: top">
 
     <label class="fix-label">Select tokens from:</label>
 
     <br>
 
-    <div class="optType NameHighlights">
+    <div class="optType">
 
-        <label style="margin-right: 20px; font-weight: normal">
-            <input class="radioData" id="radioData" name="typeVoc" value="radioData" type="radio" checked>
+        <label class="labelType"
+               style="width: 120px;margin-right: 20px; font-weight: normal">
+            <input id="radioData" name="typeVoc"
+                   value="radioData" type="radio" checked>
             Data
         </label>
 
-        <div><i class="fa fa-info-circle" style="margin-right: 5px"></i>
-            I dati sono calcolati sulla base dei token presenti dei dati</div>
+        <div style="display: inline-block">
+            <i class="fa fa-info-circle"
+               style="margin-right: 5px"></i>
+            I dati sono calcolati sulla base dei token presenti dei dati
+        </div>
 
     </div>
 
-    <!--<label style="margin-right: 20px; font-weight: normal">-->
-        <!--<input class="radioData" id="radioData" name="typeVoc" value="radioData" type="radio" checked>-->
-        <!--From data-->
-    <!--</label>-->
+    <div class="optType">
 
-    <div class="optType NameHighlights">
-
-        <label style="margin-right: 20px; font-weight: normal">
-            <input class="radioUser" id="radioUser" name="typeVoc" value="radioUser" type="radio">
+        <label class="labelType"
+               style="width: 120px;margin-right: 20px; font-weight: normal">
+            <input id="radioUser" name="typeVoc" value="radioUser" type="radio">
             User vocabulary
         </label>
 
-        <div><i class="fa fa-info-circle" style="margin-right: 5px"></i>
+        <div style="display: inline-block"><i class="fa fa-info-circle" style="margin-right: 5px;"></i>
             I dati sono calcolati sulla base del dizionario inserito dall'utente</div>
     </div>
 
 </div>
 
 <!-- GRAFICI -->
-
-<div id="container" class="hidden container" style="margin-bottom: 30px">
+<!--content container-->
+<div id="graphContainer" class="hidden itemContent "
+     style="margin-bottom: 30px">
 
     <svg id="Tags" ></svg>
+
+    <div style="margin-left: 20px">
+        <label for="cmbTags">Tags:</label>
+        <select style="z-index:200;" id="cmbTags" multiple>
+        </select>
+        <button type="button" class="btn btn-success"
+                id="btnFilterTag">
+            <span id="img-filter" class="glyphicon glyphicon-search"
+                  aria-hidden="true"></span>
+            Filter
+        </button>
+    </div>
+
     <div id="TagsBarChart"></div>
     <div id="WordsBarChart" style=""></div>
 
@@ -134,7 +88,10 @@
 
 </div>
 
-
+<div id="spinner" style="text-align: center">
+    <img src="/public/img/ajax-loader.gif" alt="Loading" class="spinnerImage"/>
+    <p>Loading data...</p>
+</div>
 
 <div class="alert alert-warning" role="alert" id="msgDataNotAvaible"
      style="margin-top: 20px;" hidden>

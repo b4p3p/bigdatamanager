@@ -792,8 +792,6 @@ Data.dateByDate = function(project, query, callback){
 
     exec.sort("ts");
 
-    Date.dateByDate_project(exec, type);
-
     exec.exec(function(err, result){
         connection.close();
         callback(err, result);

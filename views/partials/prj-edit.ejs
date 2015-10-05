@@ -78,7 +78,7 @@
          <label for="cmbType" >Type data:</label>
 
          <div class="col_dx">
-            <select class="selectpicker" name="type" id="cmbType" >
+            <select class="selectpicker" name="type" id="cmbType">
                <option value="json-crowdpulse">CrowdPulse Schema</option>
                <option value="json">JSON</option>
                <option value="csv">CSV</option>
@@ -92,7 +92,7 @@
          <label for="examplecode" >Example:</label>
 
          <div id="examplecode" class="example-code">
-            <pre>{{Example()}}</pre>
+            <pre>{{Example}}</pre>
          </div>
 
       </div>
@@ -207,7 +207,7 @@
       <div class="row">
          <a class="btn btn-default" id= "addButton"
             style="margin-top: 8px; margin-left: 15px; float: right;"
-            onclick="prjEditCtrl.showInsertTag()">Add tag
+            ng-click="showInsertTag()">Edit tag
          </a>
       </div>
 
