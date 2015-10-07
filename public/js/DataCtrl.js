@@ -94,10 +94,9 @@ DataCtrl.requireRefresh = function(field, callback)
         {
             dbLstUpd : function(next){
 
-                console.log("CALL: DataCtrl.requireRefresh - " + field.KEY);
+                console.log("CALL: DataCtrl.requireRefresh - " + field.KEY + " " + field.LASTUPDATE);
 
-                DataCtrl.storage
-                    .getContents(field.LASTUPDATE)
+                DataCtrl.storage.getContents(field.LASTUPDATE)
                     .then( function(value)
                     {
                         console.log("    storage lastupdate - key: " + field.LASTUPDATE + " value: " + value);
@@ -131,6 +130,8 @@ DataCtrl.requireRefresh = function(field, callback)
 
         function(err, result)
         {
+
+            console.log("    end");
 
             var lastUpdate = result.urlLstUpd.dateLastUpdate;
 

@@ -1,52 +1,4 @@
-<style>
-    .form-option {
-        margin-top: 15px;
-        margin-right: 15px;
-    }
-
-    .div-inline {
-        display: inline-block;
-    }
-
-    #timeLineContainer {
-        position: relative;
-        top: 0;
-        bottom:0; !important;
-        width:100%;
-        padding-left: 0;
-        margin-top: 0;
-    }
-
-    #line{
-        border-bottom: 2px #ccc solid;
-        overflow:visible;
-        height:9px;
-        margin: 50px 0 50px 0;
-    }
-    #labelID {
-        text-anchor: start;
-        font-family: Arial;
-        font-size: 14px;
-        font-weight: bold;
-        stroke: none;
-        stroke-width: 0px;
-        color: black
-    }
-    .tip{
-        display: block;
-        background: #333;
-        background: rgba(0,0,0,.8);
-        border-radius: 5px;
-        bottom: 26px;
-        color: #fff;
-        content: attr(title);
-        left: 20%;
-        padding: 5px 15px;
-        position: relative;
-        z-index: 98;
-        text-align:left;
-    }
-</style>
+<link href="/public/css/stat-users.css" rel="stylesheet">
 
 <div class="alert alert-warning" role="alert" id="msgProject"
      style="margin-top: 20px;" hidden>
@@ -77,14 +29,12 @@
         <button type="button" class="btn btn-success"
                 id="statButton"
                 style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"
-                onclick="UsersCtrl.clickStat()"
-                disabled>
+                ng-click="btnShowStatistics_Click()" disabled>
             <span id="img-filter" class="fa fa-spinner fa-spin" aria-hidden="true"></span> Show statistics
         </button>
         <button type="button" class="btn btn-danger"
                 id="restoreButton"
-                onclick="UsersCtrl.clickRestore()"
-                disabled>
+                ng-click="btnRestore_Click()" disabled>
             <span id="img-restore" class="glyphicon glyphicon-remove" aria-hidden="true"></span> Restore
         </button>
     </div>
@@ -95,14 +45,14 @@
 
             <div class="radio">
                 <label><input id="radioDays" type="radio" name="optmode" value="days" checked=""
-                              onclick="UsersCtrl.handleModeClick(this);"> Days</label></div><br>
+                              ng-click="radioDate_Click()"> Days</label></div><br>
             <div class="radio">
                 <label>
                     <input id="radioWeeks" type="radio" name="optmode" value="weeks"
-                           onclick="UsersCtrl.handleModeClick(this);"> Weeks</label></div><br>
+                           ng-click="radioDate_Click()"> Weeks</label></div><br>
             <div class="radio">
                 <label><input id="radioMonths" type="radio" name="optmode" value="months"
-                              onclick="UsersCtrl.handleModeClick(this);"> Months</label></div>
+                              ng-click="radioDate_Click()"> Months</label></div>
         </div>
     </form>
 
@@ -116,12 +66,12 @@
 
         <div class="btn-group" role="group" aria-label="...">
             <button id="AZbutton" type="button" class="btn btn-default active"
-                    onclick="UsersCtrl.AZbuttonClick();" disabled>
+                    ng-click="btnAZ_Click()" disabled>
                 <span id="img-filter" class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span> A - Z
             </button>
 
             <button id="ZAbutton" type="button" class="btn btn-default"
-                    onclick="UsersCtrl.ZAbuttonClick();" disabled>
+                    ng-click="btnZA_Click()" disabled>
                 <span id="img-filter" class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span> Z - A
             </button>
         </div>
@@ -131,13 +81,17 @@
         <div id="barChart"></div>
     </div>
 
-    <div id="divMap" class="form-group hidden">
-        <div id="line"></div>
-        <label id="labelID" class="fix-label" style="margin-left: 3px">Map user data</label><br>
-        <div id="mapContainer" class="hidden">
-            <div id="mapChart"></div>
-        </div>
+    <div class="" style="margin-top: 10px;height: 500px">
+        <div id="map" style="width: 100%;height: 100%;" ></div>
     </div>
+
+    <!--<div id="divMap" class="form-group hidden">-->
+        <!--<div id="line"></div>-->
+        <!--<label id="labelID" class="fix-label" style="margin-left: 3px">Map user data</label><br>-->
+        <!--<div id="mapContainer" class="hidden">-->
+            <!--<div id="mapChart"></div>-->
+        <!--</div>-->
+    <!--</div>-->
 
     <div id="divCloud" class="form-group hidden">
         <div id="line"></div>

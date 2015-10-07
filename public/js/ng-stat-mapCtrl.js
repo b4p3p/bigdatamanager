@@ -1,16 +1,9 @@
-//$scope.$apply(function () {
-//    $scope.test = "Start!!!";
-//});
-
 "use strict";
 
 ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
 
-    $scope.name = "ngStatMapCtrl";
-    $scope.IsNormalizeBoudariesChecked = false;
-    $scope.IsBoudariesChecked = false;
-
     //variable
+    var project = window.PROJECT;
     var stat = null;
     var regions = null;
     var filteredRegions = null;
@@ -18,6 +11,13 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
     var terms = null;
     var datas = [];
 
+    //control
+    var $cmbSelectTerms =   $('#cmbTerms');
+    var $radioData = $("#radioData");
+
+    $scope.name = "ngStatMapCtrl";
+    $scope.IsNormalizeBoudariesChecked = false;
+    $scope.IsBoudariesChecked = false;
     $scope.resize = function() {
         setTimeout(function() {
             $(window).trigger('resize');
@@ -42,13 +42,9 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
         this.$spinnerCluster = $("#spinner-cluster");
         this.$spinnerBoundaries = $("#spinner-boundaries");
 
-        this.$radioData = $("#radioData");
-        this.$radioUser = $("#radioVocabulary");
-
         this.$cmbSelectTags =    $('#cmbTags');
         this.$cmbSelectNations = $('#cmbNations');
         this.$cmbSelectUsers =   $('#cmbUsers');
-        this.$cmbSelectTerms =   $('#cmbTerms');
         this.$cmbTypeNormalization =   $("#cmbTypeNormalization");
 
         this.$chkHeatmap = $('#chk_heatmap');
@@ -70,32 +66,11 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
             }
         });
 
-        $('input[name="typeVoc"]').change( function(){
-            _self.setComboTerms();
-        });
-
         this.enableForm = function(){
             console.log("CALL: enable form");
             btnCtrl.removeWaitFromAllCheck();
             btnCtrl.enableFilterButton();
             btnCtrl.enableAllCheck();
-        };
-
-        this.setComboTerms = function(){
-            DomUtil.clearSelectpicker(this.$cmbSelectTerms);
-            var terms = [];
-            var count = [];
-            var key = this.$radioData.is(":checked") ? "syncDataTags" : "syncUserTags";
-            var syncxxxxTags = terms[key];
-            var tags = _.keys(syncxxxxTags);
-            _.each(tags, function(tag){
-                _.each(terms[key][tag], function(obj){
-                    terms.push( obj.token );
-                    count.push( obj.count );
-                });
-                DomUtil.addOptionGroup(_self.$cmbSelectTerms, tag, terms, count );
-            });
-            this.$cmbSelectTerms.selectpicker('refresh');
         };
 
         this.setIntervalSlider = function(min, max) {
@@ -131,7 +106,7 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
             this.$cmbSelectTags.attr("title", "Select Tags");
             this.$cmbSelectNations.attr("title", "Select Nations");
             this.$cmbSelectUsers.attr("title", "Select Users");
-            this.$cmbSelectTerms.attr("title", "Select Terms");
+            $cmbSelectTerms.attr("title", "Select Terms");
 
             //nations
             _.each(stat.data.nations, function(obj){
@@ -155,7 +130,7 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
                 DomUtil.addOptionValue(this.$cmbSelectUsers, obj.user, obj.sum, isDisable);
             }
 
-            this.setComboTerms();
+            setComboTerms();
 
             $('.selectpicker').selectpicker('refresh');
 
@@ -212,7 +187,9 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
             this.$cmbSelectNations.attr("title", "Not available");
             this.$cmbSelectTags.attr("title", "Not available");
             this.$cmbSelectUsers.attr("title", "Not available");
-            this.$cmbSelectTerms.attr("title", "Not available");
+
+            $cmbSelectTerms.attr("title", "Not available");
+
             $('.selectpicker').selectpicker('refresh');
 
             btnCtrl.removeWaitFromAllCheck();
@@ -290,7 +267,7 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
 
             var conditions = new ObjConditions( formCtrl.$cmbSelectNations,
                 null, formCtrl.$cmbSelectTags,  formCtrl.$sliderTimer,
-                formCtrl.$cmbSelectUsers,  formCtrl.$cmbSelectTerms
+                formCtrl.$cmbSelectUsers,  $cmbSelectTerms
             );
 
             var queryString = conditions.getQueryString();
@@ -744,7 +721,6 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
                 function(d, next) {
                     markerList.push(_self.createMarker(d)); next(null);
                 } ,
-
                 function() {
                     _self.layer.addLayers( markerList );
                 }
@@ -924,6 +900,9 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
 
     var idOp = 0;
     var cont = 0;
+    /**
+     * Timer per la lettura dei dati
+     */
     function getDataAsync(condictions){
         formCtrl.progressCount.reset();
         cont = 0;
@@ -937,7 +916,9 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
         } , 0 );
     }
 
-    //funzione asincrona che viene richiamata dal timer
+    /**
+     * funzione asincrona che viene richiamata dal timer
+     */
     function _getDataAsync(_idOp, condictions, timeout, step, start) {
 
         if (_idOp != idOp - 1) return;
@@ -972,8 +953,48 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
         });
     }
 
-    //EVENT
-    var project = window.PROJECT;
+    /**
+     * Imposta la combobox dei termini
+     */
+    function setComboTerms(){
+
+        DomUtil.clearSelectpicker($cmbSelectTerms);
+
+        var key = $radioData.is(":checked")
+            ? "syncDataTags" :
+            "syncUserTags";
+        var selectedVocabulary = terms[key];
+        var tags = _.keys(selectedVocabulary);
+
+        _.each(tags, function(tag){
+
+            var result = {
+                terms : [],
+                count: []
+            };
+
+            _.each(terms[key][tag], function(obj){
+                result.terms.push( obj.token );
+                result.count.push( obj.count );
+            });
+            DomUtil.addOptionGroup($cmbSelectTerms, tag,
+                                   result.terms, result.count );
+        });
+
+        $cmbSelectTerms.selectpicker('refresh');
+    }
+
+    /**
+     * EVENT
+     */
+    $('.typeVoc').change( function(){
+        console.log('typeVoc change');
+        setComboTerms();
+    });
+
+    /**
+     * ON LOAD
+     */
     if(!window.PROJECT)
     {
         bootbox.alert("You must first select a project<br><a href='/view/app/#project/openproject'>Select project</a>");

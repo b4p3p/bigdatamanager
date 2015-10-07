@@ -120,6 +120,12 @@ Util.addMatchClause = function(exec, query)
         //exec.match({tag: {$in: query.tags.split(",") } });
     }
 
+    if(query.hasOwnProperty("terms"))
+    {
+        var terms = query.terms.split(',');
+        var reg = new RegExp( terms.join("|"), "i");
+        exec.match({text: reg});
+    }
 
     if(query.interval)
     {
