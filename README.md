@@ -52,8 +52,40 @@ db.tags.createIndex( { tag: 1, projectName: 1 }, { unique: true } )
 
 ```
 
-##Installazione##
-Effettuare 
+Creazione utenti
+----------------
+```
+db.users.insert({username:'oim', password:'oim', level:1, firstName:'oim', lastName:'oim', created:new Date()})
+db.users.insert({username:'user', password:'user', level:0, firstName:'user', lastName:'user', created:new Date()})
+```
+
+Demonizzare node
+----------------
+
+* installare upstarter
+* creare in /etc/init il seguente file
+
+```
+#!upstart
+description "bigDataManager"
+
+start on started mountall
+stop on shutdown
+
+# Automatically Respawn:
+respawn
+respawn limit 99 5
+
+env NODE_ENV=production
+
+exec node /home/giuseppe/node/bigdatamanager/bin/www >> /var/log/bigDataManager.log 2>&1
+```
+
+* lanciare il servizio creato con: sudo service bigDataManager start
+
+
+enjoy!
+
 
 
 
