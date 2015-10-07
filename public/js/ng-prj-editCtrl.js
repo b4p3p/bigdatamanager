@@ -205,6 +205,7 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
         var selected = $cmbExample.find("option:selected").val();
         type = selected;
 
+        return "";
 
         if (selected == "csv") {
             $scope.Example = "id,[date],[latitude],[longitude],[source],text,[user],[tag]\n" +
