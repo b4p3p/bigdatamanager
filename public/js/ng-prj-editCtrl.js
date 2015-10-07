@@ -4,6 +4,32 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
 
     $(".selectpicker").selectpicker();
     var socket = io.connect();
+
+    //esempi
+    var crowdPulseExample = "[\n" +
+        "  {\n" +
+        "    id: '<unique_id>',\n" +
+        "    [date: '<AAAA-MM-GG>'],\n" +
+        "    [latitude: Float],\n" +
+        "    [longitude: Float],\n" +
+        "    [fromUser: String],\n" +
+        "    text:  String,\n" +
+        "    [user: String,\n" +
+        "    [customTags:  [String] ]\n" +
+        "    [tokens: String\n" +
+        "  },{\n" +
+        "    id: '<unique_id>',\n" +
+        "    [date: '<AAAA-MM-GG>'],\n" +
+        "    [latitude: Float],\n" +
+        "    [longitude: Float],\n" +
+        "    [fromUser: String],\n" +
+        "    text:  String,\n" +
+        "    [user: String,\n" +
+        "    [customTags:  [String] ]\n" +
+        "    [tokens: String\n" +
+        "  },\n" +
+        "  ...\n" +
+        "]";
     
     //controlli
     var $btnOverrideDataTokens = $("#overrideDataTokens");
@@ -46,7 +72,7 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
 
     $scope.Description = window.DESCRIPTION;
 
-    $scope.Example = "";
+    $scope.Example = crowdPulseExample;
 
     //function(){
     //    console.log("Example");
@@ -205,10 +231,10 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
         var selected = $cmbExample.find("option:selected").val();
         type = selected;
 
-        return "";
+        var msg = "";
 
         if (selected == "csv") {
-            $scope.Example = "id,[date],[latitude],[longitude],[source],text,[user],[tag]\n" +
+            msg = "id,[date],[latitude],[longitude],[source],text,[user],[tag]\n" +
                 "'<unique_id>'," +
                 "['<AAAA-MM-GG>']," +
                 "[Float]," +
@@ -229,7 +255,7 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
         }
 
         if (selected == "json") {
-            $scope.Example = "[\n" +
+            msg = "[\n" +
                 "  {\n" +
                 "    id: '<unique_id>',\n" +
                 "    [date: '<AAAA-MM-GG>'],\n" +
@@ -254,7 +280,7 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
         }
 
         if (selected == "json-crowdpulse"){
-            $scope.Example = "[\n" +
+            msg = "[\n" +
                 "  {\n" +
                 "    id: '<unique_id>',\n" +
                 "    [date: '<AAAA-MM-GG>'],\n" +
@@ -280,7 +306,9 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
                 "]";
         }
 
-        $scope.$apply();
+        $scope.$apply(function(){
+            $scope.Example = msg;
+        });
     }
 
     function sendFiles() {
