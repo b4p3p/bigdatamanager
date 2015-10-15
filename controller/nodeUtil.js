@@ -44,7 +44,7 @@ Util.addWhereClause = function(exec, query)
         {
             //cerco i dati che non hanno un tag
             if( tags[i] == 'undefined')
-                condictions.push({tag:{$exists:false}});
+                condictions.push({$or: [ {tag:{$exists:false}} , {tag:{$eq:''}}]});
             //prendo i dati specificati nella query
             else
                 condictions.push({tag:{$eq:tags[i]}});
@@ -109,7 +109,7 @@ Util.addMatchClause = function(exec, query)
         {
             //cerco i dati che non hanno un tag
             if( tags[i] == 'undefined')
-                condictions.push({tag:{$exists:false}});
+                condictions.push({$or: [ {tag:{$exists:false}} , {tag:{$eq:''}}]});
             //prendo i dati specificati nella query
             else
                 condictions.push({tag:{$eq:tags[i]}});

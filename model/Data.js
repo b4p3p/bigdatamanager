@@ -750,7 +750,7 @@ Data.cleanText = function(text){
     text = text.replace(/\^/g, ' ');
     text = text.replace(/`/g, ' ');
     text = text.replace(/’/g, ' ');
-    return text;
+    return text.toLowerCase();
 };
 
 /**
@@ -935,14 +935,8 @@ Data.getInfoCount = function(arg, callback){
 
         //array dei tag
         allTags: {$addToSet: "$tag"},
-
-        geoTags: {$addToSet: {
-            "$cond": [ { "$ifNull": ["$latitude", false] }, "$tag", null ]
-        }},
-
-        syncTags: {$addToSet: {
-            "$cond": [ { "$ifNull": ["$nation", false] }, "$tag", null ]
-        }}
+        geoTags: {$addToSet: { "$cond": [ { "$ifNull": ["$latitude", false] }, "$tag", null ] }},
+        syncTags: {$addToSet: { "$cond": [ { "$ifNull": ["$nation", false] }, "$tag", null ] }}
 
     });
 
@@ -951,13 +945,17 @@ Data.getInfoCount = function(arg, callback){
 
         if( result && result.length > 0 )
         {
-            var index = result[0].geoTags.indexOf(null);
-            if (index > -1)
-                result[0].geoTags.splice(index, 1);
+            cleanTag ( result[0].geoTags );
+            cleanTag ( result[0].syncTags );
+            cleanTag ( result[0].allTags );
 
-            index = result[0].syncTags.indexOf(null);
-            if (index > -1)
-                result[0].syncTags.splice(index, 1);
+            //var index = result[0].geoTags.indexOf(null);
+            //if (index > -1)
+            //    result[0].geoTags.splice(index, 1);
+            //
+            //index = result[0].syncTags.indexOf(null);
+            //if (index > -1)
+            //    result[0].syncTags.splice(index, 1);
 
             callback(err, result[0]);
         }
@@ -972,12 +970,16 @@ Data.getInfoCount = function(arg, callback){
                 max: null
             });
         }
-
-        //se non ho trovato nessun tag, ne aggiungo uno di default
-        //if( !result.allTags || result.allTags.length == 0 )
-        //    result.allTags = ["undefined"];
-        //callback(err, result);
     });
+
+    function cleanTag(tags){
+        //elimino il tag null
+        var index = tags.indexOf(null);
+        if (index > -1) tags.splice(index, 1);
+        //imposto il tag undefined per i non tag
+        var index = tags.indexOf('');
+        if (index > -1) tags[index] = 'undefined';
+    }
 
 };
 

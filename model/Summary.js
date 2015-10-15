@@ -128,9 +128,6 @@ Summary.getStatFilter = function (project,username, query, callback)
     if( !query ) query = {};
     query.projectName = project;
 
-    //var queryAgg = buildQuery(query);
-    //queryAgg.projectName = project;     //aggiungo la query sul progetto
-
     async.parallel( {
 
             //ottengo le regioni associate alla nazione. Solo stringhe

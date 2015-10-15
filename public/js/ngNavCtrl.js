@@ -1,4 +1,7 @@
-ngApp.controller('ngNavCtrl', ['$scope', function($scope) {
+"use strict";
+
+//ngApp.controller('ngNavCtrl', ['$scope', function($scope) {
+ngApp.controller('ngNavCtrl', function($scope) {
 
     $scope.Logout = function(){
         $.get("/logout", function(result){
@@ -6,11 +9,6 @@ ngApp.controller('ngNavCtrl', ['$scope', function($scope) {
         });
     };
 
-    var lvl = window.LEVEL;
-    if(window.LEVEL <= 0){
-        $(".canberemoved").hide();
-        //$("#menu-project-newproject").hide();
 
-    }
 
-}]);
+});

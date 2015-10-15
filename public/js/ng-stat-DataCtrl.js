@@ -115,9 +115,11 @@ ShowDataCtrl.initComboNations = function() {
 ShowDataCtrl.initComboRegions = function() {
     console.log("CALL: initComboRegions");
 
-    ShowDataCtrl.$cmbRegions.multiselect();
+    ShowDataCtrl.$cmbRegions.multiselect({
+        nonSelectedText: 'Regions'
+    });
     var optgroups = ShowDataCtrl.setComboRegionsData();
-    ShowDataCtrl.$cmbRegions.multiselect( optgroups.length == 0? 'disable' : 'dataprovider', optgroups);
+    ShowDataCtrl.$cmbRegions.multiselect( optgroups.length == 0 ? 'disable' : 'dataprovider', optgroups);
 };
 
 ShowDataCtrl.setComboRegionsData = function() {

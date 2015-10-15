@@ -26,7 +26,7 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
         "    text:  String,\n" +
         "    [user: String,\n" +
         "    [customTags:  [String] ]\n" +
-        "    [tokens: String\n" +
+        "    [tokens: String]\n" +
         "  },\n" +
         "  ...\n" +
         "]";
@@ -300,15 +300,17 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
                 "    text:  String,\n" +
                 "    [user: String,\n" +
                 "    [customTags:  [String] ]\n" +
-                "    [tokens: String\n" +
+                "    [tokens: String]\n" +
                 "  },\n" +
                 "  ...\n" +
                 "]";
         }
 
-        $scope.$apply(function(){
-            $scope.Example = msg;
-        });
+        try{
+            $scope.$apply(function(){
+                $scope.Example = msg;
+            });
+        }catch(e){}
     }
 
     function sendFiles() {

@@ -370,7 +370,8 @@ Vocabulary.prepareDataTags = function(project, query, app, callback) {
 
             //fix tag null
             var tag = doc.tag;
-            if(doc["tag"]==null||doc.tag=="null"||doc.tag=="undefined") tag = null;
+            if(doc["tag"]==null||doc.tag=="null"||doc.tag=="undefined"||doc.tag=="")
+                tag = "undefined";
 
             if(ris[tag]==null){
                 ris[tag] = {tag: tag, counter: {} };
@@ -427,7 +428,8 @@ Vocabulary.prepareUserTags = function(project, app, dict, datas, callback){
     });
     delete dict["tokens"];
 
-    datas.find({projectName:project},{text:1, tag:1, tokens:1}, function(err, docs){
+    datas.find( {projectName:project},
+                {text:1, tag:1, tokens:1}, function(err, docs) {
 
         wait.stop();
         app.io.emit("syncUserTags_msg", "Group data");
@@ -436,7 +438,8 @@ Vocabulary.prepareUserTags = function(project, app, dict, datas, callback){
 
             //fix tag null
             var tag = doc.tag;
-            if(doc["tag"]==null||doc.tag=="null"||doc.tag=="undefined") tag = null;
+            if(doc["tag"]==null||doc.tag=="null"||doc.tag=="undefined"||doc.tag=="")
+                tag = "undefined";
 
             if(dict[tag]==null){
                 dict[tag] = {tag: tag, counter: {} };

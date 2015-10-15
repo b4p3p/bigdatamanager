@@ -16,7 +16,16 @@ ngApp.factory('Todos', function(){
     ];
 });
 
-ngApp.controller('ngAppCtrl', ['$scope', function($scope) {
+//ngApp.controller('ngAppCtrl', ['$scope', function($scope) {
+ngApp.controller('ngAppCtrl', function($scope, $rootScope) {
+
+    $rootScope.isGuest = function() {
+        return window.LEVEL == -1
+    };
+
+    $rootScope.isAdmin = function() {
+        return window.LEVEL == 1
+    };
 
     var _self = $scope;
     var toggle = true;
@@ -121,7 +130,8 @@ ngApp.controller('ngAppCtrl', ['$scope', function($scope) {
         socket.emit( 'newproject', { project:'pippo' } );
     }
 
-}]);
+});
+
 
 // -----------
 // router

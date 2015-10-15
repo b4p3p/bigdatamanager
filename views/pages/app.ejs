@@ -69,7 +69,7 @@
                         <i class="fa fa-home"></i><span>Home</span>
                     </a>
                 </li>
-                <li id="menu-database" class="canberemoved">
+                <li id="menu-database" ng-if="isAdmin()">
                     <a href="#" >
                         <i class="fa fa-cogs"></i>
                         <span>Database</span>
@@ -81,6 +81,7 @@
                         <li><a href="#/db/normalization" class="link-menu"><i class="fa fa-balance-scale"></i>Normalization</a></li>
                     </ul>
                 </li>
+
                 <li id="menu-project" >
                     <a href="#">
                         <i class="fa fa-database"></i>
@@ -88,10 +89,9 @@
                         <span class="fa fa-angle-right" style="float: right"></span>
                     </a>
                     <ul id="menu-project-sub" >
-
-                        <li class="canberemoved" id="menu-project-newproject"><a href="#project/newproject" class="link-menu"><i class="fa fa-plus"></i>New project</a></li>
+                        <li ng-if="!isGuest()" id="menu-project-newproject"><a href="#project/newproject" class="link-menu"><i class="fa fa-plus"></i>New project</a></li>
                         <li><a href="#project/openproject" class="link-menu"><i class="fa fa-folder-open"></i>Open project</a></li>
-                        <li class="canberemoved" id="menu-project-edit"><a href="#project/editproject" class="link-menu"><i class="fa fa-pencil"></i>Edit project</a></li>
+                        <li ng-if="!isGuest()" id="menu-project-edit"><a href="#project/editproject" class="link-menu"><i class="fa fa-pencil"></i>Edit project</a></li>
                     </ul>
                 </li>
 

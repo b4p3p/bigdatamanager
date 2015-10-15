@@ -64,11 +64,13 @@
                     Section reserved for system administrators to change the database information globally.
                 </div>
                 <div class="pages">
-                    <a href="#/db/users"><h4><i class="fa fa-user-plus"></i> Users</h4></a>
+                    <a ng-if="isAdmin()" href="#/db/users"><h4><i class="fa fa-user-plus"></i> Users</h4></a>
+                    <div ng-if="!isAdmin()" ><h4><i class="fa fa-user-plus"></i> Users</h4></div>
                     List of registered users.
                 </div>
                 <div class="pages">
-                    <a href="#/db/nations"><h4><i class="fa fa-folder-open"></i> Nations</h4></a>
+                    <a ng-if="isAdmin()" href="#/db/nations"><h4><i class="fa fa-folder-open"></i> Nations</h4></a>
+                    <div ng-if="!isAdmin()" href="#/db/nations"><h4><i class="fa fa-folder-open"></i> Nations</h4></div>
                     List of European nations already entered into the database necessary for geo-localization data.
                 </div>
             </div>
