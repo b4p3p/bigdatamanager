@@ -10,13 +10,13 @@ DBUsersCtrl.cmdDeleteClick = function(username){
         message: "<div>Do you really want to delete the user and ALL your projects?</div>" +
                  "<div style='margin-top: 10px' id='progress'></div>",
         buttons: {
-            success: {
-                label: "Oh no!",
-                className: "btn-success",
-                callback: function() {
-                    Example.show("great success");
-                }
-            },
+            //success: {
+            //    label: "Oh no!",
+            //    className: "btn-success",
+            //    callback: function() {
+            //        Example.show("great success");
+            //    }
+            //},
             danger: {
                 label: "Yes, sure!",
                 className: "btn-danger",

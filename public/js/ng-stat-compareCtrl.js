@@ -182,9 +182,9 @@ CompareCtrl.clickFilter = function()
 
             CompareCtrl.$barChart.replaceWith('<div id="barChart"></div>');
             CompareCtrl.$barChart = $('#barChart');
-            CompareCtrl.$radarLegend.replaceWith('<div class="col-md-3" id="radarLegend"></div>');
+            CompareCtrl.$radarLegend.replaceWith('<div class="col-md-4" id="radarLegend"></div>');
             CompareCtrl.$radarLegend = $('#radarLegend');
-            CompareCtrl.$radarChart.replaceWith('<canvas class="radar "id="radarChart" width="400" height="400"></canvas>');
+            CompareCtrl.$radarChart.replaceWith('<canvas class="radar" id="radarChart" width="400" height="400"></canvas>');
             CompareCtrl.$radarChart = $('#radarChart');
 
             if(CompareCtrl.$radioRegions.is(':checked'))
@@ -246,9 +246,9 @@ CompareCtrl.clickRestore = function()
 
     CompareCtrl.$barChart.replaceWith('<div id="barChart" ></div>');
     CompareCtrl.$barChart = $('#barChart');
-    CompareCtrl.$radarLegend.replaceWith('<div class="col-md-3" id="radarLegend"></div>');
+    CompareCtrl.$radarLegend.replaceWith('<div class="col-md-4" id="radarLegend"></div>');
     CompareCtrl.$radarLegend = $('#radarLegend');
-    CompareCtrl.$radarChart.replaceWith('<canvas class="radar "id="radarChart" width="400" height="400"></canvas>');
+    CompareCtrl.$radarChart.replaceWith('<canvas class="radar" id="radarChart" width="400" height="400"></canvas>');
     CompareCtrl.$radarChart = $('#radarChart');
 
     DomUtil.deselectAll(CompareCtrl.$cmbRegions);

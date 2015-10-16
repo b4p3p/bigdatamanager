@@ -533,6 +533,7 @@ ngApp.controller('ngStatCloudCtrl', ['$scope', function($scope) {
      *  Imposta nuovamente tutti i dati
      */
     $radios.change(function() {
+        $(".containerRadio").addClass("hidden");
         setData( getTypeData() );
     });
     //

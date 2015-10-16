@@ -889,7 +889,7 @@ ngApp.controller('ngStatMapCtrl', [ '$scope', function($scope) {
                     title: "Progetto non sincronizzato",
                     message: 'Il progetto non è sincronizzato.<br>' +
                              "Per poter vedere le statistiche complete è necessario effettuare la sincronizzazione tramite l'apposito pulsante<br>" +
-                             '<a href="http://localhost:8080/view/app#/project/editproject">Edit Project</a>'
+                             '<a href="/view/app/#/project/editproject">Edit Project</a>'
                 });
             }
 

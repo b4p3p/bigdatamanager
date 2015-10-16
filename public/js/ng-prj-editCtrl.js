@@ -411,7 +411,7 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
                 $(resContainer).append("Added: " + result[key].success + " ");
                 $(resContainer).append("<span class=\"glyphicon glyphicon-ok\" style=\"color: green\" aria-hidden=\"true\"></span>");
                 $(resContainer).append(" - ");
-                $(resContainer).append("Discard:" + result[key].fail + " ");
+                $(resContainer).append("Discard: " + result[key].fail + " ");
                 $(resContainer).append("<span class=\"glyphicon glyphicon-remove\" style=\"color: red\" aria-hidden=\"true\"></span>");
             }
         });

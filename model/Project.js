@@ -355,7 +355,7 @@ Project.sync = function(project, username, app, callback) {
         function(regions, next){
 
             console.log("     set regions/nations data - #" + regions.length);
-            app.io.emit("projectsync_msg", "FOUND " + regions.length + " nations");
+            app.io.emit("projectsync_msg", "FOUND " + regions.length + " regions");
 
             var cont=0;
             var len = regions.length;

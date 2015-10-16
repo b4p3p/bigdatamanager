@@ -173,7 +173,8 @@ ngApp.controller('ngStatUsersCtrl', ['$scope', function($scope) {
         drawBarChart();
 
         $divMap.removeClass('hidden');
-        $mapContainer.removeClass('hidden');
+        //$mapContainer.removeClass('hidden');
+        $('#mapContainer').height(500);
         drawMap();
 
         if(dataCloud != null)
@@ -200,7 +201,7 @@ ngApp.controller('ngStatUsersCtrl', ['$scope', function($scope) {
 
     /**
      * Utility per pulire tutti i grafici
-     * Dopo aver cancellato il div è necessario richiamare jquery per prendere i riferimenti
+     * Dopo aver cancellato il div ï¿½ necessario richiamare jquery per prendere i riferimenti
      */
     function clearDiv() {
         console.log("CALL: clearDiv");
@@ -222,10 +223,8 @@ ngApp.controller('ngStatUsersCtrl', ['$scope', function($scope) {
         $ZAbutton.prop("disabled", true);
 
         $divMap.addClass('hidden');
-        $mapContainer.replaceWith(
-            '<div id="mapContainer" class="hidden">' +
-            '<div id="mapChart"></div>' +
-            '</div>');
+        $('#mapContainer').height(0);
+
         $mapContainer = $('#mapContainer');
 
         $divCloud.replaceWith(
@@ -508,7 +507,7 @@ ngApp.controller('ngStatUsersCtrl', ['$scope', function($scope) {
 
         // create the tile layer with correct attribution
         var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-        var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+        var osmAttrib='Map data ï¿½ <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
 
         var osm = new L.TileLayer( osmUrl, {
             minZoom: 2, maxZoom: 13,
