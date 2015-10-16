@@ -75,8 +75,10 @@ function deleteProject(project) {
                     '</div>';
 
                 bootbox.alert(html, function() {
-                    //window.location.reload();
-                    $table.bootstrapTable("refresh", {silent: true});
+                    console.log("Reinizializzo la tabella");
+                    window.location.reload();
+                    //$("#tableProjects").bootstrapTable("refresh", {silent: true});
+                    //$("#tableProjects").bootstrapTable( {url:"/project/projects"} );
                 });
             }
             else
@@ -101,10 +103,6 @@ ngApp.controller('ngPrjOpenCtrl', ['$scope', function($scope) {
     $scope.name = "ngPrjOpenCtrl";
 
     var $table = $("#tableProjects");
-
-
-
-
 
     $(document).ready(function(){
         $("#tableProjects").bootstrapTable( {url:"/project/projects"} );

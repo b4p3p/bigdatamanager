@@ -72,7 +72,92 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
 
     $scope.Description = window.DESCRIPTION;
 
-    $scope.Example = crowdPulseExample;
+    //$scope.Example = crowdPulseExample;
+
+    function Example(){
+
+        console.log("CALL getExample");
+
+        var selected = $cmbExample.find("option:selected").val();
+        type = selected;
+
+        var msg = "";
+
+        if (selected == "csv") {
+            msg = "id,[date],[latitude],[longitude],[source],text,[user],[tag]\n" +
+                "'<unique_id>'," +
+                "['<AAAA-MM-GG>']," +
+                "[Float]," +
+                "[Float]," +
+                "[String]," +
+                "String," +
+                "[String]," +
+                "[String]\n" +
+                "'<unique_id>'," +
+                "['<AAAA-MM-GG>']," +
+                "[Float]," +
+                "[Float]," +
+                "[String]'," +
+                "String," +
+                "[String]," +
+                "[String]\n" +
+                "...\n";
+        }
+
+        if (selected == "json") {
+            msg = "[\n" +
+                "  {\n" +
+                "    id: '<unique_id>',\n" +
+                "    [date: '<AAAA-MM-GG>'],\n" +
+                "    [latitude: Float],\n" +
+                "    [longitude: Float],\n" +
+                "    [source: String],\n" +
+                "    text: String,\n" +
+                "    [user: String],\n" +
+                "    [tag: String]\n" +
+                "  },{\n" +
+                "    id: '<unique_id>',\n" +
+                "    [date: '<AAAA-MM-GG>'],\n" +
+                "    [latitude: Float],\n" +
+                "    [longitude: Float],\n" +
+                "    [source: String],\n" +
+                "    text: String,\n" +
+                "    [user: String],\n" +
+                "    [tag: String]\n" +
+                "  },\n" +
+                "  ...\n" +
+                "]";
+        }
+
+        if (selected == "json-crowdpulse"){
+            msg = "[\n" +
+                "  {\n" +
+                "    id: '<unique_id>',\n" +
+                "    [date: '<AAAA-MM-GG>'],\n" +
+                "    [latitude: Float],\n" +
+                "    [longitude: Float],\n" +
+                "    [fromUser: String],\n" +
+                "    text:  String,\n" +
+                "    [user: String,\n" +
+                "    [customTags:  [String] ]\n" +
+                "    [tokens: String\n" +
+                "  },{\n" +
+                "    id: '<unique_id>',\n" +
+                "    [date: '<AAAA-MM-GG>'],\n" +
+                "    [latitude: Float],\n" +
+                "    [longitude: Float],\n" +
+                "    [fromUser: String],\n" +
+                "    text:  String,\n" +
+                "    [user: String,\n" +
+                "    [customTags:  [String] ]\n" +
+                "    [tokens: String]\n" +
+                "  },\n" +
+                "  ...\n" +
+                "]";
+        }
+
+        return msg;
+    };
 
     //function(){
     //    console.log("Example");
@@ -198,6 +283,15 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
         });
     };
 
+    $scope.typeSelected = {
+        type: 'json-crowdpulse',
+        example: Example()
+    };
+
+    $scope.cmbTypeChange = function(){
+        $scope.typeSelected.example = Example();
+    };
+
     function getProject() {
 
         console.log("CALL: getProject - project=" + $scope.Project);
@@ -222,95 +316,6 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
         console.log("CALL: loadEditForm");
         $("#project").val(data.projectName);
         $("#description").val(data.description);
-    }
-
-    function getExample() {
-
-        console.log("CALL getExample");
-
-        var selected = $cmbExample.find("option:selected").val();
-        type = selected;
-
-        var msg = "";
-
-        if (selected == "csv") {
-            msg = "id,[date],[latitude],[longitude],[source],text,[user],[tag]\n" +
-                "'<unique_id>'," +
-                "['<AAAA-MM-GG>']," +
-                "[Float]," +
-                "[Float]," +
-                "[String]," +
-                "String," +
-                "[String]," +
-                "[String]\n" +
-                "'<unique_id>'," +
-                "['<AAAA-MM-GG>']," +
-                "[Float]," +
-                "[Float]," +
-                "[String]'," +
-                "String," +
-                "[String]," +
-                "[String]\n" +
-                "...\n";
-        }
-
-        if (selected == "json") {
-            msg = "[\n" +
-                "  {\n" +
-                "    id: '<unique_id>',\n" +
-                "    [date: '<AAAA-MM-GG>'],\n" +
-                "    [latitude: Float],\n" +
-                "    [longitude: Float],\n" +
-                "    [source: String],\n" +
-                "    text: String,\n" +
-                "    [user: String],\n" +
-                "    [tag: String]\n" +
-                "  },{\n" +
-                "    id: '<unique_id>',\n" +
-                "    [date: '<AAAA-MM-GG>'],\n" +
-                "    [latitude: Float],\n" +
-                "    [longitude: Float],\n" +
-                "    [source: String],\n" +
-                "    text: String,\n" +
-                "    [user: String],\n" +
-                "    [tag: String]\n" +
-                "  },\n" +
-                "  ...\n" +
-                "]";
-        }
-
-        if (selected == "json-crowdpulse"){
-            msg = "[\n" +
-                "  {\n" +
-                "    id: '<unique_id>',\n" +
-                "    [date: '<AAAA-MM-GG>'],\n" +
-                "    [latitude: Float],\n" +
-                "    [longitude: Float],\n" +
-                "    [fromUser: String],\n" +
-                "    text:  String,\n" +
-                "    [user: String,\n" +
-                "    [customTags:  [String] ]\n" +
-                "    [tokens: String\n" +
-                "  },{\n" +
-                "    id: '<unique_id>',\n" +
-                "    [date: '<AAAA-MM-GG>'],\n" +
-                "    [latitude: Float],\n" +
-                "    [longitude: Float],\n" +
-                "    [fromUser: String],\n" +
-                "    text:  String,\n" +
-                "    [user: String,\n" +
-                "    [customTags:  [String] ]\n" +
-                "    [tokens: String]\n" +
-                "  },\n" +
-                "  ...\n" +
-                "]";
-        }
-
-        try{
-            $scope.$apply(function(){
-                $scope.Example = msg;
-            });
-        }catch(e){}
     }
 
     function sendFiles() {
@@ -443,10 +448,10 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
     }
 
     ////evento della combo
-    $cmbExample.on('change', function () {
-        console.log('cmbExample change');
-        getExample();
-    });
+    //$cmbExample.on('change', function () {
+    //    console.log('cmbExample change');
+    //    getExample();
+    //});
 
     $btnUpload.click(function(){ sendFiles(); });
 
@@ -796,10 +801,100 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
             getStat();
             loadPie();
             getProject();
-            getExample();
+            //getExample();
         }
     });
 
 }]);
+
+
+//function getExample() {
+//
+//    console.log("CALL getExample");
+//
+//    var selected = $cmbExample.find("option:selected").val();
+//    type = selected;
+//
+//    var msg = "";
+//
+//    if (selected == "csv") {
+//        msg = "id,[date],[latitude],[longitude],[source],text,[user],[tag]\n" +
+//            "'<unique_id>'," +
+//            "['<AAAA-MM-GG>']," +
+//            "[Float]," +
+//            "[Float]," +
+//            "[String]," +
+//            "String," +
+//            "[String]," +
+//            "[String]\n" +
+//            "'<unique_id>'," +
+//            "['<AAAA-MM-GG>']," +
+//            "[Float]," +
+//            "[Float]," +
+//            "[String]'," +
+//            "String," +
+//            "[String]," +
+//            "[String]\n" +
+//            "...\n";
+//    }
+//
+//    if (selected == "json") {
+//        msg = "[\n" +
+//            "  {\n" +
+//            "    id: '<unique_id>',\n" +
+//            "    [date: '<AAAA-MM-GG>'],\n" +
+//            "    [latitude: Float],\n" +
+//            "    [longitude: Float],\n" +
+//            "    [source: String],\n" +
+//            "    text: String,\n" +
+//            "    [user: String],\n" +
+//            "    [tag: String]\n" +
+//            "  },{\n" +
+//            "    id: '<unique_id>',\n" +
+//            "    [date: '<AAAA-MM-GG>'],\n" +
+//            "    [latitude: Float],\n" +
+//            "    [longitude: Float],\n" +
+//            "    [source: String],\n" +
+//            "    text: String,\n" +
+//            "    [user: String],\n" +
+//            "    [tag: String]\n" +
+//            "  },\n" +
+//            "  ...\n" +
+//            "]";
+//    }
+//
+//    if (selected == "json-crowdpulse"){
+//        msg = "[\n" +
+//            "  {\n" +
+//            "    id: '<unique_id>',\n" +
+//            "    [date: '<AAAA-MM-GG>'],\n" +
+//            "    [latitude: Float],\n" +
+//            "    [longitude: Float],\n" +
+//            "    [fromUser: String],\n" +
+//            "    text:  String,\n" +
+//            "    [user: String,\n" +
+//            "    [customTags:  [String] ]\n" +
+//            "    [tokens: String\n" +
+//            "  },{\n" +
+//            "    id: '<unique_id>',\n" +
+//            "    [date: '<AAAA-MM-GG>'],\n" +
+//            "    [latitude: Float],\n" +
+//            "    [longitude: Float],\n" +
+//            "    [fromUser: String],\n" +
+//            "    text:  String,\n" +
+//            "    [user: String,\n" +
+//            "    [customTags:  [String] ]\n" +
+//            "    [tokens: String]\n" +
+//            "  },\n" +
+//            "  ...\n" +
+//            "]";
+//    }
+//
+//    try{
+//        $scope.$apply(function(){
+//            $scope.Example = msg;
+//        });
+//    }catch(e){}
+//}
 
 
