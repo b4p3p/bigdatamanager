@@ -5,7 +5,7 @@ ngApp.controller('ngStatCloudCtrl', ['$scope', function($scope) {
     var $cmbSelectWord = $("#selectWord");
     var $radioUser = $("#radioUser")[0];
     var $radioData = $("#radioData")[0];
-    var $radios = $("div.optType input");
+    var $radios = $(".radios");
     var $wordCloud = $("#Tags");
     var $tagsBarChart = $("#TagsBarChart");
     var $cmbTags = $("#cmbTags");
@@ -70,6 +70,8 @@ ngApp.controller('ngStatCloudCtrl', ['$scope', function($scope) {
 
     $scope.stat = {};
 
+    $scope.isSync = true;
+
     function getStat() {
         DataCtrl.getFromUrl(DataCtrl.FIELD.STAT, null, function(result){
             $scope.stat = result;
@@ -122,6 +124,11 @@ ngApp.controller('ngStatCloudCtrl', ['$scope', function($scope) {
         if( (!data || wordCloudData.length == 0) &&
              !tags )
         {
+            //i dati non sono sincronizzati
+            $scope.$apply(function(){
+                $scope.isSync = false;
+            });
+
             $(".itemContent").hide();
             $("#msgDataNotAvaible").show();
         }
@@ -129,6 +136,7 @@ ngApp.controller('ngStatCloudCtrl', ['$scope', function($scope) {
         {
             $(".itemContent").show();
             $("#msgDataNotAvaible").hide();
+            $(".containerRadio").removeClass("hidden");
 
             drawCloud();
             drawTagsBar();
@@ -314,6 +322,7 @@ ngApp.controller('ngStatCloudCtrl', ['$scope', function($scope) {
     function removeWait() {
         $("#spinner").addClass("hidden");
         $(".itemContent").removeClass("hidden");
+        $("#containerRadio").removeClass("hidden");
     }
 
     function getInterval(data) {
@@ -344,6 +353,7 @@ ngApp.controller('ngStatCloudCtrl', ['$scope', function($scope) {
 
         var data = vocabulary[type];
 
+        if(data)
         for(var i = 0; i< data.length; i++ )
         {
             var objTag = data[i];
@@ -381,6 +391,7 @@ ngApp.controller('ngStatCloudCtrl', ['$scope', function($scope) {
 
         ris[0] = ["Tags", "Occurrences", { role: "style" } ];
 
+        if(data)
         for(var i = 0; i< data.length; i++ )
         {
             var row = data[i];
@@ -408,6 +419,7 @@ ngApp.controller('ngStatCloudCtrl', ['$scope', function($scope) {
         var data = vocabulary[type];
         var count = 0;
 
+        if(data)
         for(var i = 0; i< data.length; i++ )
         {
             var row = data[i];
@@ -471,7 +483,9 @@ ngApp.controller('ngStatCloudCtrl', ['$scope', function($scope) {
      * @returns {string}
      */
     function getTypeData(){
-        return $radioUser.checked ? "syncUserTags" : "syncDataTags"
+        if($("#radioUser")[0] == null)
+            return "";
+        return $("#radioUser")[0].checked ? "syncUserTags" : "syncDataTags"
     }
 
     /**
@@ -521,6 +535,12 @@ ngApp.controller('ngStatCloudCtrl', ['$scope', function($scope) {
     $radios.change(function() {
         setData( getTypeData() );
     });
+    //
+    //$scope.radioSelected = "";
+    //
+    //$scope.radioChange = function(){
+    //  console.log($scope.radioSelected)  ;
+    //};
 
     /**
      * Filtra i dati per tag
@@ -535,6 +555,30 @@ ngApp.controller('ngStatCloudCtrl', ['$scope', function($scope) {
         loadData();
         getStat();
         $(".selectpicker").selectpicker();
+
+        var radio = document.querySelectorAll('.NameHighlights');
+        for (var i = radio.length; i--;) {
+            (function () {
+                var t;
+                radio[i].onmouseover = function () {
+                    hideAll();
+                    clearTimeout(t);
+                    this.className = 'NameHighlightsHover';
+                };
+                radio[i].onmouseout = function () {
+                    var self = this;
+                    t = setTimeout(function () {
+                        self.className = 'NameHighlights';
+                    }, 300);
+                };
+            })();
+        }
+
+        function hideAll() {
+            for (var i = radio.length; i--;) {
+                radio[i].className = 'NameHighlights';
+            }
+        }
     });
 
 }]);

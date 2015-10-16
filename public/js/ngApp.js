@@ -27,6 +27,10 @@ ngApp.controller('ngAppCtrl', function($scope, $rootScope) {
         return window.LEVEL == 1
     };
 
+    $rootScope.isProjectOpened = function() {
+        return !(!window.PROJECT || window.PROJECT == "")
+    };
+
     var _self = $scope;
     var toggle = true;
 

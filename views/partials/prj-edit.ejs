@@ -154,6 +154,8 @@
 
    </div>
 
+   <hr>
+
    <h3>Tag</h3>
 
    <div style="vertical-align: middle;height: 40px">
@@ -173,13 +175,6 @@
          </ul>
 
       </div>
-   </div>
-
-
-   <div style="font-size:80%; margin-bottom: 10px">
-      <br>
-      I tag da inserire nella tabella <b>devono</b> corrispondere ai tag disponibili all'interno dei dati. <br>
-      Per inserire un vocabolario associato al tag <i>undefined</i>, lasciare il campo "tag" della tabella vuoto.
    </div>
 
    <div id="tableTagsContainer">
@@ -213,7 +208,59 @@
 
       <hr>
 
+      <h3>Tokens</h3>
+
       <div>
+
+         <div class="row panel panel-default" style="padding: 20px 0" >
+
+            <div class="riga" style="width:100%;">
+
+               <div class="riga" style="font-size:90%; margin-left: 10px">
+
+                  <div style="display: inline-block; vertical-align:top"><i class="fa fa-info-circle" style="margin-right: 5px"></i></div>
+                  <div style="display: inline-block">
+                     Utilizzare questa funzione per sovrascrivere i token presenti nei dati.<br>
+                     N.B. Questa operazione non è reversibile. Per utilizzare i token originali, è necessario reimportare i dati nel progetto.
+                  </div>
+               </div>
+
+               <div style="float: right;margin-right: 10px;margin-top: 8px;">
+
+                  <div>
+                     <button class="btn btn-danger btn-operation" id= "overrideDataTokens"
+                             ng-disabled="infodata == null">
+                        Override data tokens
+                     </button>
+                  </div>
+
+                  <div style="text-align: center;margin-top: 5px">
+
+                     <div  hidden>
+                        <img src="/img/icons/danger.png" width="25px" height="25px">
+                        <div class="riga" style="vertical-align: middle">
+                           <p style="margin-bottom: 0">No tokens avaible</p>
+                        </div>
+                     </div>
+
+                     <div ng-if="infodata != null">
+                        <div class="riga" style="vertical-align: middle">
+                           <p style="margin-bottom: 0">Number of tokens: {{infodata.countTokens}}</p>
+                        </div>
+                     </div>
+
+                     <div ng-if="infodata == null">
+                        <i class="fa fa-lg fa fa-spinner fa-spin" ></i>
+                     </div>
+
+                  </div>
+               </div>
+
+            </div>
+
+         </div>
+
+         <h4>Word count</h4>
 
          <div class="row panel panel-default" style="padding: 20px 0" >
 
@@ -264,54 +311,6 @@
                                        infodata == null || infodata.countTokens == 0">
                      Wordcount by user vocabulary
                   </button>
-               </div>
-
-            </div>
-
-         </div>
-
-         <div class="row panel panel-default" style="padding: 20px 0" >
-
-            <div class="riga" style="width:100%;">
-
-               <div class="riga" style="font-size:90%; margin-left: 10px">
-
-                  <div style="display: inline-block; vertical-align:top"><i class="fa fa-info-circle" style="margin-right: 5px"></i></div>
-                  <div style="display: inline-block">
-                     Utilizzare questa funzione per sovrascrivere i token presenti nei dati.<br>
-                     N.B. Questa operazione non è reversibile. Per utilizzare i token originali, è necessario reimportare i dati nel progetto.
-                  </div>
-               </div>
-
-               <div style="float: right;margin-right: 10px;margin-top: 8px;">
-
-                  <div>
-                     <button class="btn btn-danger btn-operation" id= "overrideDataTokens"
-                             ng-disabled="infodata == null">
-                        Override data tokens
-                     </button>
-                  </div>
-
-                  <div style="text-align: center;margin-top: 5px">
-
-                     <div  hidden>
-                        <img src="/img/icons/danger.png" width="25px" height="25px">
-                        <div class="riga" style="vertical-align: middle">
-                           <p style="margin-bottom: 0">No tokens avaible</p>
-                        </div>
-                     </div>
-
-                     <div ng-if="infodata != null">
-                        <div class="riga" style="vertical-align: middle">
-                           <p style="margin-bottom: 0">Number of tokens: {{infodata.countTokens}}</p>
-                        </div>
-                     </div>
-
-                     <div ng-if="infodata == null">
-                        <i class="fa fa-lg fa fa-spinner fa-spin" ></i>
-                     </div>
-
-                  </div>
                </div>
 
             </div>

@@ -369,7 +369,8 @@ CompareCtrl.drawBar = function()
         backgroundColor: 'transparent',
         hAxis: { title: CompareCtrl.$radioByNumber.is(':checked')? "Data by tags": "Percentage of data than the maximum",
             textStyle: { fontSize: 13 }},
-        vAxis: { title: CompareCtrl.type, textStyle: { fontSize: 13 }}
+        vAxis: { title: CompareCtrl.type, textStyle: { fontSize: 13 }},
+        tooltip: { textStyle: {fontSize: 13}}
     };
 
     var view = new google.visualization.DataView(dataTable);

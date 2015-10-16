@@ -8,12 +8,20 @@
 
 <div id="container">
 
-   <div class="panel panel-default" style="padding: 10px">
-      <div class="row" style="margin-top:0">
-         <p>In questa schermata è possibile inserire un dataset per normalizzare i dati nelle rispettive regioni.</p>
-         <p>La normalizzazione viene effettuata calcolando la cardinalità dei dati in una data regione,
-            quindi il risultato viene utilizzato per pesare l'indice dei tweet medi per una data regione.</p>
-         <p>Un buon dataset deve copripre allo stesso modo tutte le regioni ed essere il più generico possibile</p>
+   <div class="row panel panel-default" style="padding: 20px 0" >
+
+      <div class="riga" style="width:100%;">
+
+         <div class="riga" style="font-size:90%; margin-left: 10px">
+
+            <div style="display: inline-block; vertical-align:top"><i class="fa fa-info-circle" style="margin-right: 5px"></i></div>
+            <div style="display: inline-block">
+               Inserire un dataset per normalizzare i dati all'interno delle regioni.<br>
+               La normalizzazione consiste nel calcolare la cardinalità dei dati in una data regione;
+               il risultato viene utilizzato per pesare l'indice dei dati medi per quella regione.<br>
+               Un buon dataset deve coprire allo stesso modo tutte le regioni ed essere il più generico possibile.
+            </div>
+         </div>
       </div>
    </div>
 
@@ -45,7 +53,7 @@
 
    </form>
 
-   <div class="row" style="text-align: right;">
+   <div class="row" style="text-align: right">
 
       <button class="btn btn-danger button"
               id="upload_btn" style="width: 112px;"
