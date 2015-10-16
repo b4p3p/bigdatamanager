@@ -50,7 +50,7 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
 
     $btnFiles.fileinput( {
         previewFileType: "json",
-        allowedFileExtensions: ["json"]
+        allowedFileExtensions: ["json","csv"]
     });
     var optionsPie = {
         title: null,
