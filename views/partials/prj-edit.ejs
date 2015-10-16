@@ -78,7 +78,8 @@
          <label for="cmbType" >Type data:</label>
 
          <div class="col_dx">
-            <select class="selectpicker" name="type" id="cmbType">
+            <select class="selectpicker" name="type" id="cmbType"
+                    ng-model="typeSelected.type" ng-change="cmbTypeChange()">
                <option value="json-crowdpulse">CrowdPulse Schema</option>
                <option value="json">JSON</option>
                <option value="csv">CSV</option>
@@ -92,7 +93,7 @@
          <label for="examplecode" >Example:</label>
 
          <div id="examplecode" class="example-code">
-            <pre>{{Example}}</pre>
+            <pre>{{typeSelected.example}}</pre>
          </div>
 
       </div>
