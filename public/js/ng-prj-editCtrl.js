@@ -5,32 +5,6 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
     $(".selectpicker").selectpicker();
     var socket = io.connect();
 
-    //esempi
-    var crowdPulseExample = "[\n" +
-        "  {\n" +
-        "    id: '<unique_id>',\n" +
-        "    [date: '<AAAA-MM-GG>'],\n" +
-        "    [latitude: Float],\n" +
-        "    [longitude: Float],\n" +
-        "    [fromUser: String],\n" +
-        "    text:  String,\n" +
-        "    [user: String,\n" +
-        "    [customTags:  [String] ]\n" +
-        "    [tokens: String\n" +
-        "  },{\n" +
-        "    id: '<unique_id>',\n" +
-        "    [date: '<AAAA-MM-GG>'],\n" +
-        "    [latitude: Float],\n" +
-        "    [longitude: Float],\n" +
-        "    [fromUser: String],\n" +
-        "    text:  String,\n" +
-        "    [user: String,\n" +
-        "    [customTags:  [String] ]\n" +
-        "    [tokens: String]\n" +
-        "  },\n" +
-        "  ...\n" +
-        "]";
-    
     //controlli
     var $btnOverrideDataTokens = $("#overrideDataTokens");
     var $btnSyncUserTags = $("#synUserTag");
@@ -50,7 +24,7 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
 
     $btnFiles.fileinput( {
         previewFileType: "json",
-        allowedFileExtensions: ["json","csv"]
+        allowedFileExtensions: ["json", "csv"]
     });
     var optionsPie = {
         title: null,
@@ -501,7 +475,9 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
             success: function(response) {
                 console.log("success: " + JSON.stringify(response) );
                 $btnFiles.fileinput('clear');
-            }
+            },
+
+            timeout:   1000 * 60 * 30
         });
 
         // Have to stop the form from submitting and causing
@@ -896,5 +872,30 @@ ngApp.controller('ngPrjEditCtrl', ['$scope', function( $scope ) {
 //        });
 //    }catch(e){}
 //}
+
+//var crowdPulseExample = "[\n" +
+//    "  {\n" +
+//    "    id: '<unique_id>',\n" +
+//    "    [date: '<AAAA-MM-GG>'],\n" +
+//    "    [latitude: Float],\n" +
+//    "    [longitude: Float],\n" +
+//    "    [fromUser: String],\n" +
+//    "    text:  String,\n" +
+//    "    [user: String,\n" +
+//    "    [customTags:  [String] ]\n" +
+//    "    [tokens: String\n" +
+//    "  },{\n" +
+//    "    id: '<unique_id>',\n" +
+//    "    [date: '<AAAA-MM-GG>'],\n" +
+//    "    [latitude: Float],\n" +
+//    "    [longitude: Float],\n" +
+//    "    [fromUser: String],\n" +
+//    "    text:  String,\n" +
+//    "    [user: String,\n" +
+//    "    [customTags:  [String] ]\n" +
+//    "    [tokens: String]\n" +
+//    "  },\n" +
+//    "  ...\n" +
+//    "]";
 
 
