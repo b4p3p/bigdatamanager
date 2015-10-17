@@ -1,6 +1,66 @@
 "use strict";
 
-ngApp.controller('ngStatTimeLineCtrl', ['$scope', function($scope) {
+//ngApp.controller('ngStatTimeLineCtrl', ['$scope', function($scope) {
+ngApp.controller('ngStatTimeLineCtrl', function($scope, $rootScope) {
+
+    var lineOptions = {
+        barValueSpacing: 1,
+        animation: false,
+        ///Boolean - Whether grid lines are shown across the chart
+        scaleShowGridLines: true,
+        //String - Colour of the grid lines
+        scaleGridLineColor: "rgba(0,0,0,.05)",
+        //Number - Width of the grid lines
+        scaleGridLineWidth: 1,
+        //Boolean - Whether to show horizontal lines (except X axis)
+        scaleShowHorizontalLines: true,
+        //Boolean - Whether to show vertical lines (except Y axis)
+        scaleShowVerticalLines: true,
+        //Boolean - Whether the line is curved between points
+        bezierCurve: true,
+        //Number - Tension of the bezier curve between points
+        bezierCurveTension: 0.4,
+        //Boolean - Whether to show a dot for each point
+        pointDot: true,
+        //Number - Radius of each point dot in pixels
+        pointDotRadius: 4,
+        //Number - Pixel width of point dot stroke
+        pointDotStrokeWidth: 1,
+        //Number - amount extra to add to the radius to cater for hit detection outside the drawn point
+        pointHitDetectionRadius: 2,
+        //Boolean - Whether to show a stroke for datasets
+        datasetStroke: true,
+        //Number - Pixel width of dataset stroke
+        datasetStrokeWidth: 2,
+        //Boolean - Whether to fill the dataset with a colour
+        datasetFill: true,
+        //String - A legend template
+        legendTemplate: ""
+    };
+
+    var type = "day";  // "day" || "week" || "month"
+    var users = null;
+    var tags = null;
+
+    var $radioDays = $('#radioDays');
+    var $radioWeeks = $('#radioWeeks');
+    var $radioMonths = $('#radioMonths');
+    var $cmbUsers = $('#cmbUsers');
+    var $cmbTags = $('#cmbTags');
+    var $btnFilter = $('#btnFilter');
+    var $btnRestore = $('#btnRestore');
+    var $imgFilter = $("#img-filter");
+    var $timeLineContainer = $('#timeLineContainer');
+    var $timeLine = $('#timeLine');
+    var $spinner = $('#spinner');
+    var $msgProject = $('#msgProject');
+    var timeLineID = "timeLine";
+    var timeLineChart = null;
+    var timeLineLine = null;
+
+    $scope.data = null;
+    $scope.tags = null;
+    $scope.stat = null;
 
     $scope.hasNotData = function(){
 
@@ -11,371 +71,282 @@ ngApp.controller('ngStatTimeLineCtrl', ['$scope', function($scope) {
         return new Date(y, 0, d);
     }
 
-    var GraphBuilder = function(timeLineCtrl){
+    //Funzioni usate per eseguire l'override
+    var selectLabelDate = function (date)  {};
+    var selectStepDate = function(date)    {};
 
-        var _self = this;
+    /**
+     * Funzione che imposta l'override
+     */
+    function setFuncNextDate() {
 
-        this.timeLineCtrl = timeLineCtrl;
+        if($radioDays.is(':checked'))
+        {
+            selectLabelDate = function (date) { return date.toShortDate();};
+            selectStepDate = function(date) { return date.nextDay();};
+            type = "day";
+        }
 
-        this.selectLabelDate = function (date)  {};
-        this.selectStepDate = function(date)    {};
-
-        this.setFuncNextDate = function () {
-            if(this.timeLineCtrl.$radioDays.is(':checked'))
-            {
-                this.selectLabelDate = function (date) { return date.toShortDate();};
-                this.selectStepDate = function(date) { return date.nextDay();};
-                this.timeLineCtrl.type = "day";
-            }
-            if(this.timeLineCtrl.$radioWeeks.is(':checked'))
-            {
-                this.selectLabelDate = function (date) {
-                    var xdate = new XDate(date);
-                    var week = xdate.getWeek();
-                    var d = new XDate(getDateOfWeek(week, xdate.getFullYear()));
-                    return d.toString("dd-MM-yyyy");
-                    //return date.toShortWeek()
-                };
-                this.selectStepDate = function(date) {
-                    var xdate = new XDate(date);
-                    return new Date(xdate.addWeeks(1).getTime());
-
-                    //var nextWeek =  date.getRangeWeek().start.nextWeek();
-                    //return nextWeek;
-                };
-                this.timeLineCtrl.type = "week";
-            }
-            if(this.timeLineCtrl.$radioMonths.is(':checked'))
-            {
-                this.selectLabelDate = function (date) { return  date.getMonthString() + "-" + date.getFullYear()};
-                this.selectStepDate = function(date) { return date.nextMonth()};
-                this.timeLineCtrl.type = "month";
-            }
-        };
-
-        this.setFuncNextDate();
-
-    };
-
-    var TimeLineCtrl = function() {
-
-        var _self = this;
-
-        this.lineOptions = {
-            barValueSpacing: 1,
-            animation: false,
-            ///Boolean - Whether grid lines are shown across the chart
-            scaleShowGridLines: true,
-            //String - Colour of the grid lines
-            scaleGridLineColor: "rgba(0,0,0,.05)",
-            //Number - Width of the grid lines
-            scaleGridLineWidth: 1,
-            //Boolean - Whether to show horizontal lines (except X axis)
-            scaleShowHorizontalLines: true,
-            //Boolean - Whether to show vertical lines (except Y axis)
-            scaleShowVerticalLines: true,
-            //Boolean - Whether the line is curved between points
-            bezierCurve: true,
-            //Number - Tension of the bezier curve between points
-            bezierCurveTension: 0.4,
-            //Boolean - Whether to show a dot for each point
-            pointDot: true,
-            //Number - Radius of each point dot in pixels
-            pointDotRadius: 4,
-            //Number - Pixel width of point dot stroke
-            pointDotStrokeWidth: 1,
-            //Number - amount extra to add to the radius to cater for hit detection outside the drawn point
-            pointHitDetectionRadius: 2,
-            //Boolean - Whether to show a stroke for datasets
-            datasetStroke: true,
-            //Number - Pixel width of dataset stroke
-            datasetStrokeWidth: 2,
-            //Boolean - Whether to fill the dataset with a colour
-            datasetFill: true,
-            //String - A legend template
-            legendTemplate: ""
-        };
-
-        this.type = "day";  // "day" || "week" || "month"
-        this.users = null;
-        this.tags = null;
-
-        this.$radioDays = $('#radioDays');
-        this.$radioWeeks = $('#radioWeeks');
-        this.$radioMonths = $('#radioMonths');
-
-        this.$cmbUsers = $('#cmbUsers');
-        this.$cmbTags = $('#cmbTags');
-
-        this.$btnFilter = $('#btnFilter');
-        this.$btnRestore = $('#btnRestore');
-
-        this.$imgFilter = $("#img-filter");
-
-        this.$timeLineContainer = $('#timeLineContainer');
-        this.$timeLine = $('#timeLine');
-
-        this.$spinner = $('#spinner');
-        this.$msgProject = $('#msgProject');
-
-        this.timeLineID = "timeLine";
-
-        this.graphBuilder = new GraphBuilder(this);
-
-        this.getData = function() {
-
-            console.log("CALL: getData");
-
-            async.parallel({
-                    data: function(next) {
-                        DataCtrl.getFromUrl(DataCtrl.FIELD.DATABYDATE, null, function(result){
-                            _self.data = result;
-                            next(null, result);
-                        });
-                    },
-                    stat: function(next) {
-                        DataCtrl.getField( function(doc){
-                            _self.tags = doc.data.allTags;
-                            _self.stat = doc;
-                            next(null, doc);
-                        }, DataCtrl.FIELD.STAT );
-                    },
-                    users: function (next) {
-                        DataCtrl.getField( function(doc){
-                            _self.users = doc;
-                            next(null, doc);
-                        }, DataCtrl.FIELD.USERS, 50);
-                    }},
-                function(err, results) {
-                    _self.initComboTags();
-                    _self.initComboUsers();
-                    _self.removeWait();
-                    _self.drawTimeLine();
-                }
-            );
-        };
-
-        this.initComboTags = function() {
-            console.log("CALL: initComboTags");
-
-            _.each(_self.tags, function(obj){
-                DomUtil.addOptionValue(_self.$cmbTags, obj);
-            });
-            _self.$cmbTags.selectpicker('refresh');
-        };
-
-        this.initComboUsers = function() {
-            console.log("CALL: initComboUsers");
-
-            var obj = null;
-            for (var i = 0; i < 50 && i < _self.users.length; i++ )
-            {
-                obj = _self.users[i];
-                DomUtil.addOptionValue(_self.$cmbUsers, obj.user, obj.sum);
-            }
-            _self.$cmbUsers.selectpicker('refresh');
-        };
-
-        this.removeWait = function () {
-
-            console.log("remove wait");
-
-            $("#spinner").addClass("hidden");
-            $(".timecontent").removeClass("hidden");
-        };
-
-        this.addWaitImg = function($img){
-            $img.removeClass("glyphicon glyphicon-filter");
-            $img.addClass("fa fa-spinner fa-spin");
-        };
-
-        this.removeWaitImg = function($img){
-            $img.removeClass("fa fa-spinner fa-spin");
-            $img.addClass("glyphicon glyphicon-filter");
-        };
-
-        this.clearCanvas = function() {
-            this.$timeLineContainer.replaceWith(
-                '<div id="timeLineContainer" class="timecontent hidden">' +
-                '<canvas id="timeLine"></canvas>' +
-                '</div>');
-
-            this.$timeLineContainer = $('#timeLineContainer');
-            this.$timeLine = $('#timeLine');
-        };
-
-        this.setDisableAllBtn = function(value){
-            _self.$btnFilter.prop("disabled", value);
-            _self.$btnRestore.prop("disabled", value);
-        };
-
-        this.drawTimeLine = function(){
-
-            console.log("CALL: drawTimeLine");
-
-            var dataset = _self.toLineData();
-            var scale = 20;
-
-            _self.$timeLineContainer.removeClass('hidden');
-            _self.$timeLineContainer.css("overflow-x", "auto");
-
-            if(_self.$radioWeeks.is(':checked'))
-                scale = 50;
-            if(_self.$radioMonths.is(':checked'))
-                scale = 100;
-
-            $("#" + this.timeLineID).width(scale * dataset.datasets[0].data.length);
-
-            var hc = $('body > .container').height();
-            var htop = $('#formType').height();
-            var hmin = hc - htop - 30;
-            $("#" + _self.timeLineID).css('max-height', hmin);
-
-            var ctx = document.getElementById(_self.timeLineID).getContext("2d");
-            _self.timeLineChart = new Chart(ctx);
-            _self.timeLineLine = _self.timeLineChart.Line(dataset, _self.lineOptions );
-        };
-
-        this.toLineData = function () {
-            console.log("CALL: toLineData");
-            return {
-                labels: _self.getLabels(),
-                datasets: _self.getDataset()
+        if($radioWeeks.is(':checked'))
+        {
+            selectLabelDate = function (date) {
+                var xdate = new XDate(date);
+                var week = xdate.getWeek();
+                var d = new XDate(getDateOfWeek(week, xdate.getFullYear()));
+                return d.toString("dd-MM-yyyy");
+                //return date.toShortWeek()
             };
-        };
+            selectStepDate = function(date) {
+                var xdate = new XDate(date);
+                return new Date(xdate.addWeeks(1).getTime());
+            };
+            type = "week";
+        }
+        if($radioMonths.is(':checked'))
+        {
+            selectLabelDate = function (date) { return  date.getMonthString() + "-" + date.getFullYear()};
+            selectStepDate = function(date) { return date.nextMonth()};
+            type = "month";
+        }
+    }
 
-        /* Usa la prima regione per vedere i tag disponibili
-         * @returns {Array}
-         */
-        this.getLabels = function () {
-            console.log("CALL: getLabels");
+    //Richiamo la prima volta la funzione per impostare la funzione da usare
+    setFuncNextDate();
 
-            if (_self.data == null || _self.data.length == 0) return [];
+    function getData() {
 
-            var ris = [];
-            var min = new Date(_self.stat.data.minDate);
-            var max = new Date(_self.stat.data.maxDate);
+        console.log("CALL: getData");
 
-            while (min < max) {
-                ris.push( this.graphBuilder.selectLabelDate(min) );
-                min = this.graphBuilder.selectStepDate(min);
+        async.parallel({
+                data: function(next) {
+                    DataCtrl.getFromUrl(DataCtrl.FIELD.DATABYDATE, null, function(result){
+                        $scope.data = result;
+                        next(null, result);
+                    }, null);
+                },
+                stat: function(next) {
+                    DataCtrl.getField( function(doc){
+                        $scope.tags = doc.data.allTags;
+                        $scope.stat = doc;
+                        next(null, doc);
+                    }, DataCtrl.FIELD.STAT );
+                },
+                users: function (next) {
+                    DataCtrl.getField( function(doc){
+                        $scope.users = doc;
+                        next(null, doc);
+                    }, DataCtrl.FIELD.USERS, 50);
+                }
+            }, function(err, results) {
+                initComboTags();
+                initComboUsers();
+                removeWait();
+                drawTimeLine();
             }
+        );
+    }
 
-            //GVE - non si vede bene il time line
-            ris.push( this.graphBuilder.selectLabelDate(min) );
-            min = this.graphBuilder.selectStepDate(min);
-            ris.push( this.graphBuilder.selectLabelDate(min) );
+    function initComboTags() {
+        console.log("CALL: initComboTags");
 
-            //if(this.$radioDays.is(':checked')){
-            //    ris.push( this.graphBuilder.selectLabelDate(min) );
-            //    min = this.graphBuilder.selectStepDate(min);
-            //}
+        _.each($scope.tags, function(obj){
+            DomUtil.addOptionValue($cmbTags, obj);
+        });
+        $cmbTags.selectpicker('refresh');
+    }
 
-            return ris;
+    function initComboUsers() {
+        console.log("CALL: initComboUsers");
+
+        var obj = null;
+        for (var i = 0; i < 50 && i < $scope.users.length; i++ )
+        {
+            obj = $scope.users[i];
+            DomUtil.addOptionValue($cmbUsers, obj.user, obj.sum);
+        }
+        $cmbUsers.selectpicker('refresh');
+    }
+
+    function removeWait() {
+
+        console.log("remove wait");
+
+        $("#spinner").addClass("hidden");
+        $(".timecontent").removeClass("hidden");
+    }
+
+    function addWaitImg($img){
+        $img.removeClass("glyphicon glyphicon-filter");
+        $img.addClass("fa fa-spinner fa-spin");
+    }
+
+    function removeWaitImg($img){
+        $img.removeClass("fa fa-spinner fa-spin");
+        $img.addClass("glyphicon glyphicon-filter");
+    }
+
+    function clearCanvas() {
+        $timeLineContainer.replaceWith(
+            '<div id="timeLineContainer" class="timecontent hidden">' +
+            '<canvas id="timeLine"></canvas>' +
+            '</div>');
+        $timeLineContainer = $('#timeLineContainer');
+        $timeLine = $('#timeLine');
+    }
+
+    function setDisableAllBtn(value){
+        $btnFilter.prop("disabled", value);
+        $btnRestore.prop("disabled", value);
+    }
+
+    function drawTimeLine(){
+
+        console.log("CALL: drawTimeLine");
+
+        var dataset = toLineData();
+        var scale = 20;
+
+        $timeLineContainer.removeClass('hidden');
+        $timeLineContainer.css("overflow-x", "auto");
+
+        if($radioWeeks.is(':checked'))
+            scale = 50;
+        if($radioMonths.is(':checked'))
+            scale = 100;
+
+        var $tLine = $("#" + timeLineID);
+        $tLine.width(scale * dataset.datasets[0].data.length);
+
+        var hc = $('body > .container').height();
+        var htop = $('#formType').height();
+        var hmin = hc - htop - 30;
+        $tLine.css('max-height', hmin);
+
+        var ctx = document.getElementById(timeLineID).getContext("2d");
+        timeLineChart = new Chart(ctx);
+        timeLineLine = timeLineChart.Line(dataset, lineOptions );
+    }
+
+    function toLineData() {
+        console.log("CALL: toLineData");
+        return {
+            labels: getLabels(),
+            datasets: getDataset()
         };
+    }
 
-        this.getDataset = function () {
-            console.log("CALL: getDataset");
+    /* Usa la prima regione per vedere i tag disponibili
+     * @returns {Array}
+     */
+    function getLabels() {
+        console.log("CALL: getLabels");
 
-            var dataset = this.getDatasetValue();
+        if ($scope.data == null || $scope.data.length == 0) return [];
 
-            return [{
-                label: "Tweets time line",
-                fillColor: "rgba(151,187,205,0.2)",
-                strokeColor: "rgba(151,187,205,1)",
-                pointColor: "rgba(151,187,205,1)",
-                pointStrokeColor: "#fff",
-                pointHighlightFill: "#fff",
-                pointHighlightStroke: "rgba(151,187,205,1)",
-                data: dataset
-            }];
-        };
+        var ris = [];
+        var min = new Date($scope.stat.data.minDate);
+        var max = new Date($scope.stat.data.maxDate);
 
-        this.getDatasetValue = function () {
+        while (min < max) {
+            ris.push( selectLabelDate(min) );
+            min = selectStepDate(min);
+        }
 
-            console.log("CALL: getDatasetValue");
+        //GVE - non si vede bene il time line
+        ris.push( selectLabelDate(min) );
+        min = selectStepDate(min);
+        ris.push( selectLabelDate(min) );
 
-            if (this.data == null || this.data.length == 0) return [];
+        return ris;
+    }
 
-            var ris = [];
-            var dataset = _.object( _.map( this.data, function(item){
-                return [
-                    _self.graphBuilder.selectLabelDate( new Date(item.ts) ) ,
-                    item.count]
-            }));
+    function getDataset() {
+        console.log("CALL: getDataset");
 
-            //var dataset = _.groupBy(this.data, function(obj){
-            //    return _self.graphBuilder.selectLabelDate( new Date(obj.date));
-            //});
+        var dataset = getDatasetValue();
 
-            //Inserisco le date mancanti
-            var min = new Date(this.stat.data.minDate);
-            var max = new Date(this.stat.data.maxDate);
-            while (min <= max) {
-                var key = _self.graphBuilder.selectLabelDate(min);
-                if (dataset[key] == null)
-                    ris.push(0);
-                else
-                    ris.push(dataset[key]);
-                min = _self.graphBuilder.selectStepDate(min);
-            }
+        return [{
+            label: "Tweets time line",
+            fillColor: "rgba(151,187,205,0.2)",
+            strokeColor: "rgba(151,187,205,1)",
+            pointColor: "rgba(151,187,205,1)",
+            pointStrokeColor: "#fff",
+            pointHighlightFill: "#fff",
+            pointHighlightStroke: "rgba(151,187,205,1)",
+            data: dataset
+        }];
+    }
 
-            //lo rifaccio un'altra volta
-            var key = _self.graphBuilder.selectLabelDate(min);
+    function getDatasetValue() {
+
+        console.log("CALL: getDatasetValue");
+
+        if ($scope.data == null || $scope.data.length == 0) return [];
+
+        var ris = [];
+        var dataset = _.object( _.map( $scope.data, function(item){
+            return [
+                selectLabelDate( new Date(item.ts) ) ,
+                item.count]
+        }));
+
+        //Inserisco le date mancanti
+        var min = new Date($scope.stat.data.minDate);
+        var max = new Date($scope.stat.data.maxDate);
+        var key = null;
+        while (min <= max) {
+            key = selectLabelDate(min);
             if (dataset[key] == null)
                 ris.push(0);
             else
                 ris.push(dataset[key]);
+            min = selectStepDate(min);
+        }
 
-            //min = _self.graphBuilder.selectStepDate(min);
-            //GVE
-            //ris.push(0);
-            //if(this.$radioDays.is(':checked')) ris.push(0);
+        //lo rifaccio un'altra volta
+        key = selectLabelDate(min);
+        if (dataset[key] == null) ris.push(0);
+        else ris.push(dataset[key]);
 
-            return ris;
-        };
+        return ris;
+    }
 
-        this.showProjectError = function(){
-            this.$spinner.hide();
-            this.$msgProject.show();
-        };
+    function showProjectError(){
+        $spinner.hide();
+        $msgProject.show();
+    }
 
-        this.$btnFilter.click(function(){
+    $btnFilter.click(function(){
 
-            console.log("CALL: clickFilter");
+        console.log("CALL: clickFilter");
 
-            _self.graphBuilder.setFuncNextDate();
-            _self.addWaitImg(_self.$imgFilter);
-            _self.setDisableAllBtn(true);
+        setFuncNextDate();
+        addWaitImg($imgFilter);
+        setDisableAllBtn(true);
 
-            var conditions = new ObjConditions(
-                null, null, _self.$cmbTags,
-                null, _self.$cmbUsers);
+        var conditions = new ObjConditions(null, null, $cmbTags, null, $cmbUsers);
 
-            conditions.setField("type", _self.type);
+        conditions.setField("type", type);
 
-            DataCtrl.getFromUrl(DataCtrl.FIELD.DATABYDATE, conditions.getQueryString(), function(result){
-                _self.data = result;
-                _self.removeWaitImg(_self.$imgFilter);
-                _self.setDisableAllBtn(false);
-                _self.clearCanvas();
-                _self.drawTimeLine();
+        DataCtrl.getFromUrl(DataCtrl.FIELD.DATABYDATE, conditions.getQueryString(), function(result){
+            $scope.data = result;
+            removeWaitImg($imgFilter);
+            setDisableAllBtn(false);
+            clearCanvas();
+            drawTimeLine();
+            console.log( $timeLine.width() );
+            console.log( $timeLineContainer.width() );
+        }, null);
 
-                console.log( _self.$timeLine.width() );
-                console.log( _self.$timeLineContainer.width() );
-            });
-
-        });
-
-        if(!window.PROJECT || window.PROJECT == "")
-            this.showProjectError();
-        else
-            this.getData();
-
-    };
-
-    $(document).ready(function(){
-        var timeLineCtrl = new TimeLineCtrl();
     });
 
-}]);
+    if(!window.PROJECT || window.PROJECT == "")
+        showProjectError();
+    else
+        getData();
+
+    $(document).ready(function(){
+
+    });
+
+});
