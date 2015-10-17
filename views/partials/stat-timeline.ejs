@@ -23,7 +23,7 @@
 
              <div class="radio">
                  <label><input id="radioDays" type="radio" name="optmode" value="days" checked=""
-                               > Days</label>
+                               disabled> Days</label>
 
                 <!--onclick="timeLineCtrl.handleModeClick(this);"-->
 
@@ -31,13 +31,13 @@
              <div class="radio">
                  <label>
                      <input id="radioWeeks" type="radio" name="optmode" value="weeks"
-                            > Weeks</label>
+                            disabled> Weeks</label>
                 <!--onclick="timeLineCtrl.handleModeClick(this);"-->
 
              </div><br>
              <div class="radio">
                  <label><input id="radioMonths" type="radio" name="optmode" value="months"
-                               > Months</label>
+                               disabled> Months</label>
              </div>
 
             <!--onclick="timeLineCtrl.handleModeClick(this);"-->
@@ -47,7 +47,8 @@
                  <label class="fix-label" for="cmbTags">Tags</label><br>
                  <select class="selectpicker" id="cmbTags"
                          data-live-search="true" title="Select tags"
-                         multiple>
+                         multiple
+                         disabled>
                  </select>
              </div>
 
@@ -55,7 +56,8 @@
                  <label class="fix-label" for="cmbUsers">Users</label><br>
                  <select class="selectpicker" id="cmbUsers"
                          data-live-search="true" title="Select users"
-                         multiple>
+                         multiple
+                         disabled>
                  </select>
              </div>
 
@@ -66,7 +68,7 @@
              <button type="button" class="btn btn-success"
                      id="btnFilter"
                      style="float: right; margin-top: 15px; margin-left: 10px; margin-top: 0"
-                     >
+                     disabled>
                  <span id="img-filter" class="glyphicon glyphicon-filter" aria-hidden="true"></span> Apply filter
              </button>
 
@@ -80,6 +82,20 @@
      </form>
 
 </div>
+
+<div class="row">
+
+
+</div>
+
+<div ng-if="hasNotData()" class="alert alert-warning" role="alert" id="error" style="margin-top: 20px">
+    <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
+    <span class="sr-only">Error:</span>
+    No data for filters. <br>
+    Please enter data in the project <br>
+    <a href="/view/app#/project/editproject">Edit project</a>
+</div>
+
 
 <div id="timeLineContainer" class="timecontent hidden">
     <canvas id="timeLine"></canvas>
