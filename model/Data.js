@@ -858,7 +858,11 @@ Date.dateByDate_group = function(exec, type) {
  * @param callback
  */
 Data.delData = function(arg, callback){
-    var connection = arg.connection == null ? mongoose.createConnection('mongodb://localhost/oim') : arg.connection;
+
+    var connection = arg.connection == null ?
+        mongoose.createConnection('mongodb://localhost/oim') :
+        arg.connection;
+
     var datas = connection.model("datas", Data.SCHEMA);
 
     async.parallel({
@@ -880,7 +884,7 @@ Data.delData = function(arg, callback){
             })
         }
     }, function(err, res){
-        if(arg.connection != null )  arg.connection.close();
+        if(!arg.connection)  connection.close();
         callback(err, res.deleteData)
     })
 };
