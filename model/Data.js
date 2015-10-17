@@ -865,27 +865,28 @@ Data.delData = function(arg, callback){
 
     var datas = connection.model("datas", Data.SCHEMA);
 
-    async.parallel({
+    async.waterfall([
 
         //cancello tutti i dati
-        deleteData : function(next){
+        function(next){
             datas.remove({projectName: arg.project}, function(err, result){
                 next(null, result);
             });
         },
 
-        //azzero il contatore
-        cont : function(next){
+        //azzero il contatore solo dopo aver cancellato i dati
+        function(result, next){
             Project.setSize({
                 connection: connection,
                 project:arg.project
-            }, function(err, res){
-                next(err, res);
+            }, function(err){
+                next(err, result);
             })
         }
-    }, function(err, res){
-        if(!arg.connection)  connection.close();
-        callback(err, res.deleteData)
+    ] , function(err, result){
+        if(!arg.connection)
+            connection.close();
+        callback(err, result)
     })
 };
 

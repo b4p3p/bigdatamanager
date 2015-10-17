@@ -42,7 +42,10 @@ function cmdOpenClick(project) {
         url: "/project/setproject",
         data: { project: project } ,
         success: function(msg) {
-            if(msg.status == 200) { location.replace("/view/app/#home"); }
+            if(msg.status == 200) {
+                location.replace("/view/app/#home");
+                location.reload();
+            }
         },
         error: function(xhr, status, error) {
             console.error("ERR: cmdOpenClick: " + status + " " + xhr.status + "\n" + error);

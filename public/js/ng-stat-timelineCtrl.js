@@ -38,8 +38,6 @@ ngApp.controller('ngStatTimeLineCtrl', function($scope, $rootScope) {
         legendTemplate: ""
     };
 
-    var type = "day";  // "day" || "week" || "month"
-    var users = null;
     var tags = null;
 
     var $radioDays = $('#radioDays');
@@ -62,6 +60,26 @@ ngApp.controller('ngStatTimeLineCtrl', function($scope, $rootScope) {
     $scope.data = null;
     $scope.tags = null;
     $scope.stat = null;
+    $scope.users = null;
+
+    $scope.filter = {
+        type : "days"  // "day" || "week" || "month"
+    };
+
+    $scope.optTypeChange = function()
+    {
+        $btnFilter.removeAttr("disabled");
+    };
+
+    $scope.cmbTagChange = function()
+    {
+        $btnFilter.removeAttr("disabled");
+    };
+
+    $scope.cmbUsersChange = function()
+    {
+        $btnFilter.removeAttr("disabled");
+    };
 
     function getDateOfWeek(w, y) {
         var d = (1 + (w - 1) * 7); // 1st of January + 7 days for each week
@@ -81,7 +99,6 @@ ngApp.controller('ngStatTimeLineCtrl', function($scope, $rootScope) {
         {
             selectLabelDate = function (date) { return date.toShortDate();};
             selectStepDate = function(date) { return date.nextDay();};
-            type = "day";
         }
 
         if($radioWeeks.is(':checked'))
@@ -91,19 +108,16 @@ ngApp.controller('ngStatTimeLineCtrl', function($scope, $rootScope) {
                 var week = xdate.getWeek();
                 var d = new XDate(getDateOfWeek(week, xdate.getFullYear()));
                 return d.toString("dd-MM-yyyy");
-                //return date.toShortWeek()
             };
             selectStepDate = function(date) {
                 var xdate = new XDate(date);
                 return new Date(xdate.addWeeks(1).getTime());
             };
-            type = "week";
         }
         if($radioMonths.is(':checked'))
         {
             selectLabelDate = function (date) { return  date.getMonthString() + "-" + date.getFullYear()};
             selectStepDate = function(date) { return date.nextMonth()};
-            type = "month";
         }
     }
 
@@ -360,7 +374,7 @@ ngApp.controller('ngStatTimeLineCtrl', function($scope, $rootScope) {
 
         var conditions = new ObjConditions(null, null, $cmbTags, null, $cmbUsers);
 
-        conditions.setField("type", type);
+        conditions.setField("type", $scope.filter.type);
 
         DataCtrl.getFromUrl(DataCtrl.FIELD.DATABYDATE, conditions.getQueryString(), function(result){
             $scope.data = result;

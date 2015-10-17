@@ -23,7 +23,8 @@
 
              <div class="radio">
                  <label><input id="radioDays" type="radio" name="optmode" value="days" checked=""
-                               disabled> Days</label>
+                               disabled
+                               ng-model="filter.type" ng-change="optTypeChange()"> Days</label>
 
                 <!--onclick="timeLineCtrl.handleModeClick(this);"-->
 
@@ -31,13 +32,15 @@
              <div class="radio">
                  <label>
                      <input id="radioWeeks" type="radio" name="optmode" value="weeks"
-                            disabled> Weeks</label>
+                            disabled
+                            ng-model="filter.type" ng-change="optTypeChange()"> Weeks</label>
                 <!--onclick="timeLineCtrl.handleModeClick(this);"-->
 
              </div><br>
              <div class="radio">
                  <label><input id="radioMonths" type="radio" name="optmode" value="months"
-                               disabled> Months</label>
+                               disabled
+                               ng-model="filter.type" ng-change="optTypeChange()"> Months</label>
              </div>
 
             <!--onclick="timeLineCtrl.handleModeClick(this);"-->
@@ -47,8 +50,8 @@
                  <label class="fix-label" for="cmbTags">Tags</label><br>
                  <select class="selectpicker" id="cmbTags"
                          data-live-search="true" title="Select tags"
-                         multiple
-                         disabled>
+                         multiple disabled
+                         ng-model="tags" ng-change="cmbTagChange()">
                  </select>
              </div>
 
@@ -56,8 +59,8 @@
                  <label class="fix-label" for="cmbUsers">Users</label><br>
                  <select class="selectpicker" id="cmbUsers"
                          data-live-search="true" title="Select users"
-                         multiple
-                         disabled>
+                         multiple disabled
+                         ng-model="users" ng-change="cmbUsersChange()">
                  </select>
              </div>
 
