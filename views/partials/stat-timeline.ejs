@@ -91,7 +91,7 @@
 
 </div>
 
-<div ng-if="data.length==0" class="alert alert-warning" role="alert" id="error" style="margin-top: 20px">
+<div ng-if="hasNoData()" class="alert alert-warning" role="alert" id="error" style="margin-top: 20px">
     <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
     <span class="sr-only">Error:</span>
     No data for filters. <br>
