@@ -50,6 +50,7 @@ ngApp.controller('ngStatTimeLineCtrl', function($scope, $rootScope) {
     var $btnFilter = $('#btnFilter');
     var $btnRestore = $('#btnRestore');
     var $imgFilter = $("#img-filter");
+    var $imgRestore = $("#img-restore");
     var $timeLineContainer = $('#timeLineContainer');
     var $timeLine = $('#timeLine');
     var $spinner = $('#spinner');
@@ -61,10 +62,6 @@ ngApp.controller('ngStatTimeLineCtrl', function($scope, $rootScope) {
     $scope.data = null;
     $scope.tags = null;
     $scope.stat = null;
-
-    $scope.hasNotData = function(){
-
-    };
 
     function getDateOfWeek(w, y) {
         var d = (1 + (w - 1) * 7); // 1st of January + 7 days for each week
@@ -138,12 +135,23 @@ ngApp.controller('ngStatTimeLineCtrl', function($scope, $rootScope) {
                     }, DataCtrl.FIELD.USERS, 50);
                 }
             }, function(err, results) {
+                if($scope.data.length > 0)
+                    enableControls();
                 initComboTags();
                 initComboUsers();
                 removeWait();
                 drawTimeLine();
             }
         );
+    }
+
+    function enableControls() {
+        $radioDays.removeAttr("disabled");
+        $radioWeeks.removeAttr("disabled");
+        $radioMonths.removeAttr("disabled");
+        $cmbUsers.removeAttr("disabled");
+        $cmbTags.removeAttr("disabled");
+        $btnRestore.removeAttr("disabled");
     }
 
     function initComboTags() {
@@ -154,6 +162,22 @@ ngApp.controller('ngStatTimeLineCtrl', function($scope, $rootScope) {
         });
         $cmbTags.selectpicker('refresh');
     }
+
+    $btnRestore.click(function(){                      //  AGGIUNTO
+
+        console.log("CALL: clickRestore");
+
+        $btnRestore.prop("disabled", false);
+        addWaitImgRestore($imgRestore);
+        setDisableAllBtn(true);
+        clearCanvas();
+        DomUtil.deselectAll($cmbUsers);
+        DomUtil.deselectAll($cmbTags);
+        $(".selectpicker").selectpicker('refresh');
+        removeWaitImgRestore($imgRestore);
+        $btnFilter.removeAttr("disabled");
+
+    });
 
     function initComboUsers() {
         console.log("CALL: initComboUsers");
@@ -180,9 +204,19 @@ ngApp.controller('ngStatTimeLineCtrl', function($scope, $rootScope) {
         $img.addClass("fa fa-spinner fa-spin");
     }
 
+    function addWaitImgRestore($img){
+        $img.removeClass("glyphicon glyphicon-remove");
+        $img.addClass("fa fa-spinner fa-spin");
+    }
+
     function removeWaitImg($img){
         $img.removeClass("fa fa-spinner fa-spin");
         $img.addClass("glyphicon glyphicon-filter");
+    }
+
+    function removeWaitImgRestore($img){
+        $img.removeClass("fa fa-spinner fa-spin");
+        $img.addClass("glyphicon glyphicon-remove");
     }
 
     function clearCanvas() {
