@@ -4,6 +4,7 @@ var async = require('async');
 var _ = require('underscore');
 var fs = require('fs');
 var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
 var converter = require('../controller/converterCtrl');
 var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://localhost:27017/oim';
@@ -29,16 +30,18 @@ Data.ResultFile = {
 var MODEL_NAME = "datas";
 Data.MODEL_NAME = MODEL_NAME;
 
+Data.SCHEMA_LOC = new Schema({
+    type: String,
+    coordinates: []
+});
+
 var SCHEMA = new mongoose.Schema({
     projectName: {type: String, required: true},
-    id: {type: String, required: true},
+    id: String,
     date: Date,
     latitude: Number,
     longitude: Number,
-    loc: {
-        type: String,
-        coordinates: []
-    },
+    loc: Object,
     source: String,
     text: {type: String, required: true},
     user: String,
@@ -50,6 +53,7 @@ var SCHEMA = new mongoose.Schema({
     strict: false
 });
 Data.SCHEMA = SCHEMA;
+
 
 //Data.SCHEMA.index({ loc: '2dsphere' });
 
@@ -617,23 +621,23 @@ Data.overrideTokensData = function (project, app, callback) {
             //elaboro ogni documento
             function(next){
                 var query = datas.find({projectName:project}).stream();
-                query.on('data', function (doc) {
-
+                query.on('data', function (doc)
+                {
                     doc.tokens = elaborateText(doc);
-
-                    //docs.push ( doc );
-
                     doc.save(function(err, res){
                         contSave++;
                         printPercentage( steps, contSave, app, '#' );
+                        if( fine && contSave == contStem)
+                            next(null);
                     });
-
                     contStem++;
                     printPercentage( steps, contStem, app, '@' );
-                }).on('error', function (err) {
+                }).on('error', function (err)
+                {
                     next(err);
-                }).on('close', function () {
-                    next(null);
+                }).on('close', function ()
+                {
+                    fine = true;
                 });
             }
 
