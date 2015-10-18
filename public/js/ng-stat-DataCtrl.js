@@ -487,4 +487,7 @@ ngApp.controller('ngStatDataCtrl', ['$scope', function($scope) {
             })
     })
 
+    $scope.selectCheck = function(e){
+        //$(e.target).prop('checked', !$(e.target).prop('checked') );
+    }
 }]);

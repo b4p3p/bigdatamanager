@@ -21,6 +21,14 @@
         margin-bottom: 10px;
     }
 
+    .filtro{
+        padding: 2px 20px;
+        cursor: pointer;
+    }
+    .filtro input{
+        cursor: pointer;
+    }
+
 </style>
 
 <div class="alert alert-warning" role="alert" id="msgProject"
@@ -63,31 +71,32 @@
 
                 <li class="divider"></li>
 
-                <li data-filter-field="user">
-                    <a><input type="checkbox"> Users</a>
+                <li data-filter-field="user" class="filtro">
+                    <input type="checkbox"> Users</input>
                 </li>
 
-                <li data-filter-field="date">
-                    <a><input type="checkbox"> Date</a>
+                <li data-filter-field="date" class="filtro">
+                    <!--<a><input type="checkbox"> Date</a>-->
+                    <input type="checkbox"> Date</input>
                 </li>
 
-                <li data-filter-field="nation">
-                    <a><input type="checkbox"> Nations</a>
+                <li data-filter-field="nation" class="filtro">
+                    <input type="checkbox"> Nations</input>
                 </li>
 
-                <li data-filter-field="region">
-                    <a><input type="checkbox"> Regions</a>
+                <li data-filter-field="region" class="filtro">
+                    <input type="checkbox"> Regions</input>
                 </li>
-                <li data-filter-field="tag">
-                    <a><input type="checkbox"> Tags</a>
-                </li>
-
-                <li data-filter-field="tokens">
-                    <a><input type="checkbox"> Tokens</a>
+                <li data-filter-field="tag" class="filtro">
+                    <input type="checkbox"> Tags</input>
                 </li>
 
-                <li data-filter-field="text">
-                    <a><input type="checkbox"> Text</a>
+                <li data-filter-field="tokens" class="filtro">
+                    <input type="checkbox"> Tokens</input>
+                </li>
+
+                <li data-filter-field="text" class="filtro">
+                    <input type="checkbox"> Text</input>
                 </li>
             </ul>
 
