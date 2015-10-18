@@ -82,6 +82,7 @@ ngApp.controller('ngStatTimeLineCtrl', function($scope, $rootScope) {
     };
 
     $scope.hasNoData = function(){
+        if( $scope.data == null ) return false;
         return $scope.data.length == 0;
     };
 
@@ -175,10 +176,10 @@ ngApp.controller('ngStatTimeLineCtrl', function($scope, $rootScope) {
 
     function initComboTags() {
         console.log("CALL: initComboTags");
-
         _.each($scope.tags, function(obj){
             DomUtil.addOptionValue($cmbTags, obj);
         });
+        DomUtil.selectAll($cmbTags);
         $cmbTags.selectpicker('refresh');
     }
 
@@ -390,6 +391,7 @@ ngApp.controller('ngStatTimeLineCtrl', function($scope, $rootScope) {
             console.log( $timeLine.width() );
             console.log( $timeLineContainer.width() );
             $scope.$apply();
+            $cmbTags.selectpicker('refresh');
         }, null);
 
     });

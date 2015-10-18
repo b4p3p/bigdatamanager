@@ -41,12 +41,17 @@ module.exports = function (router, app) {
                 var arg = null;
                 if(err.code == 11000)
                     arg = ConstantsRouter.status(err.code, "Username already exists");
-                else
+                else if ( err.message )
                     arg = ConstantsRouter.status(1, err.message);
-                res.render('../view/pages/register.ejs', arg );
+                else
+                    arg = ConstantsRouter.status(1, err.toString());
+                res.render('../views/pages/register.ejs', arg );
             }
             else
-                res.redirect('/view/app#/');
+            {
+                //res.redirect('/view/app#/');
+                res.redirect('/view/login#useradd');
+            }
         })
 
     });

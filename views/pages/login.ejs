@@ -7,10 +7,11 @@
     <% include ../imports/bootstrap.ejs %>
 
     <link href="/public/css/login.css" rel="stylesheet" type="text/css">
+    <script src="/public/js/ngLogin.js"></script>
 
 </head>
 
-<body>
+<body ng-app="login" ng-controller="LoginCtrl">
 
 <div class="container">
 
@@ -34,6 +35,13 @@
                             <%= status.message %>
                         </div>
                     <% } %>
+
+                    <div class="alert alert-success" role="alert" ng-if="userAdded()">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        User added
+                    </div>
+
                     <button class="btn btn-lg btn-primary btn-block" type="submit">
                         Sign in</button>
                     <a href="#" onclick="guestClick()" class="pull-right need-help">Guest account</a><span class="clearfix"></span>

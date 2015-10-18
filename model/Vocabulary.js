@@ -383,8 +383,12 @@ Vocabulary.prepareDataTags = function(project, query, app, callback) {
 
             //calcolo il counter dai token presenti nel documento
             _.each(doc.tokens, function(token){
+
+                //prendo i token tutti minuscoli
+                token = token.toLowerCase();
+
                 var count = _.reduce(arrayText, function(memo, item){
-                    if( item.toLowerCase() == token )
+                    if( item.toLowerCase() == token)
                         return memo + 1;
                     else
                         return memo;

@@ -10,6 +10,7 @@ var url = 'mongodb://localhost:27017/oim';
 var tm = require("text-miner");
 var Util = require("../controller/nodeUtil");
 var Project = require("../model/Project");
+var WaitController = require("../controller/waitController");
 
 /**
  * Model data
@@ -584,164 +585,192 @@ function getSteps(steps, tot){
  */
 Data.overrideTokensData = function (project, app, callback) {
 
-    /**
-     * Sincronizzo il vocabolario con i token inseriti dall'utente e i token
-     * calcolati automaticamente (datas.tokens)
-     */
-
-    //var connection = mongoose.createConnection('mongodb://localhost/oim');
-    //var datas = connection.model(Data.MODEL_NAME, Data.SCHEMA);
-
     var contSave = 0;
     var contStem = 0;
     var tot = 0;
     var steps = [];
     var fine = false;
+    var docs = [];
 
     app.io.emit("overrideDataTokens_msg",'GET data');
     console.log("GET data");
 
-    MongoClient.connect( url, function (err, db)
-    {
-        var datas = db.collection('datas');
+    //var wait = new WaitController(app, "overrideDataTokens_msg");
+    //wait.start();
 
-        datas.find({projectName:project}).toArray(function(err, docs){
+    var connection = mongoose.createConnection('mongodb://localhost/oim');
+    var datas = connection.model("datas", Data.SCHEMA);
 
-            tot = docs.length;
-            steps = getSteps(50, tot);
-            console.log("FOUND " + tot + " documents");
-            app.io.emit("overrideDataTokens_msg","FILTER " + tot + " documents");
+    async.waterfall([
 
-            async.each(docs, function(doc, next){
-
-                var text = Data.cleanText(doc.text);
-                var corpus = new tm.Corpus(text);
-
-                corpus.toLower()
-                    .removeNewlines()
-                    .removeDigits()
-                    .removeInvalidCharacters()
-                    .removeInterpunctuation()
-                    .removeWords(tm.STOPWORDS.IT)
-                    .clean();
-
-                var terms = _.filter( tm.Terms(corpus).vocabulary, function(item){
-
-                    //return true;
-                    //if( /^rt$/  .test(item) ) return false;
-                    if( /^http/ .test(item) ) return false;
-                    if( /^@/    .test(item) ) return false;
-                    if( /^co\//    .test(item) ) return false;
-                    if( /^&quot/    .test(item) ) return false;
-                    if( /^\/\//    .test(item) ) return false;
-                    if( /^.$/    .test(item) ) return false;
-                    return item.length > 2;
-
+            //chiedo il contatore
+            function(next){
+                datas.count({projectName:project}, function(err, count){
+                    tot = count;
+                    steps = getSteps(50, tot);
+                    console.log("FOUND " + tot + " documents");
+                    app.io.emit("overrideDataTokens_msg","FILTER " + tot + " documents");
+                    next(null);
                 });
+            },
 
-                contStem++;
-                printPercentage( steps, contStem, app );
+            //elaboro ogni documento
+            function(next){
+                var query = datas.find({projectName:project}).stream();
+                query.on('data', function (doc) {
+                    elaborateText(doc);
+                    docs.push ( doc );
+                    contStem++;
+                    printPercentage( steps, contStem, app );
+                }).on('error', function (err) {
+                    next(err);
+                }).on('close', function () {
+                    next(null);
+                });
+            },
 
-                datas.update(
-                    { _id: doc._id },
-                    {$set:{tokens:terms}},
-                    function(err, result){
+            //salvo i documenti
+            function(next)
+            {
+                async.each(docs, function(doc, next){
+                    doc.save(function(err, res){
                         contSave++;
                         printPercentage( steps, contSave, app );
                         next(null);
-                    }
-                );
+                    });
+                }, function(res){
+                    next(null);
+                });
+            }
+        ],
+        function(err){
+            app.io.emit("overrideDataTokens_msg","Done!");
+            connection.close();
+            callback(err);
+        }
+    );
 
-            }, function(err){
-                callback(null);
-            });
-        });
-    });
 
-    //datas.find({projectName:project}, function(err, docs){
+    //MongoClient.connect( url, function (err, db)
+    //{
+    //    var datas = db.collection('datas');
     //
-    //    tot = docs.length;
-    //    steps = getSteps(50, tot);
+    //    datas.find({projectName:project}).toArray(function(err, docs){
     //
-    //    app.io.emit("overrideDataTokens_msg","FILTER " + tot + " documents");
-    //    console.log("FILTER " + tot + " documents");
+    //        wait.stop();
+    //        tot = docs.length;
+    //        steps = getSteps(50, tot);
+    //        console.log("FOUND " + tot + " documents");
+    //        app.io.emit("overrideDataTokens_msg","FILTER " + tot + " documents");
     //
-    //    async.each(docs, function(doc, next){
+    //        async.each(docs, function(doc, next)
+    //            {
+    //                var text = Data.cleanText(doc.text);
+    //                var corpus = new tm.Corpus(text);
     //
-    //        var text = Data.cleanText(doc.text);
+    //                corpus.toLower()
+    //                    .removeNewlines()
+    //                    .removeDigits()
+    //                    .removeInvalidCharacters()
+    //                    .removeInterpunctuation()
+    //                    .removeWords(tm.STOPWORDS.IT)
+    //                    .clean();
     //
-    //        var corpus = new tm.Corpus(text);
+    //                var terms = _.filter( tm.Terms(corpus).vocabulary, function(item){
     //
-    //        corpus.toLower()
-    //            .removeNewlines()
-    //            .removeDigits()
-    //            .removeInvalidCharacters()
-    //            .removeInterpunctuation()
-    //            .removeWords(tm.STOPWORDS.IT)
-    //            .clean();
+    //                    //return true;
+    //                    //if( /^rt$/  .test(item) ) return false;
+    //                    if( /^http/ .test(item) ) return false;
+    //                    if( /^@/    .test(item) ) return false;
+    //                    if( /^co\//    .test(item) ) return false;
+    //                    if( /^&quot/    .test(item) ) return false;
+    //                    if( /^\/\//    .test(item) ) return false;
+    //                    if( /^.$/    .test(item) ) return false;
+    //                    return item.length > 2;
     //
-    //        var terms = _.filter( tm.Terms(corpus).vocabulary, function(item){
+    //                });
     //
-    //            //return true;
-    //            //if( /^rt$/  .test(item) ) return false;
-    //            if( /^http/ .test(item) ) return false;
-    //            if( /^@/    .test(item) ) return false;
-    //            if( /^co\//    .test(item) ) return false;
-    //            if( /^&quot/    .test(item) ) return false;
-    //            if( /^\/\//    .test(item) ) return false;
-    //            if( /^.$/    .test(item) ) return false;
-    //            return item.length > 2;
+    //                contStem++;
+    //                printPercentage( steps, contStem, app );
     //
-    //        });
+    //                datas.update(
+    //                    { _id: doc._id },
+    //                    {$set:{tokens:terms}},
+    //                    function(err, result){
+    //                        contSave++;
+    //                        printPercentage( steps, contSave, app );
+    //                        next(null);
+    //                    }
+    //                );
     //
-    //        contStem++;
-    //        printPercentage( steps, contStem, app );
-    //
-    //        doc.update({$set:{tokens:terms}}, function(err){
-    //
-    //            contSave++;
-    //            printPercentage( steps, contSave, app );
-    //
-    //            next(null);
-    //        });
-    //
-    //    }, function(err){
-    //        connection.close();
-    //        callback(err);
+    //            },
+    //            function(err)
+    //            {
+    //                callback(null);
+    //            }
+    //        );
     //    });
     //});
+};
 
-    function printPercentage(steps, cont, app)
+function elaborateText(doc){
+
+    var text = Data.cleanText(doc.text);
+    var corpus = new tm.Corpus(text);
+
+    corpus.toLower()
+        .removeNewlines()
+        .removeDigits()
+        .removeInvalidCharacters()
+        .removeInterpunctuation()
+        .removeWords(tm.STOPWORDS.IT)
+        .clean();
+
+    var terms = _.filter( tm.Terms(corpus).vocabulary, function(item){
+
+        //return true;
+        //if( /^rt$/  .test(item) ) return false;
+        if( /^http/ .test(item) ) return false;
+        if( /^@/    .test(item) ) return false;
+        if( /^co\//    .test(item) ) return false;
+        if( /^&quot/    .test(item) ) return false;
+        if( /^\/\//    .test(item) ) return false;
+        if( /^.$/    .test(item) ) return false;
+        return item.length > 2;
+
+    });
+    doc.tokens = terms;
+}
+
+function printPercentage(steps, cont, app)
+{
+    if( steps.indexOf(cont) == -1 ) return;
+
+    var tot = steps[ steps.length -1 ];
+    var percentage = Math.ceil( cont / tot * 100 ); //[1-100]
+    var width = 50;
+    var limit = Math.ceil(width * percentage / 100 );
+    var strProgress = '';
+    var strConsole = '';
+    var i;
+
+    //progress
+    for(i = 0; i < limit; i++)
     {
-        if( steps.indexOf(cont) == -1 ) return;
-
-        var tot = steps[ steps.length -1 ];
-        var percentage = Math.ceil( cont / tot * 100 ); //[1-100]
-        var width = 50;
-        var limit = Math.ceil(width * percentage / 100 );
-        var strProgress = '';
-        var strConsole = '';
-        var i;
-
-        //progress
-        for(i = 0; i < limit; i++)
-        {
-            strProgress+="#";
-            strConsole+="#";
-        }
-
-        //padding
-        for(i = limit; i < width; i++)
-        {
-            strConsole+=" ";
-            strProgress+="&nbsp;";
-        }
-
-        console.log(strConsole + " " + percentage + "%");
-        app.io.emit("overrideDataTokens_msg", strProgress + "&nbsp;" + percentage + "%");
+        strProgress+="#";
+        strConsole+="#";
     }
 
-};
+    //padding
+    for(i = limit; i < width; i++)
+    {
+        strConsole+=" ";
+        strProgress+="&nbsp;";
+    }
+
+    console.log(strConsole + " " + percentage + "%");
+    app.io.emit("overrideDataTokens_msg", strProgress + "&nbsp;" + percentage + "%");
+}
 
 Data.cleanText = function(text){
     text = text.replace(/'/g, ' ');
@@ -1061,124 +1090,4 @@ Data.getBigram = function(arg, callback){
         });
 };
 
-
 module.exports = Data;
-
-
-
-//
-//async.waterfall([
-//
-//    //prendo tutti i testi
-//    function (next)
-//    {
-//
-//        //{ $limit: 100 },
-//
-//        datas.aggregate(
-//
-//            { $match: { projectName: project } },
-//
-//            { $group: {
-//                _id: "$tag" ,
-//                count: {"$sum": 1} ,
-//                documents:{ $push:{ text:"$text" } }
-//            }},
-//
-//            { $project: {
-//                _id:0,
-//                tag:"$_id",
-//                count: 1,
-//                documents: 1
-//            }}
-//
-//        ).exec (
-//            function (err, doc)
-//            {
-//                next(null, doc);
-//            }
-//        );
-//    },
-//
-//    //tokenizzo
-//    function(docs, next)
-//    {
-//        // x ogni tag
-//        async.each(docs, function(obj, nextDoc)
-//            {
-//                var docTag = {
-//                    tag: obj.tag,
-//                    tags: []
-//                };
-//
-//                // x ogni documento nel tag
-//                async.each(obj.documents,
-//
-//                    function (obj, innerNext)
-//                    {
-//                        var corpus = new textMiner.Corpus([ obj.text ]);
-//
-//                        var wordArr = corpus
-//                            .clean()
-//                            .trim()
-//                            .toLower().removeWords(textMiner.STOPWORDS.IT)
-//                            .clean().documents.map(function(x){
-//                                return x;
-//                            });
-//
-//                        wordArr = wordArr[0].split(' ');
-//
-//                        async.each(wordArr,
-//
-//                            function(wa, next){
-//
-//                                if( wa[0] == '@' )           { next(null); return; }
-//                                if(wa.startsWith('rt'))      { next(null); return; }
-//                                if(wa.startsWith('http'))      { next(null); return; }
-//                                if(docTag.tags[wa] != null ) { next(null); return; }
-//
-//                                docTag.tags[wa] = true;
-//                                next(null);
-//                            },
-//
-//                            function (err) {
-//                                innerNext(null)
-//                            }
-//                        )
-//                    },
-//
-//                    function (err)
-//                    {
-//                        console.log("elaborato tag " + docTag.tag);
-//                        docTag.tags = _.keys(docTag.tags);
-//                        docSync.tags.push(docTag);
-//                        nextDoc(null);
-//                    }
-//                );
-//
-//            },
-//
-//            function(err)
-//            {
-//                next(null) ; //next waterfall
-//            });
-//    },
-//
-//    //salvo il file
-//    function (next) {
-//        vocabularies.update(
-//            {username:username, project: project},
-//            docSync,
-//            { upsert:true, w:1 },
-//            function (err, result) {
-//                next(null);
-//            }
-//        )
-//    }
-//
-//], function(err, result){
-//
-//    connection.close();
-//    callback(null, docSync);
-//
-//});

@@ -34,24 +34,50 @@ User.prototype.getUsername = function()
 User.addUser = function(user, callback){
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var UserModel = connection.model("users", USER_SCHEMA);
-    var u = new UserModel(user);
-    u.save( function(err, result){
+
+    async.waterfall([
+
+        //verifico che l'utente (username) non esista
+        function(next){
+            User.getUser( connection , {username: user.username}, function(u){
+                if( u != null)
+                    next("Username already exists");
+                else
+                    next( null );
+            });
+        },
+
+        //aggiungo il nuovo utente
+        function(next){
+            var u = new UserModel(user);
+            u.save( function(err, result){
+                next(err);
+            } );
+        }
+    ], function(err){
         connection.close();
         callback(err);
-    } );
+    });
 };
 
-User.getUser = function (username, callback)
+/**
+ * Chiede un utente
+ * @param conn
+ * @param filter
+ * @param callback
+ */
+User.getUser = function (conn, filter, callback)
 {
-    var connection = mongoose.createConnection('mongodb://localhost/oim');
+    var connection = conn == null
+        ? mongoose.createConnection('mongodb://localhost/oim')
+        : conn;
+
     var Users = connection.model(MODEL_NAME, USER_SCHEMA);
 
-    Users.findOne( {username: username }, function (err, doc)
+    Users.findOne( filter, function (err, doc)
     {
-        console.log(doc);
-        console.log("CALL getUsers -> findOne");
         callback(doc);
-        connection.close();
+        if( conn == null )connection.close();
     });
 };
 

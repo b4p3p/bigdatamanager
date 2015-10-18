@@ -54,7 +54,13 @@ Util.addWhereClause = function(exec, query)
     }
 
     if(query.hasOwnProperty("tokens"))
-        exec.where('tokens').in(query.tokens.split(","));
+    {
+        //exec.where('tokens').in(query.tokens.split(","));
+        var terms = query.tokens.split(',');
+        var reg = new RegExp( terms.join("|"), "i");
+        exec.where({text: reg});
+    }
+
 
     if(query.hasOwnProperty("end"))
         exec.where('date').lte(new Date(query.end));

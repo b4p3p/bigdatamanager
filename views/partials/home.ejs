@@ -73,6 +73,11 @@
                     <div ng-if="!isAdmin()" href="#/db/nations"><h4><i class="fa fa-folder-open"></i> Nations</h4></div>
                     List of European nations already entered into the database necessary for geo-localization data.
                 </div>
+                <div class="pages">
+                    <a ng-if="isAdmin()" href="#/db/normalization"><h4><i class="fa fa-balance-scale"></i> Normalization</h4></a>
+                    <div ng-if="!isAdmin()" href="#/db/normalization"><h4><i class="fa fa-balance-scale"></i> Normalization</h4></div>
+                    Normalization data
+                </div>
             </div>
 
             <div class="column column-three">

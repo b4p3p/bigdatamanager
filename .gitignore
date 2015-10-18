@@ -3,8 +3,9 @@
 ### Example user template
 
 # IntelliJ project files
-.idea
+.idea/
 *.iml
-out
-gen
-node_modules
+out/
+gen/
+node_modules/
+
