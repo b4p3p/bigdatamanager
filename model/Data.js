@@ -618,7 +618,8 @@ Data.overrideTokensData = function (project, app, callback) {
             function(next){
                 var query = datas.find({projectName:project}).stream();
                 query.on('data', function (doc) {
-                    elaborateText(doc);
+
+                    doc.tokens = elaborateText(doc);
 
                     //docs.push ( doc );
 
@@ -746,7 +747,7 @@ function elaborateText(doc){
         return item.length > 2;
 
     });
-    doc.tokens = terms;
+    return terms;
 }
 
 function printPercentage(steps, cont, app, char)
