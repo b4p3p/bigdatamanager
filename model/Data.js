@@ -590,7 +590,7 @@ Data.overrideTokensData = function (project, app, callback) {
     var tot = 0;
     var steps = [];
     var fine = false;
-    var docs = [];
+    //var docs = [];
 
     app.io.emit("overrideDataTokens_msg",'GET data');
     console.log("GET data");
@@ -619,29 +619,36 @@ Data.overrideTokensData = function (project, app, callback) {
                 var query = datas.find({projectName:project}).stream();
                 query.on('data', function (doc) {
                     elaborateText(doc);
-                    docs.push ( doc );
+
+                    //docs.push ( doc );
+
+                    doc.save(function(err, res){
+                        contSave++;
+                        printPercentage( steps, contSave, app, '#' );
+                    });
+
                     contStem++;
-                    printPercentage( steps, contStem, app );
+                    printPercentage( steps, contStem, app, '@' );
                 }).on('error', function (err) {
                     next(err);
                 }).on('close', function () {
                     next(null);
                 });
-            },
-
-            //salvo i documenti
-            function(next)
-            {
-                async.each(docs, function(doc, next){
-                    doc.save(function(err, res){
-                        contSave++;
-                        printPercentage( steps, contSave, app );
-                        next(null);
-                    });
-                }, function(res){
-                    next(null);
-                });
             }
+
+            ////salvo i documenti
+            //function(next)
+            //{
+            //    async.each(docs, function(doc, next){
+            //        doc.save(function(err, res){
+            //            contSave++;
+            //            printPercentage( steps, contSave, app );
+            //            next(null);
+            //        });
+            //    }, function(res){
+            //        next(null);
+            //    });
+            //}
         ],
         function(err){
             app.io.emit("overrideDataTokens_msg","Done!");
@@ -742,7 +749,7 @@ function elaborateText(doc){
     doc.tokens = terms;
 }
 
-function printPercentage(steps, cont, app)
+function printPercentage(steps, cont, app, char)
 {
     if( steps.indexOf(cont) == -1 ) return;
 
@@ -757,8 +764,8 @@ function printPercentage(steps, cont, app)
     //progress
     for(i = 0; i < limit; i++)
     {
-        strProgress+="#";
-        strConsole+="#";
+        strProgress+=char;
+        strConsole+=char;
     }
 
     //padding
