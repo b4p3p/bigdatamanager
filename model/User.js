@@ -102,11 +102,24 @@ User.getUsers = function(callback)
     var connection = mongoose.createConnection('mongodb://localhost/oim');
     var users = connection.model(MODEL_NAME, USER_SCHEMA);
 
-    users.find({}, { _id:0, "firstName":1, "lastName":1, "username":1, "created":1, "level":1, "lastLogin":1}
-    ).sort("-level").lean().exec ( function(err, data){
+
+    users.aggregate([
+        {$project:{
+            _id:0, firstName:1, lastName:1, username:1,
+            created:1, level:1,
+            lastLogin: { $ifNull: [ "$lastLogin", null ] }
+        }},
+        {$sort:{level:-1}}
+    ], function(err, data){
         connection.close();
         callback(err, data);
     });
+
+    //users.find({}, { _id:0, "firstName":1, "lastName":1, "username":1, "created":1, "level":1, "lastLogin":1}
+    //).sort("-level").lean().exec ( function(err, data){
+    //    connection.close();
+    //    callback(err, data);
+    //});
 
 };
 
