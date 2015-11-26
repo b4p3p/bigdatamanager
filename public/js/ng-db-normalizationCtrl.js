@@ -85,8 +85,15 @@ ngApp.controller('ngDbNormalizationCtrl', ['$scope', function($scope) {
         }, function(err, result){
 
             //inizializza i campi
-            $scope.maxmin.max = result.regions[0].properties.baseNorm;
-            $scope.maxmin.min = result.regions[0].properties.baseNorm;
+            if(result.regions.length > 0)
+            {
+                $scope.maxmin.max = result.regions[0].properties.baseNorm;
+                $scope.maxmin.min = result.regions[0].properties.baseNorm;
+            }else{
+                $scope.maxmin.max = 0
+                $scope.maxmin.min = 0
+            }
+
             $scope.count = 0;
 
             //Prende il minimo e il massimo di baseNorm

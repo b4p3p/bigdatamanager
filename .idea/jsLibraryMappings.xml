@@ -2,9 +2,6 @@
 <project version="4">
   <component name="JavaScriptLibraryMappings">
     <file url="file://$PROJECT_DIR$" libraries="{bigdatamanager node_modules}" />
-    <file url="file://$PROJECT_DIR$/model/Project.js" libraries="{Node.js v0.12.2 Core Modules}" />
-    <file url="file://$PROJECT_DIR$/routes/database_router.js" libraries="{Node.js v0.12.2 Core Modules}" />
-    <file url="file://$PROJECT_DIR$/routes/project_router.js" libraries="{Node.js v0.12.2 Core Modules}" />
     <includedPredefinedLibrary name="ECMAScript 6" />
   </component>
 </project>

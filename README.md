@@ -63,7 +63,11 @@ Demonizzare node
 ----------------
 
 * installare upstarter
-* creare in /etc/init il seguente file
+```
+npm install -g upstarter
+```
+
+* creare in /etc/init il seguente file:  bigdatamanager.conf
 
 ```
 #!upstart
@@ -78,7 +82,7 @@ respawn limit 99 5
 
 env NODE_ENV=production
 
-exec node /home/giuseppe/node/bigdatamanager/bin/www >> /var/log/bigDataManager.log 2>&1
+exec node <path progetto>/bin/www >> /var/log/bigDataManager.log 2>&1
 ```
 
 * lanciare il servizio creato con: sudo service bigDataManager start
